@@ -1,0 +1,253 @@
+<!-- frontend/src/pages/admin/class-schedule.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Class Schedule</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Shared -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  
+  <!-- Page -->
+  <link rel="stylesheet" href="../../styles/admin/admin-class-schedule.css" />
+</head>
+
+<body data-page="class-schedule">
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">←</button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="cs-wrap">
+        <div class="cs-head">
+          <div>
+            <h2 class="cs-title">Class Schedule</h2>
+            <div class="cs-sub">Create teaching schedules per grade and section.</div>
+          </div>
+
+          <button class="cs-primary" id="addEntryBtn" type="button">
+            Add Schedule <span class="cs-plus">＋</span>
+          </button>
+        </div>
+
+        <div class="cs-grid">
+          <!-- LEFT: grade/section selector -->
+          <aside class="card cs-left">
+            <div class="cs-left-head">
+              <div class="cs-left-title">Select Class</div>
+              <div class="cs-left-hint">Pick a grade, then choose a section.</div>
+            </div>
+
+            <div id="gradeList" class="cs-grade-list"></div>
+
+            <div class="cs-left-foot">
+              <div class="cs-field">
+                <label>Section</label>
+                <select id="sectionSelect" class="cs-input"></select>
+              </div>
+
+              <div class="cs-mini-hint" id="sectionHint">—</div>
+            </div>
+          </aside>
+
+          <!-- RIGHT: filters + schedule table -->
+          <section class="card cs-right">
+            <div class="cs-right-head">
+              <div>
+                <div class="cs-right-title" id="selectedClassTitle">—</div>
+                <div class="cs-right-sub">Schedules for the selected grade and section.</div>
+              </div>
+
+              <div class="cs-tools">
+                <div class="cs-search">
+                  <span class="cs-search-ico">🔎</span>
+                  <input id="searchInput" type="text" placeholder="Search subject, teacher, room..." />
+                </div>
+
+                <select id="teacherFilter" class="cs-filter">
+                  <option value="all">All Teachers</option>
+                </select>
+
+                <select id="roomFilter" class="cs-filter">
+                  <option value="all">All Rooms</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cs-table-wrap">
+              <table class="cs-table">
+                <thead>
+                  <tr>
+                    <th style="width:70px;">No.</th>
+                    <th style="width:120px;">Day</th>
+                    <th style="width:160px;">Time</th>
+                    <th>Subject</th>
+                    <th style="width:190px;">Teacher</th>
+                    <th style="width:120px;">Room</th>
+                    <th style="width:160px; text-align:center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="scheduleTbody">
+                  <tr class="cs-empty">
+                    <td colspan="7">No schedule entries yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======================
+        ADD/EDIT ENTRY MODAL
+  ======================= -->
+  <div id="entryModal" class="cs-modal hidden" aria-hidden="true">
+    <div class="cs-backdrop" id="entryBackdrop"></div>
+
+    <div class="cs-dialog" role="dialog" aria-modal="true" aria-labelledby="entryTitle" tabindex="-1">
+      <div class="cs-mhead">
+        <div>
+          <div class="cs-mtitle" id="entryTitle">Add Schedule Entry</div>
+          <div class="cs-msub" id="entrySub">Fill in the schedule details.</div>
+        </div>
+        <button class="cs-x" id="entryCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="cs-mbody">
+        <div class="cs-form">
+          <div class="cs-field">
+            <label>Grade Level</label>
+            <select id="modalGrade" class="cs-input"></select>
+          </div>
+
+          <div class="cs-field">
+            <label>Section</label>
+            <select id="modalSection" class="cs-input"></select>
+          </div>
+
+          <div class="cs-field">
+            <label>Subject</label>
+            <select id="modalSubject" class="cs-input"></select>
+          </div>
+
+          <div class="cs-field">
+            <label>Day</label>
+            <select id="modalDay" class="cs-input">
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+
+          <div class="cs-field">
+            <label>Start Time</label>
+            <input id="modalStart" class="cs-input" type="time" />
+          </div>
+
+          <div class="cs-field">
+            <label>End Time</label>
+            <input id="modalEnd" class="cs-input" type="time" />
+          </div>
+
+          <div class="cs-field">
+            <label>Room</label>
+            <input id="modalRoom" class="cs-input" type="text" placeholder="e.g., Room 3" />
+          </div>
+
+          <!-- Teacher: dropdown OR fallback to text -->
+          <div class="cs-field">
+            <label>Teacher</label>
+
+            <select id="modalTeacherSelect" class="cs-input"></select>
+            <input id="modalTeacherText" class="cs-input hidden" type="text" placeholder="Enter teacher name" />
+
+            <div class="cs-mini-hint" id="teacherHint">—</div>
+          </div>
+
+          <div class="cs-field cs-wide">
+            <label>Notes (optional)</label>
+            <input id="modalNotes" class="cs-input" type="text" placeholder="e.g., Lab day / bring materials" />
+          </div>
+        </div>
+
+        <div id="entryError" class="cs-error hidden"></div>
+      </div>
+
+      <div class="cs-mfoot">
+        <button class="cs-ghost" id="entryCancel" type="button">Cancel</button>
+        <div class="cs-foot-right">
+          <button class="cs-ghost" id="entryReset" type="button">Reset</button>
+          <button class="cs-save" id="entrySave" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+        CONFIRM DELETE MODAL
+  ======================= -->
+  <div id="confirmModal" class="cs-modal hidden" aria-hidden="true">
+    <div class="cs-backdrop" id="confirmBackdrop"></div>
+
+    <div class="cs-dialog cs-sm" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" tabindex="-1">
+      <div class="cs-mhead">
+        <div>
+          <div class="cs-mtitle" id="confirmTitle">Delete Entry?</div>
+          <div class="cs-msub">This action cannot be undone.</div>
+        </div>
+        <button class="cs-x" id="confirmCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="cs-mbody">
+        <div class="cs-confirm" id="confirmText">Are you sure?</div>
+      </div>
+
+      <div class="cs-mfoot">
+        <button class="cs-ghost" id="confirmCancel" type="button">Cancel</button>
+        <div class="cs-foot-right">
+          <button class="cs-danger" id="confirmDelete" type="button">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-class-schedule.js"></script>
+</body>
+</html>

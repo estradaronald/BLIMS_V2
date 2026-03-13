@@ -1,0 +1,97 @@
+.audit-wrap {
+  padding: 14px 18px 22px;
+}
+
+.audit-card {
+  padding: 14px;
+}
+
+.audit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.audit-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.audit-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.audit-input {
+  width: min(380px, 70vw);
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 0 12px;
+  font: inherit;
+  outline: none;
+  background: #fff;
+}
+
+.audit-select {
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 0 10px;
+  font: inherit;
+  background: #fff;
+  outline: none;
+}
+
+.audit-btn {
+  height: 38px;
+  border-radius: 10px;
+  border: 0;
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.audit-btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+}
+
+.audit-table-wrap {
+  margin-top: 6px;
+}
+
+.audit-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.audit-meta {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.audit-pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audit-page {
+  font-weight: 800;
+  font-size: 13px;
+}

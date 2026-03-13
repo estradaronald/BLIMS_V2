@@ -1,0 +1,338 @@
+/* frontend/src/styles/admin-announcements.css */
+@import url("./admin-teachers.css");
+
+/* Filters row like your mockup */
+.ann-filters{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  margin: 8px 0 12px;
+  flex-wrap: wrap;
+}
+
+.ann-search{ min-width: 320px; }
+
+/* Feed cards */
+.ann-feed{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.ann-card{
+  position:relative;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.08);
+  border: 1px solid rgba(11,44,74,.06);
+  padding: 14px;
+}
+
+/* left content + right stack */
+.ann-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.ann-card-left{ flex: 1; min-width: 0; }
+
+.ann-title-row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Right stack: pill on top, kebab below */
+.ann-card-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap: 10px;
+}
+
+.ann-title{
+  margin:0;
+  font-size: 15px;
+  font-weight: 1000;
+  color:#0b2c4a;
+}
+
+.ann-body{
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: rgba(11,44,74,.75);
+  line-height: 1.45;
+}
+
+.ann-meta{
+  margin-top: 10px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-size: 11px;
+  color: rgba(11,44,74,.55);
+}
+
+.ann-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 20px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 1000;
+  border: 1px solid rgba(11,44,74,.10);
+  background:#f7fbff;
+  color:#0b2c4a;
+}
+
+.ann-pill.priority{ background:#fff3f3; border-color:#ffd2d2; color:#a61b1b; }
+.ann-pill.events{ background:#eef7ff; border-color:#cfe6ff; color:#0b4d7a; }
+.ann-pill.academic{ background:#f4f7ff; border-color:#dbe3ff; color:#2d3a8c; }
+
+.ann-status{
+  font-size: 11px;
+  font-weight: 1000;
+  color: rgba(11,44,74,.70);
+}
+
+/* Kebab */
+.ann-kebab{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(11,44,74,.10);
+  background:#fff;
+  cursor:pointer;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+/* Menu */
+.ann-menu{
+  position:absolute;
+  right: 14px;
+  top: 60px;
+  background:#fff;
+  border: 1px solid rgba(11,44,74,.10);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+  overflow:hidden;
+  min-width: 160px;
+  z-index: 20;
+}
+
+.ann-menu button{
+  width:100%;
+  text-align:left;
+  padding: 10px 12px;
+  border:none;
+  background:#fff;
+  cursor:pointer;
+  font-weight: 900;
+  font-size: 12px;
+  color:#0b2c4a;
+}
+.ann-menu button:hover{ background:#f5f8fb; }
+.ann-menu .danger{ color:#a61b1b; }
+
+.ann-empty{
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background:#fff;
+  border: 1px dashed rgba(11,44,74,.18);
+  color: rgba(11,44,74,.65);
+  font-weight: 900;
+}
+
+/* Modal sizing */
+.ann-dialog{
+  width: min(640px, calc(100% - 28px));
+}
+
+/* ✅ NEW: editor wrapper (textarea + toolbar inside one bordered box) */
+.ann-editor{
+  border-radius: 12px;
+  border: 1px solid rgba(11,44,74,.10);
+  background:#fff;
+  overflow:hidden; /* makes toolbar feel “inside” */
+}
+
+/* textarea now uses the wrapper’s border */
+.ann-textarea{
+  width:100%;
+  min-height: 140px;
+  resize: vertical;
+  border: none;
+  outline:none;
+  padding: 12px 12px;
+  font: inherit;
+  background: transparent;
+  display:block;
+}
+
+/* toolbar is now “attached” to the editor */
+.ann-toolbar{
+  height: 44px;
+  background:#e9f3ff;                 /* matches your reference look */
+  border-top: 1px solid rgba(11,44,74,.10);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.ann-tool{
+  height: 30px;
+  min-width: 34px;
+  padding: 0 10px;
+  border:none;
+  border-radius: 10px;
+  background: transparent;
+  cursor:pointer;
+  font-weight: 1000;
+  color:#0b2c4a;
+}
+
+.ann-tool.is-active{
+  background:#bfe0ff;
+}
+
+.ann-tool:hover{
+  background: rgba(11,77,122,.10);
+}
+
+.ann-tool-sep{
+  width: 1px;
+  height: 18px;
+  background: rgba(11,44,74,.18);
+  margin: 0 2px;
+}
+
+/* Attachments */
+.ann-drop{
+  margin-top: 8px;
+  border: 2px dashed rgba(11,77,122,.30);
+  border-radius: 14px;
+  padding: 14px;
+  background:#fbfdff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
+  cursor:pointer;
+  text-align:center;
+}
+
+.ann-drop-ico{ font-size: 24px; opacity:.85; }
+.ann-drop-text{ font-size: 12px; font-weight: 900; color:#0b2c4a; }
+
+.ann-files{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ann-file{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(11,44,74,.10);
+  background:#fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+  max-width: 100%;
+}
+
+.ann-file img{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(11,44,74,.10);
+}
+
+.ann-file-name{
+  font-size: 12px;
+  font-weight: 1000;
+  color:#0b2c4a;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.ann-file-x{
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid rgba(11,44,74,.10);
+  background:#fff;
+  cursor:pointer;
+  font-weight: 1000;
+}
+
+.ann-view-dialog{
+  width: min(720px, calc(100% - 28px));
+}
+
+.ann-view-h{
+  margin: 10px 0 6px;
+  font-size: 18px;
+  font-weight: 1000;
+  color:#0b2c4a;
+}
+
+.ann-view-msg{
+  margin: 0;
+  color: rgba(11,44,74,.78);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.ann-view-files{
+  margin-top: 12px;
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ann-view-files img{
+  width: 120px;
+  height: 90px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(11,44,74,.10);
+}
+
+/* big white list card wrapper */
+.ann-wrap-card{
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Add this near your .ann-tool rules */
+.ann-tool:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.ann-card-head{ align-items: flex-start; }
+
+.ann-card-body{ padding: 0 14px 14px; }
+
+.ann-card-head .ann-filters{ margin: 0; }
+
+.ann-wrap-card .t-subtitle{ margin-top: 6px; }
+
+@media (max-width: 700px){
+  .ann-search{ min-width: 220px; }
+}

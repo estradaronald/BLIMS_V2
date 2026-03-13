@@ -1,0 +1,188 @@
+/* frontend/src/styles/teacher/teacher-sidebar.css */
+/* Refactored to match teacher-sidebar.html (.sidebar + .sb-*) */
+
+:root{
+  --t-navy:#0b4d7a;
+  --t-navy-2:#083e63;
+  --t-text: rgba(255,255,255,.92);
+  --t-dim: rgba(255,255,255,.70);
+
+  --sb-w: 260px;
+  --sb-w-collapsed: 86px;
+}
+
+/* ✅ Teacher Sidebar Base (matches: <aside class="sidebar" id="sidebar">) */
+.sidebar{
+  width: var(--sb-w);
+  min-width: var(--sb-w);
+  height: calc(100vh - 28px);
+  background: linear-gradient(180deg, var(--t-navy), var(--t-navy-2));
+  border-radius: 14px;
+  margin: 14px 0 14px 14px;
+
+  position: sticky;
+  top: 14px;
+  overflow: hidden;
+
+  display:flex;
+  flex-direction: column;
+
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+/* TOP */
+.sb-top{
+  padding: 18px 16px 10px;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 10px;
+}
+
+.sb-logo-wrap{
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.sb-logo{
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.sb-school{
+  text-align:center;
+  padding: 0 10px;
+}
+
+.sb-school-name{
+  color: var(--t-text);
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.sb-school-sub{
+  color: var(--t-dim);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* NAV */
+.sb-nav{
+  padding: 12px 14px;
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sb-item{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  height: 48px;
+
+  text-decoration:none;
+  color: var(--t-text);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .3px;
+
+  user-select: none;
+}
+
+.sb-ico{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 40px;
+}
+
+.sb-ico img{
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.sb-text{
+  white-space: nowrap;
+}
+
+/* HOVER */
+.sb-item:hover{
+  background: rgba(255,255,255,.10);
+}
+
+/* ACTIVE */
+.sb-item.active{
+  background: #fff;
+  color: var(--t-navy);
+}
+
+.sb-item.active .sb-ico{
+  background: rgba(11,77,122,.10);
+}
+
+/* ===============================
+   ✅ COLLAPSE (matches teacher-sidebar.js)
+   JS toggles: #sidebar.is-collapsed and html.sb-collapsed
+   =============================== */
+
+.sidebar{
+  transition: width .18s ease, min-width .18s ease;
+}
+
+/* sidebar collapsed width */
+.sidebar.is-collapsed{
+  width: var(--sb-w-collapsed);
+  min-width: var(--sb-w-collapsed);
+}
+
+/* hide school name area nicely */
+.sidebar.is-collapsed .sb-school{
+  display:none;
+}
+
+/* center nav items when collapsed */
+.sidebar.is-collapsed .sb-item{
+  justify-content:center;
+  padding: 10px 10px;
+}
+
+/* hide labels when collapsed */
+.sidebar.is-collapsed .sb-text{
+  display:none;
+}
+
+/* slightly tighten nav padding when collapsed */
+.sidebar.is-collapsed .sb-nav{
+  padding: 12px 10px;
+}
+
+/* logo wrap a bit smaller when collapsed */
+.sidebar.is-collapsed .sb-logo-wrap{
+  width: 62px;
+  height: 62px;
+}
+.sidebar.is-collapsed .sb-logo{
+  width: 52px;
+  height: 52px;
+}
+
+/* Optional: when collapsed, remove extra gap */
+.sidebar.is-collapsed .sb-item{
+  gap: 0;
+}

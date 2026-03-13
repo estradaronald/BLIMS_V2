@@ -1,0 +1,306 @@
+:root {
+  --text:#0b2c4a;
+  --muted:rgba(11,44,74,.65);
+  --glass:rgba(255,255,255,.22);
+  --border:rgba(255,255,255,.35);
+  --shadow:0 20px 60px rgba(0,0,0,.18);
+  --white: #fff;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  color: var(--text);
+}
+
+/* ================= BACKGROUND ================= */
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1200px 600px at 80% 20%, rgba(255,183,112,.45), transparent 60%),
+    radial-gradient(1000px 500px at 25% 15%, rgba(120,200,255,.35), transparent 55%),
+    url("../assets/images/bg.jpg") center/cover no-repeat;
+  z-index: -1;
+}
+
+/* ================= PAGE WRAPPER ================= */
+
+.wrap {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 16px;
+  gap: 28px;
+
+  transform: translateY(-40px); /* 👈 subtle upward lift */
+}
+
+
+/* ================= TOP HEADER CARD ================= */
+
+.top-card {
+  width: min(550px, 95%);
+  padding: 20px 22px;
+  border-radius: 22px;
+
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-center {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.logo {
+  width: 80px;   /* was 58px */
+  height: 80px;  /* was 58px */
+
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.6);
+}
+
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.school-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.school-text h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.school-text p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ================= LOGIN CARD ================= */
+
+.login-card {
+  width: min(520px, 95%);
+  padding: 28px;
+  border-radius: 28px;
+
+  background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.15));
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.login-card h2 {
+  text-align: center;
+  margin: 0 0 22px;
+}
+
+/* ================= INPUTS ================= */
+
+label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: rgba(255,255,255,.92);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+
+  border: 1px solid rgba(11,44,74,.08);
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 15px;
+  background: transparent;
+  color: var(--text);
+}
+
+.icon {
+  opacity: .6;
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password svg {
+  width: 20px;
+  height: 20px;
+  opacity: .7;
+  transition: opacity .2s ease;
+}
+
+.toggle-password:hover svg {
+  opacity: 1;
+}
+
+
+/* ================= OPTIONS ================= */
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+.options a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  opacity: .8;
+}
+
+.options a:hover {
+  opacity: 1;
+}
+
+.remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================= BUTTON ================= */
+
+.login-btn {
+  width: 100%;
+  border: none;
+  padding: 14px;
+  border-radius: 999px;
+
+  background: linear-gradient(180deg, #0b4d7a, #09395c);
+  color: white;
+  font-weight: 800;
+  font-size: 16px;
+
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(11,77,122,.25);
+}
+
+.login-btn:hover {
+  filter: brightness(1.05);
+}
+
+/* ================= FOOTER ================= */
+
+.notice {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--white);
+  line-height: 1.4; 
+}
+
+/* ================= FORGOT PASSWORD UI ================= */
+
+.card-view {
+  display: none;
+  animation: fadeUp .25s ease;
+}
+
+.card-view.is-active {
+  display: block;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.helper{
+  margin: 6px 0 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Step dots (the 3 dots under the button idea) */
+.step-dots{
+  display:flex;
+  justify-content:center;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(11,44,74,.25);
+}
+
+.dot.is-active{
+  width: 18px;
+  background: rgba(11,77,122,.75);
+}
+
+/* Steps */
+.step { display:none; }
+.step.is-active { display:block; }
+
+/* Back link button */
+.link-btn{
+  margin-top: 14px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: rgba(11,44,74,.8);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 10px 0 0;
+}
+
+.link-btn:hover{
+  color: rgba(11,44,74,1);
+  text-decoration: underline;
+}

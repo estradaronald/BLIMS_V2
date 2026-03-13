@@ -1,0 +1,266 @@
+<!-- frontend/src/pages/admin/announcements.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Announcements</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+   <script>
+  (function () {
+    try {
+      const collapsed = localStorage.getItem("admin_sidebar_collapsed_v1") === "1";
+      if (collapsed) document.documentElement.classList.add("sb-collapsed");
+    } catch {}
+  })();
+</script>
+
+
+  <!-- SAME shared layout styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- Page styles (imports admin-teachers.css for consistent UI) -->
+  <link rel="stylesheet" href="../../styles/admin/admin-announcements.css" />
+</head>
+
+<body data-page="announcements">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Announcements</h2>
+
+          <button id="createAnnBtn" class="t-add-btn" type="button">
+            Create New Announcement <span class="t-plus">＋</span>
+          </button>
+        </div>
+
+        <!-- ✅ LIST CARD WRAPPER -->
+        <div class="card t-card ann-wrap-card">
+          <div class="t-card-head ann-card-head">
+            <div class="t-subtitle">All Announcements</div>
+
+            <div class="ann-filters">
+              <div class="t-search ann-search">
+                <span class="t-search-ico">🔎</span>
+                <input id="annSearch" type="text" placeholder="Search Announcement" />
+              </div>
+
+              <select id="typeFilter" class="t-filter">
+                <option value="all">Type: All</option>
+                <option value="published">Published</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+
+              <select id="catFilter" class="t-filter">
+                <option value="all">Category: All</option>
+                <option value="general">General Announcements</option>
+                <option value="events">School Events</option>
+                <option value="academic">Academic Notices</option>
+                <option value="priority">Priority Alerts</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ann-card-body">
+            <section class="ann-feed" id="annFeed"></section>
+
+            <div id="annEmpty" class="ann-empty hidden">
+              No announcements yet.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================
+       CREATE / EDIT MODAL
+  ========================== -->
+  <div id="annModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="annModalBackdrop"></div>
+
+    <div class="tmodal-dialog ann-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="annModalTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="annModalTitle" class="tmodal-title">Create New Announcement</div>
+            <div class="tmodal-sub">Fill in the details then publish or save as draft.</div>
+          </div>
+        </div>
+        <button class="tmodal-x" id="annModalCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="ann-form">
+
+          <div class="tmodal-field">
+            <label>Title</label>
+            <input id="annTitle" type="text" placeholder="Enter title here..." />
+          </div>
+
+          <div class="tmodal-field">
+            <label>Category</label>
+            <select id="annCategory" class="t-select">
+              <option value="general">General Announcements</option>
+              <option value="events">School Events</option>
+              <option value="academic">Academic Notices</option>
+              <option value="priority">Priority Alerts</option>
+            </select>
+          </div>
+
+          <!-- ✅ Message editor (Option A: textarea + helper toolbar) -->
+          <div class="tmodal-field">
+            <label>Message</label>
+
+            <div class="ann-editor">
+              <textarea
+                id="annMessage"
+                class="ann-textarea"
+                placeholder="Type your announcement details here..."
+              ></textarea>
+
+              <!-- ✅ IMPORTANT: id + data-act so JS can bind -->
+              <div class="ann-toolbar" id="annToolbar">
+                <button type="button" class="ann-tool" data-act="bold" title="Bold"><strong>B</strong></button>
+                <button type="button" class="ann-tool" data-act="italic" title="Italic"><em>I</em></button>
+                <button type="button" class="ann-tool" data-act="underline" title="Underline"><u>U</u></button>
+
+                <span class="ann-tool-sep"></span>
+
+                <!-- (Optional UI only for now) -->
+                <button type="button" class="ann-tool" disabled title="Coming soon">A</button>
+
+                <span class="ann-tool-sep"></span>
+
+                <button type="button" class="ann-tool" disabled title="Coming soon">≡</button>
+                <button type="button" class="ann-tool" disabled title="Coming soon">≣</button>
+                <button type="button" class="ann-tool" disabled title="Coming soon">≡</button>
+
+                <span class="ann-tool-sep"></span>
+
+                <button type="button" class="ann-tool" data-act="bullets" title="Bulleted list">•≡</button>
+                <button type="button" class="ann-tool" data-act="numbered" title="Numbered list">1≡</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tmodal-field">
+            <label>Publish Date</label>
+            <input id="annPublishAt" type="datetime-local" />
+            <div class="t-hint">Leave blank to publish immediately (when you click Publish).</div>
+          </div>
+
+          <div class="tmodal-field">
+            <label>Attach Files</label>
+
+            <input id="annFiles" type="file" accept="image/*" multiple hidden />
+
+            <div class="ann-drop" id="annDrop">
+              <div class="ann-drop-ico">☁️</div>
+              <div class="ann-drop-text">Click to upload or drag and drop images</div>
+              <button id="annPickFiles" class="t-ghost small" type="button">Select files</button>
+            </div>
+
+            <div class="ann-files" id="annFilesList"></div>
+          </div>
+
+          <div id="annFormError" class="t-error hidden"></div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="annCancelBtn" type="button">Cancel</button>
+
+        <div class="tmodal-foot-right">
+          <button class="t-ghost" id="annDraftBtn" type="button">Draft</button>
+          <button class="t-save" id="annPublishBtn" type="button">Publish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW MODAL (unchanged) -->
+  <div id="annViewModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="annViewBackdrop"></div>
+
+    <div class="tmodal-dialog ann-view-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="annViewTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="annViewTitle" class="tmodal-title">Announcement</div>
+            <div class="tmodal-sub">
+              <span id="annViewMeta">—</span>
+            </div>
+          </div>
+        </div>
+        <button class="tmodal-x" id="annViewCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="ann-view">
+          <div class="ann-view-top">
+            <span id="annViewPill" class="ann-pill">General</span>
+            <span id="annViewStatus" class="ann-status">Published</span>
+          </div>
+
+          <h3 id="annViewH" class="ann-view-h">—</h3>
+          <p id="annViewMsg" class="ann-view-msg">—</p>
+
+          <div id="annViewFiles" class="ann-view-files"></div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="annViewCloseBtn" type="button">Close</button>
+
+        <div class="tmodal-foot-right">
+          <button class="t-save" id="annViewEditBtn" type="button">Edit</button>
+          <button class="tmodal-danger" id="annViewArchiveBtn" type="button">Archive</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-announcements.js"></script>
+</body>
+</html>

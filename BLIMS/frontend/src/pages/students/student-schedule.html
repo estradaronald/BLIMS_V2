@@ -1,0 +1,145 @@
+<!-- frontend/src/pages/student/student-schedule.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - My Schedule</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- ✅ same baseline styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- ✅ Used for shared header/card styles consistency (same trick as student-announcements) -->
+  <link rel="stylesheet" href="../../styles/admin-announcements.css"/>
+
+  <!-- Student schedule styles -->
+  <link rel="stylesheet" href="../../styles/student/student-schedule.css" />
+</head>
+
+<body data-page="schedule">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">Student</div>
+              <div class="tb-role">My Schedule</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ✅ PAGE HEADER RULE (same wrapper/classes as Admin/Teacher) -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">My Schedule</h2>
+        </div>
+
+        <!-- Card wrapper (same style system) -->
+        <div class="card t-card sched-card">
+          <!-- Top info row -->
+          <div class="t-card-head sched-head">
+            <div class="sched-left">
+              <div class="t-subtitle">Weekly Timetable</div>
+
+              <!-- ✅ JS will populate Grade/Section + Room; SY can stay fixed -->
+              <div class="sched-sub">
+                <span id="schedGradeSection">—</span>
+                <span class="sched-dot">•</span>
+                <span id="schedRoom">Room —</span>
+                <span class="sched-dot">•</span>
+                <span id="schedSY">SY 2025–2026</span>
+              </div>
+            </div>
+
+            <div class="sched-actions">
+              <div class="sched-toggle" role="tablist" aria-label="Schedule View Toggle">
+                <button class="sched-tab active" id="viewWeekBtn" type="button" role="tab" aria-selected="true">
+                  Week View
+                </button>
+                <button class="sched-tab" id="viewDayBtn" type="button" role="tab" aria-selected="false">
+                  Day View
+                </button>
+              </div>
+
+              <select id="daySelect" class="t-filter sched-day" aria-label="Select day" disabled>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="sched-body">
+            <!-- ✅ WEEK VIEW (empty columns; JS will populate .sched-item entries) -->
+            <div id="weekView" class="sched-week">
+              <div class="sched-col">
+                <div class="sched-col-head">Monday</div>
+              </div>
+
+              <div class="sched-col">
+                <div class="sched-col-head">Tuesday</div>
+              </div>
+
+              <div class="sched-col">
+                <div class="sched-col-head">Wednesday</div>
+              </div>
+
+              <div class="sched-col">
+                <div class="sched-col-head">Thursday</div>
+              </div>
+
+              <div class="sched-col">
+                <div class="sched-col-head">Friday</div>
+              </div>
+            </div>
+
+            <!-- DAY VIEW (hidden by default; JS populates list) -->
+            <div id="dayView" class="sched-dayview hidden">
+              <div class="sched-day-head">
+                <div class="sched-col-head" id="dayViewTitle">Monday</div>
+              </div>
+
+              <div class="sched-day-list" id="dayViewList"></div>
+            </div>
+
+            <div id="schedEmpty" class="sched-empty hidden">
+              No schedule available yet.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../js/student/student-sidebar.js"></script>
+  <script src="../../js/student/student-schedule.js"></script>
+</body>
+</html>

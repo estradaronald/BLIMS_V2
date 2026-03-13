@@ -1,0 +1,184 @@
+/* frontend/src/styles/student/student-events.css */
+
+/* ✅ Required spacing rule */
+.topbar { margin-bottom: 4px; }
+.teachers-wrap { padding: 0; }
+
+/* ===============================
+   HEAD
+================================= */
+.ev-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.ev-left{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.ev-sub{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(11,44,74,.55);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.ev-dot{ opacity:.4; }
+
+.ev-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.ev-search{ min-width: 240px; }
+
+/* ===============================
+   BODY + LIST
+================================= */
+.ev-body{ padding: 14px 16px 16px; }
+
+.ev-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* event card */
+.ev-item{
+  border:1px solid rgba(11,44,74,.12);
+  background:#fff;
+  border-radius:14px;
+  padding:12px 12px;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+}
+
+.ev-item:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(0,0,0,.08);
+  border-color: rgba(59,130,246,.25);
+}
+
+.ev-item:active{
+  transform: translateY(0px);
+}
+
+.ev-main{
+  min-width: 0;
+  flex: 1;
+}
+
+.ev-title{
+  margin:0 0 6px;
+  font-size:12px;
+  font-weight:1000;
+  color:rgba(11,44,74,.92);
+}
+
+.ev-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 14px;
+  font-size:11px;
+  font-weight:800;
+  color:rgba(11,44,74,.60);
+}
+
+.ev-desc{
+  margin-top:8px;
+  font-size:12px;
+  font-weight:800;
+  color:rgba(11,44,74,.72);
+  line-height:1.5;
+}
+
+.ev-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-content:flex-end;
+  flex: 0 0 auto;
+}
+
+/* type pill */
+.ev-pill{
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(11,44,74,.12);
+  background: rgba(59,130,246,.10);
+  color: rgba(11,44,74,.88);
+  font-size: 11px;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+.ev-pill.holiday{ background: rgba(245,158,11,.14); }
+.ev-pill.exam{ background: rgba(239,68,68,.12); }
+.ev-pill.activity{ background: rgba(34,197,94,.14); }
+.ev-pill.meeting{ background: rgba(168,85,247,.12); }
+
+/* posted-by chip */
+.ev-by{
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(11,44,74,.12);
+  background: rgba(255,255,255,.85);
+  font-size: 11px;
+  font-weight: 1000;
+  color: rgba(11,44,74,.75);
+  white-space: nowrap;
+}
+
+/* empty */
+.ev-empty{
+  text-align:center;
+  padding: 36px 0 28px;
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(11,44,74,.45);
+}
+
+.hidden{ display:none !important; }
+
+/* ===============================
+   MODAL CONTENT
+   (do not override global modal look)
+================================= */
+.ev-view-dialog{
+  max-width: 760px;
+  width: calc(100% - 24px);
+}
+
+.ev-view-top{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ev-view-notes{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(11,44,74,.72);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

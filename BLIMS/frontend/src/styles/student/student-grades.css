@@ -1,0 +1,165 @@
+/* frontend/src/styles/student/student-grades.css */
+
+/* Required spacing rule */
+.topbar { margin-bottom: 4px; }
+.teachers-wrap { padding: 0; }
+
+/* ===============================
+   HEAD
+================================= */
+.grades-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.grades-left{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.grades-sub{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(11,44,74,.55);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.grades-dot{ opacity:.4; }
+
+.grades-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+/* ===============================
+   QUARTER TABS
+================================= */
+.grades-tabs{
+  display:flex;
+  background:rgba(11,44,74,.06);
+  padding:4px;
+  border-radius:999px;
+}
+
+.grades-tab{
+  border:none;
+  background:transparent;
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:900;
+  border-radius:999px;
+  cursor:pointer;
+  transition:background .15s ease, transform .12s ease;
+  color:rgba(11,44,74,.65);
+}
+
+.grades-tab.active{
+  background:#fff;
+  color:#0b2c4a;
+  box-shadow:0 3px 8px rgba(0,0,0,.08);
+}
+
+.grades-tab:hover{
+  transform:translateY(-1px);
+}
+
+/* ===============================
+   SUMMARY
+================================= */
+.grades-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  padding:14px 16px;
+  border-top:1px solid rgba(11,44,74,.08);
+  border-bottom:1px solid rgba(11,44,74,.08);
+}
+
+.grades-sum-card{
+  background:#fff;
+  border:1px solid rgba(11,44,74,.12);
+  border-radius:12px;
+  padding:12px;
+}
+
+.grades-sum-k{
+  font-size:11px;
+  font-weight:800;
+  color:rgba(11,44,74,.55);
+}
+
+.grades-sum-v{
+  margin-top:4px;
+  font-size:16px;
+  font-weight:1000;
+  color:#0b2c4a;
+}
+
+/* ===============================
+   TABLE
+================================= */
+.grades-body{
+  padding:16px;
+}
+
+.grades-table-wrap{
+  overflow:auto;
+  border:1px solid rgba(11,44,74,.12);
+  border-radius:12px;
+  background:#fff;
+}
+
+.grades-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.grades-table thead{
+  background:rgba(11,44,74,.05);
+}
+
+.grades-table th{
+  padding:10px 12px;
+  text-align:left;
+  font-weight:900;
+  color:#0b2c4a;
+  border-bottom:1px solid rgba(11,44,74,.12);
+}
+
+.grades-table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(11,44,74,.08);
+  font-weight:800;
+  color:rgba(11,44,74,.85);
+}
+
+.grades-table tbody tr:hover{
+  background:rgba(59,130,246,.05);
+}
+
+.grades-empty{
+  text-align:center;
+  padding:40px 0;
+  font-weight:900;
+  font-size:13px;
+  color:rgba(11,44,74,.45);
+}
+
+.hidden{ display:none !important; }
+
+@media (max-width: 700px){
+  .grades-summary{
+    grid-template-columns:1fr;
+  }
+}

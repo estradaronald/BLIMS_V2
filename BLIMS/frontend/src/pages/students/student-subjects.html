@@ -1,0 +1,119 @@
+<!-- frontend/src/pages/student/student-subjects.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - Subjects</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- ✅ same baseline styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- helps keep the same header/card feel across pages -->
+  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+
+  <!-- Student Subjects styles -->
+  <link rel="stylesheet" href="../../styles/student/student-subjects.css" />
+</head>
+
+<body data-page="subjects">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">Student</div>
+              <div class="tb-role">Subjects</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ✅ PAGE HEADER RULE -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Subjects</h2>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="card t-card subj-card">
+          <div class="t-card-head subj-head">
+            <div class="subj-left">
+              <div class="t-subtitle">My Subjects</div>
+
+              <!-- ✅ grade/section • adviser • school year -->
+              <div class="subj-sub">
+                <span id="subjGradeSection">Grade 6 - Section A</span>
+                <span class="subj-dot">•</span>
+                <span id="subjAdviser">Adviser —</span>
+                <span class="subj-dot">•</span>
+                <span id="subjSYLabel">SY 2025–2026</span>
+              </div>
+            </div>
+
+            <div class="subj-actions">
+              <!-- ✅ School year dropdown (admin-controlled; JS will set active SY) -->
+              <select id="sySelect" class="t-filter" aria-label="Select school year">
+                <option value="">SY —</option>
+              </select>
+
+              <!-- Current / Archive toggle -->
+              <div class="subj-toggle" role="tablist" aria-label="Subjects view toggle">
+                <button class="subj-tab active" id="tabCurrent" type="button" role="tab" aria-selected="true">
+                  Current
+                </button>
+                <button class="subj-tab" id="tabArchive" type="button" role="tab" aria-selected="false">
+                  Archive
+                </button>
+              </div>
+
+              <!-- optional search -->
+              <div class="t-search subj-search">
+                <span class="t-search-ico">🔎</span>
+                <input id="subjSearch" type="text" placeholder="Search subject" />
+              </div>
+            </div>
+          </div>
+
+          <div class="subj-body">
+            <!-- LIST -->
+            <div class="subj-list" id="subjList"></div>
+
+            <!-- EMPTY STATE -->
+            <div id="subjEmpty" class="subj-empty hidden">
+              No subjects to display.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../js/student/student-sidebar.js"></script>
+  <script src="../../js/student/student-subjects.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+/* frontend/src/styles/student/student-sidebar.css */
+/* Keep it consistent with admin sidebar.css, but allows student-specific tweaks later. */
+/* For now: minimal/no overrides to maintain uniformity. */
+
+/* Match teacher placement */
+.sidebar-float-toggle{
+  top: 18px;
+  left: 18px;
+}

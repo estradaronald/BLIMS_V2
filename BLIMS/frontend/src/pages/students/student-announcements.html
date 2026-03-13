@@ -1,0 +1,145 @@
+<!-- frontend/src/pages/student/student-announcements.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - Announcements</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <<!-- ✅ same baseline styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+  <!-- Reuse Admin announcements UI -->
+  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+  <link rel="stylesheet" href="../../styles/student/student-announcements.css" />
+</head>
+
+<body data-page="announcements">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">Student</div>
+              <div class="tb-role">Announcements</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE (same wrapper/class names as Admin for consistent header spacing) -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Announcements</h2>
+        </div>
+
+        <!-- LIST CARD WRAPPER (same as Admin) -->
+        <div class="card t-card ann-wrap-card">
+          <div class="t-card-head ann-card-head">
+            <div class="t-subtitle">All Announcements</div>
+
+            <!-- Filters row (source: Teacher/Admin) -->
+            <div class="ann-filters">
+              <div class="t-search ann-search">
+                <span class="t-search-ico">🔎</span>
+                <input id="annSearch" type="text" placeholder="Search Announcement" />
+              </div>
+
+              <select id="sourceFilter" class="t-filter">
+                <option value="all">Source: All</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+              </select>
+
+              <select id="catFilter" class="t-filter">
+                <option value="all">Category: All</option>
+                <option value="general">General Announcements</option>
+                <option value="events">School Events</option>
+                <option value="academic">Academic Notices</option>
+                <option value="priority">Priority Alerts</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ann-card-body">
+            <section class="ann-feed" id="annFeed"></section>
+
+            <div id="annEmpty" class="ann-empty hidden">
+              No announcements yet.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================
+       VIEW MODAL (Student - view only)
+  ========================== -->
+  <div id="annViewModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="annViewBackdrop"></div>
+
+    <div class="tmodal-dialog ann-view-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="annViewTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="annViewTitle" class="tmodal-title">Announcement</div>
+            <div class="tmodal-sub">
+              <span id="annViewMeta">—</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="tmodal-x" id="annViewCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="ann-view">
+          <div class="ann-view-top">
+            <!-- we will fill these via JS -->
+            <span id="annViewSource" class="ann-source admin">Admin</span>
+            <span id="annViewPill" class="ann-pill">General</span>
+          </div>
+
+          <h3 id="annViewH" class="ann-view-h">—</h3>
+          <p id="annViewMsg" class="ann-view-msg">—</p>
+
+          <div id="annViewFiles" class="ann-view-files"></div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="annViewCloseBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/student/student-sidebar.js"></script>
+  <script src="../../js/student/student-announcements.js"></script>
+</body>
+</html>

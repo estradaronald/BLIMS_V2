@@ -1,0 +1,137 @@
+<!-- frontend/src/pages/admin/attendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Attendance</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Shared -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- Page -->
+  <link rel="stylesheet" href="../../styles/admin/admin-attendance.css" />
+</head>
+
+<body data-page="attendance">
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">←</button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="att-wrap">
+        <div class="att-head">
+          <div>
+            <h2 class="att-title">Attendance Monitoring</h2>
+            <div class="att-sub">School-wide attendance view by date, grade level, and section.</div>
+          </div>
+
+          <div class="att-head-actions">
+            <button class="att-ghost" id="refreshBtn" type="button">Refresh</button>
+            <button class="att-primary" id="exportCsvBtn" type="button">
+              Export CSV <span class="att-plus">⤓</span>
+            </button>
+          </div>
+        </div>
+
+        <section class="card att-card">
+          <div class="att-card-head">
+            <div class="att-filters">
+              <div class="att-field">
+                <label>Date</label>
+                <input id="dateInput" class="att-input" type="date" />
+              </div>
+
+              <div class="att-field">
+                <label>Grade Level</label>
+                <select id="gradeSelect" class="att-input"></select>
+              </div>
+
+              <div class="att-field">
+                <label>Section</label>
+                <select id="sectionSelect" class="att-input"></select>
+              </div>
+
+              <div class="att-field">
+                <label>Status</label>
+                <select id="statusSelect" class="att-input">
+                  <option value="all">All</option>
+                  <option value="present">Present</option>
+                  <option value="absent">Absent</option>
+                  <option value="late">Late</option>
+                  <option value="excused">Excused</option>
+                </select>
+              </div>
+
+              <div class="att-search">
+                <span class="att-search-ico">🔎</span>
+                <input id="searchInput" type="text" placeholder="Search student / teacher / remarks..." />
+              </div>
+            </div>
+
+            <div class="att-summary" id="summaryLine">—</div>
+          </div>
+
+          <div class="att-table-wrap">
+            <table class="att-table">
+              <thead>
+                <tr>
+                  <th style="width:70px;">No.</th>
+                  <th style="width:140px;">Date</th>
+                  <th style="width:170px;">Grade • Section</th>
+                  <th>Student</th>
+                  <th style="width:140px;">Status</th>
+                  <th style="width:150px;">Teacher</th>
+                  <th style="width:180px;">Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="attTbody">
+                <tr class="att-empty">
+                  <td colspan="7">No attendance records found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="att-foot">
+            <div class="att-foot-note" id="dataSourceNote">Data source: —</div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-attendance.js"></script>
+</body>
+</html>

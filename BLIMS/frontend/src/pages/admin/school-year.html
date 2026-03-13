@@ -1,0 +1,239 @@
+<!-- frontend/src/pages/admin/school-year.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - School Year & Quarters</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Shared -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- Page -->
+  <link rel="stylesheet" href="../../styles/admin/admin-school-year.css" />
+</head>
+
+<body data-page="school-year">
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">←</button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+             <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="sy-wrap">
+        <div class="sy-head">
+          <div>
+            <h2 class="sy-title">School Year & Quarters</h2>
+            <div class="sy-sub">Define the academic timeline and manage quarter dates.</div>
+          </div>
+
+          <button class="sy-primary" id="addSchoolYearBtn" type="button">
+            Create School Year <span class="sy-plus">＋</span>
+          </button>
+        </div>
+
+        <div class="sy-grid">
+          <!-- LEFT: LIST -->
+          <aside class="card sy-left">
+            <div class="sy-left-head">
+              <div class="sy-left-title">School Years</div>
+              <div class="sy-left-hint">Select one to edit quarters and set Active.</div>
+            </div>
+
+            <div id="syList" class="sy-list"></div>
+          </aside>
+
+          <!-- RIGHT: DETAILS -->
+          <section class="card sy-right">
+            <div class="sy-right-head">
+              <div>
+                <div class="sy-right-title" id="selectedSYTitle">—</div>
+                <div class="sy-right-sub" id="selectedSYSub">Select a school year to view details.</div>
+              </div>
+
+              <div class="sy-actions">
+                <button class="sy-ghost" id="setActiveBtn" type="button" disabled>Set as Active</button>
+                <button class="sy-ghost" id="editQuartersBtn" type="button" disabled>Edit Quarters</button>
+              </div>
+            </div>
+
+            <div class="sy-table-wrap">
+              <table class="sy-table">
+                <thead>
+                  <tr>
+                    <th style="width:90px;">No.</th>
+                    <th>Quarter</th>
+                    <th style="width:210px;">Start</th>
+                    <th style="width:210px;">End</th>
+                    <th style="width:160px; text-align:center;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="quartersTbody">
+                  <tr class="sy-empty">
+                    <td colspan="5">No quarters to show.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======================
+      CREATE SCHOOL YEAR MODAL
+  ======================= -->
+  <div id="createSYModal" class="sy-modal hidden" aria-hidden="true">
+    <div class="sy-backdrop" id="createSYBackdrop"></div>
+
+    <div class="sy-dialog sy-sm" role="dialog" aria-modal="true" aria-labelledby="createSYTitle" tabindex="-1">
+      <div class="sy-mhead">
+        <div>
+          <div class="sy-mtitle" id="createSYTitle">Create School Year</div>
+          <div class="sy-msub">Example: 2025–2026</div>
+        </div>
+        <button class="sy-x" id="createSYCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="sy-mbody">
+        <div class="sy-form">
+          <div class="sy-field">
+            <label>School Year Name</label>
+            <input id="syNameInput" class="sy-input" type="text" placeholder="e.g., 2025-2026" />
+          </div>
+
+          <div class="sy-field">
+            <label>Start Date (optional)</label>
+            <input id="syStartInput" class="sy-input" type="date" />
+          </div>
+
+          <div class="sy-field">
+            <label>End Date (optional)</label>
+            <input id="syEndInput" class="sy-input" type="date" />
+          </div>
+
+          <div class="sy-field sy-wide">
+            <label>Auto-create Quarters</label>
+            <div class="sy-row">
+              <label class="sy-check">
+                <input id="autoQ4" type="checkbox" checked />
+                <span>Create 4 quarters (Q1–Q4)</span>
+              </label>
+            </div>
+            <div class="sy-hint">You can edit dates later in “Edit Quarters”.</div>
+          </div>
+        </div>
+
+        <div id="createSYError" class="sy-error hidden"></div>
+      </div>
+
+      <div class="sy-mfoot">
+        <button class="sy-ghost" id="createSYCancel" type="button">Cancel</button>
+        <div class="sy-foot-right">
+          <button class="sy-save" id="createSYSave" type="button">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+        EDIT QUARTERS MODAL
+  ======================= -->
+  <div id="editQModal" class="sy-modal hidden" aria-hidden="true">
+    <div class="sy-backdrop" id="editQBackdrop"></div>
+
+    <div class="sy-dialog" role="dialog" aria-modal="true" aria-labelledby="editQTitle" tabindex="-1">
+      <div class="sy-mhead">
+        <div>
+          <div class="sy-mtitle" id="editQTitle">Edit Quarters</div>
+          <div class="sy-msub" id="editQSub">Update dates and lock finished quarters.</div>
+        </div>
+        <button class="sy-x" id="editQCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="sy-mbody">
+        <div class="sy-qwrap">
+          <div class="sy-qhead">
+            <div class="sy-qhint">Quarters for: <strong id="editQName">—</strong></div>
+            <button class="sy-chip" id="addQuarterBtn" type="button">Add Quarter</button>
+          </div>
+
+          <div id="qEditor" class="sy-qeditor"></div>
+        </div>
+
+        <div id="editQError" class="sy-error hidden"></div>
+      </div>
+
+      <div class="sy-mfoot">
+        <button class="sy-ghost" id="editQCancel" type="button">Cancel</button>
+        <div class="sy-foot-right">
+          <button class="sy-ghost" id="editQReset" type="button">Reset</button>
+          <button class="sy-save" id="editQSave" type="button">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+        CONFIRM DELETE MODAL
+  ======================= -->
+  <div id="confirmModal" class="sy-modal hidden" aria-hidden="true">
+    <div class="sy-backdrop" id="confirmBackdrop"></div>
+
+    <div class="sy-dialog sy-sm" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" tabindex="-1">
+      <div class="sy-mhead">
+        <div>
+          <div class="sy-mtitle" id="confirmTitle">Delete?</div>
+          <div class="sy-msub">This action cannot be undone.</div>
+        </div>
+        <button class="sy-x" id="confirmCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="sy-mbody">
+        <div class="sy-confirm" id="confirmText">Are you sure?</div>
+      </div>
+
+      <div class="sy-mfoot">
+        <button class="sy-ghost" id="confirmCancel" type="button">Cancel</button>
+        <div class="sy-foot-right">
+          <button class="sy-danger" id="confirmDelete" type="button">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-school-year.js"></script>
+</body>
+</html>

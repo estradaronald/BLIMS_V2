@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- ✅ Page-header spacing rule (ensures consistency) -->
+  <style>
+    .topbar { margin-bottom: 4px; }
+    .ms-page { padding: 0; }
+  </style>
+</head>
+
+<body data-page="dashboard">
+  <!-- Sidebar Floating Toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <!-- Sidebar Mount -->
+    <div id="sidebar-mount"></div>
+
+    <main class="content ms-page">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar">
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Dashboard Grid -->
+      <section class="dash-grid">
+
+        <!-- HERO -->
+        <div class="card hero" style="grid-area: hero;">
+          <div class="hero-left">
+            <h2>Welcome, Bolosan Elementary School Team!</h2>
+            <p>
+              Manage your school operations with ease.
+              Stay updated on academics, attendance, finances, and more—all in one place.
+              Let’s keep shaping a brighter future together!
+            </p>
+          </div>
+          <div class="hero-right">
+            <div class="hero-illus"></div>
+          </div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div class="card calendar" style="grid-area: calendar;">
+          <div class="cal-head">
+            <button class="cal-nav" id="calPrev" type="button">‹</button>
+            <div class="cal-title" id="calTitle">September 2021</div>
+            <button class="cal-nav" id="calNext" type="button">›</button>
+          </div>
+
+          <div class="cal-days">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+          </div>
+
+          <div class="cal-grid" id="calGrid"></div>
+
+          <button class="cal-btn" type="button">Manage Calendar</button>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row" style="grid-area: stats;">
+          <div class="stat blue">
+            <div class="stat-ico">👥</div>
+            <div class="stat-mid">
+              <div class="stat-label">Total Students</div>
+              <!-- ✅ JS will set this -->
+              <div class="stat-value" id="statStudents">0</div>
+            </div>
+          </div>
+
+          <div class="stat green">
+            <div class="stat-ico">🧑‍🏫</div>
+            <div class="stat-mid">
+              <div class="stat-label">Total Teachers</div>
+              <!-- ✅ JS will set this -->
+              <div class="stat-value" id="statTeachers">0</div>
+            </div>
+          </div>
+
+          <div class="stat pink">
+            <div class="stat-ico">📣</div>
+            <div class="stat-mid">
+              <div class="stat-label">Announcements</div>
+              <!-- ✅ JS will set this -->
+              <div class="stat-value" id="statAnnouncements">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REG TREND -->
+        <div class="card chart-wide" style="grid-area: trend;">
+          <div class="chart-title">Registration Trend</div>
+          <div class="chart-box">( Line Chart )</div>
+        </div>
+
+        <!-- USER DIST -->
+        <div class="card chart-narrow" style="grid-area: dist;">
+          <div class="chart-title">User Distribution</div>
+          <div class="chart-box">( Doughnut Chart )</div>
+        </div>
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="card ann" style="grid-area: ann;">
+          <div class="card-head">
+            <div class="head-left">
+              <span class="mini-ico">📣</span>
+              <span class="head-title">Announcements</span>
+            </div>
+            <a class="head-link" href="./announcements.html">View Announcement ></a>
+          </div>
+
+          <div class="ann-item">
+            <div class="ann-title">Faculty Meeting</div>
+            <div class="ann-meta">
+              <span>Date: October 15, 2025</span>
+              <span>Time: 10:00am – 11:00am</span>
+            </div>
+            <div class="ann-meta">Venue: AVR Room</div>
+          </div>
+
+          <div class="ann-item">
+            <div class="ann-title">Math Competition</div>
+            <div class="ann-meta">
+              <span>Date: October 15, 2025</span>
+              <span>Time: 10:00am – 11:00am</span>
+            </div>
+            <div class="ann-meta">Venue: Bolosan Elementary School</div>
+          </div>
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="card upcoming" style="grid-area: up;">
+          <div class="card-head">
+            <div class="head-left">
+              <span class="mini-ico">📅</span>
+              <span class="head-title">Upcoming Events</span>
+            </div>
+            <a class="head-link" href="./events.html">View Events ></a>
+          </div>
+
+          <div class="up-item">
+            <div class="up-left"></div>
+            <div class="up-body">
+              <div class="up-title">Buwan ng Wika</div>
+              <div class="up-meta">Date : November 15, 2025</div>
+            </div>
+          </div>
+
+          <div class="up-item">
+            <div class="up-left"></div>
+            <div class="up-body">
+              <div class="up-title">Nutrition Month</div>
+              <div class="up-meta">Date : November 30, 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <section class="card table-card" style="grid-area: table;">
+          <div class="table-head">
+            <div class="head-left">
+              <span class="mini-ico">👤</span>
+              <span class="head-title">Recently Added Accounts</span>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ACCOUNT ROLE</th>
+                  <th>NAME</th>
+                  <th>EMAIL</th>
+                  <th>CONTACT NO.</th>
+                  <th>DATE CREATED</th>
+                </tr>
+              </thead>
+              <tbody id="recentAccountsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+</body>
+</html>

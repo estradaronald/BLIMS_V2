@@ -1,0 +1,256 @@
+/* frontend/src/styles/sidebar.css */
+
+:root{
+  --navy:#0b4d7a;
+  --navy-2:#083e63;
+  --white:#ffffff;
+  --sbText: rgba(255,255,255,.92);
+  --sbDim: rgba(255,255,255,.70);
+}
+
+.sidebar{
+  width: 260px;
+  min-width: 260px;
+  height: calc(100vh - 28px);
+  background: linear-gradient(180deg, var(--navy), var(--navy-2));
+  border-radius: 14px;
+  margin: 14px 0 14px 14px;
+  position: sticky;
+  top: 14px;
+  overflow: hidden;
+  display:flex;
+  flex-direction: column;
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+/* =========================
+   TOP SECTION
+========================= */
+
+.sb-top{
+  padding: 18px 16px 10px;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 10px;
+}
+
+.sb-logo-wrap{
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.sb-logo{
+  width: 66px;
+  height: 66px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.sb-school{
+  text-align:center;
+  padding: 0 10px;
+}
+
+.sb-school-name{
+  color: var(--sbText);
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.sb-school-sub{
+  color: var(--sbDim);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* =========================
+   NAV SECTION (FIXED)
+========================= */
+
+.sb-nav{
+  padding: 12px 14px;
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+
+  flex: 1 1 auto;         /* take remaining vertical space */
+  overflow-y: auto;       /* allow scrolling */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+.sb-nav::-webkit-scrollbar{
+  width: 8px;
+}
+
+.sb-nav::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.sb-nav::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+}
+
+.sb-nav::-webkit-scrollbar-thumb:hover{
+  background: rgba(255,255,255,.30);
+}
+
+/* =========================
+   NAV ITEMS
+========================= */
+
+.sb-item{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration:none;
+  color: var(--sbText);
+  font-weight: 900;
+  letter-spacing: .3px;
+  font-size: 12px;
+  height: 48px;
+  transition: background .2s ease;
+}
+
+.sb-ico{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,.12);
+  flex: 0 0 40px;
+}
+
+/* SVG icons */
+.sb-ico img{
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display:block;
+  filter: brightness(0) invert(1);
+}
+
+.sb-item:hover{
+  background: rgba(255,255,255,.10);
+}
+
+/* Active pill */
+.sb-item.active{
+  background: #fff;
+  color: var(--navy);
+}
+
+.sb-item.active .sb-ico{
+  background: rgba(11,77,122,.10);
+}
+
+.sb-item.active .sb-ico img{
+  filter: none;
+}
+
+/* =========================
+   COLLAPSED MODE
+========================= */
+
+.sidebar.is-collapsed{
+  width: 86px;
+  min-width: 86px;
+}
+
+.sidebar.is-collapsed .sb-school,
+.sidebar.is-collapsed .sb-text{
+  display:none;
+}
+
+.sidebar.is-collapsed .sb-top{
+  padding: 18px 10px 8px;
+}
+
+.sidebar.is-collapsed .sb-logo-wrap{
+  width: 62px;
+  height: 62px;
+}
+
+.sidebar.is-collapsed .sb-logo{
+  width: 52px;
+  height: 52px;
+}
+
+.sidebar.is-collapsed .sb-nav{
+  padding: 10px 10px;
+  gap: 12px;
+}
+
+.sidebar.is-collapsed .sb-item{
+  justify-content:center;
+  padding: 10px 8px;
+  gap: 0;
+  width: 100%;
+}
+
+.sidebar.is-collapsed .sb-ico{
+  background: rgba(255,255,255,.14);
+}
+
+.sidebar.is-collapsed .sb-item.active{
+  background: rgba(255,255,255,.95);
+}
+
+/* html-level collapsed */
+html.sb-collapsed .sidebar{
+  width: 86px;
+  min-width: 86px;
+}
+
+html.sb-collapsed .sidebar .sb-school,
+html.sb-collapsed .sidebar .sb-text{
+  display:none;
+}
+
+html.sb-collapsed .sidebar .sb-top{
+  padding: 18px 10px 8px;
+}
+
+html.sb-collapsed .sidebar .sb-logo-wrap{
+  width: 62px;
+  height: 62px;
+}
+
+html.sb-collapsed .sidebar .sb-logo{
+  width: 52px;
+  height: 52px;
+}
+
+html.sb-collapsed .sidebar .sb-nav{
+  padding: 10px 10px;
+  gap: 12px;
+}
+
+html.sb-collapsed .sidebar .sb-item{
+  justify-content:center;
+  padding: 10px 8px;
+  gap: 0;
+  width: 100%;
+}
+
+html.sb-collapsed .sidebar .sb-ico{
+  background: rgba(255,255,255,.14);
+}
+
+html.sb-collapsed .sidebar .sb-item.active{
+  background: rgba(255,255,255,.95);
+}

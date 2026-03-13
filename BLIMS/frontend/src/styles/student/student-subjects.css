@@ -1,0 +1,174 @@
+/* frontend/src/styles/student/student-subjects.css */
+
+/* ✅ Required spacing rule (consistency across all pages) */
+.topbar { margin-bottom: 4px; }
+.teachers-wrap { padding: 0; }
+
+/* ===============================
+   HEAD (filters / toggle / search)
+   =============================== */
+.subj-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.subj-left{
+  display:flex;
+  flex-direction:column;
+  gap: 6px;
+}
+
+.subj-sub{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(11,44,74,.55);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.subj-dot{ opacity:.4; }
+
+.subj-actions{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content:flex-end;
+}
+
+/* Keep search consistent with your existing search look */
+.subj-search{
+  min-width: 240px;
+}
+
+/* ===============================
+   CURRENT / ARCHIVE TOGGLE (pill)
+   =============================== */
+.subj-toggle{
+  display:flex;
+  background: rgba(11,44,74,.06);
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.subj-tab{
+  border:none;
+  background: transparent;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 999px;
+  cursor:pointer;
+  transition: background .15s ease, transform .12s ease, filter .12s ease;
+  color: rgba(11,44,74,.65);
+  line-height: 1;
+}
+
+.subj-tab.active{
+  background:#fff;
+  color:#0b2c4a;
+  box-shadow: 0 3px 8px rgba(0,0,0,.08);
+}
+
+.subj-tab:hover{ transform: translateY(-1px); }
+.subj-tab:active{ transform: translateY(0px); }
+
+/* ===============================
+   BODY + LIST
+   =============================== */
+.subj-body{
+  padding: 14px 16px 16px;
+}
+
+.subj-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Subject row – matches your “card row” feel */
+.subj-row{
+  border: 1px solid rgba(11,44,74,.12);
+  background:#fff;
+  border-radius: 12px;
+  padding: 12px 12px;
+
+  display:grid;
+  grid-template-columns: 1fr 160px; /* ✅ Subject | Section */
+  gap: 12px;
+  align-items:center;
+
+  cursor: default;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+}
+
+/* subtle hover so the UI feels alive (not “click to edit”) */
+.subj-row:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(0,0,0,.08);
+  border-color: rgba(59,130,246,.25);
+}
+
+@media (max-width: 820px){
+  .subj-row{
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+/* left: subject */
+.subj-name{
+  font-weight: 1000;
+  font-size: 12px;
+  color: rgba(11,44,74,.90);
+  letter-spacing: -0.1px;
+}
+
+.subj-meta{
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(11,44,74,.55);
+}
+
+/* ✅ removed: .subj-teacher (no longer used) */
+
+/* right: section pill */
+.subj-pill{
+  justify-self: end;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(11,44,74,.12);
+  background: rgba(59,130,246,.10);
+  color: rgba(11,44,74,.88);
+  font-size: 11px;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+@media (max-width: 820px){
+  .subj-pill{ justify-self: start; }
+}
+
+/* ===============================
+   EMPTY STATE
+   =============================== */
+.subj-empty{
+  text-align:center;
+  padding: 36px 0 28px;
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(11,44,74,.45);
+}
+
+/* utility */
+.hidden{ display:none !important; }

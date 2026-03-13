@@ -1,0 +1,500 @@
+/* frontend/src/styles/admin-dashboard.css */
+h1, h2, h3, h4{
+  font-weight: 800;
+}
+
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  font-family: "Plus Jakarta Sans", system-ui, Arial, sans-serif;
+  background:#d9d9d9;
+  color:#0b2c4a;
+}
+
+.app{
+  display:flex;
+  gap: 14px;
+}
+
+.content{
+  flex:1;
+  margin: 14px 14px 14px 0;
+  background:#e9e9e9;
+  border-radius: 14px;
+  padding: 14px;
+  min-height: calc(100vh - 28px);
+  position: relative;
+}
+
+.sidebar-float-toggle{
+  position: fixed;
+
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  /* 🔥 stronger layered shadow */
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.20),
+    0 0 0 3px rgba(11,77,122,.15);
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999999;
+  transition: all .2s ease;
+}
+
+/* subtle hover feedback */
+.sidebar-float-toggle:hover{
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.25),
+    0 0 0 4px rgba(11,77,122,.25);
+}
+
+
+.topbar{
+  height: 56px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+
+  /* ✅ match schedule spacing baseline */
+  margin-bottom: 4px;
+
+  /* ✅ consistent padding like schedule/dashboard */
+  padding: 6px 8px 6px 60px;
+}
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.tb-icon{
+  width: 40px;
+  height: 40px;
+  border:none;
+  border-radius: 12px;
+  background:#fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+  cursor:pointer;
+
+  /* ✅ consistent center alignment */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+
+.tb-user{
+  position: relative;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 8px 10px;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+}
+
+.tb-avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tb-meta{ line-height: 1.1; }
+.tb-name{ font-weight: 900; font-size: 13px; }
+.tb-role{ font-size: 11px; color: rgba(11,44,74,.60); }
+
+.tb-drop{
+  width: 34px;
+  height: 34px;
+  border:none;
+  border-radius: 12px;
+  background:#f1f4f8;
+  cursor:pointer;
+
+  /* ✅ center the ▾ consistently */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.tb-menu{
+  position:absolute;
+  top: 54px;
+  right: 8px;
+  width: 170px;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(0,0,0,.18);
+  padding: 6px;
+  display:none;
+}
+.tb-menu.open{ display:block; }
+
+.tb-item{
+  width:100%;
+  border:none;
+  background:transparent;
+  padding: 10px 10px;
+  text-align:left;
+  border-radius: 10px;
+  cursor:pointer;
+  font-weight: 800;
+}
+.tb-item:hover{ background:#f1f4f8; }
+.tb-item.danger{ color:#b42318; }
+
+.card{
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+  padding: 14px;
+}
+
+/* ✅ MAIN GRID LIKE FIGMA */
+.dash-grid{
+  display:grid;
+  gap: 14px;
+  grid-template-columns: 1.65fr 0.85fr;
+  grid-template-areas:
+    "hero     calendar"
+    "stats    calendar"
+    "trend    dist"
+    "ann      up"
+    "table    table";
+}
+
+/* HERO */
+.hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height: 150px;
+}
+
+.hero-left h2{
+  margin:0 0 10px;
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.hero-left p{
+  margin:0;
+  font-size: 12px;
+  color: rgba(11,44,74,.55);
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.hero-right{
+  width: 260px;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.hero-illus{
+  width: 240px;
+  height: 120px;
+  border-radius: 14px;
+  background: #f3f6fb;
+  border: 1px dashed rgba(11,77,122,.22);
+}
+
+/* ✅ CALENDAR is taller and stays tall */
+.calendar{
+  min-height: 310px;
+  display:flex;
+  flex-direction: column;
+}
+
+.cal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 10px;
+}
+
+.cal-title{
+  font-weight: 900;
+  font-size: 12px;
+  color: rgba(11,44,74,.70);
+}
+
+.cal-nav{
+  width: 34px;
+  height: 34px;
+  border:none;
+  border-radius: 10px;
+  background:#f1f4f8;
+  cursor:pointer;
+  font-size: 18px;
+}
+
+.cal-days{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 900;
+  color: rgba(11,44,74,.40);
+  padding: 0 4px 6px;
+}
+
+.cal-grid{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 0 4px 10px;
+  flex: 1;
+}
+
+.cal-cell{
+  height: 28px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(11,44,74,.70);
+  border: none;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+}
+
+.cal-day{ cursor:pointer; position:relative; }
+.cal-day:hover{ background: rgba(11, 77, 122, 0.08); }
+
+.cal-cell.today{
+  background: #ff4a2a;
+  color:#fff;
+  font-weight: 1000;
+}
+
+.cal-btn{
+  width: 100%;
+  border:none;
+  border-radius: 10px;
+  background:#e9edf3;
+  color: rgba(11,44,74,.60);
+  font-weight: 900;
+  padding: 10px 12px;
+  cursor:pointer;
+  margin-top: 10px;
+}
+
+/* STATS (under hero only) */
+.stats-row{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat{
+  background:#fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+  padding: 12px 14px;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  border-left: 4px solid #2b6cb0;
+}
+
+.stat.green{ border-left-color:#22c55e; }
+.stat.pink{ border-left-color:#ff4bd8; }
+
+.stat-ico{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background:#f1f4f8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 16px;
+}
+
+.stat-label{
+  font-size: 11px;
+  color: rgba(11,44,74,.55);
+  font-weight: 900;
+}
+.stat-value{
+  font-size: 16px;
+  font-weight: 1000;
+  margin-top: 4px;
+}
+
+/* CHARTS */
+.chart-title{
+  text-align:center;
+  font-weight: 1000;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: rgba(11,44,74,.70);
+}
+
+.chart-box{
+  height: 190px;
+  border-radius: 12px;
+  background:#efefef;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+  color: rgba(0,0,0,.55);
+}
+
+/* Heads */
+.card-head,
+.table-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 10px;
+}
+
+.head-left{ display:flex; align-items:center; gap: 8px; }
+
+.mini-ico{ font-size: 14px; color: rgba(11,44,74,.80); }
+
+.head-title{
+  font-size: 12px;
+  font-weight: 1000;
+  color: rgba(11,44,74,.85);
+}
+
+.head-link{
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(11,44,74,.55);
+  text-decoration:none;
+}
+.head-link:hover{ text-decoration: underline; }
+
+/* Announcement items */
+.ann-item{
+  border: 1px solid rgba(11,44,74,.12);
+  background:#fff;
+  border-radius: 10px;
+  padding: 10px 10px;
+  margin-bottom: 10px;
+}
+
+.ann-title{
+  font-weight: 1000;
+  font-size: 11px;
+  margin-bottom: 6px;
+  color: rgba(11,44,74,.85);
+}
+
+.ann-meta{
+  font-size: 10px;
+  color: rgba(11,44,74,.55);
+  display:flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Upcoming */
+.up-item{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  border-radius: 10px;
+  background:#fff;
+  border: 1px solid rgba(11,44,74,.12);
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.up-left{
+  width: 6px;
+  height: 46px;
+  border-radius: 10px;
+  background: #0b4d7a;
+}
+
+.up-title{
+  font-weight: 1000;
+  font-size: 11px;
+  color: rgba(11,44,74,.85);
+}
+
+.up-meta{
+  font-size: 10px;
+  color: rgba(11,44,74,.55);
+  margin-top: 4px;
+}
+
+/* Table */
+.table-card{ padding: 12px 14px 14px; }
+
+.table-wrap{
+  border-radius: 12px;
+  overflow:auto;
+  border: 1px solid rgba(11,44,74,.12);
+}
+
+.table{
+  width:100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.table thead th{
+  background: var(--navy, #0b4d7a);
+  color:#fff;
+  padding: 10px 12px;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-align:center;
+}
+
+.table tbody td{
+  padding: 12px 12px;
+  font-size: 12px;
+  border-top: 1px solid rgba(11,44,74,.08);
+  text-align:center;
+}
+
+/* Responsive */
+@media (max-width: 1100px){
+  .dash-grid{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hero"
+      "calendar"
+      "stats"
+      "trend"
+      "dist"
+      "ann"
+      "up"
+      "table";
+  }
+  .stats-row{ grid-template-columns: 1fr; }
+}
+

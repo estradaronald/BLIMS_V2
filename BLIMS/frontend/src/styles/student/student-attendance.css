@@ -1,0 +1,271 @@
+/* frontend/src/styles/student/student-attendance.css */
+
+/* ✅ Required spacing rule */
+.topbar { margin-bottom: 4px; }
+.teachers-wrap { padding: 0; }
+
+/* ===============================
+   HEAD
+================================= */
+.att-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.att-left{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.att-sub{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(11,44,74,.55);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.att-dot{ opacity:.4; }
+
+.att-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+/* ===============================
+   VIEW TOGGLE
+================================= */
+.att-toggle{
+  display:flex;
+  background: rgba(11,44,74,.06);
+  padding:4px;
+  border-radius:999px;
+}
+
+.att-tab{
+  border:none;
+  background:transparent;
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:900;
+  border-radius:999px;
+  cursor:pointer;
+  transition:background .15s ease, transform .12s ease;
+  color:rgba(11,44,74,.65);
+}
+
+.att-tab.active{
+  background:#fff;
+  color:#0b2c4a;
+  box-shadow:0 3px 8px rgba(0,0,0,.08);
+}
+
+.att-tab:hover{
+  transform:translateY(-1px);
+}
+
+/* ===============================
+   SUMMARY STATS
+================================= */
+.att-summary{
+  margin-top:14px;
+  padding:14px 16px;
+  border-top:1px solid rgba(11,44,74,.08);
+  border-bottom:1px solid rgba(11,44,74,.08);
+
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:14px;
+}
+
+.att-stat{
+  background:#fff;
+  border:1px solid rgba(11,44,74,.12);
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.att-stat-k{
+  font-size:11px;
+  font-weight:800;
+  color:rgba(11,44,74,.55);
+}
+
+.att-stat-v{
+  font-size:16px;
+  font-weight:1000;
+  color:#0b2c4a;
+}
+
+.att-stat.rate{
+  background:rgba(59,130,246,.08);
+  border-color:rgba(59,130,246,.25);
+}
+
+/* ===============================
+   BODY
+================================= */
+.att-body{
+  padding:16px;
+}
+
+/* ===============================
+   TABLE VIEW
+================================= */
+.att-table-wrap{
+  overflow:auto;
+  border-radius:12px;
+  border:1px solid rgba(11,44,74,.12);
+  background:#fff;
+}
+
+.att-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.att-table thead{
+  background:rgba(11,44,74,.05);
+}
+
+.att-table th{
+  text-align:left;
+  padding:10px 12px;
+  font-weight:900;
+  color:#0b2c4a;
+  border-bottom:1px solid rgba(11,44,74,.12);
+}
+
+.att-table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(11,44,74,.08);
+  font-weight:800;
+  color:rgba(11,44,74,.85);
+}
+
+.att-table tbody tr:hover{
+  background:rgba(59,130,246,.05);
+}
+
+/* Status pills */
+.att-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:24px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:1000;
+}
+
+.att-present{
+  background:rgba(16,185,129,.12);
+  color:#059669;
+}
+
+.att-absent{
+  background:rgba(239,68,68,.12);
+  color:#dc2626;
+}
+
+.att-late{
+  background:rgba(245,158,11,.12);
+  color:#d97706;
+}
+
+/* ===============================
+   CALENDAR VIEW
+================================= */
+.att-cal{
+  background:#fff;
+  border:1px solid rgba(11,44,74,.12);
+  border-radius:12px;
+  padding:16px;
+}
+
+.att-cal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.att-cal-title{
+  font-weight:1000;
+  font-size:14px;
+  color:#0b2c4a;
+}
+
+.att-cal-grid{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:8px;
+}
+
+.att-cal-day{
+  height:70px;
+  border:1px solid rgba(11,44,74,.12);
+  border-radius:10px;
+  padding:6px;
+  font-size:11px;
+  font-weight:800;
+  color:rgba(11,44,74,.8);
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+
+.att-cal-day:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 12px rgba(0,0,0,.06);
+}
+
+.att-cal-day.present{ border-color:#059669; }
+.att-cal-day.absent{ border-color:#dc2626; }
+.att-cal-day.late{ border-color:#d97706; }
+
+/* ===============================
+   EMPTY STATE
+================================= */
+.att-empty{
+  text-align:center;
+  padding:40px 0;
+  font-weight:900;
+  font-size:13px;
+  color:rgba(11,44,74,.45);
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+@media (max-width: 900px){
+  .att-summary{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px){
+  .att-summary{
+    grid-template-columns: 1fr;
+  }
+}
+
+.hidden{
+  display:none !important;
+}

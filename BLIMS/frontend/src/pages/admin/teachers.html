@@ -1,0 +1,573 @@
+<!--
+  FILE: frontend/src/pages/admin/teachers.html
+
+  PURPOSE:
+  Admin page to create/manage Teacher accounts.
+
+  QUICK SEARCH (Ctrl+F):
+  - LIST VIEW:      id="listView"
+  - ADD FORM:       id="formView"
+  - SAVE BUTTON:    id="saveBtn"
+  - TABLE BODY:     id="teachersTbody"
+  - MODAL:          id="teacherModal"
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Teachers</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- SAME as dashboard -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- Teachers page styles -->
+  <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
+</head>
+
+<body data-page="teachers">
+  <!-- floating toggle -->
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="avatar"
+            />
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Teachers</h2>
+
+          <button id="addNewBtn" class="t-add-btn" type="button">
+            Add New <span class="t-plus">＋</span>
+          </button>
+        </div>
+
+        <!-- =====================
+             LIST VIEW
+        ====================== -->
+        <section id="listView" class="t-view">
+          <div class="card t-card">
+            <div class="t-card-head">
+              <div class="t-subtitle">All Teachers List</div>
+
+              <div class="t-tools">
+                <div class="t-search">
+                  <span class="t-search-ico">🔎</span>
+                  <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search by Name or ID"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <select id="classFilter" class="t-filter">
+                  <option value="all">All Classes</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="t-table-wrap">
+              <table class="t-table">
+                <thead>
+                  <tr>
+                    <th style="width:70px">No.</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Advisory Class</th>
+                    <th>Contact No.</th>
+                    <th class="t-action-head" style="width:150px">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="teachersTbody">
+                  <tr class="t-empty">
+                    <td colspan="7">No teachers yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================
+             ADD FORM
+        ====================== -->
+        <section id="formView" class="t-view hidden">
+          <div class="t-form-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="t-form-left t-left-col">
+
+              <!-- BASIC -->
+              <div class="card t-form-card t-basic-card">
+                <div class="t-form-hd">Basic Information</div>
+
+                <div class="t-form-bd">
+
+                  <div class="t-basic-left">
+
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label for="firstName">First Name</label>
+                        <input id="firstName" type="text" autocomplete="given-name" />
+                      </div>
+                      <div class="t-field">
+                        <label for="lastName">Last Name</label>
+                        <input id="lastName" type="text" autocomplete="family-name" />
+                      </div>
+                    </div>
+
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label for="middleName">Middle Name</label>
+                        <input id="middleName" type="text" autocomplete="additional-name" />
+                      </div>
+                      <div class="t-field">
+                        <label for="dob">Date of Birth</label>
+                        <input id="dob" type="date" />
+                      </div>
+                    </div>
+
+                    <!-- GENDER -->
+                    <div class="t-field">
+                      <label>Gender</label>
+                      <div class="t-gender">
+                        <label class="t-radio">
+                          <input type="radio" name="gender" value="male" checked />
+                          <span>Male</span>
+                        </label>
+
+                        <label class="t-radio">
+                          <input type="radio" name="gender" value="female" />
+                          <span>Female</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label for="classSelect">Class</label>
+                        <div class="t-inline">
+                          <select id="classSelect" class="t-select"></select>
+                          <button id="addClassBtn" class="t-mini" type="button" aria-label="Add class">＋</button>
+                        </div>
+                      </div>
+
+                      <div class="t-field">
+                        <label for="sectionSelect">Section</label>
+                        <div class="t-inline">
+                          <select id="sectionSelect" class="t-select"></select>
+                          <button id="addSectionBtn" class="t-mini" type="button" aria-label="Add section">＋</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- PHOTO -->
+                  <div class="t-basic-right">
+                    <div class="t-upload">
+                      <input id="photoInput" type="file" accept="image/*" hidden />
+                      <div class="t-upload-box" id="photoPreview" role="button" tabindex="0" aria-label="Upload teacher photo">
+                        <div class="t-upload-ico">🖼️</div>
+                        <div class="t-upload-text">Drop your profile photo to upload</div>
+                        <button id="selectFilesBtn" class="t-ghost small" type="button">
+                          Select photo
+                        </button>
+                      </div>
+                      <button id="removePhotoBtn" class="t-remove hidden" type="button" aria-label="Remove photo">✕</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- CREDENTIALS -->
+              <div class="card t-form-card t-creds-card">
+                <div class="t-form-hd">Credentials</div>
+
+                <div class="t-form-bd">
+
+                  <!-- PRC -->
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label>Has PRC License?</label>
+                      <div class="t-gender">
+                        <label class="t-radio">
+                          <input id="hasPrcNo" type="radio" name="hasPrc" value="no" checked />
+                          <span>No</span>
+                        </label>
+
+                        <label class="t-radio">
+                          <input id="hasPrcYes" type="radio" name="hasPrc" value="yes" />
+                          <span>Yes</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="t-field">
+                      <label for="prcLicense">PRC License No.</label>
+                      <input id="prcLicense" type="text" value="N/A" disabled inputmode="numeric" />
+                    </div>
+                  </div>
+
+                  <!-- MAJOR + ATTAINMENT -->
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label for="majorSpec">Major / Specialization</label>
+                      <select id="majorSpec" class="t-select">
+                        <option value="">Select</option>
+                        <option value="English">English</option>
+                        <option value="Math">Math</option>
+                        <option value="Science">Science</option>
+                        <option value="Filipino">Filipino</option>
+                        <option value="MAPEH">MAPEH</option>
+                        <option value="ICT">ICT</option>
+                        <option value="SPED">SPED</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <small class="t-hint">Select “Other” to specify.</small>
+                    </div>
+
+                    <div class="t-field">
+                      <label for="highestEduc">Highest Educational Attainment</label>
+                      <select id="highestEduc" class="t-select">
+                        <option value="">Select</option>
+                        <option value="Bachelor's Degree">Bachelor's Degree</option>
+                        <option value="With Master's Units">With Master's Units</option>
+                        <option value="Master's Degree">Master's Degree</option>
+                        <option value="Doctorate">Doctorate</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- OTHER MAJOR -->
+                  <div class="t-field hidden" id="majorOtherWrap">
+                    <label for="majorOther">If Other, please specify</label>
+                    <input id="majorOther" type="text" placeholder="Type major/specialization" />
+                  </div>
+
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label for="dateHired">Date Hired</label>
+                      <input id="dateHired" type="date" />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="t-form-right t-right-col">
+
+              <!-- LOGIN -->
+              <div class="card t-form-card">
+                <div class="t-form-hd">Login / Account Details</div>
+                <div class="t-form-bd">
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label for="teacherId">Teacher ID</label>
+                      <input id="teacherId" readonly />
+                    </div>
+                    <div class="t-field">
+                      <label for="tempPass">Password</label>
+                      <div class="t-inline">
+                        <input id="tempPass" readonly />
+                        <button id="regenPassBtn" class="t-mini" type="button" title="Regenerate password" aria-label="Regenerate password">↻</button>
+                      </div>
+                      <!-- ✅ small hint: backend will generate actual password -->
+                      <small class="t-hint">Password is generated automatically on Save.</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CONTACT -->
+              <div class="card t-form-card">
+                <div class="t-form-hd">Contact & Address</div>
+                <div class="t-form-bd">
+                  <div class="t-row2">
+
+                    <!-- ✅ Phone w/ +63 prefix + 10 digits input -->
+                    <div class="t-field">
+                      <label for="phone">Phone</label>
+                      <div class="t-inline">
+                        <span class="t-prefix">+63</span>
+                        <input
+                          id="phone"
+                          type="text"
+                          inputmode="numeric"
+                          autocomplete="tel"
+                          placeholder="9123456789"
+                          maxlength="10"
+                        />
+                      </div>
+                      <small class="t-hint">Enter 10 digits (e.g., 9123456789)</small>
+                    </div>
+
+                    <div class="t-field">
+                      <label for="email">Email</label>
+                      <input id="email" type="email" autocomplete="email" />
+                    </div>
+                  </div>
+
+                  <div class="t-field">
+                    <label for="street">Street</label>
+                    <input id="street" />
+                  </div>
+
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label for="provinceSelect">Province</label>
+                      <select id="provinceSelect" class="t-select"></select>
+                    </div>
+                    <div class="t-field">
+                      <label for="citySelect">City</label>
+                      <select id="citySelect" class="t-select" disabled></select>
+                    </div>
+                  </div>
+
+                  <div class="t-row2">
+                    <div class="t-field">
+                      <label for="brgySelect">Barangay</label>
+                      <select id="brgySelect" class="t-select" disabled></select>
+                    </div>
+
+                    <!-- ✅ Postal: 4 digits -->
+                    <div class="t-field">
+                      <label for="postal">Postal Code</label>
+                      <input
+                        id="postal"
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="4"
+                        placeholder="2400"
+                      />
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <div id="formError" class="t-error hidden" role="alert" aria-live="polite"></div>
+
+              <!-- BUTTONS -->
+              <div class="t-form-actions t-form-actions-bottom">
+                <button id="cancelBtn" class="t-ghost" type="button">Cancel</button>
+                <button id="resetBtn" class="t-ghost" type="button">Reset</button>
+                <button id="saveBtn" class="t-save" type="button">Save</button>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- =====================
+     TEACHER PROFILE MODAL
+  ===================== -->
+  <div id="teacherModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="teacherModalBackdrop"></div>
+
+    <div class="tmodal-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle">
+      <!-- header -->
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <img id="tmAvatar" class="tmodal-avatar" src="../../assets/images/bg.jpg" alt="Teacher photo" />
+          <div>
+            <div id="teacherModalTitle" class="tmodal-title">Teacher Profile</div>
+            <div class="tmodal-sub">
+              <span id="tmTeacherId">Teacher ID: —</span>
+              <span class="tmodal-dot">•</span>
+              <span id="tmStatus" class="tmodal-status">
+                <span class="tmodal-status-dot"></span> Active
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <button class="tmodal-x" id="teacherModalCloseX" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <!-- tabs -->
+      <div class="tmodal-tabs">
+        <button class="tmodal-tab active" data-tab="basic" type="button">Basic Info</button>
+        <button class="tmodal-tab" data-tab="contact" type="button">Contact & Address</button>
+        <button class="tmodal-tab" data-tab="creds" type="button">Credentials</button>
+        <button class="tmodal-tab" data-tab="account" type="button">Account</button>
+      </div>
+
+      <!-- body -->
+      <div class="tmodal-body">
+        <!-- BASIC -->
+        <div class="tmodal-panel" data-panel="basic">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Full Name</label>
+              <input id="tmFullName" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Gender</label>
+              <input id="tmGender" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Date of Birth</label>
+              <input id="tmDob" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Advisory Class</label>
+              <input id="tmAdvisory" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div class="tmodal-panel hidden" data-panel="contact">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Phone</label>
+              <input id="tmPhone" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Email</label>
+              <input id="tmEmail" readonly>
+            </div>
+
+            <div class="tmodal-field" style="grid-column:1/-1;">
+              <label>Street</label>
+              <input id="tmStreet" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Province</label>
+              <input id="tmProvince" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>City</label>
+              <input id="tmCity" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Barangay</label>
+              <input id="tmBrgy" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Postal Code</label>
+              <input id="tmPostal" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- CREDS -->
+        <div class="tmodal-panel hidden" data-panel="creds">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>PRC License</label>
+              <input id="tmPrc" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Major / Specialization</label>
+              <input id="tmMajor" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Highest Attainment</label>
+              <input id="tmEduc" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Date Hired</label>
+              <input id="tmHired" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="tmodal-panel hidden" data-panel="account">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Teacher ID</label>
+              <input id="tmAccId" readonly>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Temp Password</label>
+              <input id="tmAccPass" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- footer -->
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="teacherModalCloseBtn" type="button">Close</button>
+        <div class="tmodal-foot-right">
+          <button class="t-save" id="teacherModalEditBtn" type="button">Edit Teacher</button>
+          <button class="tmodal-danger" id="teacherModalDisableBtn" type="button">Disable Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-teachers.js"></script>
+</body>
+</html>

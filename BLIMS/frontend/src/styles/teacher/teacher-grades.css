@@ -1,0 +1,335 @@
+/* frontend/src/styles/teacher/teacher-grades.css */
+
+/* ==============================
+   MATCH SCHEDULE HEADER SPACING
+   (Topbar -> 4px -> Title -> 10px -> Card)
+   ============================== */
+
+.topbar{
+  margin-bottom: 4px; /* same as my schedule */
+}
+
+/* Page wrapper: match .ms-page behavior */
+.gr-page{
+  padding: 0;          /* ✅ schedule-like */
+  margin: 0;
+}
+
+/* Title: match .ms-title behavior */
+.gr-page-title{
+  margin: 0 0 10px;
+  font-size: 34px;
+  font-weight: 1000;
+  color:#0b2c4a;
+  line-height: 1.15;
+  letter-spacing: 0;   /* schedule doesn’t compress letters */
+}
+
+/* (Optional) legacy: if an old header wrapper still exists somewhere,
+   keep it neutral so it won’t add extra spacing. */
+.gr-page-head{
+  margin: 0;
+  padding: 0;
+}
+
+/* ==============================
+   LAYOUT
+   ============================== */
+
+.gr-grid{
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items:start;
+}
+
+@media (max-width: 1100px){
+  .gr-grid{ grid-template-columns: 1fr; }
+}
+
+/* ==============================
+   MAIN CARD
+   ============================== */
+
+.gr-card{
+  padding: 12px;
+  display:flex;
+  flex-direction:column;
+}
+
+.gr-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.gr-card-title{
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.gr-card-sub{
+  color:#6b7b8a;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* Controls inside card */
+.gr-card-controls{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gr-pill{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background:#fff;
+  border: 1px solid #e6eef6;
+}
+
+.gr-pill-label{
+  font-size: 12px;
+  color:#6b7b8a;
+  font-weight: 900;
+}
+
+.gr-select{
+  border:1px solid #e6eef6;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background:#fff;
+  font-weight: 900;
+}
+
+.gr-mini{
+  border:none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor:pointer;
+  font-weight: 1000;
+  background:#fff;
+  border: 1px solid #e6eef6;
+  color:#0b5a8b;
+}
+
+/* ==============================
+   TABLE
+   ============================== */
+
+.gr-table-wrap{
+  flex: 1;
+  overflow:auto;
+  border-radius: 14px;
+  border: 1px solid #e8eef5;
+  min-height: 620px;
+  background:#fff;
+}
+
+.gr-table{
+  width:100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1200px;
+  background:#fff;
+}
+
+.gr-table th, .gr-table td{
+  padding: 10px 10px;
+  border-bottom: 1px solid #eef3f8;
+  border-right: 1px solid #eef3f8;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.gr-table th{
+  position: sticky;
+  top: 0;
+  background:#f7f9fc;
+  z-index: 3;
+  font-size: 12px;
+  color:#2f3a45;
+  font-weight: 1000;
+}
+
+.gr-table thead tr.group th{
+  top: 0;
+  z-index: 4;
+  background: #eef5ff;
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.gr-table thead tr.cols th{
+  top: 34px;
+  z-index: 3;
+}
+
+.gr-table th:last-child, .gr-table td:last-child{ border-right:none; }
+.gr-table tr:last-child td{ border-bottom:none; }
+
+.gr-empty{
+  padding: 16px;
+  color:#6b7b8a;
+  text-align:center;
+}
+
+.gr-student{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.gr-ava{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
+.gr-name{ font-weight: 1000; }
+
+.gr-id{
+  font-size: 11px;
+  color:#6b7b8a;
+  font-weight: 800;
+}
+
+.gr-input{
+  width: 86px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e6eef6;
+  outline: none;
+  font-weight: 900;
+  text-align: center;
+}
+
+.gr-input:focus{
+  border-color: #8bb7ff;
+  box-shadow: 0 0 0 3px rgba(40,120,255,.12);
+}
+
+.gr-final{ font-weight: 1000; }
+.gr-remark{ font-weight: 1000; }
+
+/* ==============================
+   WEIGHTS / NOTE
+   ============================== */
+
+.gr-note{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eef3f8;
+}
+
+.gr-note-title{
+  font-weight: 1000;
+  margin-bottom: 6px;
+}
+
+.gr-note-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+  font-size: 12px;
+  color:#2f3a45;
+}
+
+.gr-note-grid b{
+  display:inline-block;
+  width: 190px;
+}
+
+.gr-note-grid span{
+  color:#6b7b8a;
+  font-weight: 900;
+}
+
+/* ==============================
+   SIDE CARD
+   ============================== */
+
+.gr-side{
+  padding: 14px;
+  position: sticky;
+  top: 12px;
+}
+
+.gr-side-title{
+  font-weight: 1000;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.gr-metrics{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.gr-metric{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 10px 10px;
+  border: 1px solid #eef3f8;
+  border-radius: 12px;
+  background:#fff;
+}
+
+.gr-metric span{
+  color:#6b7b8a;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.gr-metric b{
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.gr-side-actions{
+  margin-top: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.gr-btn{
+  border:none;
+  border-radius: 12px;
+  padding: 12px 12px;
+  cursor:pointer;
+  font-weight: 1000;
+}
+
+.gr-btn-primary{
+  background:#0b5a8b;
+  color:#fff;
+}
+
+.gr-btn-ghost{
+  background:#fff;
+  border: 1px solid #e6eef6;
+  color:#0b5a8b;
+}
+
+.gr-status{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 1000;
+  background: rgba(255, 193, 7, 0.16);
+  color: #7a5b00;
+}

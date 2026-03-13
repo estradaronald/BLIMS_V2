@@ -1,0 +1,264 @@
+<!-- frontend/src/pages/student/student-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - Dashboard</title>
+
+  <!-- Plus Jakarta Sans (same as admin/teacher) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- ✅ same baseline styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- Student dashboard styles (teacher-style, student prefix) -->
+  <link rel="stylesheet" href="../../styles/student/student-dashboard.css" />
+</head>
+
+<!-- ✅ Must match student-sidebar.html data-nav="dashboard" -->
+<body data-page="dashboard">
+  <!-- Floating collapse button (same as admin/teacher) -->
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >←</button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- top bar (same markup/classes as admin/teacher) -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" id="tbAvatar" src="../../assets/images/bg.jpg" alt="avatar">
+            <div class="tb-meta">
+              <div class="tb-name" id="tbName">Juan Dela Cruz</div>
+              <div class="tb-role" id="tbRole">Grade 6 - Section A</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- STUDENT DASH GRID (teacher-style ratios) -->
+      <section class="s-dash">
+        <!-- HERO (same look as teacher hero card) -->
+        <div class="card s-hero">
+          <div class="s-hero-left">
+            <h2>Welcome back, <span id="heroName">Juan</span>!</h2>
+
+            <div class="s-hero-meta">
+              <div><b>Grade &amp; Section :</b> <span id="heroGradeSection">Grade 6 - A</span></div>
+              <div><b>Adviser :</b> <span id="heroAdviser">Ms. Giselle Meneses</span></div>
+              <div><b>Today :</b> <span id="heroToday">Monday, September 9</span></div>
+            </div>
+          </div>
+
+          <div class="s-hero-right" aria-hidden="true">
+            <div class="s-hero-illus">
+              <img src="../../assets/images/hero-img.png" alt="Student illustration" />
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS (same look as teacher quick actions) -->
+        <div class="card s-quick">
+          <div class="s-quick-title">Quick Actions</div>
+
+          <div class="s-quick-actions">
+            <button class="s-qa s-qa-blue" id="qaSchedule" type="button">
+              <span class="s-qa-ico">📅</span>
+              <span class="s-qa-text">View Schedule</span>
+            </button>
+
+            <button class="s-qa s-qa-green" id="qaGrades" type="button">
+              <span class="s-qa-ico">📊</span>
+              <span class="s-qa-text">View Grades</span>
+            </button>
+
+            <button class="s-qa s-qa-purple" id="qaClasswork" type="button">
+              <span class="s-qa-ico">📝</span>
+              <span class="s-qa-text">Open Classwork</span>
+            </button>
+
+            <button class="s-qa s-qa-pink" id="qaAnnouncements" type="button">
+              <span class="s-qa-ico">📣</span>
+              <span class="s-qa-text">Announcements</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STATS (teacher-style cards) -->
+        <div class="s-stats">
+          <div class="s-stat card">
+            <div class="s-stat-ico">📝</div>
+            <div class="s-stat-mid">
+              <div class="s-stat-label">Pending Tasks</div>
+              <div class="s-stat-value" id="statPending">3</div>
+            </div>
+          </div>
+
+          <div class="s-stat card">
+            <div class="s-stat-ico s-ico-green">✅</div>
+            <div class="s-stat-mid">
+              <div class="s-stat-label">Attendance</div>
+              <div class="s-stat-value" id="statAttendance">18 / 20</div>
+            </div>
+          </div>
+
+          <div class="s-stat card">
+            <div class="s-stat-ico s-ico-pink">📊</div>
+            <div class="s-stat-mid">
+              <div class="s-stat-label">Current Average</div>
+              <div class="s-stat-value" id="statAverage">89</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TODAY'S SCHEDULE (left, row 3) -->
+        <div class="card s-panel s-schedule">
+          <div class="s-panel-head">
+            <div class="s-panel-title">
+              <span class="s-mini">📅</span>
+              Today's Schedule
+            </div>
+          </div>
+
+          <div class="s-sched" id="todayScheduleList">
+            <!-- sample -->
+            <div class="s-sched-row">
+              <div class="s-sched-main">
+                <div class="s-sched-title">Mathematics</div>
+                <div class="s-sched-sub">8:00am - 9:00am</div>
+              </div>
+              <span class="s-badge s-badge-blue">Current</span>
+            </div>
+
+            <div class="s-sched-row">
+              <div class="s-sched-main">
+                <div class="s-sched-title">Science</div>
+                <div class="s-sched-sub">9:00am - 10:00am</div>
+              </div>
+              <span class="s-badge s-badge-gray">Next</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING CLASSWORK (right, row 3) -->
+        <div class="card s-panel s-classwork">
+          <div class="s-panel-head">
+            <div class="s-panel-title">
+              <span class="s-mini">📝</span>
+              Upcoming Classwork
+            </div>
+            <a class="s-view" href="./student-classwork.html">View All</a>
+          </div>
+
+          <div class="s-list" id="classworkList">
+            <!-- sample -->
+            <div class="s-list-row">
+              <div>
+                <div class="s-list-title">Math Worksheet #3</div>
+                <div class="s-list-sub">Due: Feb 10</div>
+              </div>
+              <span class="s-badge s-badge-orange">Pending</span>
+              <button class="s-ghost" type="button">Open</button>
+            </div>
+
+            <div class="s-list-row">
+              <div>
+                <div class="s-list-title">Science Reflection</div>
+                <div class="s-list-sub">Due: Feb 12</div>
+              </div>
+              <span class="s-badge s-badge-orange">Pending</span>
+              <button class="s-ghost" type="button">Open</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ATTENDANCE SUMMARY (left, row 4) -->
+        <div class="card s-panel s-attendance">
+          <div class="s-panel-head">
+            <div class="s-panel-title">
+              <span class="s-mini">📋</span>
+              Attendance Summary
+            </div>
+            <a class="s-view" href="./student-attendance.html">View</a>
+          </div>
+
+          <div class="s-att">
+            <div class="s-att-row">
+              <span class="s-att-label">Present</span>
+              <span class="s-att-val" id="attPresent">18</span>
+            </div>
+            <div class="s-att-row">
+              <span class="s-att-label">Late</span>
+              <span class="s-att-val" id="attLate">1</span>
+            </div>
+            <div class="s-att-row">
+              <span class="s-att-label">Absent</span>
+              <span class="s-att-val" id="attAbsent">1</span>
+            </div>
+            <div class="s-att-row">
+              <span class="s-att-label">Excused</span>
+              <span class="s-att-val" id="attExcused">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LATEST ANNOUNCEMENTS (right, row 4) -->
+        <div class="card s-panel s-announcements">
+          <div class="s-panel-head">
+            <div class="s-panel-title">
+              <span class="s-mini">📣</span>
+              Latest Announcements
+            </div>
+            <a class="s-view" href="./student-announcements.html">View All</a>
+          </div>
+
+          <div class="s-ann" id="announcementsList">
+            <!-- sample -->
+            <div class="s-ann-item">
+              <div class="s-ann-title">School Program</div>
+              <div class="s-ann-meta">
+                <span>Date: Wed, Feb 14</span>
+                <span>Time: 12:00pm - 1:00pm</span>
+              </div>
+              <div class="s-ann-meta">Venue: AVR Room</div>
+            </div>
+
+            <div class="s-ann-item">
+              <div class="s-ann-title">Math Competition</div>
+              <div class="s-ann-meta">
+                <span>Date: Thu, Feb 15</span>
+                <span>Time: 8:00am - 12:00pm</span>
+              </div>
+              <div class="s-ann-meta">Venue: Bolosan Elementary School</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Sidebar auto-load (student clone of admin sidebar.js) -->
+  <script src="../../js/student/student-sidebar.js"></script>
+
+  <!-- Student dashboard behaviors -->
+  <script src="../../js/student/student-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!-- frontend/src/pages/admin/events.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Events</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+   <script>
+    (function () {
+      try {
+        const collapsed = localStorage.getItem("admin_sidebar_collapsed_v1") === "1";
+        if (collapsed) document.documentElement.classList.add("sb-collapsed");
+      } catch {}
+    })();
+  </script>
+
+
+  <!-- shared layout styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+  <!-- page styles -->
+  <link rel="stylesheet" href="../../styles/admin/admin-events.css" />
+</head>
+
+<body data-page="events">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role"> admin</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Events</h2>
+
+          <button id="createEventBtn" class="t-add-btn" type="button">
+            Create New Event <span class="t-plus">＋</span>
+          </button>
+        </div>
+
+        <!-- ✅ LIST CARD (same as other pages) -->
+        <div class="card t-card ev-wrap-card">
+          <div class="t-card-head ev-card-head">
+            <div class="t-subtitle">All Events</div>
+
+            <div class="ev-filters">
+              <div class="t-search ev-search">
+                <span class="t-search-ico">🔎</span>
+                <input id="evSearch" type="text" placeholder="Search event title, location, or description" />
+              </div>
+
+              <select id="evStatusFilter" class="t-filter">
+                <option value="all">Status: All</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="past">Past</option>
+              </select>
+
+              <select id="evTypeFilter" class="t-filter">
+                <option value="all">Type: All</option>
+                <option value="school">School Event</option>
+                <option value="holiday">Holiday</option>
+                <option value="exam">Exam</option>
+                <option value="meeting">Meeting</option>
+                <option value="other">Other</option>
+              </select>
+
+              <!-- ✅ FIXED: remove duplicate "all" option -->
+              <select id="evAudienceFilter" class="t-filter">
+                <option value="all">Audience: All</option>
+                <option value="teachers">Teachers</option>
+                <option value="students">Students</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ev-card-body">
+            <section class="ev-feed" id="evFeed"></section>
+
+            <div id="evEmpty" class="ev-empty hidden">
+              No events yet.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================
+       CREATE / EDIT MODAL
+  ========================== -->
+  <div id="evModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="evModalBackdrop"></div>
+
+    <div class="tmodal-dialog ev-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="evModalTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="evModalTitle" class="tmodal-title">Create New Event</div>
+            <div class="tmodal-sub">Add schedule, audience, and details.</div>
+          </div>
+        </div>
+        <button class="tmodal-x" id="evModalCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="ev-form">
+
+          <div class="tmodal-field">
+            <label>Event Title</label>
+            <input id="evTitle" type="text" placeholder="Enter event title..." />
+          </div>
+
+          <div class="ev-row2">
+            <div class="tmodal-field">
+              <label>Type</label>
+              <select id="evType" class="t-select">
+                <option value="school">School Event</option>
+                <option value="holiday">Holiday</option>
+                <option value="exam">Exam</option>
+                <option value="meeting">Meeting</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="tmodal-field">
+              <label>Audience</label>
+              <select id="evAudience" class="t-select">
+                <option value="all">All</option>
+                <option value="teachers">Teachers</option>
+                <option value="students">Students</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ev-row2">
+            <div class="tmodal-field">
+              <label>Start</label>
+              <input id="evStart" type="datetime-local" />
+            </div>
+
+            <div class="tmodal-field">
+              <label>End</label>
+              <input id="evEnd" type="datetime-local" />
+            </div>
+          </div>
+
+          <div class="tmodal-field">
+            <label>Location</label>
+            <input id="evLocation" type="text" placeholder="e.g., Gymnasium / Room 201 / Online" />
+          </div>
+
+          <div class="tmodal-field">
+            <label>Description</label>
+            <textarea id="evDesc" class="ev-textarea" placeholder="Type event details..."></textarea>
+          </div>
+
+          <div class="tmodal-field">
+            <label>Banner / Attach Image (optional)</label>
+
+            <input id="evFile" type="file" accept="image/*" hidden />
+
+            <div class="ev-drop" id="evDrop">
+              <div class="ev-drop-ico">🖼️</div>
+              <div class="ev-drop-text">Click to upload an image (1 file)</div>
+              <button id="evPickFile" class="t-ghost small" type="button">Select file</button>
+            </div>
+
+            <div class="ev-file-preview" id="evFilePreview"></div>
+          </div>
+
+          <div id="evFormError" class="t-error hidden"></div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="evCancelBtn" type="button">Cancel</button>
+
+        <div class="tmodal-foot-right">
+          <button class="tmodal-danger" id="evDeleteBtn" type="button">Delete</button>
+          <button class="t-save" id="evSaveBtn" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       VIEW MODAL
+  ========================== -->
+  <div id="evViewModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="evViewBackdrop"></div>
+
+    <div class="tmodal-dialog ev-view-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="evViewTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="evViewTitle" class="tmodal-title">Event</div>
+            <div class="tmodal-sub">
+              <span id="evViewMeta">—</span>
+            </div>
+          </div>
+        </div>
+        <button class="tmodal-x" id="evViewCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="ev-view">
+          <div class="ev-view-top">
+            <span id="evViewTypePill" class="ev-pill">Type</span>
+            <span id="evViewAudiencePill" class="ev-pill soft">Audience</span>
+            <span id="evViewStatus" class="ev-status">Upcoming</span>
+          </div>
+
+          <h3 id="evViewH" class="ev-view-h">—</h3>
+
+          <div class="ev-view-grid">
+            <div class="ev-view-field">
+              <label>Start</label>
+              <input id="evViewStart" readonly />
+            </div>
+            <div class="ev-view-field">
+              <label>End</label>
+              <input id="evViewEnd" readonly />
+            </div>
+            <div class="ev-view-field">
+              <label>Location</label>
+              <input id="evViewLoc" readonly />
+            </div>
+          </div>
+
+          <p id="evViewDesc" class="ev-view-desc">—</p>
+
+          <div id="evViewImgWrap" class="ev-view-img-wrap hidden">
+            <img id="evViewImg" alt="event image" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="evViewCloseBtn" type="button">Close</button>
+
+        <div class="tmodal-foot-right">
+          <button class="t-save" id="evViewEditBtn" type="button">Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../../js/auth/admin-guard.js"></script>
+  <script src="../../js/admin/sidebar.js"></script>
+  <script src="../../js/admin/admin-dashboard.js"></script>
+  <script src="../../js/admin/admin-events.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!-- frontend/src/pages/student/student-attendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student - Attendance</title>
+
+  <!-- Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+ <!-- ✅ same baseline styles -->
+  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+  <!-- helps keep the same header/card feel across pages -->
+  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+
+  <!-- Student Attendance styles -->
+  <link rel="stylesheet" href="../../styles/student/student-attendance.css" />
+</head>
+
+<body data-page="attendance">
+  <!-- floating toggle -->
+  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">Student</div>
+              <div class="tb-role">Attendance</div>
+            </div>
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ✅ PAGE HEADER RULE -->
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <h2 class="teachers-title">Attendance</h2>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="card t-card att-card">
+          <div class="t-card-head att-head">
+            <div class="att-left">
+              <div class="t-subtitle">Attendance Record</div>
+              <div class="att-sub">
+                <span id="attGradeSection">Grade 6 - Section A</span>
+                <span class="att-dot">•</span>
+                <span id="attSYLabel">SY 2025–2026</span>
+              </div>
+            </div>
+
+            <div class="att-actions">
+              <!-- School Year (Admin-controlled; JS will set this) -->
+              <select id="attSYSelect" class="t-filter" aria-label="Select school year" disabled>
+                <option value="">SY —</option>
+              </select>
+
+              <!-- Month filter -->
+              <select id="attMonthSelect" class="t-filter" aria-label="Select month">
+                <option value="all">Month: All</option>
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+              </select>
+
+              <!-- View toggle (Table / Calendar) -->
+              <div class="att-toggle" role="tablist" aria-label="Attendance view toggle">
+                <button class="att-tab active" id="attTabTable" type="button" role="tab" aria-selected="true">
+                  Table
+                </button>
+                <button class="att-tab" id="attTabCalendar" type="button" role="tab" aria-selected="false">
+                  Calendar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUMMARY -->
+          <div class="att-summary" id="attSummary">
+            <div class="att-stat">
+              <div class="att-stat-k">Present</div>
+              <div class="att-stat-v" id="attPresent">—</div>
+            </div>
+            <div class="att-stat">
+              <div class="att-stat-k">Absent</div>
+              <div class="att-stat-v" id="attAbsent">—</div>
+            </div>
+            <div class="att-stat">
+              <div class="att-stat-k">Late</div>
+              <div class="att-stat-v" id="attLate">—</div>
+            </div>
+            <div class="att-stat rate">
+              <div class="att-stat-k">Attendance Rate</div>
+              <div class="att-stat-v" id="attRate">—</div>
+            </div>
+          </div>
+
+          <!-- BODY -->
+          <div class="att-body">
+            <!-- TABLE VIEW -->
+            <div id="attViewTable">
+              <div class="att-table-wrap">
+                <table class="att-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 220px;">Date</th>
+                      <th style="width: 180px;">Status</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attTbody">
+                    <!-- JS will populate -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- CALENDAR VIEW -->
+            <div id="attViewCalendar" class="hidden">
+              <div class="att-cal">
+                <div class="att-cal-head">
+                  <div class="att-cal-title" id="attCalTitle">Month</div>
+                </div>
+                <div class="att-cal-grid" id="attCalGrid">
+                  <!-- JS will populate -->
+                </div>
+              </div>
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div id="attEmpty" class="att-empty hidden">
+              No attendance record yet.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../js/student/student-sidebar.js"></script>
+  <script src="../../js/student/student-attendance.js"></script>
+</body>
+</html>

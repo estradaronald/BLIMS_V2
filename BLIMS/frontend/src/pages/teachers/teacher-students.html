@@ -1,0 +1,336 @@
+<!-- frontend/src/pages/teacher/teacher-students.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher - Students</title>
+
+  <script>
+    (function () {
+      try {
+        const collapsed =
+          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
+        if (collapsed) document.documentElement.classList.add("sb-collapsed");
+      } catch {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+ <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  <link rel="stylesheet" href="../../styles/teacher/teacher-students.css" />
+</head>
+
+<body data-page="teacher-students">
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >
+    ←
+  </button>
+
+  <div class="app">
+    <div id="sidebar-mount"></div>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="topbar-right">
+          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <div class="tb-user" id="userbox">
+            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+            <div class="tb-meta">
+              <div class="tb-name">Giselle Meneses</div>
+              <div class="tb-role">Class 1 - A Teacher</div>
+            </div>
+
+            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+            <div class="tb-menu" id="userMenu">
+              <button class="tb-item" type="button">Settings</button>
+              <button class="tb-item danger" type="button" id="topbarLogout">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="teachers-wrap">
+        <div class="teachers-page-head">
+          <div>
+            <h2 class="teachers-title">Students</h2>
+          </div>
+
+          <button id="addNewBtn" class="t-add-btn" type="button">
+            Enroll Students <span class="t-plus">＋</span>
+          </button>
+        </div>
+
+        <section id="listView" class="t-view">
+          <div class="card t-card">
+            <div class="t-card-head">
+              <div class="t-subtitle">My Enrolled Students</div>
+
+              <div class="t-tools">
+                <div class="t-search">
+                  <span class="t-search-ico">🔎</span>
+                  <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search by Name, ID, or LRN"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="t-table-wrap">
+              <table class="t-table">
+                <thead>
+                  <tr>
+                    <th style="width:70px">No.</th>
+                    <th>Full Name</th>
+                    <th>LRN</th>
+                    <th>Email</th>
+                    <th>Student ID</th>
+                    <th>Class &amp; Section</th>
+                    <th>Contact No.</th>
+                    <th class="t-action-head" style="width:150px">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="studentsTbody">
+                  <tr class="t-empty">
+                    <td colspan="8">No students enrolled yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- ENROLL STUDENTS MODAL -->
+  <div id="enrollModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="enrollModalBackdrop"></div>
+
+    <div class="tmodal-dialog tem-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="enrollModalTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <div>
+            <div id="enrollModalTitle" class="tmodal-title">Enroll Students to Class</div>
+            <div class="tmodal-sub">
+              <span id="enrollScopeText">Assigned Class: —</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="tmodal-x" id="enrollModalCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="tem-topbar">
+          <div class="t-search tem-search">
+            <span class="t-search-ico">🔎</span>
+            <input
+              id="enrollSearchInput"
+              type="text"
+              placeholder="Search student by name, ID, or LRN"
+            />
+          </div>
+        </div>
+
+        <div id="enrollModalError" class="t-form-error hidden" role="alert"></div>
+
+        <div class="t-table-wrap tem-table-wrap">
+          <table class="t-table tem-table">
+            <thead>
+              <tr>
+                <th style="width:56px; text-align:center;">
+                  <input id="selectAllEnroll" type="checkbox" />
+                </th>
+                <th>Full Name</th>
+                <th>LRN</th>
+                <th>Email</th>
+                <th>Student ID</th>
+                <th>Current Class &amp; Section</th>
+              </tr>
+            </thead>
+            <tbody id="enrollStudentsTbody">
+              <tr class="t-empty">
+                <td colspan="6">No available student accounts found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="enrollModalCloseBtn" type="button">Cancel</button>
+        <div class="tmodal-foot-right">
+          <button class="t-save" id="confirmEnrollBtn" type="button">Enroll to Class</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT PROFILE MODAL -->
+  <div id="studentModal" class="tmodal hidden" aria-hidden="true">
+    <div class="tmodal-backdrop" id="studentModalBackdrop"></div>
+
+    <div class="tmodal-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle">
+      <div class="tmodal-head">
+        <div class="tmodal-head-left">
+          <img id="smAvatar" class="tmodal-avatar" src="../../assets/images/bg.jpg" alt="student avatar" />
+
+          <div>
+            <div id="studentModalTitle" class="tmodal-title">Student Profile</div>
+            <div class="tmodal-sub">
+              <span id="smStudentId">Student ID: —</span>
+              <span class="tmodal-dot">•</span>
+              <span class="tmodal-status">
+                <span class="tmodal-status-dot"></span>
+                Enrolled
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <button class="tmodal-x" id="studentModalCloseX" type="button">✕</button>
+      </div>
+
+      <div class="tmodal-tabs">
+        <button class="tmodal-tab active" data-tab="basic" type="button">Basic Info</button>
+        <button class="tmodal-tab" data-tab="address" type="button">Contact &amp; Address</button>
+        <button class="tmodal-tab" data-tab="parents" type="button">Parent Details</button>
+        <button class="tmodal-tab" data-tab="account" type="button">Account</button>
+      </div>
+
+      <div class="tmodal-body">
+        <div class="tmodal-panel" data-panel="basic">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Full Name</label>
+              <input id="smFullName" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>LRN</label>
+              <input id="smLRN" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Gender</label>
+              <input id="smGender" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Date of Birth</label>
+              <input id="smDob" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Class &amp; Section</label>
+              <input id="smClassSection" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="tmodal-panel hidden" data-panel="address">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Phone</label>
+              <input id="smPhone" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Email</label>
+              <input id="smEmail" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Street</label>
+              <input id="smStreet" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Province</label>
+              <input id="smProvince" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>City</label>
+              <input id="smCity" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Barangay</label>
+              <input id="smBarangay" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Zip Code</label>
+              <input id="smZip" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="tmodal-panel hidden" data-panel="parents">
+          <div class="pd-grid">
+            <div class="pd-col">
+              <div class="tmodal-field">
+                <label>Father Name</label>
+                <input id="smFatherName" readonly />
+              </div>
+              <div class="tmodal-field">
+                <label>Father Occupation</label>
+                <input id="smFatherOccupation" readonly />
+              </div>
+              <div class="tmodal-field">
+                <label>Father Contact</label>
+                <input id="smFatherContact" readonly />
+              </div>
+            </div>
+
+            <div class="pd-col">
+              <div class="tmodal-field">
+                <label>Mother Name</label>
+                <input id="smMotherName" readonly />
+              </div>
+              <div class="tmodal-field">
+                <label>Mother Occupation</label>
+                <input id="smMotherOccupation" readonly />
+              </div>
+              <div class="tmodal-field">
+                <label>Mother Contact</label>
+                <input id="smMotherContact" readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tmodal-panel hidden" data-panel="account">
+          <div class="tmodal-grid">
+            <div class="tmodal-field">
+              <label>Student ID</label>
+              <input id="smAccId" readonly />
+            </div>
+            <div class="tmodal-field">
+              <label>Temp Password</label>
+              <input id="smAccPass" readonly />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tmodal-foot">
+        <button class="t-ghost" id="studentModalCloseBtn" type="button">Close</button>
+        <div class="tmodal-foot-right">
+          <button class="tmodal-danger" id="studentModalUnenrollBtn" type="button">Unenroll Student</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/teacher/teacher-sidebar.js"></script>
+  <script src="../../js/teacher/teacher-students.js"></script>
+</body>
+</html>
