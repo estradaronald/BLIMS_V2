@@ -1,6 +1,7 @@
 // backend/src/routes/teacher.routes.js
 const router = require("express").Router();
 const { requireRole } = require("../middlewares/rbac");
+const teacherController = require("../controllers/teacher.controller");
 
 // ------------------------------
 // Category 2 helpers
@@ -31,7 +32,14 @@ function requireJsonBody(req, res, next) {
 // ------------------------------
 router.use(requireRole("Teacher"));
 
-// TODO: Replace these placeholders with your real controller functions.
+// ------------------------------
+// Teacher schedule
+// ------------------------------
+router.get("/my-schedule", teacherController.getMySchedule);
+
+// ------------------------------
+// Existing placeholders
+// ------------------------------
 // Create
 router.post("/items", requireJsonBody, (req, res) => {
   res.json({ ok: true, message: "Created (placeholder)" });

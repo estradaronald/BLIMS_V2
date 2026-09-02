@@ -1,4 +1,3 @@
-const Subject = require("../models/Subject.model");
 const GradeLevel = require("../models/GradeLevel.model");
 
 function isPlainObject(v) {
@@ -42,17 +41,29 @@ exports.getSubjectsSummary = async (req, res) => {
       .sort({ createdAt: 1, grade: 1 })
       .lean();
 
-    const subjects = await Subject.find({ isActive: true })
-      .sort({ name: 1 })
-      .lean();
+    const uniqueSubjects = new Set();
 
-    const data = {
-      grades: grades.map((g) => ({
+    const mappedGrades = grades.map((g) => {
+      const subjects = Array.isArray(g.subjects) ? g.subjects : [];
+
+      for (const subject of subjects) {
+        if (typeof subject === "string" && subject.trim()) {
+          uniqueSubjects.add(subject.trim());
+        }
+      }
+
+      return {
         id: String(g._id),
         grade: g.grade,
-        subjects: Array.isArray(g.subjects) ? g.subjects : [],
-      })),
-      masterSubjects: subjects.map((s) => s.name),
+        subjects,
+      };
+    });
+
+    const data = {
+      grades: mappedGrades,
+      masterSubjects: Array.from(uniqueSubjects).sort((a, b) =>
+        a.localeCompare(b)
+      ),
     };
 
     res.json({ ok: true, data });
@@ -100,33 +111,49 @@ exports.createSubject = async (req, res) => {
       return badRequest(res);
     }
 
+    const grade = safeString(req.body.grade, {
+      trim: true,
+      min: 1,
+      max: 80,
+    });
+
     const name = safeString(req.body.name, {
       trim: true,
       min: 1,
       max: 120,
     });
 
+    if (!grade.ok) return badRequest(res, "Grade is required.");
     if (!name.ok) return badRequest(res, "Subject name is required.");
 
-    const existing = await Subject.findOne({
-      name: { $regex: `^${name.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" },
-      isActive: true,
-    }).lean();
-
-    if (existing) {
-      return res.status(409).json({ ok: false, message: "Subject already exists." });
-    }
-
-    const subject = await Subject.create({
-      name: name.value,
+    const gradeDoc = await GradeLevel.findOne({
+      grade: grade.value,
       isActive: true,
     });
 
+    if (!gradeDoc) {
+      return res.status(404).json({ ok: false, message: "Grade not found." });
+    }
+
+    const currentSubjects = Array.isArray(gradeDoc.subjects) ? gradeDoc.subjects : [];
+    const exists = currentSubjects.some((s) => norm(s) === norm(name.value));
+
+    if (exists) {
+      return res.status(409).json({
+        ok: false,
+        message: "Subject already exists in this grade level.",
+      });
+    }
+
+    gradeDoc.subjects = [...currentSubjects, name.value];
+    await gradeDoc.save();
+
     res.status(201).json({
       ok: true,
-      subject: {
-        id: String(subject._id),
-        name: subject.name,
+      data: {
+        grade: gradeDoc.grade,
+        subjects: gradeDoc.subjects,
+        addedSubject: name.value,
       },
     });
   } catch (err) {

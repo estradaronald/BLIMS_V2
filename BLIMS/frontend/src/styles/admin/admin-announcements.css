@@ -1,338 +1,1200 @@
-/* frontend/src/styles/admin-announcements.css */
+/* =========================================================
+   frontend/src/styles/admin/admin-announcements.css
+   ========================================================= */
+
 @import url("./admin-teachers.css");
 
-/* Filters row like your mockup */
-.ann-filters{
-  display:flex;
-  align-items:center;
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.ann-filters {
+  display: flex;
+  align-items: center;
   gap: 12px;
   margin: 8px 0 12px;
   flex-wrap: wrap;
 }
 
-.ann-search{ min-width: 320px; }
+.ann-search {
+  min-width: 320px;
+}
 
-/* Feed cards */
-.ann-feed{
-  display:flex;
-  flex-direction:column;
+
+/* =========================================================
+   ANNOUNCEMENT FEED
+   ========================================================= */
+
+.ann-feed {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   padding-bottom: 18px;
+  overflow: visible;
 }
 
-.ann-card{
-  position:relative;
-  background:#fff;
+
+/* =========================================================
+   ANNOUNCEMENT CARD
+   ========================================================= */
+
+.ann-card {
+  position: relative;
+
+  background: #fff;
+
   border-radius: 14px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.08);
-  border: 1px solid rgba(11,44,74,.06);
-  padding: 14px;
+
+  border: 1px solid rgba(11, 44, 74, 0.06);
+
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+
+  overflow: visible;
+
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
-/* left content + right stack */
-.ann-card-top{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 12px;
+.ann-card:hover {
+  border-color: rgba(11, 77, 122, 0.12);
+
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.09);
 }
 
-.ann-card-left{ flex: 1; min-width: 0; }
 
-.ann-title-row{
-  display:flex;
-  align-items:center;
+/* =========================================================
+   CARD MAIN AREA
+   ========================================================= */
+
+.ann-card-top {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 20px 22px;
+}
+
+.ann-card-left {
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.ann-title-row {
+  display: flex;
+
+  align-items: center;
+
   gap: 10px;
+
   flex-wrap: wrap;
 }
 
-/* Right stack: pill on top, kebab below */
-.ann-card-right{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap: 10px;
-}
+.ann-title {
+  margin: 10px 0 0;
 
-.ann-title{
-  margin:0;
-  font-size: 15px;
+  font-size: 17px;
+
   font-weight: 1000;
-  color:#0b2c4a;
+
+  line-height: 1.35;
+
+  color: #0b2c4a;
 }
 
-.ann-body{
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: rgba(11,44,74,.75);
-  line-height: 1.45;
-}
+.ann-body {
+  margin: 8px 0 0;
 
-.ann-meta{
-  margin-top: 10px;
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  font-size: 11px;
-  color: rgba(11,44,74,.55);
-}
-
-.ann-pill{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height: 20px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 1000;
-  border: 1px solid rgba(11,44,74,.10);
-  background:#f7fbff;
-  color:#0b2c4a;
-}
-
-.ann-pill.priority{ background:#fff3f3; border-color:#ffd2d2; color:#a61b1b; }
-.ann-pill.events{ background:#eef7ff; border-color:#cfe6ff; color:#0b4d7a; }
-.ann-pill.academic{ background:#f4f7ff; border-color:#dbe3ff; color:#2d3a8c; }
-
-.ann-status{
-  font-size: 11px;
-  font-weight: 1000;
-  color: rgba(11,44,74,.70);
-}
-
-/* Kebab */
-.ann-kebab{
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  border: 1px solid rgba(11,44,74,.10);
-  background:#fff;
-  cursor:pointer;
-  box-shadow: 0 10px 22px rgba(0,0,0,.06);
-}
-
-/* Menu */
-.ann-menu{
-  position:absolute;
-  right: 14px;
-  top: 60px;
-  background:#fff;
-  border: 1px solid rgba(11,44,74,.10);
-  border-radius: 12px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.14);
-  overflow:hidden;
-  min-width: 160px;
-  z-index: 20;
-}
-
-.ann-menu button{
-  width:100%;
-  text-align:left;
-  padding: 10px 12px;
-  border:none;
-  background:#fff;
-  cursor:pointer;
-  font-weight: 900;
-  font-size: 12px;
-  color:#0b2c4a;
-}
-.ann-menu button:hover{ background:#f5f8fb; }
-.ann-menu .danger{ color:#a61b1b; }
-
-.ann-empty{
-  margin-top: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  background:#fff;
-  border: 1px dashed rgba(11,44,74,.18);
-  color: rgba(11,44,74,.65);
-  font-weight: 900;
-}
-
-/* Modal sizing */
-.ann-dialog{
-  width: min(640px, calc(100% - 28px));
-}
-
-/* ✅ NEW: editor wrapper (textarea + toolbar inside one bordered box) */
-.ann-editor{
-  border-radius: 12px;
-  border: 1px solid rgba(11,44,74,.10);
-  background:#fff;
-  overflow:hidden; /* makes toolbar feel “inside” */
-}
-
-/* textarea now uses the wrapper’s border */
-.ann-textarea{
-  width:100%;
-  min-height: 140px;
-  resize: vertical;
-  border: none;
-  outline:none;
-  padding: 12px 12px;
-  font: inherit;
-  background: transparent;
-  display:block;
-}
-
-/* toolbar is now “attached” to the editor */
-.ann-toolbar{
-  height: 44px;
-  background:#e9f3ff;                 /* matches your reference look */
-  border-top: 1px solid rgba(11,44,74,.10);
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  padding: 0 10px;
-}
-
-.ann-tool{
-  height: 30px;
-  min-width: 34px;
-  padding: 0 10px;
-  border:none;
-  border-radius: 10px;
-  background: transparent;
-  cursor:pointer;
-  font-weight: 1000;
-  color:#0b2c4a;
-}
-
-.ann-tool.is-active{
-  background:#bfe0ff;
-}
-
-.ann-tool:hover{
-  background: rgba(11,77,122,.10);
-}
-
-.ann-tool-sep{
-  width: 1px;
-  height: 18px;
-  background: rgba(11,44,74,.18);
-  margin: 0 2px;
-}
-
-/* Attachments */
-.ann-drop{
-  margin-top: 8px;
-  border: 2px dashed rgba(11,77,122,.30);
-  border-radius: 14px;
-  padding: 14px;
-  background:#fbfdff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  cursor:pointer;
-  text-align:center;
-}
-
-.ann-drop-ico{ font-size: 24px; opacity:.85; }
-.ann-drop-text{ font-size: 12px; font-weight: 900; color:#0b2c4a; }
-
-.ann-files{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.ann-file{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(11,44,74,.10);
-  background:#fff;
-  box-shadow: 0 10px 22px rgba(0,0,0,.06);
-  max-width: 100%;
-}
-
-.ann-file img{
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid rgba(11,44,74,.10);
-}
-
-.ann-file-name{
-  font-size: 12px;
-  font-weight: 1000;
-  color:#0b2c4a;
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
-  max-width: 260px;
-}
-
-.ann-file-x{
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  border: 1px solid rgba(11,44,74,.10);
-  background:#fff;
-  cursor:pointer;
-  font-weight: 1000;
-}
-
-.ann-view-dialog{
-  width: min(720px, calc(100% - 28px));
-}
-
-.ann-view-h{
-  margin: 10px 0 6px;
-  font-size: 18px;
-  font-weight: 1000;
-  color:#0b2c4a;
-}
-
-.ann-view-msg{
-  margin: 0;
-  color: rgba(11,44,74,.78);
-  line-height: 1.6;
   font-size: 13px;
+
+  color: rgba(11, 44, 74, 0.68);
+
+  line-height: 1.55;
 }
 
-.ann-view-files{
-  margin-top: 12px;
-  display:flex;
+
+/* =========================================================
+   CARD META
+   ========================================================= */
+
+.ann-meta {
+  margin-top: 10px;
+
+  display: flex;
+
+  align-items: center;
+
   gap: 10px;
+
+  font-size: 11px;
+
+  color: rgba(11, 44, 74, 0.55);
+
   flex-wrap: wrap;
 }
 
-.ann-view-files img{
-  width: 120px;
-  height: 90px;
-  border-radius: 14px;
-  object-fit: cover;
-  border: 1px solid rgba(11,44,74,.10);
+
+/* =========================================================
+   CATEGORY PILL
+   ========================================================= */
+
+.ann-pill {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-height: 30px;
+
+  padding: 0 13px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+
+  font-weight: 1000;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #f7fbff;
+
+  color: #0b2c4a;
+
+  white-space: nowrap;
 }
 
-/* big white list card wrapper */
-.ann-wrap-card{
+.ann-pill.priority {
+  background: #fff3f3;
+
+  border-color: #ffd2d2;
+
+  color: #a61b1b;
+}
+
+.ann-pill.events {
+  background: #eef7ff;
+
+  border-color: #cfe6ff;
+
+  color: #0b4d7a;
+}
+
+.ann-pill.academic {
+  background: #f4f7ff;
+
+  border-color: #dbe3ff;
+
+  color: #2d3a8c;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.ann-status {
+  font-size: 11px;
+
+  font-weight: 1000;
+
+  color: rgba(11, 44, 74, 0.70);
+}
+
+
+/* =========================================================
+   CARD RIGHT SIDE
+   ========================================================= */
+
+.ann-card-right {
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  gap: 10px;
+
+  flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   THREE-DOT BUTTON
+   ========================================================= */
+
+.ann-kebab {
+  width: 42px;
+
+  height: 42px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #fff;
+
+  color: #0b2c4a;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+
+  font-size: 21px;
+
+  line-height: 1;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ann-kebab:hover {
+  background: #f4f9fd;
+
+  border-color: rgba(11, 77, 122, 0.22);
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.ann-kebab:active {
+  transform: scale(0.96);
+}
+
+
+/* =========================================================
+   EXPANDABLE ACTION ROW
+   ========================================================= */
+
+.ann-menu {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  width: 100%;
+
+  padding: 14px 22px;
+
+  background: #fbfdff;
+
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+
+  border-radius: 0 0 14px 14px;
+
+  animation: annMenuOpen 0.16s ease-out;
+}
+
+.ann-menu.hidden {
+  display: none;
+}
+
+@keyframes annMenuOpen {
+  from {
+    opacity: 0;
+
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.ann-menu button {
+  min-width: 118px;
+
+  height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 11px;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #fff;
+
+  color: #0b2c4a;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 1000;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ann-menu button:hover {
+  background: #f5f9fc;
+
+  border-color: rgba(11, 77, 122, 0.18);
+
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+}
+
+.ann-menu button:active {
+  transform: scale(0.98);
+}
+
+
+/* View button */
+
+.ann-menu button[data-act="view"] {
+  background: #0b4d7a;
+
+  border-color: #0b4d7a;
+
+  color: #fff;
+}
+
+.ann-menu button[data-act="view"]:hover {
+  background: #0a4167;
+
+  border-color: #0a4167;
+}
+
+
+/* Delete button */
+
+.ann-menu .danger {
+  color: #a61b1b;
+
+  border-color: #ffd2d2;
+
+  background: #fff;
+}
+
+.ann-menu .danger:hover {
+  background: #fff3f3;
+
+  border-color: #f3bcbc;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.ann-empty {
+  margin-top: 10px;
+
+  padding: 18px;
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  border: 1px dashed rgba(11, 44, 74, 0.18);
+
+  color: rgba(11, 44, 74, 0.65);
+
+  font-weight: 900;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   BIG WHITE LIST CARD
+   ========================================================= */
+
+.ann-wrap-card {
   padding: 0;
+
+  overflow: visible;
+}
+
+.ann-card-head {
+  align-items: flex-start;
+}
+
+.ann-card-body {
+  padding: 0 14px 14px;
+
+  overflow: visible;
+}
+
+.ann-card-head .ann-filters {
+  margin: 0;
+}
+
+.ann-wrap-card .t-subtitle {
+  margin-top: 6px;
+}
+
+
+/* =========================================================
+   CREATE / EDIT MODAL
+   ========================================================= */
+
+.ann-dialog {
+  width: min(700px, calc(100% - 28px));
+
+  /*
+   * Keep the modal inside the viewport.
+   * This prevents the footer from disappearing when
+   * Schedule for later adds extra fields.
+   */
+  height: min(780px, calc(100vh - 40px));
+
+  max-height: calc(100vh - 40px);
+
+  display: flex;
+
+  flex-direction: column;
+
   overflow: hidden;
 }
 
-/* Add this near your .ann-tool rules */
-.ann-tool:disabled{
-  opacity: .45;
-  cursor: not-allowed;
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+.ann-dialog .tmodal-head {
+  flex: 0 0 auto;
 }
 
-.ann-card-head{ align-items: flex-start; }
 
-.ann-card-body{ padding: 0 14px 14px; }
+/* =========================================================
+   MODAL BODY
+   ========================================================= */
 
-.ann-card-head .ann-filters{ margin: 0; }
+.ann-dialog .tmodal-body {
+  flex: 1 1 auto;
 
-.ann-wrap-card .t-subtitle{ margin-top: 6px; }
+  min-height: 0;
 
-@media (max-width: 700px){
-  .ann-search{ min-width: 220px; }
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  padding: 20px 16px;
+
+  /*
+   * Makes scrolling feel cleaner on touch devices.
+   */
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* Custom scrollbar */
+
+.ann-dialog .tmodal-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.ann-dialog .tmodal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ann-dialog .tmodal-body::-webkit-scrollbar-thumb {
+  background: rgba(11, 77, 122, 0.20);
+
+  border-radius: 999px;
+}
+
+.ann-dialog .tmodal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 77, 122, 0.32);
+}
+
+
+/* =========================================================
+   MODAL FOOTER
+   ========================================================= */
+
+.ann-dialog .tmodal-foot {
+  flex: 0 0 auto;
+
+  position: relative;
+
+  z-index: 5;
+
+  background: #fff;
+
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.ann-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
+
+.ann-form .tmodal-field {
+  width: 100%;
+}
+
+
+/* =========================================================
+   TEXT EDITOR
+   ========================================================= */
+
+.ann-editor {
+  border-radius: 12px;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #fff;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   ANNOUNCEMENT TEXTAREA
+   ========================================================= */
+
+.ann-textarea {
+  width: 100%;
+
+  min-height: 150px;
+
+  resize: vertical;
+
+  border: none;
+
+  outline: none;
+
+  padding: 14px 14px;
+
+  font: inherit;
+
+  background: transparent;
+
+  display: block;
+
+  line-height: 1.55;
+
+  color: #0b2c4a;
+}
+
+.ann-textarea::placeholder {
+  color: rgba(11, 44, 74, 0.45);
+}
+
+.ann-textarea:focus {
+  outline: none;
+}
+
+
+/* =========================================================
+   SCHEDULE / PUBLICATION SECTION
+   ========================================================= */
+
+.ann-publication {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+/* Publication options */
+
+.ann-publication-options {
+  display: flex;
+
+  align-items: center;
+
+  gap: 24px;
+
+  padding-top: 3px;
+}
+
+
+/* Radio option */
+
+.ann-radio-option {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  color: #0b2c4a;
+
+  font-size: 13px;
+
+  font-weight: 800;
+}
+
+.ann-radio-option input {
+  width: 17px;
+
+  height: 17px;
+
+  margin: 0;
+
+  accent-color: #0b4d7a;
+
+  cursor: pointer;
+}
+
+.ann-radio-option span {
+  user-select: none;
+}
+
+
+/* =========================================================
+   SCHEDULE FIELDS
+   ========================================================= */
+
+.ann-schedule-fields {
+  padding: 15px;
+
+  border: 1px solid rgba(11, 77, 122, 0.12);
+
+  border-radius: 12px;
+
+  background: #f8fbfe;
+
+  animation: annScheduleIn 0.15s ease-out;
+}
+
+.ann-schedule-fields.hidden {
+  display: none;
+}
+
+@keyframes annScheduleIn {
+  from {
+    opacity: 0;
+
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   SCHEDULE DATE + TIME GRID
+   ========================================================= */
+
+.ann-schedule-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   SCHEDULE FIELD
+   ========================================================= */
+
+.ann-schedule-field {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.ann-schedule-field label {
+  font-size: 12px;
+
+  font-weight: 1000;
+
+  color: #0b2c4a;
+}
+
+
+/* =========================================================
+   DATE / TIME INPUTS
+   ========================================================= */
+
+.ann-schedule-field input {
+  width: 100%;
+
+  min-width: 0;
+
+  height: 44px;
+
+  padding: 0 12px;
+
+  border: 1px solid rgba(11, 44, 74, 0.12);
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  color: #0b2c4a;
+
+  font: inherit;
+
+  outline: none;
+}
+
+.ann-schedule-field input:focus {
+  border-color: #0b4d7a;
+
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+
+/* =========================================================
+   SCHEDULE HINT
+   ========================================================= */
+
+.ann-schedule-hint {
+  margin-top: 8px;
+
+  font-size: 11px;
+
+  line-height: 1.45;
+
+  color: rgba(11, 44, 74, 0.58);
+}
+
+
+/* =========================================================
+   OLD TOOLBAR SUPPORT
+   ========================================================= */
+
+/*
+ * The formatting toolbar was removed from the current
+ * announcement design, but these styles are kept so
+ * older markup does not break unexpectedly.
+ */
+
+.ann-toolbar {
+  display: none;
+}
+
+.ann-tool {
+  display: none;
+}
+
+.ann-tool-sep {
+  display: none;
+}
+
+
+/* =========================================================
+   ATTACHMENTS
+   ========================================================= */
+
+.ann-drop {
+  margin-top: 8px;
+
+  border: 2px dashed rgba(11, 77, 122, 0.30);
+
+  border-radius: 14px;
+
+  padding: 14px;
+
+  background: #fbfdff;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  text-align: center;
+}
+
+.ann-drop-ico {
+  font-size: 24px;
+
+  opacity: 0.85;
+}
+
+.ann-drop-text {
+  font-size: 12px;
+
+  font-weight: 900;
+
+  color: #0b2c4a;
+}
+
+.ann-files {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.ann-file {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 10px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #fff;
+
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+
+  max-width: 100%;
+}
+
+.ann-file img {
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 10px;
+
+  object-fit: cover;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+}
+
+.ann-file-name {
+  font-size: 12px;
+
+  font-weight: 1000;
+
+  color: #0b2c4a;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  max-width: 260px;
+}
+
+.ann-file-x {
+  width: 28px;
+
+  height: 28px;
+
+  border-radius: 10px;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  background: #fff;
+
+  cursor: pointer;
+
+  font-weight: 1000;
+}
+
+
+/* =========================================================
+   VIEW MODAL
+   ========================================================= */
+
+.ann-view-dialog {
+  width: min(720px, calc(100% - 28px));
+
+  max-height: calc(100vh - 40px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.ann-view-dialog .tmodal-head {
+  flex: 0 0 auto;
+}
+
+.ann-view-dialog .tmodal-body {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   VIEW CONTENT
+   ========================================================= */
+
+.ann-view {
+  padding: 2px 0;
+}
+
+.ann-view-top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.ann-view-h {
+  margin: 14px 0 8px;
+
+  font-size: 21px;
+
+  font-weight: 1000;
+
+  line-height: 1.35;
+
+  color: #0b2c4a;
+}
+
+.ann-view-msg {
+  margin: 0;
+
+  color: rgba(11, 44, 74, 0.78);
+
+  line-height: 1.7;
+
+  font-size: 14px;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   VIEW MODAL FILES
+   ========================================================= */
+
+.ann-view-files {
+  margin-top: 12px;
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+.ann-view-files img {
+  width: 120px;
+
+  height: 90px;
+
+  border-radius: 14px;
+
+  object-fit: cover;
+
+  border: 1px solid rgba(11, 44, 74, 0.10);
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+#annFormError {
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .ann-card-top {
+    padding: 18px;
+  }
+
+  .ann-menu {
+    padding: 12px 18px;
+  }
+
+  .ann-menu button {
+    min-width: 105px;
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  .ann-search {
+    min-width: 220px;
+  }
+
+
+  /* Card */
+
+  .ann-card-top {
+    padding: 16px;
+
+    gap: 10px;
+  }
+
+  .ann-title {
+    font-size: 15px;
+  }
+
+  .ann-body {
+    font-size: 12px;
+  }
+
+
+  /* Action row */
+
+  .ann-menu {
+    justify-content: stretch;
+
+    flex-wrap: wrap;
+
+    padding: 12px 16px;
+  }
+
+  .ann-menu button {
+    flex: 1 1 calc(50% - 8px);
+
+    min-width: 0;
+  }
+
+
+  /* Create modal */
+
+  .ann-dialog {
+    width: calc(100% - 20px);
+
+    height: calc(100vh - 20px);
+
+    max-height: calc(100vh - 20px);
+  }
+
+  .ann-dialog .tmodal-body {
+    padding: 18px 14px;
+  }
+
+
+  /* Publication */
+
+  .ann-publication-options {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 12px;
+  }
+
+
+  /* Schedule */
+
+  .ann-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* View modal */
+
+  .ann-view-dialog {
+    width: calc(100% - 20px);
+
+    max-height: calc(100vh - 20px);
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .ann-kebab {
+    width: 38px;
+
+    height: 38px;
+  }
+
+  .ann-card-top {
+    padding: 14px;
+  }
+
+  .ann-menu {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .ann-menu button {
+    width: 100%;
+
+    flex: none;
+  }
+
+  .ann-dialog .tmodal-foot {
+    padding: 12px;
+  }
 }

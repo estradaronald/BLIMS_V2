@@ -6,23 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teacher - Students</title>
 
-  <script>
-    (function () {
-      try {
-        const collapsed =
-          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-        if (collapsed) document.documentElement.classList.add("sb-collapsed");
-      } catch {}
-    })();
-  </script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
- <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/teacher/teacher-students.css" />
+  <link rel="stylesheet" href="/src/styles/admin/sidebar.css" />
+<link rel="stylesheet" href="/src/styles/admin/admin-dashboard.css" />
+<link rel="stylesheet" href="/src/styles/teacher/teacher-students.css" />
+  <link rel="stylesheet" href="../../shared/css/page-animations.css" />
 </head>
 
 <body data-page="teacher-students">
@@ -38,8 +29,8 @@
   <div class="app">
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <header class="topbar">
+    <main class="content page-animate">
+      <header class="topbar reveal-soft">
         <div class="topbar-right">
           <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
@@ -63,19 +54,19 @@
       </header>
 
       <section class="teachers-wrap">
-        <div class="teachers-page-head">
-          <div>
+        <div class="teachers-page-head reveal-soft">
+          <div class="reveal-item">
             <h2 class="teachers-title">Students</h2>
           </div>
 
-          <button id="addNewBtn" class="t-add-btn" type="button">
+          <button id="addNewBtn" class="t-add-btn reveal-item" type="button">
             Enroll Students <span class="t-plus">＋</span>
           </button>
         </div>
 
         <section id="listView" class="t-view">
-          <div class="card t-card">
-            <div class="t-card-head">
+          <div class="card t-card reveal-scale">
+            <div class="t-card-head reveal-item">
               <div class="t-subtitle">My Enrolled Students</div>
 
               <div class="t-tools">
@@ -90,7 +81,7 @@
               </div>
             </div>
 
-            <div class="t-table-wrap">
+            <div class="t-table-wrap reveal-item">
               <table class="t-table">
                 <thead>
                   <tr>
@@ -330,6 +321,7 @@
     </div>
   </div>
 
+  <script src="../../shared/js/page-animations.js"></script>
   <script src="../../js/teacher/teacher-sidebar.js"></script>
   <script src="../../js/teacher/teacher-students.js"></script>
 </body>

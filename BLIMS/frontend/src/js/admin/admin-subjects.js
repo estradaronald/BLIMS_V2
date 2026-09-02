@@ -1,8 +1,7 @@
 // frontend/src/js/admin-subjects.js
-// Subjects (Admin) - backend-connected
+// Subjects (Admin) - backend-connected (gradelevels.subjects only)
 // Endpoints used:
 //   GET    /api/csrf-token
-//   GET    /api/admin/sections/summary
 //   GET    /api/admin/subjects/summary
 //   GET    /api/admin/subjects?grade=...
 //   POST   /api/admin/subjects
@@ -53,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // state
   let activeGrade = "Kinder";
-  let grades = []; // full grade objects: [{ _id, grade }]
+  let grades = []; // [{ _id, grade }]
   let masterSubjects = [];
   let gradeSubjectsMap = {};
   let csrfToken = "";
@@ -74,38 +73,82 @@ document.addEventListener("DOMContentLoaded", async () => {
     return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
   }
 
+  function gradeKey(s) {
+    return norm(s);
+  }
+
+  function uniqStrings(list) {
+    const out = [];
+    const seen = new Set();
+
+    for (const item of Array.isArray(list) ? list : []) {
+      const value = String(item || "").trim();
+      if (!value) continue;
+
+      const key = norm(value);
+      if (seen.has(key)) continue;
+
+      seen.add(key);
+      out.push(value);
+    }
+
+    return out;
+  }
+
   function showSubjectError(msg) {
+    if (!subjectModalError) return;
     subjectModalError.textContent = msg;
     subjectModalError.classList.remove("hidden");
   }
 
   function hideSubjectError() {
+    if (!subjectModalError) return;
     subjectModalError.textContent = "";
     subjectModalError.classList.add("hidden");
   }
 
   function showGradeError(msg) {
+    if (!gradeModalError) return;
     gradeModalError.textContent = msg;
     gradeModalError.classList.remove("hidden");
   }
 
   function hideGradeError() {
+    if (!gradeModalError) return;
     gradeModalError.textContent = "";
     gradeModalError.classList.add("hidden");
   }
 
   function gradeNameOf(item) {
     if (!item) return "";
-    if (typeof item === "string") return item;
-    return item.grade || item.name || "";
+    if (typeof item === "string") return String(item).trim();
+    return String(item.grade || item.name || "").trim();
   }
 
   function getCurrentGradeDoc() {
-    return grades.find((g) => gradeNameOf(g) === activeGrade) || null;
+    return grades.find((g) => gradeKey(gradeNameOf(g)) === gradeKey(activeGrade)) || null;
   }
 
   function getGradeNames() {
     return grades.map((g) => gradeNameOf(g)).filter(Boolean);
+  }
+
+  function findGradeName(name) {
+    const key = gradeKey(name);
+    return getGradeNames().find((g) => gradeKey(g) === key) || "";
+  }
+
+  function getSubjectsForGrade(grade) {
+    const exactGrade = findGradeName(grade) || String(grade || "").trim();
+    return uniqStrings(gradeSubjectsMap[exactGrade] || []);
+  }
+
+  function setModalBusy(isBusy) {
+    if (addNewSubjectBtn) addNewSubjectBtn.disabled = isBusy;
+    if (subjectSaveBtn) subjectSaveBtn.disabled = isBusy;
+    if (subjectClearBtn) subjectClearBtn.disabled = isBusy;
+    if (modalGrade) modalGrade.disabled = isBusy;
+    if (newSubjectInput) newSubjectInput.disabled = isBusy;
   }
 
   // ==============================
@@ -123,7 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         csrfToken = data.csrfToken;
       }
     } catch {
-        // ignore
+      // ignore
     }
   }
 
@@ -149,7 +192,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     let data = null;
     try {
       data = await res.json();
-    } catch {}
+    } catch {
+      // ignore non-json
+    }
 
     if (!res.ok) {
       throw new Error(data?.message || `Request failed (${res.status})`);
@@ -180,21 +225,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       list = data.data.gradeLevels;
     }
 
-    grades = list.map((item) => {
-      if (typeof item === "string") {
-        return { _id: item, grade: item };
-      }
-      return {
-        _id: item._id || item.id || "",
-        grade: item.grade || item.name || "",
-      };
-    }).filter((x) => x.grade);
+    grades = list
+      .map((item) => {
+        if (typeof item === "string") {
+          return { _id: item, grade: String(item).trim() };
+        }
+        return {
+          _id: item._id || item.id || "",
+          grade: String(item.grade || item.name || "").trim(),
+        };
+      })
+      .filter((x) => x.grade);
 
     const names = getGradeNames();
     if (!names.length) {
       activeGrade = "";
-    } else if (!names.includes(activeGrade)) {
+    } else if (!findGradeName(activeGrade)) {
       activeGrade = names[0];
+    } else {
+      activeGrade = findGradeName(activeGrade);
     }
   }
 
@@ -208,53 +257,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? data.data
         : data;
 
-    const rows = payload?.grades || [];
-    const masters = payload?.masterSubjects || [];
-
-    masterSubjects = Array.isArray(masters) ? masters.slice() : [];
+    const rows = Array.isArray(payload?.grades) ? payload.grades : [];
+    const masters = Array.isArray(payload?.masterSubjects)
+      ? payload.masterSubjects
+      : [];
 
     const nextMap = {};
     getGradeNames().forEach((g) => {
       nextMap[g] = Array.isArray(gradeSubjectsMap[g])
-        ? gradeSubjectsMap[g].slice()
+        ? uniqStrings(gradeSubjectsMap[g])
         : [];
     });
 
     rows.forEach((r) => {
-      if (r?.grade) {
-        nextMap[r.grade] = Array.isArray(r.subjects) ? r.subjects.slice() : [];
+      const rowGrade = findGradeName(r?.grade);
+      if (rowGrade) {
+        nextMap[rowGrade] = uniqStrings(r.subjects || []);
       }
     });
 
     gradeSubjectsMap = nextMap;
 
+    const combined = [
+      ...masters,
+      ...Object.values(nextMap).flat(),
+    ];
+    masterSubjects = uniqStrings(combined).sort((a, b) => a.localeCompare(b));
+
     const names = getGradeNames();
     if (!names.length) {
       activeGrade = "";
-    } else if (!names.includes(activeGrade)) {
+    } else if (!findGradeName(activeGrade)) {
       activeGrade = names[0];
+    } else {
+      activeGrade = findGradeName(activeGrade);
     }
   }
 
   async function loadSubjectsByGrade(grade) {
-    if (!grade) return;
+    const exactGrade = findGradeName(grade);
+    if (!exactGrade) return;
 
-    const data = await apiFetch(`/api/admin/subjects?grade=${encodeURIComponent(grade)}`);
+    const data = await apiFetch(
+      `/api/admin/subjects?grade=${encodeURIComponent(exactGrade)}`
+    );
 
     const payload =
       data && typeof data === "object" && data.ok === true && data.data
         ? data.data
         : data;
 
-    gradeSubjectsMap[grade] = Array.isArray(payload?.subjects)
-      ? payload.subjects.slice()
-      : [];
+    gradeSubjectsMap[exactGrade] = uniqStrings(payload?.subjects || []);
   }
 
   // ==============================
   // grade list
   // ==============================
   function buildGradeList() {
+    if (!gradeList) return;
     gradeList.innerHTML = "";
 
     const gradeNames = getGradeNames();
@@ -262,14 +322,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     gradeNames.forEach((g) => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "sub-grade-btn" + (g === activeGrade ? " active" : "");
+      btn.className =
+        "sub-grade-btn" + (gradeKey(g) === gradeKey(activeGrade) ? " active" : "");
 
       const left = document.createElement("span");
       left.textContent = g;
 
       const pill = document.createElement("span");
       pill.className = "sub-grade-pill";
-      const n = (gradeSubjectsMap[g] || []).length;
+      const n = getSubjectsForGrade(g).length;
       pill.textContent = `${n} subject${n === 1 ? "" : "s"}`;
 
       btn.appendChild(left);
@@ -277,7 +338,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       btn.addEventListener("click", async () => {
         activeGrade = g;
-        selectedGradeTitle.textContent = g;
+        if (selectedGradeTitle) selectedGradeTitle.textContent = g;
         await loadSubjectsByGrade(g);
         render();
       });
@@ -290,10 +351,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // table
   // ==============================
   function renderTable() {
-    const q = norm(searchInput.value);
-    const list = (gradeSubjectsMap[activeGrade] || [])
-      .slice()
-      .sort((a, b) => a.localeCompare(b));
+    if (!subjectsTbody) return;
+
+    const q = norm(searchInput?.value || "");
+    const list = getSubjectsForGrade(activeGrade).sort((a, b) =>
+      a.localeCompare(b)
+    );
 
     const filtered = list.filter((s) => !q || norm(s).includes(q));
 
@@ -344,6 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       await loadSubjectsByGrade(activeGrade);
+      await loadSummary();
       render();
     } catch (err) {
       alert(err.message || "Failed to remove subject.");
@@ -354,129 +418,196 @@ document.addEventListener("DOMContentLoaded", async () => {
   // subject modal
   // ==============================
   function openSubjectModal(mode = "add") {
-    subjectModalTitle.textContent = mode === "edit" ? "Edit Subjects" : "Add Subjects";
-    subjectModalSub.textContent = "Select subjects for the chosen grade.";
+    if (!subjectModal) return;
+
+    if (subjectModalTitle) {
+      subjectModalTitle.textContent =
+        mode === "edit" ? "Edit Subjects" : "Add Subject";
+    }
+
+    if (subjectModalSub) {
+      subjectModalSub.textContent = "Manage subjects for the chosen grade.";
+    }
+
     hideSubjectError();
 
-    modalGrade.innerHTML = getGradeNames()
-      .map((g) => `<option value="${esc(g)}">${esc(g)}</option>`)
-      .join("");
+    if (modalGrade) {
+      modalGrade.innerHTML = getGradeNames()
+        .map((g) => `<option value="${esc(g)}">${esc(g)}</option>`)
+        .join("");
+      modalGrade.value = findGradeName(activeGrade) || activeGrade;
+    }
 
-    modalGrade.value = activeGrade;
-    newSubjectInput.value = "";
+    if (newSubjectInput) newSubjectInput.value = "";
+    if (subjectClearBtn) subjectClearBtn.textContent = "Close";
+    if (subjectSaveBtn) subjectSaveBtn.classList.add("hidden");
+
     buildChecklist();
 
     subjectModal.classList.remove("hidden");
     subjectModal.setAttribute("aria-hidden", "false");
 
-    setTimeout(() => modalGrade.focus(), 0);
+    setTimeout(() => modalGrade?.focus(), 0);
   }
 
   function closeSubjectModal() {
+    if (!subjectModal) return;
     subjectModal.classList.add("hidden");
     subjectModal.setAttribute("aria-hidden", "true");
     hideSubjectError();
   }
 
   function buildChecklist() {
-    const grade = modalGrade.value || activeGrade;
-    const assigned = new Set((gradeSubjectsMap[grade] || []).map((s) => norm(s)));
+    if (!subjectChecklist) return;
 
-    const subjects = masterSubjects.slice().sort((a, b) => a.localeCompare(b));
+    const grade = findGradeName(modalGrade?.value || activeGrade);
+    const subjects = getSubjectsForGrade(grade).sort((a, b) => a.localeCompare(b));
+
+    if (!subjects.length) {
+      subjectChecklist.innerHTML = `
+        <div class="sub-empty-checklist">
+          No subjects yet for ${esc(grade || "this grade")}.
+        </div>
+      `;
+      return;
+    }
 
     subjectChecklist.innerHTML = subjects
-      .map((s) => {
-        const id = "chk_" + norm(s).replace(/[^a-z0-9]+/g, "_");
-        const checked = assigned.has(norm(s)) ? "checked" : "";
-
+      .map((s, idx) => {
         return `
-          <label class="sub-check" for="${esc(id)}">
-            <input type="checkbox" id="${esc(id)}" value="${esc(s)}" ${checked} />
-            <span>${esc(s)}</span>
-          </label>
+          <div class="sub-check" data-subject-row="true" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <span style="font-weight:600;">${idx + 1}. ${esc(s)}</span>
+            <button
+              type="button"
+              class="sub-icon-btn sub-del"
+              data-act="remove-modal-subject"
+              data-name="${esc(s)}"
+              title="Remove"
+            >🗑</button>
+          </div>
         `;
       })
       .join("");
-  }
 
-  function getCheckedSubjects() {
-    const checked = Array.from(
-      subjectChecklist.querySelectorAll("input[type='checkbox']:checked")
-    );
-    return checked.map((c) => c.value).filter(Boolean);
-  }
-
-  function clearChecks() {
     subjectChecklist
-      .querySelectorAll("input[type='checkbox']")
-      .forEach((c) => (c.checked = false));
+      .querySelectorAll("button[data-act='remove-modal-subject']")
+      .forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const name = btn.getAttribute("data-name");
+          if (!name) return;
+          await removeSubjectFromGradeFromModal(name);
+        });
+      });
   }
 
-  async function addNewSubjectToMaster() {
-    const raw = newSubjectInput.value.trim();
-    if (!raw) return showSubjectError("Enter a subject name to add.");
+  async function removeSubjectFromGradeFromModal(name) {
+    const grade = findGradeName(modalGrade?.value || activeGrade);
+    if (!grade || !name) return;
+
+    const ok = window.confirm(`Remove "${name}" from ${grade}?`);
+    if (!ok) return;
 
     try {
-      await apiFetch("/api/admin/subjects", {
-        method: "POST",
-        body: JSON.stringify({ name: raw }),
+      setModalBusy(true);
+
+      await apiFetch("/api/admin/subjects/assign", {
+        method: "DELETE",
+        body: JSON.stringify({
+          grade,
+          subject: name,
+        }),
       });
 
+      if (gradeKey(activeGrade) === gradeKey(grade)) {
+        activeGrade = grade;
+      }
+
+      await loadSubjectsByGrade(grade);
       await loadSummary();
-      newSubjectInput.value = "";
+
+      if (selectedGradeTitle && gradeKey(activeGrade) === gradeKey(grade)) {
+        selectedGradeTitle.textContent = grade;
+      }
+
+      buildChecklist();
+      render();
+    } catch (err) {
+      showSubjectError(err.message || "Failed to remove subject.");
+    } finally {
+      setModalBusy(false);
+    }
+  }
+
+  async function addNewSubjectToGrade() {
+    const raw = String(newSubjectInput?.value || "").trim();
+    const grade = findGradeName(modalGrade?.value || activeGrade);
+
+    if (!grade) return showSubjectError("Grade is required.");
+    if (!raw) return showSubjectError("Enter a subject name to add.");
+
+    const existsInGrade = getSubjectsForGrade(grade).some((s) => norm(s) === norm(raw));
+    if (existsInGrade) {
+      return showSubjectError("That subject already exists in this grade.");
+    }
+
+    try {
+      setModalBusy(true);
+
+      await apiFetch("/api/admin/subjects", {
+        method: "POST",
+        body: JSON.stringify({
+          grade,
+          name: raw,
+        }),
+      });
+
+      activeGrade = grade;
+
+      await loadSubjectsByGrade(grade);
+      await loadSummary();
+
+      if (selectedGradeTitle) selectedGradeTitle.textContent = grade;
+
+      if (newSubjectInput) newSubjectInput.value = "";
       hideSubjectError();
       buildChecklist();
       render();
     } catch (err) {
       showSubjectError(err.message || "Failed to add subject.");
+    } finally {
+      setModalBusy(false);
     }
   }
 
+  // kept only so existing bindings won't break if HTML still has button
+  function clearChecks() {
+    closeSubjectModal();
+  }
+
+  // kept only so existing bindings won't break if HTML still has save button
   async function saveSubjectsToGrade() {
-    const grade = modalGrade.value;
-    if (!grade) return showSubjectError("Please select a grade level.");
-
-    const chosen = getCheckedSubjects();
-
-    try {
-      await apiFetch("/api/admin/subjects/assign", {
-        method: "PUT",
-        body: JSON.stringify({
-          grade,
-          subjects: chosen,
-        }),
-      });
-
-      activeGrade = grade;
-      selectedGradeTitle.textContent = grade;
-
-      await loadSubjectsByGrade(grade);
-      closeSubjectModal();
-      render();
-    } catch (err) {
-      showSubjectError(err.message || "Failed to save subjects.");
-    }
+    closeSubjectModal();
   }
 
   // ==============================
   // grade modal
   // ==============================
   function openGradeModal() {
-    gradeNameInput.value = "";
+    if (gradeNameInput) gradeNameInput.value = "";
     hideGradeError();
-    gradeModal.classList.remove("hidden");
-    gradeModal.setAttribute("aria-hidden", "false");
-    setTimeout(() => gradeNameInput.focus(), 0);
+    gradeModal?.classList.remove("hidden");
+    gradeModal?.setAttribute("aria-hidden", "false");
+    setTimeout(() => gradeNameInput?.focus(), 0);
   }
 
   function closeGradeModal() {
-    gradeModal.classList.add("hidden");
-    gradeModal.setAttribute("aria-hidden", "true");
+    gradeModal?.classList.add("hidden");
+    gradeModal?.setAttribute("aria-hidden", "true");
     hideGradeError();
   }
 
   async function saveGrade() {
-    const name = gradeNameInput.value.trim();
+    const name = String(gradeNameInput?.value || "").trim();
     if (!name) return showGradeError("Grade level name is required.");
 
     try {
@@ -486,8 +617,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       await loadSummary();
-      activeGrade = name;
-      selectedGradeTitle.textContent = name;
+      activeGrade = findGradeName(name) || name;
+
+      if (selectedGradeTitle) selectedGradeTitle.textContent = activeGrade;
 
       closeGradeModal();
       render();
@@ -539,11 +671,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   function render() {
     const gradeNames = getGradeNames();
 
-    if (!gradeNames.includes(activeGrade)) {
+    if (!findGradeName(activeGrade)) {
       activeGrade = gradeNames[0] || "";
+    } else {
+      activeGrade = findGradeName(activeGrade);
     }
 
-    selectedGradeTitle.textContent = activeGrade || "No Grade";
+    if (selectedGradeTitle) {
+      selectedGradeTitle.textContent = activeGrade || "No Grade";
+    }
+
     buildGradeList();
     renderTable();
 
@@ -566,16 +703,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   subjectModalCloseX?.addEventListener("click", closeSubjectModal);
   subjectCancelBtn?.addEventListener("click", closeSubjectModal);
 
-  modalGrade?.addEventListener("change", () => {
+  modalGrade?.addEventListener("change", async () => {
+    const grade = findGradeName(modalGrade.value);
+    if (grade) {
+      await loadSubjectsByGrade(grade);
+    }
     buildChecklist();
+    hideSubjectError();
   });
 
   subjectClearBtn?.addEventListener("click", clearChecks);
   subjectSaveBtn?.addEventListener("click", saveSubjectsToGrade);
 
-  addNewSubjectBtn?.addEventListener("click", addNewSubjectToMaster);
+  addNewSubjectBtn?.addEventListener("click", addNewSubjectToGrade);
   newSubjectInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") addNewSubjectToMaster();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addNewSubjectToGrade();
+    }
   });
 
   // grade modal
@@ -593,8 +738,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ESC close
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (gradeModal && !gradeModal.classList.contains("hidden")) return closeGradeModal();
-    if (subjectModal && !subjectModal.classList.contains("hidden")) return closeSubjectModal();
+    if (gradeModal && !gradeModal.classList.contains("hidden")) {
+      return closeGradeModal();
+    }
+    if (subjectModal && !subjectModal.classList.contains("hidden")) {
+      return closeSubjectModal();
+    }
   });
 
   // ==============================
@@ -603,9 +752,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await fetchCsrf();
     await loadSummary();
+
     if (activeGrade) {
       await loadSubjectsByGrade(activeGrade);
     }
+
     render();
   } catch (err) {
     console.error(err);

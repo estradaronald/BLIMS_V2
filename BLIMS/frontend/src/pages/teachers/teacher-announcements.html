@@ -1,36 +1,111 @@
-<!-- frontend/src/pages/teacher/teacher-announcements.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Teacher - Announcements</title>
 
-  <!-- ✅ Prevent sidebar flash (teacher key) -->
+
+  <!-- =====================================================
+       SIDEBAR COLLAPSE STATE
+  ====================================================== -->
+
   <script>
     (function () {
+
       try {
+
         const collapsed =
-          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-        if (collapsed) document.documentElement.classList.add("sb-collapsed");
+          localStorage.getItem(
+            "teacher_sidebar_collapsed_v1"
+          ) === "1";
+
+        if (collapsed) {
+
+          document.documentElement.classList.add(
+            "sb-collapsed"
+          );
+
+        }
+
       } catch {}
+
     })();
   </script>
 
-  <!-- Font (same family used across your pages) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  <!-- =====================================================
+       FONTS
+  ====================================================== -->
 
-  <!-- Page -->
-  <link rel="stylesheet" href="../../styles/teacher/teacher-announcements.css" />
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  >
+
+
+  <!-- =====================================================
+       SHARED STYLES
+  ====================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin-announcements.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  >
+
+
+  <!-- =====================================================
+       TEACHER ANNOUNCEMENT STYLES
+  ====================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-announcements.css"
+  >
+
 </head>
 
+
 <body data-page="teacher-announcements">
-  <!-- floating collapse button -->
+
+
+  <!-- =====================================================
+       SIDEBAR TOGGLE
+  ====================================================== -->
+
   <button
     class="sidebar-float-toggle"
     id="sidebarFloatToggle"
@@ -40,177 +115,867 @@
     ←
   </button>
 
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
   <div class="app">
+
+
+    <!-- ===================================================
+         SHARED TEACHER SIDEBAR
+    ==================================================== -->
+
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <!-- TOPBAR (keep consistent with other teacher pages) -->
-      <header class="topbar">
+
+    <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
+
+    <main class="content page-animate">
+
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+      <header class="topbar reveal-soft">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+
+          <!-- NOTIFICATIONS -->
+
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            🔔
+          </button>
+
+
+          <!-- USER -->
+
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="avatar"
+            >
+
+
             <div class="tb-meta">
-              <div class="tb-name">Teacher</div>
-              <div class="tb-role">Advisory Class</div>
+
+              <div
+                class="tb-name"
+                id="tbName"
+              >
+                Teacher
+              </div>
+
+              <div
+                class="tb-role"
+                id="tbRole"
+              >
+                Teacher
+              </div>
+
             </div>
 
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+            >
+              ▾
+            </button>
+
+
+            <!-- USER MENU -->
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
             </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- PAGE -->
-      <section class="ta-page ms-page">
-        <div class="ta-title ms-title">Announcements</div>
 
-        <!-- tabs -->
-        <div class="ta-tabs" role="tablist" aria-label="Announcements tabs">
-          <button class="ta-tab active" id="tabMy" type="button" role="tab" aria-selected="true">
-            My Class
+
+      <!-- =================================================
+           ANNOUNCEMENTS PAGE
+      ================================================== -->
+
+      <section class="announcement-page">
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <section class="announcement-page-header reveal-soft">
+
+          <div>
+
+            <h1>
+              Announcements
+            </h1>
+
+            <p id="taSub">
+              Posting to: (unassigned)
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            id="btnNew"
+            class="btn-primary btn-new-announcement"
+          >
+
+            <span>
+              Create New Announcement
+            </span>
+
+            <span>
+              +
+            </span>
+
           </button>
-          <button class="ta-tab" id="tabAdmin" type="button" role="tab" aria-selected="false">
-            Admin Announcements
-          </button>
-        </div>
 
-        <!-- LIST CARD -->
-        <section class="card ta-card">
-          <div class="ta-card-head">
-            <div>
-              <div class="ta-subtitle" id="listTitle">My Class Announcements</div>
-              <div class="ta-subtext" id="listSubtext">Create and manage announcements for your class.</div>
-            </div>
-
-            <div class="ta-head-actions">
-              <button class="ta-add-btn" id="btnNew" type="button">
-                <span class="ta-plus">＋</span>
-                New Announcement
-              </button>
-            </div>
-          </div>
-
-          <!-- tools -->
-          <div class="ta-tools">
-            <div class="ta-search">
-              <span class="ta-search-ico">🔍</span>
-              <input id="searchInput" type="text" placeholder="Search title or message..." />
-            </div>
-
-            <select id="statusFilter" class="ta-filter" aria-label="Status filter">
-              <option value="all">All</option>
-              <option value="published">Published</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="draft">Draft</option>
-            </select>
-
-            <select id="scopeFilter" class="ta-filter" aria-label="Scope filter">
-              <option value="all">All</option>
-              <option value="myclass">My Class</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <!-- table -->
-          <div class="ta-table-wrap">
-            <table class="ta-table" aria-label="Announcements table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th style="width:140px">Audience</th>
-                  <th style="width:120px">Status</th>
-                  <th style="width:160px">Date</th>
-                  <th class="ta-action-head" style="width:140px">Action</th>
-                </tr>
-              </thead>
-              <tbody id="listTbody">
-                <tr class="ta-empty">
-                  <td colspan="5">No announcements yet.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </section>
 
-        <!-- MODAL (Create/Edit/View) -->
-        <div class="ta-modal hidden" id="announceModal" aria-hidden="true">
-          <div class="ta-backdrop" id="modalBackdrop"></div>
 
-          <div class="ta-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <div class="ta-dialog-head">
-              <div class="ta-dialog-head-left">
-                <div class="ta-dialog-title" id="modalTitle">New Announcement</div>
-                <div class="ta-dialog-sub" id="modalSub">Compose a message for your class.</div>
-              </div>
 
-              <button class="ta-x" id="btnClose" type="button" aria-label="Close">✕</button>
-            </div>
+        <!-- =================================================
+             TABS
+        ================================================== -->
 
-            <div class="ta-dialog-body">
-              <div class="ta-field">
-                <label for="inpTitle">Title <span class="req">*</span></label>
-                <input id="inpTitle" type="text" placeholder="e.g., Reminder: Bring your notebooks" />
-              </div>
+        <div
+          class="announcement-tabs"
+          role="tablist"
+          aria-label="Announcement source"
+        >
 
-              <div class="ta-row2">
-                <div class="ta-field">
-                  <label for="inpAudience">Audience</label>
-                  <select id="inpAudience">
-                    <option value="myclass">My Class</option>
-                    <option value="all">All (Unassigned)</option>
-                  </select>
-                </div>
+          <button
+            type="button"
+            id="tabMy"
+            class="announcement-tab active"
+            role="tab"
+            aria-selected="true"
+          >
+            My Class
+          </button>
 
-                <div class="ta-field">
-                  <label for="inpStatus">Status</label>
-                  <select id="inpStatus">
-                    <option value="published">Publish now</option>
-                    <option value="scheduled">Schedule</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </div>
-              </div>
 
-              <div class="ta-field">
-                <label for="inpMessage">Message <span class="req">*</span></label>
-                <textarea id="inpMessage" rows="6" placeholder="Write the announcement..."></textarea>
-                <div class="ta-hint" id="formHint"></div>
-              </div>
+          <button
+            type="button"
+            id="tabAdmin"
+            class="announcement-tab"
+            role="tab"
+            aria-selected="false"
+          >
+            Admin
+          </button>
 
-              <div class="ta-row2">
-                <div class="ta-field" id="scheduleWrap">
-                  <label for="inpSchedule">Publish date (optional)</label>
-                  <input id="inpSchedule" type="date" />
-                </div>
-
-                <div class="ta-field">
-                  <label>Attachments (images)</label>
-                  <input id="inpFiles" type="file" accept="image/*" multiple />
-                </div>
-              </div>
-
-              <div class="ta-previews" id="imgPreviews"></div>
-            </div>
-
-            <div class="ta-dialog-foot">
-              <button class="ta-btn ghost" id="btnCancel" type="button">Cancel</button>
-              <button class="ta-btn" id="btnDraft" type="button">Save as Draft</button>
-              <button class="ta-btn primary" id="btnPublish" type="button">Publish</button>
-            </div>
-          </div>
         </div>
 
+
+
+        <!-- =================================================
+             ANNOUNCEMENT LIST CARD
+        ================================================== -->
+
+        <section class="announcement-card">
+
+
+          <!-- =================================================
+               LIST HEADER
+          ================================================== -->
+
+          <div class="announcement-card-header">
+
+            <div>
+
+              <h2 id="listTitle">
+                My Class Announcements
+              </h2>
+
+              <p id="listSubtext">
+                Create and manage announcements
+                for your handled class.
+              </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 FILTERS
+            ================================================== -->
+
+            <div class="announcement-filters">
+
+
+              <!-- SEARCH -->
+
+              <div class="search-box">
+
+                <span class="search-icon">
+                  🔎
+                </span>
+
+                <input
+                  type="search"
+                  id="annSearch"
+                  placeholder="Search announcements..."
+                  autocomplete="off"
+                  aria-label="Search announcements"
+                >
+
+              </div>
+
+
+              <!-- STATUS -->
+
+              <select
+                id="statusFilter"
+                aria-label="Filter by status"
+              >
+
+                <option value="all">
+                  Status: All
+                </option>
+
+                <option value="published">
+                  Published
+                </option>
+
+                <option value="scheduled">
+                  Scheduled
+                </option>
+
+                <option value="draft">
+                  Draft
+                </option>
+
+              </select>
+
+
+              <!-- CATEGORY -->
+
+              <select
+                id="catFilter"
+                aria-label="Filter by category"
+              >
+
+                <option value="all">
+                  Category: All
+                </option>
+
+                <option value="general">
+                  General Announcements
+                </option>
+
+                <option value="events">
+                  School Events
+                </option>
+
+                <option value="academic">
+                  Academic Notices
+                </option>
+
+                <option value="priority">
+                  Priority Alerts
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- =================================================
+               ANNOUNCEMENT LIST
+          ================================================== -->
+
+          <div
+            id="annFeed"
+            class="ann-feed"
+          >
+            <!-- JavaScript inserts announcements here -->
+          </div>
+
+
+
+          <!-- =================================================
+               EMPTY STATE
+          ================================================== -->
+
+          <div
+            id="annEmpty"
+            class="ann-empty hidden"
+          >
+            No announcements found.
+          </div>
+
+        </section>
+
       </section>
+
     </main>
+
   </div>
-  <script src="../../js/auth/teacher-guard.js"></script>
+
+
+
+  <!-- =====================================================
+       VIEW ANNOUNCEMENT MODAL
+  ====================================================== -->
+
+  <div
+    id="annViewModal"
+    class="announcement-modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      id="annViewBackdrop"
+      class="announcement-modal-backdrop"
+    ></div>
+
+
+    <div
+      class="announcement-modal-dialog view-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="annViewTitle"
+    >
+
+
+      <!-- =================================================
+           HEADER
+      ================================================== -->
+
+      <div class="announcement-modal-header">
+
+        <div>
+
+          <h2 id="annViewTitle">
+            Announcement
+          </h2>
+
+          <p id="annViewMeta">
+            —
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          id="annViewCloseX"
+          class="modal-close-button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+
+      <!-- =================================================
+           BODY
+      ================================================== -->
+
+      <div class="announcement-modal-body">
+
+
+        <!-- CATEGORY / STATUS -->
+
+        <div class="announcement-view-meta">
+
+          <span
+            id="annViewPill"
+            class="ta-badge"
+          >
+            General Announcements
+          </span>
+
+
+          <span
+            id="annViewStatus"
+            class="ta-status-pill published"
+          >
+            Published
+          </span>
+
+        </div>
+
+
+        <!-- SOURCE -->
+
+        <div class="announcement-view-source">
+
+          <strong>
+            Source
+          </strong>
+
+          <span id="annViewSource">
+            Teacher
+          </span>
+
+        </div>
+
+
+        <!-- TITLE -->
+
+        <h3 id="annViewH">
+          Announcement
+        </h3>
+
+
+        <!-- MESSAGE -->
+
+        <div
+          id="annViewMsg"
+          class="announcement-view-message"
+        ></div>
+
+
+      </div>
+
+
+
+      <!-- =================================================
+           FOOTER
+      ================================================== -->
+
+      <div
+        id="annViewActions"
+        class="announcement-modal-footer"
+      >
+
+        <button
+          type="button"
+          id="annViewCloseBtn"
+          class="btn-secondary"
+        >
+          Close
+        </button>
+
+
+        <button
+          type="button"
+          id="annViewEditBtn"
+          class="btn-secondary"
+        >
+          Edit
+        </button>
+
+
+        <button
+          type="button"
+          id="annViewDeleteBtn"
+          class="btn-danger"
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =====================================================
+       CREATE / EDIT ANNOUNCEMENT MODAL
+  ====================================================== -->
+
+  <div
+    id="annFormModal"
+    class="announcement-modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      id="annFormBackdrop"
+      class="announcement-modal-backdrop"
+    ></div>
+
+
+    <div
+      class="announcement-modal-dialog form-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="annFormTitle"
+    >
+
+
+      <!-- =================================================
+           FORM HEADER
+      ================================================== -->
+
+      <div class="announcement-modal-header">
+
+        <div>
+
+          <h2 id="annFormTitle">
+            New Announcement
+          </h2>
+
+          <p id="annFormSub">
+            Compose a message for your handled class.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          id="annFormCloseX"
+          class="modal-close-button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+
+      <!-- =================================================
+           FORM
+      ================================================== -->
+
+      <form
+        id="announcementForm"
+        class="announcement-form"
+        novalidate
+      >
+
+        <div class="announcement-modal-body">
+
+
+          <!-- =================================================
+               TITLE
+          ================================================== -->
+
+          <div class="form-field">
+
+            <label for="inpTitle">
+              Title
+              <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              id="inpTitle"
+              name="title"
+              placeholder="e.g., Reminder: Bring your notebooks"
+              maxlength="150"
+              required
+            >
+
+          </div>
+
+
+
+          <!-- =================================================
+               CATEGORY
+          ================================================== -->
+
+          <div class="form-field">
+
+            <label for="inpCategory">
+              Category
+            </label>
+
+            <select
+              id="inpCategory"
+              name="category"
+            >
+
+              <option value="general">
+                General Announcements
+              </option>
+
+              <option value="events">
+                School Events
+              </option>
+
+              <option value="academic">
+                Academic Notices
+              </option>
+
+              <option value="priority">
+                Priority Alerts
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- =================================================
+               PUBLICATION
+          ================================================== -->
+
+          <div class="form-field">
+
+            <label>
+              Publication
+            </label>
+
+
+            <div class="publication-options">
+
+              <label class="publication-option">
+
+                <input
+                  type="radio"
+                  id="publicationNow"
+                  name="publication"
+                  value="now"
+                  checked
+                >
+
+                <span>
+                  Publish Now
+                </span>
+
+              </label>
+
+
+              <label class="publication-option">
+
+                <input
+                  type="radio"
+                  id="publicationSchedule"
+                  name="publication"
+                  value="schedule"
+                >
+
+                <span>
+                  Schedule for later
+                </span>
+
+              </label>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- =================================================
+               SCHEDULE
+          ================================================== -->
+
+          <div
+            id="scheduleWrap"
+            class="schedule-field"
+            hidden
+          >
+
+            <div class="form-grid-2">
+
+
+              <!-- DATE -->
+
+              <div class="form-field">
+
+                <label for="inpScheduleDate">
+                  Schedule Date
+                  <span>*</span>
+                </label>
+
+                <input
+                  type="date"
+                  id="inpScheduleDate"
+                  name="scheduleDate"
+                >
+
+              </div>
+
+
+              <!-- TIME -->
+
+              <div class="form-field">
+
+                <label for="inpScheduleTime">
+                  Schedule Time
+                  <span>*</span>
+                </label>
+
+                <input
+                  type="time"
+                  id="inpScheduleTime"
+                  name="scheduleTime"
+                >
+
+              </div>
+
+            </div>
+
+
+            <small>
+              The announcement will become visible
+              at the selected date and time.
+            </small>
+
+          </div>
+
+
+
+          <!-- =================================================
+               AUDIENCE
+          ================================================== -->
+
+          <div class="form-field">
+
+            <label for="inpAudienceLabel">
+              Audience
+            </label>
+
+            <input
+              type="text"
+              id="inpAudienceLabel"
+              value="My handled class"
+              readonly
+            >
+
+          </div>
+
+
+
+          <!-- =================================================
+               MESSAGE
+          ================================================== -->
+
+          <div class="form-field">
+
+            <label for="inpMessage">
+              Message
+              <span>*</span>
+            </label>
+
+            <textarea
+              id="inpMessage"
+              name="message"
+              rows="7"
+              maxlength="5000"
+              placeholder="Write the announcement..."
+              required
+            ></textarea>
+
+          </div>
+
+
+
+          <!-- =================================================
+               FORM HINT
+          ================================================== -->
+
+          <div
+            id="formHint"
+            class="form-hint"
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FORM FOOTER
+        ================================================== -->
+
+        <div class="announcement-modal-footer">
+
+          <button
+            type="button"
+            id="btnCancel"
+            class="btn-secondary"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="button"
+            id="btnDraft"
+            class="btn-secondary"
+          >
+            Save as Draft
+          </button>
+
+
+          <button
+            type="button"
+            id="btnPublish"
+            class="btn-primary"
+          >
+            Publish
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script src="../../shared/js/page-animations.js"></script>
+
   <script src="../../js/teacher/teacher-sidebar.js"></script>
+
   <script src="../../js/teacher/teacher-announcements.js"></script>
+
 </body>
 </html>

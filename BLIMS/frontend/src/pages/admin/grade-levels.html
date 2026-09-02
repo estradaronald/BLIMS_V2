@@ -48,8 +48,8 @@
           <div class="tb-user" id="userbox">
             <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
             <div class="tb-meta">
-             <div class="tb-name">admin@school.com</div>
-              <div class="tb-role"> admin</div>
+              <div class="tb-name">admin@school.com</div>
+              <div class="tb-role">admin</div>
             </div>
             <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
@@ -150,25 +150,47 @@
       <div class="gl-modal-body">
         <div class="gl-form-grid">
           <div class="gl-field">
-            <label>Grade Level</label>
+            <label for="modalGrade">Grade Level</label>
             <select id="modalGrade" class="gl-input">
               <!-- populated by JS -->
             </select>
           </div>
 
           <div class="gl-field">
-            <label>Section Name</label>
-            <input id="modalSection" class="gl-input" type="text" placeholder="e.g., A, B, Emerald" />
+            <label for="modalSection">Section Name</label>
+            <input
+              id="modalSection"
+              class="gl-input"
+              type="text"
+              placeholder="e.g., A, B, Emerald"
+            />
           </div>
 
           <div class="gl-field" style="grid-column:1/-1;">
-            <label>Adviser / Teacher</label>
-            <input id="modalAdviser" class="gl-input" type="text" placeholder="e.g., Ms. Dela Cruz" />
+            <label for="modalAdviser">Adviser / Teacher</label>
+            <select id="modalAdviser" class="gl-input">
+              <option value="">Unassigned</option>
+            </select>
+
+            <button
+              type="button"
+              id="removeTeacherBtn"
+              class="gl-remove-teacher"
+            >
+              Remove Teacher
+            </button>
           </div>
 
           <div class="gl-field">
-            <label>Capacity</label>
-            <input id="modalCapacity" class="gl-input" type="number" min="1" step="1" placeholder="e.g., 35" />
+            <label for="modalCapacity">Capacity</label>
+            <input
+              id="modalCapacity"
+              class="gl-input"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="e.g., 35"
+            />
           </div>
         </div>
 

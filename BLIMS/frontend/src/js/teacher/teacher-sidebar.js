@@ -4,10 +4,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const FLOAT_GAP = 14;
   const FLOAT_NUDGE = 10;
 
-  // ✅ cache sidebar markup for this browser tab
+  // cache sidebar markup for this browser tab
   const SIDEBAR_CACHE_KEY = "__teacherSidebarHTML";
 
-  // ✅ page key from body
+  // page key from body
   const rawKey = (document.body?.dataset?.page || "").trim();
   const activeKey = rawKey || "dashboard";
 
@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".tb-icon") ||
     document.querySelector(".topbar .tb-icon") ||
     document.querySelector(".topbar .icon-btn");
+
+  const normalize = (s) => String(s || "").trim().toLowerCase();
 
   const setArrow = (collapsed) => {
     const btn = getFloatBtn();
@@ -43,11 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setArrow(collapsed);
   };
 
-  // ==============================
-  // ✅ Sticky float button logic
-  // - We compute TOP once (aligned to bell) and freeze it
-  // - We always update LEFT to sit beside the sidebar
-  // ==============================
+  // Sticky float button logic
   let frozenTopPx = null;
 
   const computeTopFromBell = () => {
@@ -65,17 +63,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btn = getFloatBtn();
     if (!sidebar || !btn) return;
 
-    // ✅ LEFT: always stick beside sidebar edge
+    // LEFT: always stick beside sidebar edge
     const rect = sidebar.getBoundingClientRect();
     btn.style.left = `${Math.round(rect.right + FLOAT_GAP + FLOAT_NUDGE)}px`;
 
-    // ✅ TOP: freeze at first good bell-aligned position
+    // TOP: freeze at first good bell-aligned position
     if (frozenTopPx == null || freezeTop) {
       const t = computeTopFromBell();
       if (t != null) frozenTopPx = t;
     }
 
-    // apply frozen top if we have it
     if (frozenTopPx != null) {
       btn.style.top = `${frozenTopPx}px`;
     }
@@ -97,11 +94,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
     applyCollapsed(collapsed);
 
-    // LEFT changes when sidebar width changes; TOP should stay frozen
     positionSafe();
   };
 
-  // 1) Load sidebar HTML (cached in sessionStorage to prevent "reload" feel)
+  // 1) Load sidebar HTML
   try {
     let html = sessionStorage.getItem(SIDEBAR_CACHE_KEY);
 
@@ -120,12 +116,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // 2) Active item highlight
-  const normalize = (k) => (k || "").trim().toLowerCase();
   const current = normalize(activeKey);
 
   const candidates = mount.querySelectorAll(
     ".sb-item, .sb-link, a[data-nav], a[data-key]"
   );
+
   candidates.forEach((el) => {
     const key = normalize(el.dataset.nav || el.dataset.key || "");
     const isActive = key && key === current;
@@ -135,8 +131,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     else el.removeAttribute("aria-current");
   });
 
-  // ✅ 2.5) Prevent reload glitch if clicking the active/current link
-  mount.querySelectorAll(".sb-item[href]").forEach((a) => {
+  // 2.5) Prevent reload glitch if clicking the active/current link
+  mount.querySelectorAll(".sb-item[href], .sb-link[href], a[href]").forEach((a) => {
     a.addEventListener("click", (e) => {
       const href = a.getAttribute("href");
       if (!href) return;
@@ -144,7 +140,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const targetPath = new URL(href, window.location.href).pathname;
       const currentPath = window.location.pathname;
 
-      // If already on this page, prevent reload
       if (targetPath === currentPath) {
         e.preventDefault();
         positionSafe();
@@ -166,13 +161,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ✅ 5) Keep button positioned correctly
-  // - On resize/load: recompute and freeze TOP (since header might move)
-  // - On scroll: only keep LEFT accurate, do NOT chase the bell
+  // 5) Keep button positioned correctly
   window.addEventListener("resize", () => positionSafe({ freezeTop: true }));
   window.addEventListener("load", () => positionSafe({ freezeTop: true }));
   window.addEventListener("scroll", () => positionFloatButton(), { passive: true });
 
-  // initial position (freeze top once)
+  // initial position
   positionSafe({ freezeTop: true });
 });

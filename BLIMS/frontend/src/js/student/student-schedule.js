@@ -1,329 +1,1022 @@
 // frontend/src/js/student/student-schedule.js
+
 document.addEventListener("DOMContentLoaded", () => {
-  initTopbarMenu();
-  initLogout();
-  initScheduleView();
-});
 
-function $(id) {
-  return document.getElementById(id);
-}
+  // =========================================================
+  // TOPBAR USER MENU
+  // =========================================================
 
-function initTopbarMenu() {
-  const userMenuBtn = $("userMenuBtn");
-  const userMenu = $("userMenu");
-  const userbox = $("userbox");
-  if (!userMenuBtn || !userMenu || !userbox) return;
+  const userMenuBtn = document.getElementById("userMenuBtn");
+  const userMenu = document.getElementById("userMenu");
+  const userbox = document.getElementById("userbox");
 
-  userMenuBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    userMenu.classList.toggle("open");
-  });
+  if (userMenuBtn && userMenu && userbox) {
 
-  document.addEventListener("click", (ev) => {
-    if (!userbox.contains(ev.target)) userMenu.classList.remove("open");
-  });
-}
-
-function initLogout() {
-  const btn = $("topbarLogout");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    window.location.href = "../../login.html";
-  });
-}
-
-function initScheduleView() {
-  const viewWeekBtn = $("viewWeekBtn");
-  const viewDayBtn = $("viewDayBtn");
-  const daySelect = $("daySelect");
-
-  const weekView = $("weekView");
-  const dayView = $("dayView");
-  const dayViewTitle = $("dayViewTitle");
-  const dayViewList = $("dayViewList");
-  const empty = $("schedEmpty");
-
-  // header fields
-  const gradeSectionEl = $("schedGradeSection");
-  const roomEl = $("schedRoom");
-
-  if (!viewWeekBtn || !viewDayBtn || !daySelect || !weekView || !dayView || !dayViewTitle || !dayViewList) {
-    return;
-  }
-
-  const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri"];
-  const DAY_LABELS = { mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday" };
-
-  // ✅ MUST match Admin schedule LS key
-  const LS_SCHEDULE = "blims_class_schedule_v1";
-
-  function readLS(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function escapeHtml(s) {
-    return String(s || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function toKeyFromDay(day) {
-    const d = String(day || "").toLowerCase();
-    if (d.startsWith("mon")) return "mon";
-    if (d.startsWith("tue")) return "tue";
-    if (d.startsWith("wed")) return "wed";
-    if (d.startsWith("thu")) return "thu";
-    if (d.startsWith("fri")) return "fri";
-    return "";
-  }
-
-  function toMinutes(hhmm) {
-    if (!hhmm || typeof hhmm !== "string" || !hhmm.includes(":")) return 99999;
-    const [h, m] = hhmm.split(":").map((n) => Number(n));
-    return (h * 60) + (m || 0);
-  }
-
-  function fmtTime(hhmm) {
-    if (!hhmm || typeof hhmm !== "string" || !hhmm.includes(":")) return hhmm || "—";
-    const [h, m] = hhmm.split(":").map((n) => Number(n));
-    const d = new Date();
-    d.setHours(h || 0, m || 0, 0, 0);
-    return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  }
-
-  function fmtRange(start, end) {
-    const a = fmtTime(start);
-    const b = fmtTime(end);
-    return `${a}–${b}`;
-  }
-
-  // ✅ Recommended: read active class from localStorage (frontend-only but backend-ready)
-  function getActiveClass() {
-    try {
-      const raw = localStorage.getItem("blims_active_student_class_v1");
-      if (raw) {
-        const v = JSON.parse(raw);
-        if (v && v.grade && v.section) return { grade: String(v.grade), section: String(v.section) };
-      }
-    } catch {}
-
-    const label = String(gradeSectionEl?.textContent || "").trim();
-    const m = label.match(/^(.*?)(?:-|\u2013)\s*Section\s*(.+)$/i);
-    if (m) return { grade: m[1].trim(), section: m[2].trim() };
-
-    return { grade: "Grade 6", section: "A" };
-  }
-
-  function mostCommonRoom(rows) {
-    const freq = new Map();
-    rows.forEach((r) => {
-      const v = String(r.room || "").trim();
-      if (!v) return;
-      freq.set(v, (freq.get(v) || 0) + 1);
+    userMenuBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      userMenu.classList.toggle("open");
     });
 
-    let best = "";
-    let bestN = 0;
-    for (const [room, n] of freq.entries()) {
-      if (n > bestN) {
-        best = room;
-        bestN = n;
+    document.addEventListener("click", (ev) => {
+      if (!userbox.contains(ev.target)) {
+        userMenu.classList.remove("open");
       }
+    });
+
+  }
+
+
+  // =========================================================
+  // LOGOUT
+  // =========================================================
+
+  const topbarLogout = document.getElementById("topbarLogout");
+
+  if (topbarLogout) {
+
+    topbarLogout.addEventListener("click", async () => {
+
+      try {
+
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+
+      } catch (_) {}
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      window.location.href = "../../login.html";
+
+    });
+
+  }
+
+
+  // =========================================================
+  // HELPERS
+  // =========================================================
+
+  function esc(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  }
+
+
+  async function apiFetch(url, options = {}) {
+
+    const res = await fetch(url, {
+
+      credentials: "include",
+
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+
+      ...options,
+
+    });
+
+
+    let data = null;
+
+    try {
+      data = await res.json();
+    } catch (_) {
+      data = null;
     }
 
-    if (!best) return "Room —";
-    const cleaned = best.replace(/^room\s*/i, "").trim();
-    return cleaned ? `Room ${cleaned}` : "Room —";
+
+    if (!res.ok) {
+
+      throw new Error(
+        data?.message ||
+        `Request failed (${res.status})`
+      );
+
+    }
+
+
+    return data;
+
   }
 
-  function buildScheduleMapFromAdmin(list, cls) {
-    const map = { mon: [], tue: [], wed: [], thu: [], fri: [] };
 
-    const rows = Array.isArray(list)
-      ? list.filter((x) => x && x.grade === cls.grade && String(x.section) === String(cls.section))
-      : [];
+  // =========================================================
+  // TIME
+  // =========================================================
 
-    rows.forEach((x) => {
-      const key = toKeyFromDay(x.day);
-      if (!key) return;
+  function to12Hour(value) {
 
-      map[key].push({
-        startRaw: x.start || "",
-        time: fmtRange(x.start, x.end),
-        subject: x.subject || "—",
-        teacher: x.teacher || "—",
-      });
-    });
+    if (value == null || value === "") {
+      return "—";
+    }
 
-    DAY_KEYS.forEach((k) => {
-      map[k].sort((a, b) => toMinutes(a.startRaw) - toMinutes(b.startRaw));
-      map[k] = map[k].map(({ startRaw, ...rest }) => rest);
-    });
+    const raw = String(value).trim();
 
-    return { map, rows };
+    // Already formatted
+    if (
+      raw.includes(":") &&
+      /am|pm/i.test(raw)
+    ) {
+      return raw;
+    }
+
+    // 13:30
+    if (/^\d{1,2}:\d{2}$/.test(raw)) {
+
+      const [hh, mm] = raw
+        .split(":")
+        .map(Number);
+
+      const h12 =
+        ((hh + 11) % 12) + 1;
+
+      const ampm =
+        hh >= 12 ? "PM" : "AM";
+
+      return `${h12}:${String(mm).padStart(2, "0")} ${ampm}`;
+
+    }
+
+    return raw;
+
   }
 
-  function clearWeekColumns() {
-    const cols = Array.from(weekView.querySelectorAll(".sched-col"));
-    cols.forEach((col) => {
-      col.querySelectorAll(".sched-item").forEach((n) => n.remove());
-    });
+
+  function parseTimeToSortable(value) {
+
+    const raw =
+      String(value || "")
+        .trim()
+        .toLowerCase();
+
+    if (!raw) {
+      return 0;
+    }
+
+    // 13:30
+    if (/^\d{1,2}:\d{2}$/.test(raw)) {
+
+      const [hour, minute] =
+        raw.split(":").map(Number);
+
+      return hour * 60 + minute;
+
+    }
+
+    // 1:30 PM
+    const match =
+      raw.match(
+        /^(\d{1,2}):(\d{2})\s*(am|pm)$/i
+      );
+
+    if (match) {
+
+      let hour = Number(match[1]);
+      const minute = Number(match[2]);
+
+      const ampm =
+        match[3].toLowerCase();
+
+      if (ampm === "pm" && hour !== 12) {
+        hour += 12;
+      }
+
+      if (ampm === "am" && hour === 12) {
+        hour = 0;
+      }
+
+      return hour * 60 + minute;
+
+    }
+
+    return 0;
+
   }
 
-  function renderWeek(map) {
-    const cols = Array.from(weekView.querySelectorAll(".sched-col"));
 
-    cols.forEach((col) => {
-      const head = col.querySelector(".sched-col-head")?.textContent?.trim().toLowerCase() || "";
-      const key =
-        head.startsWith("mon") ? "mon" :
-        head.startsWith("tue") ? "tue" :
-        head.startsWith("wed") ? "wed" :
-        head.startsWith("thu") ? "thu" :
-        head.startsWith("fri") ? "fri" : null;
+  // =========================================================
+  // DAY
+  // =========================================================
 
-      if (!key) return;
+  function normalizeDay(day) {
 
-      col.querySelectorAll(".sched-item").forEach((n) => n.remove());
+    const value =
+      String(day || "")
+        .trim()
+        .toLowerCase();
 
-      const items = map[key] || [];
-      items.forEach((x) => {
-        const it = document.createElement("div");
-        it.className = "sched-item";
-        it.innerHTML = `
-          <div class="sched-time">${escapeHtml(x.time)}</div>
-          <div class="sched-main">
-            <div class="sched-subject">${escapeHtml(x.subject)}</div>
-            <div class="sched-meta">${escapeHtml(x.teacher)}</div>
-          </div>
-        `;
-        col.appendChild(it);
-      });
-    });
+    const map = {
+
+      mon: "mon",
+      monday: "mon",
+
+      tue: "tue",
+      tues: "tue",
+      tuesday: "tue",
+
+      wed: "wed",
+      wednesday: "wed",
+
+      thu: "thu",
+      thur: "thu",
+      thurs: "thu",
+      thursday: "thu",
+
+      fri: "fri",
+      friday: "fri",
+
+    };
+
+    return map[value] || "";
+
   }
 
-  function setActiveTab(mode) {
-    const isWeek = mode === "week";
 
-    viewWeekBtn.classList.toggle("active", isWeek);
-    viewWeekBtn.setAttribute("aria-selected", isWeek ? "true" : "false");
+  function dayLabel(dayKey) {
 
-    viewDayBtn.classList.toggle("active", !isWeek);
-    viewDayBtn.setAttribute("aria-selected", !isWeek ? "true" : "false");
+    const map = {
 
-    weekView.classList.toggle("hidden", !isWeek);
-    dayView.classList.toggle("hidden", isWeek);
+      mon: "Monday",
+      tue: "Tuesday",
+      wed: "Wednesday",
+      thu: "Thursday",
+      fri: "Friday",
 
-    // ✅ now dropdown is only disabled in Week mode (normal behavior)
-    daySelect.disabled = isWeek;
+    };
+
+    return map[dayKey] || "Monday";
+
   }
 
-  function renderDay(map, key) {
-    const items = map[key] || [];
-    dayViewTitle.textContent = DAY_LABELS[key] || "Day";
-    dayViewList.innerHTML = "";
+
+  // =========================================================
+  // NORMALIZE STUDENT SCHEDULE
+  // =========================================================
+
+  function normalizeItem(item, index) {
+
+    const grade =
+      item.grade ||
+      "";
+
+    const section =
+      item.section ||
+      "";
+
+    const classLabel =
+      item.classLabel ||
+      item.gradeSection ||
+      [grade, section]
+        .filter(Boolean)
+        .join(" - ") ||
+      "Unassigned Class";
+
+
+    return {
+
+      id:
+        item.id ||
+        item._id ||
+        `student-sched-${index}`,
+
+      day:
+        normalizeDay(
+          item.day ||
+          item.scheduleDay ||
+          item.weekday
+        ),
+
+      subject:
+        item.subject ||
+        item.subjectName ||
+        "Untitled Subject",
+
+      teacher:
+        item.teacher ||
+        item.teacherName ||
+        "—",
+
+      room:
+        item.room ||
+        item.roomName ||
+        "",
+
+      grade,
+
+      section,
+
+      classLabel,
+
+      startText:
+        to12Hour(
+          item.startTime ||
+          item.start ||
+          item.startHour
+        ),
+
+      endText:
+        to12Hour(
+          item.endTime ||
+          item.end ||
+          item.endHour
+        ),
+
+      startSort:
+        parseTimeToSortable(
+          item.startTime ||
+          item.start ||
+          item.startHour ||
+          ""
+        ),
+
+      raw: item,
+
+    };
+
+  }
+
+
+  // =========================================================
+  // DOM
+  // =========================================================
+
+  const schedGradeSection =
+    document.getElementById("schedGradeSection");
+
+  const schedRoom =
+    document.getElementById("schedRoom");
+
+  const weekView =
+    document.getElementById("weekView");
+
+  const dayView =
+    document.getElementById("dayView");
+
+  const dayViewTitle =
+    document.getElementById("dayViewTitle");
+
+  const dayViewList =
+    document.getElementById("dayViewList");
+
+  const schedEmpty =
+    document.getElementById("schedEmpty");
+
+  const viewWeekBtn =
+    document.getElementById("viewWeekBtn");
+
+  const viewDayBtn =
+    document.getElementById("viewDayBtn");
+
+  const daySelect =
+    document.getElementById("daySelect");
+
+
+  const days = [
+    "mon",
+    "tue",
+    "wed",
+    "thu",
+    "fri",
+  ];
+
+
+  let scheduleItems = [];
+
+  let currentMode = "week";
+
+
+  // =========================================================
+  // META
+  // =========================================================
+
+  function setMeta(items) {
 
     if (!items.length) {
-      empty?.classList.remove("hidden");
+
+      if (schedGradeSection) {
+        schedGradeSection.textContent = "—";
+      }
+
+      if (schedRoom) {
+        schedRoom.textContent = "Room —";
+      }
+
+      return;
+
+    }
+
+
+    const first = items[0];
+
+
+    if (schedGradeSection) {
+
+      schedGradeSection.textContent =
+        first.classLabel || "—";
+
+    }
+
+
+    const room =
+      first.room
+        ? `Room ${first.room}`
+        : "Room —";
+
+
+    if (schedRoom) {
+      schedRoom.textContent = room;
+    }
+
+  }
+
+
+  // =========================================================
+  // EMPTY STATE
+  // =========================================================
+
+  function showEmpty(
+    show,
+    message = "No schedule available yet."
+  ) {
+
+    if (!schedEmpty) {
       return;
     }
-    empty?.classList.add("hidden");
 
-    items.forEach((x) => {
-      const row = document.createElement("div");
-      row.className = "sched-item";
-      row.innerHTML = `
-        <div class="sched-time">${escapeHtml(x.time)}</div>
-        <div class="sched-main">
-          <div class="sched-subject">${escapeHtml(x.subject)}</div>
-          <div class="sched-meta">${escapeHtml(x.teacher)}</div>
-        </div>
-      `;
-      dayViewList.appendChild(row);
-    });
+    schedEmpty.textContent = message;
+
+    schedEmpty.classList.toggle(
+      "hidden",
+      !show
+    );
+
   }
 
-  // ✅ NEW: keep tabs clickable; just show empty state when needed
-  function applyEmptyUI(isEmpty, mode) {
-    if (isEmpty) {
-      empty?.classList.remove("hidden");
 
-      // clear any leftover schedule items so it looks clean
+  // =========================================================
+  // SCHEDULE CARD
+  // =========================================================
+
+  function buildScheduleCard(item) {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "sched-item";
+
+
+    div.innerHTML = `
+
+      <div class="sched-item-time">
+        ${esc(item.startText)} - ${esc(item.endText)}
+      </div>
+
+      <div class="sched-item-title">
+        ${esc(item.subject)}
+      </div>
+
+      <div class="sched-item-meta">
+        ${esc(item.teacher)}
+      </div>
+
+      <div class="sched-item-room">
+        Room ${esc(item.room || "—")}
+      </div>
+
+    `;
+
+
+    return div;
+
+  }
+
+
+  // =========================================================
+  // WEEK COLUMNS
+  // =========================================================
+
+  function getWeekColumns() {
+
+    if (!weekView) {
+      return {};
+    }
+
+
+    const cols =
+      Array.from(
+        weekView.querySelectorAll(".sched-col")
+      );
+
+
+    return {
+
+      mon: cols[0] || null,
+      tue: cols[1] || null,
+      wed: cols[2] || null,
+      thu: cols[3] || null,
+      fri: cols[4] || null,
+
+    };
+
+  }
+
+
+  function clearWeekColumns() {
+
+    const columns =
+      getWeekColumns();
+
+
+    Object.entries(columns)
+      .forEach(([key, column]) => {
+
+        if (!column) {
+          return;
+        }
+
+
+        column.innerHTML = "";
+
+
+        const head =
+          document.createElement("div");
+
+        head.className =
+          "sched-col-head";
+
+        head.textContent =
+          dayLabel(key);
+
+
+        column.appendChild(head);
+
+      });
+
+  }
+
+
+  // =========================================================
+  // WEEK VIEW
+  // =========================================================
+
+  function renderWeekView(items) {
+
+    clearWeekColumns();
+
+
+    const columns =
+      getWeekColumns();
+
+
+    days.forEach((dayKey) => {
+
+      const column =
+        columns[dayKey];
+
+      if (!column) {
+        return;
+      }
+
+
+      const list =
+        items
+          .filter(
+            item => item.day === dayKey
+          )
+          .sort(
+            (a, b) =>
+              a.startSort - b.startSort
+          );
+
+
+      if (!list.length) {
+
+        const empty =
+          document.createElement("div");
+
+        empty.className =
+          "sched-slot-empty";
+
+        empty.textContent =
+          "No class";
+
+        column.appendChild(empty);
+
+        return;
+
+      }
+
+
+      list.forEach((item) => {
+
+        column.appendChild(
+          buildScheduleCard(item)
+        );
+
+      });
+
+    });
+
+  }
+
+
+  // =========================================================
+  // DAY VIEW
+  // =========================================================
+
+  function renderDayView(items, dayKey) {
+
+    if (dayViewTitle) {
+
+      dayViewTitle.textContent =
+        dayLabel(dayKey);
+
+    }
+
+
+    if (!dayViewList) {
+      return;
+    }
+
+
+    dayViewList.innerHTML = "";
+
+
+    const list =
+      items
+        .filter(
+          item => item.day === dayKey
+        )
+        .sort(
+          (a, b) =>
+            a.startSort - b.startSort
+        );
+
+
+    if (!list.length) {
+
+      const empty =
+        document.createElement("div");
+
+      empty.className =
+        "sched-slot-empty";
+
+      empty.textContent =
+        "No class for this day.";
+
+      dayViewList.appendChild(empty);
+
+      return;
+
+    }
+
+
+    list.forEach((item) => {
+
+      dayViewList.appendChild(
+        buildScheduleCard(item)
+      );
+
+    });
+
+  }
+
+
+  // =========================================================
+  // VIEW MODE
+  // =========================================================
+
+  function updateModeUI() {
+
+    const isWeek =
+      currentMode === "week";
+
+
+    // -------------------------------------------------------
+    // WEEK VIEW
+    // -------------------------------------------------------
+
+    if (weekView) {
+
+      weekView.classList.toggle(
+        "hidden",
+        !isWeek
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // DAY VIEW
+    // -------------------------------------------------------
+
+    if (dayView) {
+
+      dayView.classList.toggle(
+        "hidden",
+        isWeek
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // WEEK BUTTON
+    // -------------------------------------------------------
+
+    if (viewWeekBtn) {
+
+      viewWeekBtn.classList.toggle(
+        "active",
+        isWeek
+      );
+
+      viewWeekBtn.setAttribute(
+        "aria-selected",
+        String(isWeek)
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // DAY BUTTON
+    // -------------------------------------------------------
+
+    if (viewDayBtn) {
+
+      viewDayBtn.classList.toggle(
+        "active",
+        !isWeek
+      );
+
+      viewDayBtn.setAttribute(
+        "aria-selected",
+        String(!isWeek)
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // DAY DROPDOWN
+    //
+    // Week View:
+    //   Hidden + disabled
+    //
+    // Day View:
+    //   Visible + enabled
+    // -------------------------------------------------------
+
+    if (daySelect) {
+
+      daySelect.disabled = isWeek;
+
+      daySelect.classList.toggle(
+        "hidden",
+        isWeek
+      );
+
+      // Extra protection so the element is actually
+      // hidden even if another stylesheet overrides .hidden.
+      daySelect.hidden = isWeek;
+
+    }
+
+  }
+
+
+  // =========================================================
+  // RENDER ALL
+  // =========================================================
+
+  function renderAll() {
+
+    const hasItems =
+      scheduleItems.length > 0;
+
+
+    showEmpty(
+      !hasItems,
+      "No schedule available yet."
+    );
+
+
+    if (!hasItems) {
+
       clearWeekColumns();
-      dayViewList.innerHTML = "";
 
-      // keep views visible depending on mode (so toggles feel normal)
-      setActiveTab(mode || "week");
-    } else {
-      empty?.classList.add("hidden");
-    }
-  }
+      if (dayViewList) {
+        dayViewList.innerHTML = "";
+      }
 
-  function boot() {
-    const cls = getActiveClass();
-    const adminList = readLS(LS_SCHEDULE, []);
-    const { map, rows } = buildScheduleMapFromAdmin(adminList, cls);
+      setMeta([]);
 
-    // Header
-    if (gradeSectionEl) gradeSectionEl.textContent = `${cls.grade} - Section ${cls.section}`;
-    if (roomEl) roomEl.textContent = mostCommonRoom(rows);
+      return;
 
-    // Default mode: week
-    daySelect.value = "mon";
-    setActiveTab("week");
-
-    // Render / empty UI
-    if (!rows.length) {
-      applyEmptyUI(true, "week");
-    } else {
-      applyEmptyUI(false, "week");
-      renderWeek(map);
     }
 
-    // Events: always clickable now
-    viewDayBtn.addEventListener("click", () => {
-      setActiveTab("day");
 
-      if (!rows.length) {
-        applyEmptyUI(true, "day");
-        dayViewTitle.textContent = DAY_LABELS[daySelect.value || "mon"] || "Day";
-        return;
-      }
+    setMeta(scheduleItems);
 
-      applyEmptyUI(false, "day");
-      renderDay(map, daySelect.value || "mon");
-    });
+    renderWeekView(scheduleItems);
 
-    viewWeekBtn.addEventListener("click", () => {
-      setActiveTab("week");
+    renderDayView(
+      scheduleItems,
+      daySelect?.value || "mon"
+    );
 
-      if (!rows.length) {
-        applyEmptyUI(true, "week");
-        return;
-      }
-
-      applyEmptyUI(false, "week");
-      renderWeek(map);
-    });
-
-    daySelect.addEventListener("change", () => {
-      if (!rows.length) {
-        applyEmptyUI(true, "day");
-        dayViewTitle.textContent = DAY_LABELS[daySelect.value || "mon"] || "Day";
-        return;
-      }
-      renderDay(map, daySelect.value || "mon");
-    });
   }
 
-  boot();
-}
+
+  // =========================================================
+  // FETCH STUDENT SCHEDULE
+  // =========================================================
+
+  async function loadStudentSchedule() {
+
+    try {
+
+      console.log(
+        "📚 Loading student schedule..."
+      );
+
+
+      const data =
+        await apiFetch(
+          "/api/student/my-schedule"
+        );
+
+
+      console.log(
+        "📚 Student schedule response:",
+        data
+      );
+
+
+      if (!data?.ok) {
+
+        throw new Error(
+          data?.message ||
+          "Failed to load schedule."
+        );
+
+      }
+
+
+      const rawItems =
+        data?.data ||
+        data?.items ||
+        data?.schedule ||
+        [];
+
+
+      if (!Array.isArray(rawItems)) {
+
+        console.warn(
+          "Student schedule is not an array:",
+          rawItems
+        );
+
+        scheduleItems = [];
+
+      } else {
+
+        scheduleItems =
+          rawItems
+            .map(normalizeItem)
+            .filter(
+              item => item.day
+            );
+
+      }
+
+
+      console.log(
+        "📚 Normalized student schedule:",
+        scheduleItems
+      );
+
+
+      // =====================================================
+      // IMPORTANT:
+      // Use the student information returned by backend.
+      // =====================================================
+
+      if (data.student) {
+
+        const grade =
+          data.student.grade || "";
+
+        const section =
+          data.student.section || "";
+
+
+        if (
+          schedGradeSection &&
+          grade &&
+          section
+        ) {
+
+          schedGradeSection.textContent =
+            `${grade} - Section ${section}`;
+
+        }
+
+      }
+
+
+      renderAll();
+
+    } catch (err) {
+
+      console.error(
+        "❌ loadStudentSchedule error:",
+        err
+      );
+
+
+      scheduleItems = [];
+
+      renderAll();
+
+
+      showEmpty(
+        true,
+        err.message ||
+        "Failed to load schedule."
+      );
+
+    }
+
+  }
+
+
+  // =========================================================
+  // EVENTS
+  // =========================================================
+
+  viewWeekBtn?.addEventListener(
+    "click",
+    () => {
+
+      currentMode = "week";
+
+      updateModeUI();
+
+      renderWeekView(scheduleItems);
+
+    }
+  );
+
+
+  viewDayBtn?.addEventListener(
+    "click",
+    () => {
+
+      currentMode = "day";
+
+      updateModeUI();
+
+      renderDayView(
+        scheduleItems,
+        daySelect?.value || "mon"
+      );
+
+    }
+  );
+
+
+  daySelect?.addEventListener(
+    "change",
+    () => {
+
+      renderDayView(
+        scheduleItems,
+        daySelect.value
+      );
+
+    }
+  );
+
+
+  // =========================================================
+  // INIT
+  // =========================================================
+
+  updateModeUI();
+
+  loadStudentSchedule();
+
+});

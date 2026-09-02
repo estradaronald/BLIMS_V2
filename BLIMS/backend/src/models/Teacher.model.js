@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 
 const TeacherSchema = new mongoose.Schema(
   {
-    // ✅ link to User collection (login credentials live in users)
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -12,40 +11,146 @@ const TeacherSchema = new mongoose.Schema(
       index: true,
     },
 
-    teacherId: { type: String, required: true, unique: true }, // TCH-0001
+    teacherId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
 
-    firstName: { type: String, required: true },
-    middleName: { type: String, default: "" },
-    lastName: { type: String, required: true },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    gender: { type: String, enum: ["male", "female"], default: "male" },
-    dob: { type: String, required: true }, // keep string "YYYY-MM-DD"
+    middleName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
-    className: { type: String, required: true },
-    sectionName: { type: String, required: true },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    phone: { type: String, required: true }, // +63XXXXXXXXXX
-    email: { type: String, required: true, lowercase: true, trim: true },
+    gender: {
+      type: String,
+      enum: ["male", "female"],
+      default: "male",
+      required: true,
+    },
+
+    dob: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    className: {
+      type: String,
+      required: true,
+      default: "Unassigned",
+      trim: true,
+    },
+
+    sectionName: {
+      type: String,
+      required: true,
+      default: "Unassigned",
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    position: {
+      type: String,
+      default: "Teacher",
+      trim: true,
+    },
 
     address: {
-      street: { type: String, default: "" },
-      provinceCode: { type: String, default: "" },
-      cityCode: { type: String, default: "" },
-      brgyCode: { type: String, default: "" },
-      postal: { type: String, default: "" },
+      regionCode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      street: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      provinceCode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      cityCode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      brgyCode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      postal: {
+        type: String,
+        default: "",
+        trim: true,
+      },
     },
 
     credentials: {
-      hasPrc: { type: Boolean, default: false },
-      prcLicense: { type: String, default: "N/A" },
-      majorSpec: { type: String, default: "" },
-      highestEduc: { type: String, default: "" },
-      dateHired: { type: String, default: "" }, // YYYY-MM-DD
+      hasPrc: {
+        type: Boolean,
+        default: false,
+      },
+      prcLicense: {
+        type: String,
+        default: "N/A",
+        trim: true,
+      },
+      majorSpec: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      highestEduc: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      dateHired: {
+        type: String,
+        default: "",
+        trim: true,
+      },
     },
 
-    photoDataUrl: { type: String, default: "" },
+    photoDataUrl: {
+      type: String,
+      default: "",
+    },
 
-    isActive: { type: Boolean, default: true },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

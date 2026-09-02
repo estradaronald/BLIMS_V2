@@ -1,145 +1,555 @@
 <!-- frontend/src/pages/student/student-announcements.html -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Student - Announcements</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <<!-- ✅ same baseline styles -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  <!-- =====================================================
+       FONTS
+  ====================================================== -->
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  >
 
 
-  <!-- Reuse Admin announcements UI -->
-  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
-  <link rel="stylesheet" href="../../styles/student/student-announcements.css" />
+  <!-- =====================================================
+       SHARED STYLES
+  ====================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  >
+
+
+  <!-- =====================================================
+       STUDENT ANNOUNCEMENT STYLES
+  ====================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="../../styles/student/student-announcements.css"
+  >
+
 </head>
 
+
 <body data-page="announcements">
-  <!-- floating toggle -->
-  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+
+
+  <!-- =====================================================
+       SIDEBAR TOGGLE
+  ====================================================== -->
+
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >
     ←
   </button>
 
+
+  <!-- =====================================================
+       APP
+  ====================================================== -->
+
   <div class="app">
+
+
+    <!-- ===================================================
+         STUDENT SIDEBAR
+    ==================================================== -->
+
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <!-- TOP BAR -->
-      <header class="topbar">
+
+    <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
+
+    <main class="content page-animate">
+
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+      <header class="topbar reveal-soft">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+
+          <!-- NOTIFICATIONS -->
+
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            🔔
+          </button>
+
+
+          <!-- USER -->
+
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="Student avatar"
+            >
+
+
             <div class="tb-meta">
-              <div class="tb-name">Student</div>
-              <div class="tb-role">Announcements</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- PAGE (same wrapper/class names as Admin for consistent header spacing) -->
-      <section class="teachers-wrap">
-        <div class="teachers-page-head">
-          <h2 class="teachers-title">Announcements</h2>
-        </div>
-
-        <!-- LIST CARD WRAPPER (same as Admin) -->
-        <div class="card t-card ann-wrap-card">
-          <div class="t-card-head ann-card-head">
-            <div class="t-subtitle">All Announcements</div>
-
-            <!-- Filters row (source: Teacher/Admin) -->
-            <div class="ann-filters">
-              <div class="t-search ann-search">
-                <span class="t-search-ico">🔎</span>
-                <input id="annSearch" type="text" placeholder="Search Announcement" />
+              <div
+                class="tb-name"
+                id="tbName"
+              >
+                Student
               </div>
 
-              <select id="sourceFilter" class="t-filter">
-                <option value="all">Source: All</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
-              </select>
 
-              <select id="catFilter" class="t-filter">
-                <option value="all">Category: All</option>
-                <option value="general">General Announcements</option>
-                <option value="events">School Events</option>
-                <option value="academic">Academic Notices</option>
-                <option value="priority">Priority Alerts</option>
-              </select>
+              <div
+                class="tb-role"
+                id="tbRole"
+              >
+                Announcements
+              </div>
+
             </div>
+
+
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+            >
+              ▾
+            </button>
+
+
+            <!-- USER MENU -->
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
+            </div>
+
           </div>
 
-          <div class="ann-card-body">
-            <section class="ann-feed" id="annFeed"></section>
-
-            <div id="annEmpty" class="ann-empty hidden">
-              No announcements yet.
-            </div>
-          </div>
         </div>
-      </section>
-    </main>
-  </div>
 
-  <!-- =========================
-       VIEW MODAL (Student - view only)
-  ========================== -->
-  <div id="annViewModal" class="tmodal hidden" aria-hidden="true">
-    <div class="tmodal-backdrop" id="annViewBackdrop"></div>
+      </header>
 
-    <div class="tmodal-dialog ann-view-dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="annViewTitle">
-      <div class="tmodal-head">
-        <div class="tmodal-head-left">
+
+      <!-- =================================================
+           ANNOUNCEMENTS PAGE
+      ================================================== -->
+
+      <section class="student-announcements-page">
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <section class="student-announcements-header reveal-soft">
+
           <div>
-            <div id="annViewTitle" class="tmodal-title">Announcement</div>
-            <div class="tmodal-sub">
-              <span id="annViewMeta">—</span>
+
+            <h1>
+              Announcements
+            </h1>
+
+            <p>
+              Stay updated with announcements from your school
+              and teachers.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             TABS / SOURCE SUMMARY
+        ================================================== -->
+
+        <div class="student-announcement-tabs">
+
+          <div class="student-announcement-tab active">
+
+            <span class="student-tab-icon">
+              📢
+            </span>
+
+            <span>
+              All Announcements
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ANNOUNCEMENT CARD
+        ================================================== -->
+
+        <section class="student-announcement-card">
+
+
+          <!-- =================================================
+               CARD HEADER
+          ================================================== -->
+
+          <div class="student-announcement-card-header">
+
+            <div>
+
+              <h2>
+                All Announcements
+              </h2>
+
+              <p>
+                View the latest announcements published
+                by administrators and teachers.
+              </p>
+
             </div>
+
+
+            <!-- =================================================
+                 FILTERS
+            ================================================== -->
+
+            <div class="student-announcement-filters">
+
+
+              <!-- SEARCH -->
+
+              <div class="student-search-box">
+
+                <span>
+                  🔎
+                </span>
+
+                <input
+                  type="search"
+                  id="annSearch"
+                  placeholder="Search announcements..."
+                  autocomplete="off"
+                  aria-label="Search announcements"
+                >
+
+              </div>
+
+
+              <!-- SOURCE -->
+
+              <select
+                id="sourceFilter"
+                aria-label="Filter announcements by source"
+              >
+
+                <option value="all">
+                  Source: All
+                </option>
+
+                <option value="teacher">
+                  Teacher
+                </option>
+
+                <option value="admin">
+                  Admin
+                </option>
+
+              </select>
+
+
+              <!-- CATEGORY -->
+
+              <select
+                id="catFilter"
+                aria-label="Filter announcements by category"
+              >
+
+                <option value="all">
+                  Category: All
+                </option>
+
+                <option value="general">
+                  General Announcements
+                </option>
+
+                <option value="events">
+                  School Events
+                </option>
+
+                <option value="academic">
+                  Academic Notices
+                </option>
+
+                <option value="priority">
+                  Priority Alerts
+                </option>
+
+              </select>
+
+            </div>
+
           </div>
-        </div>
 
-        <button class="tmodal-x" id="annViewCloseX" type="button">✕</button>
-      </div>
 
-      <div class="tmodal-body">
-        <div class="ann-view">
-          <div class="ann-view-top">
-            <!-- we will fill these via JS -->
-            <span id="annViewSource" class="ann-source admin">Admin</span>
-            <span id="annViewPill" class="ann-pill">General</span>
+          <!-- =================================================
+               FEED
+          ================================================== -->
+
+          <div
+            id="annFeed"
+            class="student-announcement-feed"
+          >
           </div>
 
-          <h3 id="annViewH" class="ann-view-h">—</h3>
-          <p id="annViewMsg" class="ann-view-msg">—</p>
 
-          <div id="annViewFiles" class="ann-view-files"></div>
-        </div>
-      </div>
+          <!-- =================================================
+               EMPTY
+          ================================================== -->
 
-      <div class="tmodal-foot">
-        <button class="t-ghost" id="annViewCloseBtn" type="button">Close</button>
-      </div>
-    </div>
+          <div
+            id="annEmpty"
+            class="student-announcement-empty hidden"
+          >
+
+            <div class="student-empty-icon">
+              📢
+            </div>
+
+            <strong>
+              No announcements found
+            </strong>
+
+            <span>
+              There are currently no announcements matching
+              your filters.
+            </span>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </main>
+
   </div>
+
+
+  <!-- =====================================================
+       VIEW ANNOUNCEMENT MODAL
+  ====================================================== -->
+
+  <div
+    id="annViewModal"
+    class="student-announcement-modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      id="annViewBackdrop"
+      class="student-announcement-modal-backdrop"
+    >
+    </div>
+
+
+    <div
+      class="student-announcement-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="annViewTitle"
+      tabindex="-1"
+    >
+
+
+      <!-- =================================================
+           MODAL HEADER
+      ================================================== -->
+
+      <div class="student-announcement-modal-header">
+
+        <div>
+
+          <h2 id="annViewTitle">
+            Announcement
+          </h2>
+
+          <p id="annViewMeta">
+            —
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          id="annViewCloseX"
+          class="student-announcement-close"
+          aria-label="Close announcement"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           MODAL BODY
+      ================================================== -->
+
+      <div class="student-announcement-modal-body">
+
+
+        <!-- BADGES -->
+
+        <div class="student-announcement-view-badges">
+
+          <span
+            id="annViewSource"
+            class="student-source-pill admin"
+          >
+            Admin
+          </span>
+
+
+          <span
+            id="annViewPill"
+            class="student-category-pill"
+          >
+            General
+          </span>
+
+        </div>
+
+
+        <!-- TITLE -->
+
+        <h3 id="annViewH">
+          Announcement
+        </h3>
+
+
+        <!-- MESSAGE -->
+
+        <div
+          id="annViewMsg"
+          class="student-announcement-view-message"
+        >
+        </div>
+
+
+        <!-- ATTACHMENTS -->
+
+        <div
+          id="annViewFiles"
+          class="student-announcement-view-files"
+        >
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           MODAL FOOTER
+      ================================================== -->
+
+      <div class="student-announcement-modal-footer">
+
+        <button
+          type="button"
+          id="annViewCloseBtn"
+          class="student-modal-close-btn"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script src="../../shared/js/page-animations.js"></script>
 
   <script src="../../js/student/student-sidebar.js"></script>
+
   <script src="../../js/student/student-announcements.js"></script>
+
 </body>
+
 </html>

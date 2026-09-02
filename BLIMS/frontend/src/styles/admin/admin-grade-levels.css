@@ -469,3 +469,34 @@
   .gl-search{ min-width: 220px; }
   .gl-form-grid{ grid-template-columns: 1fr; }
 }
+
+/* remove teacher button */
+.gl-remove-teacher{
+  margin-top: 8px;
+  background: #ffecec;
+  color: #a61b1b;
+  border: 1px solid #ffd1d1;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.gl-remove-teacher:hover{
+  filter: brightness(.98);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+  transform: translateY(-1px);
+}
+
+.gl-remove-teacher:active{
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+.gl-remove-teacher:focus-visible{
+  outline: 3px solid rgba(166,27,27,.25);
+  outline-offset: 2px;
+}

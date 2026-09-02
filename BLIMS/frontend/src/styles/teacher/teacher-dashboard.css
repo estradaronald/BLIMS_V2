@@ -6,18 +6,13 @@
 .t-dash{
   display:grid;
   gap: 14px;
-
-  /* ✅ remove double padding (content already has padding:14px) */
   padding: 0;
-
   grid-template-columns: repeat(12, 1fr);
-
   grid-template-rows:
     auto
     auto
     minmax(0, 260px)
     minmax(0, 260px);
-
   align-items: stretch;
 }
 
@@ -67,7 +62,7 @@
 .t-assessments,
 .t-announcements{
   height: 100%;
-  min-height: 0; /* ⭐ critical: allows inner overflow instead of stretching the grid */
+  min-height: 0;
 }
 
 /* responsive */
@@ -91,7 +86,7 @@
   }
 
   .t-quick{
-    position: static; /* stop sticky when stacked */
+    position: static;
   }
 }
 
@@ -100,17 +95,16 @@
    =============================== */
 .t-hero{
   display:flex;
-  align-items:center;              /* 🔥 center vertically */
-  min-height: 200px;
+  align-items:center;
   justify-content:space-between;
-  gap: 24px;                       /* slightly more breathing room */
-  min-height: 140px;               /* slightly tighter */
-  padding: 18px 20px;              /* premium spacing */  
+  gap: 24px;
+  min-height: 140px;
+  padding: 18px 20px;
 }
 
 .t-hero-left h2{
   margin:0 0 8px;
-  font-size: 26px;          /* 🔥 larger */
+  font-size: 26px;
   font-weight: 1000;
   letter-spacing: -0.4px;
   line-height: 1.2;
@@ -130,7 +124,7 @@
   list-style:none;
   display:flex;
   flex-direction: column;
-  gap: 10px;                       /* more balanced spacing */
+  gap: 10px;
   font-size: 12px;
   color: rgba(11,44,74,.80);
 }
@@ -146,7 +140,7 @@
 }
 
 .t-hero-right{
-  width: 240px;                    /* more proportional */
+  width: 240px;
   display:flex;
   justify-content:flex-end;
   align-items:center;
@@ -154,11 +148,10 @@
 
 .t-hero-illus{
   width: 200px;
-  height: 200px;          /* 🔥 make it square to match circle image */
-  border-radius: 50%;     /* keep circular look */
+  height: 200px;
+  border-radius: 50%;
   background: transparent;
   border: none;
-
   display:flex;
   align-items:center;
   justify-content:center;
@@ -172,10 +165,10 @@
 }
 
 /* ===============================
-   QUICK ACTIONS (real buttons + icons)
+   QUICK ACTIONS
    =============================== */
 .t-quick{
-  position: static; /* ✅ not sticky */
+  position: static;
   padding: 14px;
   height: 100%;
   display:flex;
@@ -192,31 +185,26 @@
 .t-quick-actions{
   display:flex;
   flex-direction: column;
-  gap: 12px; /* spacing between buttons */
+  gap: 12px;
 }
 
-/* button reset + layout */
 .t-qa{
   margin-top: 0;
   appearance: none;
   -webkit-appearance: none;
   font-family: inherit;
   line-height: 1;
-
   width: 100%;
   border: 1px solid rgba(11,44,74,.10);
   border-radius: 14px;
   padding: 12px 14px;
-
   cursor: pointer;
   font-weight: 900;
   font-size: 12px;
-
   display:flex;
   align-items:center;
   gap: 10px;
   text-align:left;
-
   transition:
     transform .10s ease,
     box-shadow .10s ease,
@@ -224,7 +212,6 @@
     background .10s ease;
 }
 
-/* icon bubble */
 .t-qa-ico{
   width: 34px;
   height: 34px;
@@ -244,7 +231,6 @@
   color: rgba(11,44,74,.88);
 }
 
-/* button colors */
 .t-qa-green{ background: rgba(34,197,94,.14); }
 .t-qa-blue{ background: rgba(59,130,246,.14); }
 .t-qa-purple{ background: rgba(168,85,247,.14); }
@@ -273,8 +259,6 @@
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-
-  /* ✅ make the row feel less squished */
   align-items: stretch;
 }
 
@@ -287,10 +271,8 @@
   display:flex;
   align-items:center;
   gap: 12px;
-
-  min-height: 86px;          /* ✅ taller */
+  min-height: 86px;
   border-radius: 14px;
-
   border-left: 5px solid #2b6cb0;
 }
 
@@ -381,24 +363,18 @@
   border-radius: 10px;
   padding: 10px 10px;
   display:grid;
-
-  /* ✅ consistent right columns */
   grid-template-columns: 1fr 110px 150px;
-
   gap: 10px;
   align-items:center;
 }
 
-/* Schedule rows: 2 columns now */
 .t-sched-row{
   grid-template-columns: 1fr 120px;
 }
 
-/* List rows (assessments): keep 3 columns if still needed */
 .t-list-row{
   grid-template-columns: 1fr 110px 150px;
 }
-
 
 @media (max-width: 520px){
   .t-sched-row, .t-list-row{
@@ -406,7 +382,6 @@
     gap: 8px;
   }
 }
-
 
 .t-sched-title, .t-list-title{
   font-weight: 1000;
@@ -421,25 +396,23 @@
 }
 
 /* ===============================
-   TODAY'S SCHEDULE – SCROLLABLE (fixed)
+   TODAY'S SCHEDULE – SCROLLABLE
    =============================== */
 .t-schedule{
-  position: relative; /* for fade */
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
-/* scrollable list inside schedule */
 .t-schedule .t-sched{
   flex: 1;
-  min-height: 0;           /* ⭐ CRITICAL */
+  min-height: 0;
   overflow-y: auto;
   padding-right: 6px;
-  padding-bottom: 20px;    /* prevents fade hiding last row */
+  padding-bottom: 20px;
   overscroll-behavior: contain;
 }
 
-/* subtle scrollbar (Chrome/Edge) */
 .t-schedule .t-sched::-webkit-scrollbar{ width: 8px; }
 .t-schedule .t-sched::-webkit-scrollbar-thumb{
   background: rgba(11,44,74,.20);
@@ -447,7 +420,6 @@
 }
 .t-schedule .t-sched::-webkit-scrollbar-track{ background: transparent; }
 
-/* fade hint */
 .t-schedule::after{
   content: "";
   position: absolute;
@@ -461,20 +433,14 @@
 }
 
 /* ===============================
-   SHARED: make these panels able to scroll inside
+   SHARED SCROLLABLE PANELS
    =============================== */
 .t-activity-panel,
 .t-assessments,
 .t-announcements{
-  position: relative;     /* for fade */
+  position: relative;
   display: flex;
   flex-direction: column;
-}
-
-/* ✅ allow inner overflow to work (already in your file, keep it) */
-.t-activity-panel,
-.t-assessments,
-.t-announcements{
   min-height: 0;
 }
 
@@ -571,24 +537,20 @@
   border-radius: 12px;
 }
 
-
 /* badges + ghost buttons */
 .t-badge{
-  display: inline-flex;         /* ✅ center perfectly */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  height: 26px;                 /* consistent pill height */
-  min-width: 86px;              /* prevents “long stretching” */
+  height: 26px;
+  min-width: 86px;
   padding: 0 10px;
-
   font-size: 10px;
   font-weight: 900;
   border-radius: 999px;
   border: 1px solid rgba(11,44,74,.12);
-
-  white-space: nowrap;          /* ✅ no weird wrapping */
-  line-height: 1;               /* ✅ vertical centering */
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .t-badge-blue{ background: rgba(59,130,246,.12); }
@@ -679,4 +641,129 @@
   display:flex;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+/* =========================================
+   TOPBAR USER DROPDOWN FIX
+   ========================================= */
+.topbar {
+  position: relative;
+  z-index: 50;
+  overflow: visible !important;
+}
+
+.topbar-right {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  overflow: visible !important;
+}
+
+.tb-user {
+  position: relative;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: visible !important;
+}
+
+.tb-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tb-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.tb-name {
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(11, 44, 74, 0.92);
+}
+
+.tb-role {
+  font-size: 12px;
+  color: rgba(11, 44, 74, 0.60);
+}
+
+.tb-drop {
+  border: none;
+  background: #f1f4f8;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.15s ease;
+}
+
+.tb-drop:hover {
+  filter: brightness(.96);
+}
+
+.tb-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 190px;
+  background: #fff;
+  border: 1px solid rgba(11, 44, 74, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    visibility 0.18s ease;
+}
+
+.tb-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.tb-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(11, 44, 74, 0.88);
+  cursor: pointer;
+  transition: 0.12s ease;
+}
+
+.tb-item:hover {
+  background: #f5f7fb;
+}
+
+.tb-item.danger {
+  color: #b42318;
+}
+
+.tb-item.danger:hover {
+  background: rgba(220, 53, 69, 0.08);
 }

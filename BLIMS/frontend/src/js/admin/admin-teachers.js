@@ -2,7 +2,7 @@
 // =====================================================
 // ADMIN TEACHERS PAGE (Backend-connected)
 // Endpoints used:
-//   GET  /api/admin/teachers?q=&class=all
+//   GET  /api/admin/teachers?q=
 //   POST /api/admin/teachers
 //
 // Notes:
@@ -14,9 +14,6 @@
   if (window.__adminTeachersInit) return;
   window.__adminTeachersInit = true;
 
-  // ==============================
-  // DOM helpers
-  // ==============================
   const $ = (id) => document.getElementById(id);
 
   // ==============================
@@ -31,12 +28,16 @@
       const ct = res.headers.get("content-type") || "";
       if (!res.ok || !ct.includes("application/json")) return;
 
-      const payload = await res.json();
-      if (payload?.ok && typeof payload.csrfToken === "string") {
-        csrfToken = payload.csrfToken;
+      const payload = await res.json().catch(() => null);
+
+      if (
+        typeof payload?.csrfToken === "string" &&
+        payload.csrfToken.trim()
+      ) {
+        csrfToken = payload.csrfToken.trim();
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn("CSRF fetch failed:", err);
     }
   }
 
@@ -51,8 +52,18 @@
       ...(opts.headers || {}),
     };
 
-    if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
-      if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
+    if (
+      method !== "GET" &&
+      method !== "HEAD" &&
+      method !== "OPTIONS"
+    ) {
+      if (!csrfToken) {
+        await fetchCsrf();
+      }
+
+      if (csrfToken) {
+        headers["X-CSRF-Token"] = csrfToken;
+      }
     }
 
     const res = await fetch(url, {
@@ -61,15 +72,38 @@
       credentials: "include",
     });
 
+    const contentType = res.headers.get("content-type") || "";
     let data = null;
+
     try {
-      data = await res.json();
-    } catch {}
+      if (contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = text ? { message: text } : null;
+      }
+    } catch {
+      data = null;
+    }
 
     if (!res.ok) {
-      const msg = data?.message || `Request failed (${res.status})`;
+      console.error("API ERROR:", {
+        url,
+        method,
+        status: res.status,
+        response: data,
+      });
+
+      const msg =
+        data?.message ||
+        data?.error ||
+        data?.details ||
+        data?.errors?.[0]?.msg ||
+        `Request failed (${res.status})`;
+
       throw new Error(msg);
     }
+
     return data;
   }
 
@@ -87,9 +121,12 @@
     try {
       const raw = localStorage.getItem(cacheKey(key));
       if (!raw) return null;
+
       const parsed = JSON.parse(raw);
+
       if (!parsed?.data || !parsed?.expiresAt) return null;
       if (Date.now() > parsed.expiresAt) return null;
+
       return parsed.data;
     } catch {
       return null;
@@ -100,44 +137,61 @@
     try {
       localStorage.setItem(
         cacheKey(key),
-        JSON.stringify({ data, expiresAt: Date.now() + PSGC_CACHE_TTL_MS })
+        JSON.stringify({
+          data,
+          expiresAt: Date.now() + PSGC_CACHE_TTL_MS,
+        })
       );
     } catch {}
   }
 
   async function fetchJSON(url) {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+
+    if (!res.ok) {
+      throw new Error(`Request failed: ${res.status}`);
+    }
+
     return res.json();
   }
 
   async function getProvinces() {
     const cached = cacheGet("provinces");
     if (cached) return cached;
+
     const data = await fetchJSON(`${PSGC_BASE}/provinces`);
     cacheSet("provinces", data);
+
     return data;
   }
 
   async function getCitiesByProvince(provinceCode) {
     const key = `cities_${provinceCode}`;
+
     const cached = cacheGet(key);
     if (cached) return cached;
+
     const data = await fetchJSON(
       `${PSGC_BASE}/provinces/${provinceCode}/cities-municipalities`
     );
+
     cacheSet(key, data);
+
     return data;
   }
 
   async function getBarangaysByCity(cityCode) {
     const key = `brgys_${cityCode}`;
+
     const cached = cacheGet(key);
     if (cached) return cached;
+
     const data = await fetchJSON(
       `${PSGC_BASE}/cities-municipalities/${cityCode}/barangays`
     );
+
     cacheSet(key, data);
+
     return data;
   }
 
@@ -145,6 +199,7 @@
     const provSel = $("provinceSelect");
     const citySel = $("citySelect");
     const brgySel = $("brgySelect");
+
     if (!provSel) return;
 
     provSel.innerHTML = `<option value="">Select province</option>`;
@@ -153,6 +208,7 @@
       citySel.innerHTML = `<option value="">Select city</option>`;
       citySel.disabled = true;
     }
+
     if (brgySel) {
       brgySel.innerHTML = `<option value="">Select barangay</option>`;
       brgySel.disabled = true;
@@ -160,11 +216,17 @@
 
     try {
       const provinces = await getProvinces();
-      provinces.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+      provinces.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
+
       provinces.forEach((p) => {
         const opt = document.createElement("option");
+
         opt.value = String(p.code);
         opt.textContent = p.name;
+
         provSel.appendChild(opt);
       });
     } catch (e) {
@@ -176,6 +238,7 @@
     const provSel = $("provinceSelect");
     const citySel = $("citySelect");
     const brgySel = $("brgySelect");
+
     if (!provSel || !citySel || !brgySel) return;
 
     const provinceCode = provSel.value;
@@ -186,18 +249,28 @@
     brgySel.innerHTML = `<option value="">Select barangay</option>`;
     brgySel.disabled = true;
 
-    if ($("postal")) $("postal").value = "";
+    if ($("postal")) {
+      $("postal").value = "";
+    }
+
     if (!provinceCode) return;
 
     try {
       const cities = await getCitiesByProvince(provinceCode);
-      cities.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+      cities.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
+
       cities.forEach((c) => {
         const opt = document.createElement("option");
+
         opt.value = String(c.code);
         opt.textContent = c.name;
+
         citySel.appendChild(opt);
       });
+
       citySel.disabled = false;
     } catch (e) {
       console.warn("PSGC cities error:", e);
@@ -207,6 +280,7 @@
   async function onCityChange() {
     const citySel = $("citySelect");
     const brgySel = $("brgySelect");
+
     if (!citySel || !brgySel) return;
 
     const cityCode = citySel.value;
@@ -214,18 +288,28 @@
     brgySel.innerHTML = `<option value="">Select barangay</option>`;
     brgySel.disabled = true;
 
-    if ($("postal")) $("postal").value = "";
+    if ($("postal")) {
+      $("postal").value = "";
+    }
+
     if (!cityCode) return;
 
     try {
       const brgys = await getBarangaysByCity(cityCode);
-      brgys.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+      brgys.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
+
       brgys.forEach((b) => {
         const opt = document.createElement("option");
+
         opt.value = String(b.code);
         opt.textContent = b.name;
+
         brgySel.appendChild(opt);
       });
+
       brgySel.disabled = false;
     } catch (e) {
       console.warn("PSGC barangays error:", e);
@@ -241,11 +325,13 @@
 
   function filterNameValue(raw) {
     let s = String(raw || "");
+
     s = s.replace(/[^A-Za-z\s'\-]/g, "");
     s = s.replace(/\s+/g, " ");
     s = s.trim();
     s = s.replace(/'{2,}/g, "'");
     s = s.replace(/\-{2,}/g, "-");
+
     return s;
   }
 
@@ -255,7 +341,10 @@
 
     el.addEventListener("input", () => {
       const cleaned = filterNameValue(el.value);
-      if (el.value !== cleaned) el.value = cleaned;
+
+      if (el.value !== cleaned) {
+        el.value = cleaned;
+      }
     });
 
     el.addEventListener("paste", () => {
@@ -267,8 +356,10 @@
 
   function filterEmailValue(raw) {
     let s = String(raw || "");
+
     s = s.replace(/\s+/g, "");
     s = s.toLowerCase();
+
     return s;
   }
 
@@ -278,7 +369,10 @@
 
     el.addEventListener("input", () => {
       const cleaned = filterEmailValue(el.value);
-      if (el.value !== cleaned) el.value = cleaned;
+
+      if (el.value !== cleaned) {
+        el.value = cleaned;
+      }
     });
 
     el.addEventListener("paste", () => {
@@ -290,7 +384,11 @@
 
   function toPostal4(raw) {
     let d = digitsOnly(raw);
-    if (d.length > 4) d = d.slice(0, 4);
+
+    if (d.length > 4) {
+      d = d.slice(0, 4);
+    }
+
     return d;
   }
 
@@ -302,7 +400,10 @@
 
     el.addEventListener("input", () => {
       const cleaned = toPostal4(el.value);
-      if (el.value !== cleaned) el.value = cleaned;
+
+      if (el.value !== cleaned) {
+        el.value = cleaned;
+      }
     });
 
     el.addEventListener("paste", () => {
@@ -318,12 +419,17 @@
 
     el.addEventListener("input", () => {
       if (el.disabled) return;
+
       const cleaned = digitsOnly(el.value);
-      if (el.value !== cleaned) el.value = cleaned;
+
+      if (el.value !== cleaned) {
+        el.value = cleaned;
+      }
     });
 
     el.addEventListener("paste", () => {
       if (el.disabled) return;
+
       requestAnimationFrame(() => {
         el.value = digitsOnly(el.value);
       });
@@ -333,16 +439,28 @@
   function toLocal10Digits(raw) {
     let d = digitsOnly(raw);
 
-    if (d.startsWith("63")) d = d.slice(2);
-    if (d.startsWith("0") && d.length >= 11) d = d.slice(1);
-    if (d.length > 10) d = d.slice(0, 10);
+    if (d.startsWith("63")) {
+      d = d.slice(2);
+    }
+
+    if (d.startsWith("0") && d.length >= 11) {
+      d = d.slice(1);
+    }
+
+    if (d.length > 10) {
+      d = d.slice(0, 10);
+    }
 
     return d;
   }
 
   function toStoredPhone(local10) {
     const d = toLocal10Digits(local10);
-    if (d.length !== 10) return "";
+
+    if (d.length !== 10) {
+      return "";
+    }
+
     return `+63${d}`;
   }
 
@@ -354,7 +472,10 @@
 
     phoneEl.addEventListener("input", () => {
       const cleaned = toLocal10Digits(phoneEl.value);
-      if (phoneEl.value !== cleaned) phoneEl.value = cleaned;
+
+      if (phoneEl.value !== cleaned) {
+        phoneEl.value = cleaned;
+      }
     });
 
     phoneEl.addEventListener("paste", () => {
@@ -368,60 +489,9 @@
   // State
   // ==============================
   let teachers = [];
-  let classes = [];
-  let sections = [];
-  let currentPhotoDataUrl = "";
   let activeTeacherId = null;
 
   const tempPassCache = {};
-
-  // ==============================
-  // Load Grade Levels / Sections
-  // ==============================
-  async function loadClasses() {
-    try {
-      const res = await apiFetch("/api/admin/sections/summary");
-      const grades = res?.data || {};
-
-      classes = Object.keys(grades);
-
-      const classSel = $("classSelect");
-      if (!classSel) return;
-
-      classSel.innerHTML = `<option value="">Select class</option>`;
-
-      classes.forEach((g) => {
-        const opt = document.createElement("option");
-        opt.value = g;
-        opt.textContent = g;
-        classSel.appendChild(opt);
-      });
-    } catch (err) {
-      console.error("Failed to load grade levels:", err);
-    }
-  }
-
-  async function loadSectionsByGrade(grade) {
-    try {
-      const res = await apiFetch(`/api/admin/sections?grade=${encodeURIComponent(grade)}`);
-      const rows = res?.data || [];
-
-      const secSel = $("sectionSelect");
-      if (!secSel) return;
-
-      secSel.innerHTML = `<option value="">Select section</option>`;
-      sections = rows.map((r) => r.section);
-
-      rows.forEach((s) => {
-        const opt = document.createElement("option");
-        opt.value = s.section;
-        opt.textContent = s.section;
-        secSel.appendChild(opt);
-      });
-    } catch (err) {
-      console.error("Failed to load sections:", err);
-    }
-  }
 
   // ==============================
   // View toggling
@@ -431,7 +501,10 @@
     $("formView")?.classList.add("hidden");
 
     const addBtn = $("addNewBtn");
-    if (addBtn) addBtn.style.display = "";
+
+    if (addBtn) {
+      addBtn.style.display = "";
+    }
   }
 
   function showFormView() {
@@ -439,7 +512,10 @@
     $("formView")?.classList.remove("hidden");
 
     const addBtn = $("addNewBtn");
-    if (addBtn) addBtn.style.display = "none";
+
+    if (addBtn) {
+      addBtn.style.display = "none";
+    }
   }
 
   // ==============================
@@ -448,6 +524,7 @@
   function setError(msg) {
     const box = $("formError");
     if (!box) return;
+
     box.textContent = msg;
     box.classList.remove("hidden");
   }
@@ -455,87 +532,107 @@
   function clearError() {
     const box = $("formError");
     if (!box) return;
+
     box.classList.add("hidden");
     box.textContent = "";
   }
 
-  function advisoryLabel(t) {
-    const cls = t.className || "";
-    const sec = t.sectionName || "";
-    const out = [cls, sec].filter(Boolean).join(" - ");
-    return out || "—";
+  function fullName(t) {
+    return [t.firstName, t.middleName, t.lastName]
+      .filter(Boolean)
+      .join(" ");
   }
 
-  function fullName(t) {
-    return [t.firstName, t.middleName, t.lastName].filter(Boolean).join(" ");
+  function getTeacherGenderText(t) {
+    if (t.gender) {
+      return t.gender === "female" ? "Female" : "Male";
+    }
+
+    if (t.sex) {
+      return t.sex;
+    }
+
+    return "—";
+  }
+
+  function getTeacherAddress(t) {
+    return t.address || {};
+  }
+
+  function getTeacherCredentials(t) {
+    return t.credentials || {};
   }
 
   // ==============================
   // Render
   // ==============================
-  function renderClassFilter() {
-    const filter = $("classFilter");
-    if (!filter) return;
-
-    const current = filter.value || "all";
-    filter.innerHTML = `<option value="all">All Classes</option>`;
-
-    classes.forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = c;
-      filter.appendChild(opt);
-    });
-
-    filter.value = classes.includes(current) ? current : "all";
-  }
-
   function renderTeachersTable() {
     const tbody = $("teachersTbody");
     if (!tbody) return;
 
-    const q = ($("searchInput")?.value || "").toLowerCase().trim();
-    const classFilter = $("classFilter")?.value || "all";
+    const q = ($("searchInput")?.value || "")
+      .toLowerCase()
+      .trim();
 
     const filtered = teachers.filter((t) => {
-      const matchesSearch =
+      return (
         !q ||
         fullName(t).toLowerCase().includes(q) ||
-        (t.teacherId || "").toLowerCase().includes(q);
-
-      const matchesClass = classFilter === "all" || t.className === classFilter;
-      return matchesSearch && matchesClass;
+        (t.teacherId || "").toLowerCase().includes(q)
+      );
     });
 
     tbody.innerHTML = "";
 
     if (filtered.length === 0) {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="7" style="padding:16px;color:#6b7b8a;">No teachers yet.</td>`;
+
+      tr.innerHTML = `
+        <td colspan="6" style="padding:16px;color:#6b7b8a;">
+          No teachers yet.
+        </td>
+      `;
+
       tbody.appendChild(tr);
       return;
     }
 
     filtered.forEach((t, idx) => {
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
         <td>${String(idx + 1).padStart(2, "0")}</td>
+
         <td>
-          <div style="font-weight:800">${fullName(t)}</div>
-          <div style="font-size:11px;color:#6b7b8a">${t.teacherId || "—"}</div>
+          <div style="font-weight:800">
+            ${fullName(t)}
+          </div>
+
+          <div style="font-size:11px;color:#6b7b8a">
+            ${t.teacherId || "—"}
+          </div>
         </td>
+
         <td>${t.email || "—"}</td>
+
         <td>*****</td>
-        <td>${advisoryLabel(t)}</td>
+
         <td>${t.phone || "—"}</td>
+
         <td>
           <div class="t-actions">
-            <button class="t-icon-btn t-view" data-id="${t.id}" title="View" type="button">
+            <button
+              class="t-icon-btn t-view"
+              data-id="${t.id}"
+              title="View"
+              type="button"
+            >
               <img src="../../assets/icons/view.svg" alt="View" />
             </button>
           </div>
         </td>
       `;
+
       tbody.appendChild(tr);
     });
   }
@@ -545,47 +642,67 @@
   // ==============================
   function setText(id, value) {
     const el = $(id);
-    if (el) el.textContent = value ?? "";
+
+    if (el) {
+      el.textContent = value ?? "";
+    }
   }
 
   function setValue(id, value) {
     const el = $(id);
-    if (el) el.value = value ?? "";
+
+    if (el) {
+      el.value = value ?? "";
+    }
   }
 
   async function openTeacherModal(id) {
     const modal = $("teacherModal");
+
     if (!modal) return;
 
     const t = teachers.find((x) => x.id === id);
+
     if (!t) return;
 
     activeTeacherId = id;
 
     const avatar = $("tmAvatar");
-    if (avatar) avatar.src = t.photoDataUrl || "../../assets/images/bg.jpg";
+
+    if (avatar) {
+      avatar.src = "../../assets/images/bg.jpg";
+    }
+
+    const addr = getTeacherAddress(t);
+    const creds = getTeacherCredentials(t);
 
     setText("teacherModalTitle", "Teacher Profile");
-    setText("tmTeacherId", `Teacher ID: ${t.teacherId || "—"}`);
+
+    setText(
+      "tmTeacherId",
+      `Teacher ID: ${t.teacherId || "—"}`
+    );
 
     setValue("tmFullName", fullName(t) || "—");
-    setValue("tmGender", t.gender || "—");
+    setValue("tmGender", getTeacherGenderText(t));
     setValue("tmDob", t.dob || "—");
-    setValue("tmAdvisory", advisoryLabel(t));
 
     setValue("tmPhone", t.phone || "—");
     setValue("tmEmail", t.email || "—");
 
-    const addr = t.address || {};
     setValue("tmStreet", addr.street || "—");
     setValue("tmProvince", addr.provinceCode || "—");
     setValue("tmCity", addr.cityCode || "—");
-    setValue("tmBrgy", addr.brgyCode || "—");
-    setValue("tmPostal", addr.postal || "—");
+    setValue(
+      "tmBrgy",
+      addr.brgyCode || addr.barangayCode || "—"
+    );
+    setValue(
+      "tmPostal",
+      addr.postal || addr.postalCode || "—"
+    );
 
-    const creds = t.credentials || {};
-    const prc = creds.hasPrc ? creds.prcLicense || "—" : "N/A";
-    setValue("tmPrc", prc);
+    setValue("tmPrc", creds.prcLicense || "N/A");
     setValue("tmMajor", creds.majorSpec || "—");
     setValue("tmEduc", creds.highestEduc || "—");
     setValue("tmHired", creds.dateHired || "—");
@@ -593,10 +710,21 @@
     setValue("tmAccId", t.teacherId || "—");
     setValue("tmAccPass", tempPassCache[id] || "—");
 
-    document.querySelectorAll(".tmodal-tab").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tmodal-panel").forEach((p) => p.classList.add("hidden"));
-    document.querySelector('.tmodal-tab[data-tab="basic"]')?.classList.add("active");
-    document.querySelector('.tmodal-panel[data-panel="basic"]')?.classList.remove("hidden");
+    document
+      .querySelectorAll(".tmodal-tab")
+      .forEach((b) => b.classList.remove("active"));
+
+    document
+      .querySelectorAll(".tmodal-panel")
+      .forEach((p) => p.classList.add("hidden"));
+
+    document
+      .querySelector('.tmodal-tab[data-tab="basic"]')
+      ?.classList.add("active");
+
+    document
+      .querySelector('.tmodal-panel[data-panel="basic"]')
+      ?.classList.remove("hidden");
 
     modal.classList.remove("hidden");
     modal.setAttribute("aria-hidden", "false");
@@ -604,32 +732,61 @@
 
   function closeTeacherModal() {
     const modal = $("teacherModal");
+
     if (!modal) return;
+
     modal.classList.add("hidden");
     modal.setAttribute("aria-hidden", "true");
+
     activeTeacherId = null;
   }
 
   function bindTeacherModalEvents() {
-    $("teacherModalBackdrop")?.addEventListener("click", closeTeacherModal);
-    $("teacherModalCloseX")?.addEventListener("click", closeTeacherModal);
-    $("teacherModalCloseBtn")?.addEventListener("click", closeTeacherModal);
+    $("teacherModalBackdrop")?.addEventListener(
+      "click",
+      closeTeacherModal
+    );
+
+    $("teacherModalCloseX")?.addEventListener(
+      "click",
+      closeTeacherModal
+    );
+
+    $("teacherModalCloseBtn")?.addEventListener(
+      "click",
+      closeTeacherModal
+    );
 
     document.querySelectorAll(".tmodal-tab").forEach((btn) => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".tmodal-tab").forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tmodal-tab")
+          .forEach((b) => b.classList.remove("active"));
+
         btn.classList.add("active");
 
         const tab = btn.dataset.tab;
-        document.querySelectorAll(".tmodal-panel").forEach((p) => p.classList.add("hidden"));
-        document.querySelector(`.tmodal-panel[data-panel="${tab}"]`)?.classList.remove("hidden");
+
+        document
+          .querySelectorAll(".tmodal-panel")
+          .forEach((p) => p.classList.add("hidden"));
+
+        document
+          .querySelector(
+            `.tmodal-panel[data-panel="${tab}"]`
+          )
+          ?.classList.remove("hidden");
       });
     });
 
     document.addEventListener("keydown", (e) => {
       const modal = $("teacherModal");
-      const isOpen = modal && !modal.classList.contains("hidden");
-      if (isOpen && e.key === "Escape") closeTeacherModal();
+      const isOpen =
+        modal && !modal.classList.contains("hidden");
+
+      if (isOpen && e.key === "Escape") {
+        closeTeacherModal();
+      }
     });
   }
 
@@ -638,11 +795,16 @@
   // ==============================
   function setPrcState(hasPrc) {
     const prc = $("prcLicense");
+
     if (!prc) return;
 
     if (hasPrc) {
       prc.disabled = false;
-      if (prc.value.trim().toUpperCase() === "N/A") prc.value = "";
+
+      if (prc.value.trim().toUpperCase() === "N/A") {
+        prc.value = "";
+      }
+
       prc.placeholder = "Enter PRC License No.";
     } else {
       prc.disabled = true;
@@ -656,154 +818,119 @@
   }
 
   function resetPrc() {
-    $("hasPrcNo") && ($("hasPrcNo").checked = true);
-    $("hasPrcYes") && ($("hasPrcYes").checked = false);
+    if ($("hasPrcNo")) {
+      $("hasPrcNo").checked = true;
+    }
+
+    if ($("hasPrcYes")) {
+      $("hasPrcYes").checked = false;
+    }
+
     setPrcState(false);
-  }
-
-  // ==============================
-  // Photo upload / preview
-  // ==============================
-  function bindSelectFilesButton(previewEl) {
-    const btn = previewEl.querySelector("#selectFilesBtn");
-    if (btn) {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        $("photoInput")?.click();
-      });
-    }
-  }
-
-  function setPhoto(dataUrl) {
-    currentPhotoDataUrl = dataUrl || "";
-
-    const preview = $("photoPreview");
-    const removeBtn = $("removePhotoBtn");
-    if (!preview || !removeBtn) return;
-
-    if (!currentPhotoDataUrl) {
-      preview.style.backgroundImage = "";
-      preview.style.backgroundSize = "";
-      preview.style.backgroundPosition = "";
-      preview.innerHTML = `
-        <div class="t-upload-ico">🖼️</div>
-        <div class="t-upload-text">Drop your profile photo to upload</div>
-        <button id="selectFilesBtn" class="t-ghost small" type="button">Select photo</button>
-      `;
-      removeBtn.classList.add("hidden");
-      bindSelectFilesButton(preview);
-      return;
-    }
-
-    preview.innerHTML = `
-      <div class="t-upload-text">Profile photo selected</div>
-      <div style="font-size:12px;color:#6b7b8a">Click to change</div>
-    `;
-    preview.style.backgroundImage = `url('${currentPhotoDataUrl}')`;
-    preview.style.backgroundSize = "cover";
-    preview.style.backgroundPosition = "center";
-    removeBtn.classList.remove("hidden");
-  }
-
-  function bindPhotoUpload() {
-    const preview = $("photoPreview");
-    const input = $("photoInput");
-    const removeBtn = $("removePhotoBtn");
-    if (!preview || !input || !removeBtn) return;
-
-    preview.addEventListener("click", () => input.click());
-
-    preview.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      preview.style.borderColor = "#0b4d7a";
-    });
-
-    preview.addEventListener("dragleave", () => {
-      preview.style.borderColor = "#d9e4f2";
-    });
-
-    preview.addEventListener("drop", (e) => {
-      e.preventDefault();
-      preview.style.borderColor = "#d9e4f2";
-      const file = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (file) handlePhotoFile(file);
-    });
-
-    input.addEventListener("change", () => {
-      const file = input.files && input.files[0];
-      if (file) handlePhotoFile(file);
-    });
-
-    removeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      input.value = "";
-      setPhoto("");
-    });
-
-    bindSelectFilesButton(preview);
-  }
-
-  function handlePhotoFile(file) {
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => setPhoto(reader.result);
-    reader.readAsDataURL(file);
   }
 
   // ==============================
   // Form helpers
   // ==============================
   function getGenderValue() {
-    const checked = document.querySelector('input[name="gender"]:checked');
+    const checked = document.querySelector(
+      'input[name="gender"]:checked'
+    );
+
     return checked ? checked.value : "male";
   }
 
   function clearForm() {
-    $("firstName") && ($("firstName").value = "");
-    $("middleName") && ($("middleName").value = "");
-    $("lastName") && ($("lastName").value = "");
-    $("dob") && ($("dob").value = "");
+    if ($("firstName")) {
+      $("firstName").value = "";
+    }
 
-    const male = document.querySelector('input[name="gender"][value="male"]');
-    if (male) male.checked = true;
+    if ($("middleName")) {
+      $("middleName").value = "";
+    }
+
+    if ($("lastName")) {
+      $("lastName").value = "";
+    }
+
+    if ($("dob")) {
+      $("dob").value = "";
+    }
+
+    const male = document.querySelector(
+      'input[name="gender"][value="male"]'
+    );
+
+    if (male) {
+      male.checked = true;
+    }
 
     resetPrc();
 
-    $("classSelect") && ($("classSelect").value = "");
-    if ($("sectionSelect")) {
-      $("sectionSelect").innerHTML = `<option value="">Select section</option>`;
+    if ($("phone")) {
+      $("phone").value = "";
     }
 
-    $("phone") && ($("phone").value = "");
-    $("email") && ($("email").value = "");
-    $("street") && ($("street").value = "");
+    if ($("email")) {
+      $("email").value = "";
+    }
 
-    $("provinceSelect") && ($("provinceSelect").value = "");
+    if ($("street")) {
+      $("street").value = "";
+    }
+
+    if ($("provinceSelect")) {
+      $("provinceSelect").value = "";
+    }
+
     if ($("citySelect")) {
-      $("citySelect").innerHTML = `<option value="">Select city</option>`;
+      $("citySelect").innerHTML =
+        `<option value="">Select city</option>`;
+
       $("citySelect").disabled = true;
     }
+
     if ($("brgySelect")) {
-      $("brgySelect").innerHTML = `<option value="">Select barangay</option>`;
+      $("brgySelect").innerHTML =
+        `<option value="">Select barangay</option>`;
+
       $("brgySelect").disabled = true;
     }
-    $("postal") && ($("postal").value = "");
 
-    $("majorSpec") && ($("majorSpec").value = "");
-    $("majorOther") && ($("majorOther").value = "");
-    $("highestEduc") && ($("highestEduc").value = "");
-    $("dateHired") && ($("dateHired").value = "");
+    if ($("postal")) {
+      $("postal").value = "";
+    }
+
+    if ($("majorSpec")) {
+      $("majorSpec").value = "";
+    }
+
+    if ($("majorOther")) {
+      $("majorOther").value = "";
+    }
+
+    if ($("highestEduc")) {
+      $("highestEduc").value = "";
+    }
+
+    if ($("dateHired")) {
+      $("dateHired").value = "";
+    }
 
     $("majorOtherWrap")?.classList.add("hidden");
-    $("majorOther") && ($("majorOther").disabled = true);
 
-    $("teacherId") && ($("teacherId").value = "");
-    $("tempPass") && ($("tempPass").value = "");
+    if ($("majorOther")) {
+      $("majorOther").disabled = true;
+    }
 
-    setPhoto("");
+    if ($("teacherId")) {
+      $("teacherId").value = "";
+    }
+
+    if ($("tempPass")) {
+      $("tempPass").value = "";
+    }
+
     clearError();
   }
 
@@ -812,26 +939,22 @@
   // ==============================
   async function loadTeachers() {
     const q = ($("searchInput")?.value || "").trim();
-    const classFilter = $("classFilter")?.value || "all";
 
     const qs = new URLSearchParams();
-    if (q) qs.set("q", q);
-    if (classFilter) qs.set("class", classFilter);
 
-    const data = await apiFetch(`/api/admin/teachers?${qs.toString()}`);
+    if (q) {
+      qs.set("q", q);
+    }
+
+    const data = await apiFetch(
+      `/api/admin/teachers?${qs.toString()}`
+    );
 
     teachers = (data?.teachers || []).map((t) => ({
       ...t,
       id: t.id || t._id || "",
     }));
 
-    const set = new Set(classes);
-    teachers.forEach((t) => {
-      if (t.className) set.add(t.className);
-    });
-    classes = Array.from(set);
-
-    renderClassFilter();
     renderTeachersTable();
   }
 
@@ -844,105 +967,220 @@
     const firstName = ($("firstName")?.value || "").trim();
     const middleName = ($("middleName")?.value || "").trim();
     const lastName = ($("lastName")?.value || "").trim();
+
     const dob = $("dob")?.value || "";
     const gender = getGenderValue();
-
-    const className = $("classSelect")?.value || "";
-    const sectionName = $("sectionSelect")?.value || "";
 
     const phoneLocal = ($("phone")?.value || "").trim();
     const phoneStored = toStoredPhone(phoneLocal);
 
-    const email = ($("email")?.value || "").trim().toLowerCase();
+    const email = ($("email")?.value || "")
+      .trim()
+      .toLowerCase();
 
     const street = ($("street")?.value || "").trim();
-    const provinceCode = $("provinceSelect")?.value || "";
-    const cityCode = $("citySelect")?.value || "";
-    const brgyCode = $("brgySelect")?.value || "";
-    const postal = ($("postal")?.value || "").trim();
+
+    const provinceCode =
+      $("provinceSelect")?.value || "";
+
+    const cityCode =
+      $("citySelect")?.value || "";
+
+    const brgyCode =
+      $("brgySelect")?.value || "";
+
+    const postal =
+      ($("postal")?.value || "").trim();
 
     const hasPrc = getHasPrcValue();
-    let prcLicense = ($("prcLicense")?.value || "").trim();
-    if (!hasPrc) prcLicense = "N/A";
 
-    const majorSpecSel = ($("majorSpec")?.value || "").trim();
-    const majorOther = ($("majorOther")?.value || "").trim();
-    const majorSpec =
-      majorSpecSel.toLowerCase() === "other" ? majorOther : majorSpecSel;
+    let prcLicense =
+      ($("prcLicense")?.value || "").trim();
 
-    const highestEduc = ($("highestEduc")?.value || "").trim();
-    const dateHired = $("dateHired")?.value || "";
-
-    if (!firstName || !lastName) return setError("First and last name are required.");
-    if (!dob) return setError("Date of birth is required.");
-    if (!className || !sectionName) return setError("Class and section are required.");
-    if (!email) return setError("Email is required.");
-    if (!phoneStored) return setError("Phone must be exactly 10 digits.");
-    if (postal && !/^\d{4}$/.test(postal)) return setError("Postal must be exactly 4 digits.");
-    if (hasPrc && !prcLicense) return setError("PRC license number required.");
-    if (!majorSpecSel) return setError("Major is required.");
-    if (majorSpecSel.toLowerCase() === "other" && !majorOther) {
-      return setError("Please specify the Major / Specialization.");
+    if (!hasPrc) {
+      prcLicense = "N/A";
     }
-    if (!highestEduc) return setError("Highest educational attainment required.");
-    if (!dateHired) return setError("Date hired is required.");
+
+    const majorSpecSel =
+      ($("majorSpec")?.value || "").trim();
+
+    const majorOther =
+      ($("majorOther")?.value || "").trim();
+
+    const majorSpec =
+      majorSpecSel.toLowerCase() === "other"
+        ? majorOther
+        : majorSpecSel;
+
+    const highestEduc =
+      ($("highestEduc")?.value || "").trim();
+
+    const dateHired =
+      $("dateHired")?.value || "";
+
+    if (!firstName || !lastName) {
+      return setError(
+        "First and last name are required."
+      );
+    }
+
+    if (!dob) {
+      return setError(
+        "Date of birth is required."
+      );
+    }
+
+    if (!email) {
+      return setError("Email is required.");
+    }
+
+    if (!phoneStored) {
+      return setError(
+        "Phone must be exactly 10 digits."
+      );
+    }
+
+    if (
+      postal &&
+      !/^\d{4}$/.test(postal)
+    ) {
+      return setError(
+        "Postal must be exactly 4 digits."
+      );
+    }
+
+    if (hasPrc && !prcLicense) {
+      return setError(
+        "PRC license number required."
+      );
+    }
+
+    if (!majorSpecSel) {
+      return setError("Major is required.");
+    }
+
+    if (
+      majorSpecSel.toLowerCase() === "other" &&
+      !majorOther
+    ) {
+      return setError(
+        "Please specify the Major / Specialization."
+      );
+    }
+
+    if (!highestEduc) {
+      return setError(
+        "Highest educational attainment required."
+      );
+    }
+
+    if (!dateHired) {
+      return setError(
+        "Date hired is required."
+      );
+    }
 
     const payload = {
       firstName,
       middleName,
       lastName,
       dob,
-      gender,
-      className,
-      sectionName,
 
-      phone: phoneLocal,
+      gender,
+      sex: gender === "male" ? "Male" : "Female",
+
+      phone: phoneStored,
       email,
 
       street,
       provinceCode,
       cityCode,
-      brgyCode,
-      postal,
+      barangayCode: brgyCode,
+      postalCode: postal,
 
       hasPrc,
-      prcLicense,
+      prcLicenseNo: hasPrc
+        ? prcLicense
+        : "N/A",
+
       majorSpec,
       highestEduc,
       dateHired,
 
-      photoDataUrl: currentPhotoDataUrl,
+      position: "Teacher",
     };
+
+    console.log("Teacher payload:", payload);
 
     try {
       const btn = $("saveBtn");
-      if (btn) btn.disabled = true;
 
-      const data = await apiFetch("/api/admin/teachers", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      if (btn) {
+        btn.disabled = true;
+      }
 
-      const created = data.teacher;
-      const tempPass = data.tempPass;
+      const data = await apiFetch(
+        "/api/admin/teachers",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }
+      );
 
-      if (created?.id && tempPass) tempPassCache[created.id] = tempPass;
+      const created =
+        data?.teacher || null;
 
-      $("teacherId") && ($("teacherId").value = created?.teacherId || "");
-      $("tempPass") && ($("tempPass").value = tempPass || "");
+      const tempPass =
+        data?.tempPass || "";
+
+      if (created?.id && tempPass) {
+        tempPassCache[created.id] =
+          tempPass;
+      }
+
+      if (created?._id && tempPass) {
+        tempPassCache[created._id] =
+          tempPass;
+      }
+
+      if ($("teacherId")) {
+        $("teacherId").value =
+          created?.teacherId || "";
+      }
+
+      if ($("tempPass")) {
+        $("tempPass").value =
+          tempPass || "";
+      }
 
       alert(
-        `✅ Teacher created!\n\nTeacher ID: ${created?.teacherId || ""}\nTemp Password: ${tempPass || ""}\n\n⚠️ Save this password now. It will not be shown again later.`
+        `✅ Teacher created!\n\n` +
+        `Teacher ID: ${created?.teacherId || ""}\n` +
+        `Temp Password: ${tempPass || ""}\n\n` +
+        `⚠️ Save this password now. ` +
+        `It will not be shown again later.`
       );
 
       await loadTeachers();
+
       showListView();
       clearForm();
     } catch (err) {
-      setError(err.message || "Failed to create teacher.");
+      console.error(
+        "Create teacher failed:",
+        err
+      );
+
+      setError(
+        err.message ||
+        "Failed to create teacher."
+      );
     } finally {
       const btn = $("saveBtn");
-      if (btn) btn.disabled = false;
+
+      if (btn) {
+        btn.disabled = false;
+      }
     }
   }
 
@@ -950,107 +1188,168 @@
   // Events
   // ==============================
   function bindEvents() {
-    $("classSelect")?.addEventListener("change", async (e) => {
-      const grade = e.target.value;
-      if (grade) {
-        await loadSectionsByGrade(grade);
-      } else if ($("sectionSelect")) {
-        $("sectionSelect").innerHTML = `<option value="">Select section</option>`;
+    $("addNewBtn")?.addEventListener(
+      "click",
+      async () => {
+        showFormView();
+        clearForm();
+        clearError();
+
+        await loadProvinces();
       }
-    });
+    );
 
-    $("addNewBtn")?.addEventListener("click", async () => {
-      showFormView();
-      clearForm();
-      clearError();
-
-      await loadClasses();
-      await loadProvinces();
-    });
-
-    $("cancelBtn")?.addEventListener("click", () => {
-      showListView();
-      clearForm();
-    });
-
-    $("resetBtn")?.addEventListener("click", async () => {
-      clearForm();
-      await loadClasses();
-      await loadProvinces();
-    });
-
-    $("saveBtn")?.addEventListener("click", saveTeacher);
-
-    $("searchInput")?.addEventListener("input", renderTeachersTable);
-    $("classFilter")?.addEventListener("change", renderTeachersTable);
-
-    $("provinceSelect")?.addEventListener("change", onProvinceChange);
-    $("citySelect")?.addEventListener("change", onCityChange);
-
-    $("hasPrcYes")?.addEventListener("change", () => setPrcState(true));
-    $("hasPrcNo")?.addEventListener("change", () => setPrcState(false));
-
-    $("majorSpec")?.addEventListener("change", () => {
-      const sel = ($("majorSpec")?.value || "").trim().toLowerCase();
-      const wrap = $("majorOtherWrap");
-      const input = $("majorOther");
-      if (!wrap || !input) return;
-
-      if (sel === "other") {
-        wrap.classList.remove("hidden");
-        input.disabled = false;
-        input.focus();
-      } else {
-        wrap.classList.add("hidden");
-        input.value = "";
-        input.disabled = true;
+    $("cancelBtn")?.addEventListener(
+      "click",
+      () => {
+        showListView();
+        clearForm();
       }
-    });
+    );
 
-    $("teachersTbody")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
-
-      const id = btn.dataset.id;
-      if (!id) return;
-
-      if (btn.classList.contains("t-view")) {
-        openTeacherModal(id);
+    $("resetBtn")?.addEventListener(
+      "click",
+      async () => {
+        clearForm();
+        await loadProvinces();
       }
-    });
+    );
+
+    $("saveBtn")?.addEventListener(
+      "click",
+      saveTeacher
+    );
+
+    $("searchInput")?.addEventListener(
+      "input",
+      renderTeachersTable
+    );
+
+    $("provinceSelect")?.addEventListener(
+      "change",
+      onProvinceChange
+    );
+
+    $("citySelect")?.addEventListener(
+      "change",
+      onCityChange
+    );
+
+    $("hasPrcYes")?.addEventListener(
+      "change",
+      () => setPrcState(true)
+    );
+
+    $("hasPrcNo")?.addEventListener(
+      "change",
+      () => setPrcState(false)
+    );
+
+    $("majorSpec")?.addEventListener(
+      "change",
+      () => {
+        const sel =
+          ($("majorSpec")?.value || "")
+            .trim()
+            .toLowerCase();
+
+        const wrap =
+          $("majorOtherWrap");
+
+        const input =
+          $("majorOther");
+
+        if (!wrap || !input) return;
+
+        if (sel === "other") {
+          wrap.classList.remove(
+            "hidden"
+          );
+
+          input.disabled = false;
+          input.focus();
+        } else {
+          wrap.classList.add(
+            "hidden"
+          );
+
+          input.value = "";
+          input.disabled = true;
+        }
+      }
+    );
+
+    $("teachersTbody")?.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target.closest("button");
+
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+
+        if (!id) return;
+
+        if (
+          btn.classList.contains(
+            "t-view"
+          )
+        ) {
+          openTeacherModal(id);
+        }
+      }
+    );
   }
 
   // ==============================
   // Init
   // ==============================
-  document.addEventListener("DOMContentLoaded", async () => {
+  async function init() {
     await fetchCsrf();
 
     bindEvents();
     bindTeacherModalEvents();
-    bindPhotoUpload();
 
     bindPhoneFilter();
     bindPostalFilter();
+
     bindNameFilter("firstName");
     bindNameFilter("middleName");
     bindNameFilter("lastName");
+
     bindEmailFilter("email");
     bindPrcFilter();
 
-    renderClassFilter();
     showListView();
     resetPrc();
-    $("majorOther") && ($("majorOther").disabled = true);
+
+    if ($("majorOther")) {
+      $("majorOther").disabled = true;
+    }
 
     try {
-      await loadClasses();
       await loadTeachers();
     } catch (e) {
       console.warn(e);
+
       setError(
-        "Backend not reachable or route missing. Make sure server is running and /api/admin/teachers exists."
+        e.message ||
+        "Failed to load teachers."
       );
     }
-  });
+  }
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      { once: true }
+    );
+  } else {
+    init();
+  }
 })();

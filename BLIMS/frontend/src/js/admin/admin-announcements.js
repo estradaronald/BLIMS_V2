@@ -1,674 +1,1900 @@
-// frontend/src/js/admin-announcements.js
-document.addEventListener("DOMContentLoaded", function () {
-  const $ = (id) => document.getElementById(id);
+document.addEventListener("DOMContentLoaded", () => {
+  const $ = (id) =>
+    document.getElementById(id);
 
-  const LS_KEYS = { ANN: "rbms_announcements_v1" };
+  const API_BASE =
+    "/api/admin/announcements";
 
-  function readLS(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-  function writeLS(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
 
-  function uid(prefix = "ANN") {
-    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 900 + 100)}`;
-  }
-  function nowISO() {
-    return new Date().toISOString();
-  }
-  function fmtShort(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-  function escapeHtml(s) {
-    return String(s || "")
+  // =========================================================
+  // HELPERS
+  // =========================================================
+
+  function escapeHtml(value) {
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
   }
-  function clampText(s, n = 180) {
-    const t = String(s || "").trim();
-    if (t.length <= n) return t;
-    return t.slice(0, n).trim() + "…";
+
+
+  function nl2brSafe(value) {
+    return escapeHtml(value)
+      .replace(/\n/g, "<br>");
   }
-  function catLabel(cat) {
+
+
+  function clampText(value, max = 180) {
+    const text =
+      String(value ?? "").trim();
+
+    if (text.length <= max) {
+      return text;
+    }
+
     return (
-      {
-        general: "General",
-        events: "Event",
-        academic: "Notice",
-        priority: "Alert",
-      }[cat] || "General"
+      text.slice(0, max).trim() +
+      "…"
     );
   }
-  function catPillClass(cat) {
+
+
+  function fmtShort(value) {
+    if (!value) {
+      return "—";
+    }
+
+    const date =
+      new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return "—";
+    }
+
+    return date.toLocaleString(
+      undefined,
+      {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
+  }
+
+
+  function catLabel(category) {
+    return (
+      {
+        general:
+          "General Announcement",
+
+        events:
+          "School Event",
+
+        academic:
+          "Academic Notice",
+
+        priority:
+          "Priority Alert",
+      }[category] ||
+      "General Announcement"
+    );
+  }
+
+
+  function catPillClass(category) {
     return (
       {
         general: "",
         events: "events",
         academic: "academic",
         priority: "priority",
-      }[cat] || ""
+      }[category] || ""
     );
-  }
-  function computeStatus(a) {
-    if (a.archived) return "archived";
-    if (a.draft) return "draft";
-    if (a.publishAt) {
-      const t = new Date(a.publishAt).getTime();
-      if (!Number.isNaN(t) && t > Date.now()) return "scheduled";
-    }
-    return "published";
-  }
-  function statusLabel(st) {
-    return (
-      {
-        published: "Published",
-        scheduled: "Scheduled",
-        draft: "Draft",
-        archived: "Archived",
-      }[st] || "Published"
-    );
-  }
-  function toISOFromLocal(localStr) {
-    if (!localStr) return "";
-    const d = new Date(localStr);
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toISOString();
   }
 
-  // -------- State --------
-  let announcements = readLS(LS_KEYS.ANN, []);
+
+  // =========================================================
+  // AUDIENCE LABEL
+  //
+  // IMPORTANT:
+  // These values MUST match the backend exactly:
+  //
+  // all
+  // students
+  // teachers
+  //
+  // There is NO "both"
+  // There is NO "students_teachers"
+  // =========================================================
+
+  function audienceLabel(audience) {
+    return (
+      {
+        all:
+          "Students & Teachers",
+
+        students:
+          "Students Only",
+
+        teachers:
+          "Teachers Only",
+      }[audience] ||
+      "Students & Teachers"
+    );
+  }
+
+
+  function computeStatus(a) {
+    if (a.archived) {
+      return "archived";
+    }
+
+    if (a.draft) {
+      return "draft";
+    }
+
+    if (a.publishAt) {
+      const time =
+        new Date(
+          a.publishAt
+        ).getTime();
+
+      if (
+        !Number.isNaN(time) &&
+        time > Date.now()
+      ) {
+        return "scheduled";
+      }
+    }
+
+    return "published";
+  }
+
+
+  function statusLabel(status) {
+    return (
+      {
+        published:
+          "Published",
+
+        scheduled:
+          "Scheduled",
+
+        draft:
+          "Draft",
+
+        archived:
+          "Archived",
+      }[status] ||
+      "Published"
+    );
+  }
+
+
+  function toLocalInputValue(value) {
+    if (!value) {
+      return "";
+    }
+
+    const date =
+      new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return "";
+    }
+
+    const pad = (n) =>
+      String(n).padStart(
+        2,
+        "0"
+      );
+
+    return (
+      `${date.getFullYear()}-` +
+      `${pad(date.getMonth() + 1)}-` +
+      `${pad(date.getDate())}T` +
+      `${pad(date.getHours())}:` +
+      `${pad(date.getMinutes())}`
+    );
+  }
+
+
+  function debounce(
+    fn,
+    wait = 250
+  ) {
+    let timer = null;
+
+    return (...args) => {
+      clearTimeout(timer);
+
+      timer = setTimeout(
+        () => fn(...args),
+        wait
+      );
+    };
+  }
+
+
+  // =========================================================
+  // STATE
+  // =========================================================
+
+  let csrfToken = "";
+
+  let announcements = [];
+
   let openMenuId = null;
 
   let editingId = null;
-  let tempFiles = [];
+
   let viewingId = null;
 
-  // -------- DOM --------
-  const feed = $("annFeed");
-  const empty = $("annEmpty");
 
-  const search = $("annSearch");
-  const typeFilter = $("typeFilter");
-  const catFilter = $("catFilter");
+  // =========================================================
+  // DOM
+  // =========================================================
 
-  const createBtn = $("createAnnBtn");
+  const feed =
+    $("annFeed");
 
-  // create/edit modal
-  const modal = $("annModal");
-  const modalBackdrop = $("annModalBackdrop");
-  const modalCloseX = $("annModalCloseX");
-  const cancelBtn = $("annCancelBtn");
-  const draftBtn = $("annDraftBtn");
-  const publishBtn = $("annPublishBtn");
-  const modalTitle = $("annModalTitle");
+  const empty =
+    $("annEmpty");
 
-  const fTitle = $("annTitle");
-  const fCat = $("annCategory");
-  const fMsg = $("annMessage");
-  const fPublishAt = $("annPublishAt");
-  const fFiles = $("annFiles");
-  const drop = $("annDrop");
-  const pickFiles = $("annPickFiles");
-  const filesList = $("annFilesList");
-  const formError = $("annFormError");
+  const search =
+    $("annSearch");
 
-  // view modal
-  const viewModal = $("annViewModal");
-  const viewBackdrop = $("annViewBackdrop");
-  const viewCloseX = $("annViewCloseX");
-  const viewCloseBtn = $("annViewCloseBtn");
-  const viewEditBtn = $("annViewEditBtn");
-  const viewArchiveBtn = $("annViewArchiveBtn");
+  const typeFilter =
+    $("typeFilter");
 
-  const vMeta = $("annViewMeta");
-  const vPill = $("annViewPill");
-  const vStatus = $("annViewStatus");
-  const vH = $("annViewH");
-  const vMsg = $("annViewMsg");
-  const vFiles = $("annViewFiles");
+  const catFilter =
+    $("catFilter");
 
-  // -------- Seed sample --------
-  if (!Array.isArray(announcements) || announcements.length === 0) {
-    announcements = [
-      {
-        id: uid(),
-        title: "Emergency Drill Tomorrow",
-        category: "priority",
-        message:
-          "Please be advised of a mandatory emergency drill tomorrow. Kindly follow the nearest exit routes and assemble at the designated area.",
-        publishAt: "",
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-        draft: false,
-        archived: false,
-        files: [],
-      },
-      {
-        id: uid(),
-        title: "New Curriculum Workshop",
-        category: "events",
-        message:
-          "There will be a workshop to discuss the changes for the new curriculum updates for all teachers on Friday at 2:00 pm in the library.",
-        publishAt: "",
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-        draft: false,
-        archived: false,
-        files: [],
-      },
-      {
-        id: uid(),
-        title: "Parent–Teacher Conference",
-        category: "academic",
-        message:
-          "All parents are encouraged to attend the conference scheduled for Friday next week at 1:00 pm in their child’s classroom.",
-        publishAt: "",
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-        draft: false,
-        archived: false,
-        files: [],
-      },
-    ];
-    writeLS(LS_KEYS.ANN, announcements);
+  const createBtn =
+    $("createAnnBtn");
+
+
+  // Create/Edit
+
+  const modal =
+    $("annModal");
+
+  const modalBackdrop =
+    $("annModalBackdrop");
+
+  const modalCloseX =
+    $("annModalCloseX");
+
+  const cancelBtn =
+    $("annCancelBtn");
+
+  const draftBtn =
+    $("annDraftBtn");
+
+  const publishBtn =
+    $("annPublishBtn");
+
+  const modalTitle =
+    $("annModalTitle");
+
+  const fTitle =
+    $("annTitle");
+
+  const fCat =
+    $("annCategory");
+
+  const fAudience =
+    $("annAudience");
+
+  const fMsg =
+    $("annMessage");
+
+  const fPublishNow =
+    $("annPublishNow");
+
+  const fScheduleLater =
+    $("annScheduleLater");
+
+  const scheduleFields =
+    $("annScheduleFields");
+
+  const fScheduleDate =
+    $("annScheduleDate");
+
+  const fScheduleTime =
+    $("annScheduleTime");
+
+  const formError =
+    $("annFormError");
+
+
+  // View
+
+  const viewModal =
+    $("annViewModal");
+
+  const viewBackdrop =
+    $("annViewBackdrop");
+
+  const viewCloseX =
+    $("annViewCloseX");
+
+  const viewCloseBtn =
+    $("annViewCloseBtn");
+
+  const viewEditBtn =
+    $("annViewEditBtn");
+
+  const viewArchiveBtn =
+    $("annViewArchiveBtn");
+
+  const vMeta =
+    $("annViewMeta");
+
+  const vPill =
+    $("annViewPill");
+
+  const vStatus =
+    $("annViewStatus");
+
+  const vH =
+    $("annViewH");
+
+  const vAudience =
+    $("annViewAudience");
+
+  const vMsg =
+    $("annViewMsg");
+
+
+  // =========================================================
+  // API
+  // =========================================================
+
+  async function fetchCsrfToken() {
+    const response =
+      await fetch(
+        "/api/csrf-token",
+        {
+          credentials:
+            "include",
+        }
+      );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if (
+      !response.ok ||
+      !data.ok
+    ) {
+      throw new Error(
+        data.message ||
+          "Failed to fetch CSRF token."
+      );
+    }
+
+    csrfToken =
+      data.csrfToken || "";
   }
 
-  // -------- Menus --------
-  function closeAllMenus() {
-    openMenuId = null;
-    feed.querySelectorAll(".ann-menu").forEach((m) => m.classList.add("hidden"));
+
+  async function api(
+    url,
+    options = {}
+  ) {
+    const method =
+      (
+        options.method ||
+        "GET"
+      ).toUpperCase();
+
+    const headers = {
+      ...(options.headers ||
+        {}),
+    };
+
+    if (
+      method !== "GET" &&
+      method !== "HEAD"
+    ) {
+      headers[
+        "x-csrf-token"
+      ] = csrfToken;
+    }
+
+    const response =
+      await fetch(
+        url,
+        {
+          credentials:
+            "include",
+
+          ...options,
+
+          headers,
+        }
+      );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if (
+      !response.ok ||
+      data.ok === false
+    ) {
+      throw new Error(
+        data.message ||
+          "Request failed."
+      );
+    }
+
+    return data;
   }
 
-  function toggleMenuForCard(cardEl) {
-    const id = cardEl?.dataset?.id;
-    if (!id) return;
 
-    const menu = cardEl.querySelector(".ann-menu");
-    if (!menu) return;
+  // =========================================================
+  // LOAD
+  // =========================================================
 
-    const isOpen = openMenuId === id;
-    closeAllMenus();
+  async function loadAnnouncements() {
+    try {
+      closeAllMenus();
 
-    if (!isOpen) {
-      openMenuId = id;
-      menu.classList.remove("hidden");
+      const params =
+        new URLSearchParams({
+          search:
+            (
+              search.value ||
+              ""
+            ).trim(),
+
+          type:
+            typeFilter.value ||
+            "all",
+
+          category:
+            catFilter.value ||
+            "all",
+        });
+
+      const data =
+        await api(
+          `${API_BASE}?${params.toString()}`
+        );
+
+      announcements =
+        Array.isArray(
+          data.data
+        )
+          ? data.data
+          : [];
+
+      render();
+
+    } catch (error) {
+      console.error(
+        "Failed to load announcements:",
+        error
+      );
+
+      announcements = [];
+
+      render();
+
+      setFormError(
+        error.message ||
+          "Failed to load announcements."
+      );
     }
   }
 
-  // -------- Render --------
+
+  async function getAnnouncementById(
+    id
+  ) {
+    const data =
+      await api(
+        `${API_BASE}/${encodeURIComponent(
+          id
+        )}`
+      );
+
+    return data.data;
+  }
+
+
+  async function createAnnouncement(
+    payload
+  ) {
+    const data =
+      await api(
+        API_BASE,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            ),
+        }
+      );
+
+    return data.data;
+  }
+
+
+  async function updateAnnouncement(
+    id,
+    payload
+  ) {
+    const data =
+      await api(
+        `${API_BASE}/${encodeURIComponent(
+          id
+        )}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            ),
+        }
+      );
+
+    return data.data;
+  }
+
+
+  async function archiveAnnouncement(
+    id
+  ) {
+    const data =
+      await api(
+        `${API_BASE}/${encodeURIComponent(
+          id
+        )}/archive`,
+        {
+          method: "PATCH",
+        }
+      );
+
+    return data.data;
+  }
+
+
+  async function removeAnnouncement(
+    id
+  ) {
+    await api(
+      `${API_BASE}/${encodeURIComponent(
+        id
+      )}`,
+      {
+        method: "DELETE",
+      }
+    );
+  }
+
+
+  // =========================================================
+  // EXPANDABLE CARD ACTIONS
+  // =========================================================
+
+  function closeAllMenus() {
+    openMenuId = null;
+
+    if (!feed) {
+      return;
+    }
+
+    feed
+      .querySelectorAll(
+        ".ann-menu"
+      )
+      .forEach(
+        (menu) =>
+          menu.classList.add(
+            "hidden"
+          )
+      );
+
+    feed
+      .querySelectorAll(
+        ".ann-kebab"
+      )
+      .forEach(
+        (button) => {
+          button.classList.remove(
+            "is-open"
+          );
+
+          button.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        }
+      );
+  }
+
+
+  function toggleMenuForCard(
+    card
+  ) {
+    const id =
+      card.dataset.id;
+
+    const menu =
+      card.querySelector(
+        ".ann-menu"
+      );
+
+    const button =
+      card.querySelector(
+        ".ann-kebab"
+      );
+
+    if (
+      !id ||
+      !menu ||
+      !button
+    ) {
+      return;
+    }
+
+    const alreadyOpen =
+      openMenuId === id;
+
+    closeAllMenus();
+
+    if (alreadyOpen) {
+      return;
+    }
+
+    openMenuId = id;
+
+    menu.classList.remove(
+      "hidden"
+    );
+
+    button.classList.add(
+      "is-open"
+    );
+
+    button.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+  }
+
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   function render() {
     closeAllMenus();
 
-    const q = (search.value || "").trim().toLowerCase();
-    const type = typeFilter.value;
-    const cat = catFilter.value;
-
-    let list = announcements.slice();
-    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    if (cat !== "all") list = list.filter((a) => (a.category || "general") === cat);
-    if (type !== "all") list = list.filter((a) => computeStatus(a) === type);
-
-    if (q) {
-      list = list.filter((a) => {
-        const hay = `${a.title || ""} ${a.message || ""}`.toLowerCase();
-        return hay.includes(q);
-      });
-    }
-
     feed.innerHTML = "";
 
-    if (!list.length) {
-      empty.classList.remove("hidden");
+    if (
+      !announcements.length
+    ) {
+      empty.classList.remove(
+        "hidden"
+      );
+
       return;
     }
-    empty.classList.add("hidden");
 
-    list.forEach((a) => {
-      const st = computeStatus(a);
-      const pillText = catLabel(a.category);
-      const pillClass = catPillClass(a.category);
+    empty.classList.add(
+      "hidden"
+    );
 
-      const el = document.createElement("div");
-      el.className = "ann-card";
-      el.dataset.id = a.id;
+    announcements.forEach(
+      (a) => {
+        const id =
+          a._id ||
+          a.id ||
+          "";
 
-      el.innerHTML = `
-        <div class="ann-card-top">
-          <div class="ann-card-left">
-            <div class="ann-title-row">
-              <h3 class="ann-title">${escapeHtml(a.title || "Untitled")}</h3>
-              <span class="ann-status">${statusLabel(st)}</span>
-            </div>
+        const category =
+          catLabel(
+            a.category
+          );
 
-            <p class="ann-body">${escapeHtml(clampText(a.message || ""))}</p>
+        const pillClass =
+          catPillClass(
+            a.category
+          );
 
-            <div class="ann-meta">
-              <span>Posted: ${escapeHtml(fmtShort(a.createdAt))}</span>
+        const status =
+          a.status ||
+          computeStatus(a);
+
+        const card =
+          document.createElement(
+            "article"
+          );
+
+        card.className =
+          "ann-card";
+
+        card.dataset.id =
+          id;
+
+        card.innerHTML = `
+          <div class="ann-card-top">
+
+            <div class="ann-card-left">
+
+              <span class="ann-pill ${pillClass}">
+                ${escapeHtml(category)}
+              </span>
+
+              <h3
+                class="ann-title"
+                data-act="view"
+                tabindex="0"
+                role="button"
+              >
+                ${escapeHtml(
+                  a.title ||
+                    "Untitled Announcement"
+                )}
+              </h3>
+
+              <p class="ann-body">
+                ${nl2brSafe(
+                  clampText(
+                    a.message ||
+                      ""
+                  )
+                )}
+              </p>
+
               ${
                 a.publishAt
-                  ? `<span>• Publish: ${escapeHtml(fmtShort(toISOFromLocal(a.publishAt)))}</span>`
+                  ? `
+                    <div class="ann-meta">
+                      <span>
+                        ${
+                          status ===
+                          "scheduled"
+                            ? "Scheduled: "
+                            : "Published: "
+                        }
+                        ${escapeHtml(
+                          fmtShort(
+                            a.publishAt
+                          )
+                        )}
+                      </span>
+                    </div>
+                  `
                   : ""
               }
-              ${a.files && a.files.length ? `<span>• Attachments: ${a.files.length}</span>` : ""}
+
             </div>
+
+            <div class="ann-card-right">
+
+              <button
+                class="ann-kebab"
+                type="button"
+                aria-label="Announcement actions"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+
+            </div>
+
           </div>
 
-          <div class="ann-card-right">
-            <span class="ann-pill ${pillClass}">${pillText}</span>
-            <button class="ann-kebab" type="button" aria-label="More">⋮</button>
+          <div
+            class="ann-menu hidden"
+            role="group"
+          >
+
+            <button
+              type="button"
+              data-act="view"
+            >
+              View Details
+            </button>
+
+            <button
+              type="button"
+              data-act="edit"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              data-act="archive"
+            >
+              ${
+                a.archived
+                  ? "Unarchive"
+                  : "Archive"
+              }
+            </button>
+
+            <button
+              type="button"
+              data-act="delete"
+              class="danger"
+            >
+              Delete
+            </button>
+
           </div>
-        </div>
+        `;
 
-        <div class="ann-menu hidden" role="menu">
-          <button type="button" data-act="view">View</button>
-          <button type="button" data-act="edit">Edit</button>
-          <button type="button" data-act="archive">${a.archived ? "Unarchive" : "Archive"}</button>
-          <button type="button" data-act="delete" class="danger">Delete</button>
-        </div>
-      `;
-
-      feed.appendChild(el);
-    });
+        feed.appendChild(
+          card
+        );
+      }
+    );
   }
 
-  // -------- Modals --------
-  function openModal() {
-    modal.classList.remove("hidden");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-  function closeModal() {
-    modal.classList.add("hidden");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-    clearFormError();
-  }
-  function openViewModal() {
-    viewModal.classList.remove("hidden");
-    viewModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-  function closeViewModal() {
-    viewModal.classList.add("hidden");
-    viewModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-  function setFormError(msg) {
-    formError.textContent = msg;
-    formError.classList.remove("hidden");
-  }
-  function clearFormError() {
-    formError.textContent = "";
-    formError.classList.add("hidden");
+
+  // =========================================================
+  // FORM
+  // =========================================================
+
+  function setPublicationMode() {
+    const scheduled =
+      fScheduleLater.checked;
+
+    scheduleFields.classList.toggle(
+      "hidden",
+      !scheduled
+    );
+
+    publishBtn.textContent =
+      scheduled
+        ? "Save"
+        : "Publish";
   }
 
-  function renderFiles() {
-    filesList.innerHTML = "";
-    if (!tempFiles.length) return;
-
-    tempFiles.forEach((f, idx) => {
-      const item = document.createElement("div");
-      item.className = "ann-file";
-      item.innerHTML = `
-        <img src="${f.dataUrl}" alt="file preview">
-        <div class="ann-file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
-        <button class="ann-file-x" type="button" aria-label="Remove">✕</button>
-      `;
-      item.querySelector(".ann-file-x").addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        tempFiles.splice(idx, 1);
-        renderFiles();
-      });
-      filesList.appendChild(item);
-    });
-  }
 
   function resetFormUI() {
     editingId = null;
-    tempFiles = [];
-    modalTitle.textContent = "Create New Announcement";
-    draftBtn.textContent = "Draft";
-    publishBtn.textContent = "Publish";
+
+    modalTitle.textContent =
+      "Create New Announcement";
+
+    draftBtn.textContent =
+      "Save as Draft";
+
+    publishBtn.textContent =
+      "Publish";
+
     fTitle.value = "";
-    fCat.value = "general";
+
+    fCat.value =
+      "general";
+
+    // Backend value:
+    // all = Students & Teachers
+    fAudience.value =
+      "all";
+
     fMsg.value = "";
-    fPublishAt.value = "";
-    renderFiles();
+
+    fPublishNow.checked =
+      true;
+
+    fScheduleLater.checked =
+      false;
+
+    fScheduleDate.value =
+      "";
+
+    fScheduleTime.value =
+      "";
+
+    scheduleFields.classList.add(
+      "hidden"
+    );
+
     clearFormError();
   }
+
 
   function openCreate() {
     resetFormUI();
+
     openModal();
   }
+
 
   function openEdit(id) {
-    const a = announcements.find((x) => x.id === id);
-    if (!a) return;
+    const announcement =
+      announcements.find(
+        (item) =>
+          (
+            item._id ||
+            item.id
+          ) === id
+      );
+
+    if (!announcement) {
+      return;
+    }
 
     editingId = id;
-    modalTitle.textContent = "Edit Announcement";
-    draftBtn.textContent = "Save Draft";
-    publishBtn.textContent = "Save & Publish";
 
-    fTitle.value = a.title || "";
-    fCat.value = a.category || "general";
-    fMsg.value = a.message || "";
-    fPublishAt.value = a.publishAt || "";
-    tempFiles = Array.isArray(a.files) ? a.files.slice() : [];
-    renderFiles();
+    modalTitle.textContent =
+      "Edit Announcement";
+
+    draftBtn.textContent =
+      "Save as Draft";
+
+    fTitle.value =
+      announcement.title ||
+      "";
+
+    fCat.value =
+      announcement.category ||
+      "general";
+
+    /*
+     * Use the backend value directly.
+     *
+     * Allowed:
+     * all
+     * students
+     * teachers
+     */
+    fAudience.value =
+      announcement.audience ||
+      "all";
+
+    fMsg.value =
+      announcement.message ||
+      "";
+
+    if (
+      announcement.publishAt
+    ) {
+      const date =
+        new Date(
+          announcement.publishAt
+        );
+
+      if (
+        !Number.isNaN(
+          date.getTime()
+        )
+      ) {
+        const pad =
+          (n) =>
+            String(n).padStart(
+              2,
+              "0"
+            );
+
+        fScheduleDate.value =
+          `${date.getFullYear()}-${pad(
+            date.getMonth() + 1
+          )}-${pad(
+            date.getDate()
+          )}`;
+
+        fScheduleTime.value =
+          `${pad(
+            date.getHours()
+          )}:${pad(
+            date.getMinutes()
+          )}`;
+
+        fScheduleLater.checked =
+          computeStatus(
+            announcement
+          ) === "scheduled";
+
+        fPublishNow.checked =
+          !fScheduleLater.checked;
+      }
+    } else {
+      fPublishNow.checked =
+        true;
+
+      fScheduleLater.checked =
+        false;
+    }
+
+    setPublicationMode();
+
+    clearFormError();
+
     openModal();
   }
 
-  function openView(id) {
-    const a = announcements.find((x) => x.id === id);
-    if (!a) return;
 
-    viewingId = id;
+  function validateForm() {
+    const title =
+      (
+        fTitle.value ||
+        ""
+      ).trim();
 
-    const st = computeStatus(a);
-    const label = catLabel(a.category);
-    const pillClass = catPillClass(a.category);
+    const message =
+      (
+        fMsg.value ||
+        ""
+      ).trim();
 
-    vMeta.textContent = `Posted: ${fmtShort(a.createdAt)}${
-      a.publishAt ? " • Publish: " + fmtShort(toISOFromLocal(a.publishAt)) : ""
-    }`;
-
-    vPill.className = `ann-pill ${pillClass}`;
-    vPill.textContent = label;
-    vStatus.textContent = statusLabel(st);
-
-    vH.textContent = a.title || "Untitled";
-    vMsg.textContent = a.message || "—";
-
-    vFiles.innerHTML = "";
-    if (a.files && a.files.length) {
-      a.files.forEach((f) => {
-        const img = document.createElement("img");
-        img.src = f.dataUrl;
-        img.alt = f.name;
-        vFiles.appendChild(img);
-      });
+    if (!title) {
+      return "Title is required.";
     }
 
-    viewArchiveBtn.textContent = a.archived ? "Unarchive" : "Archive";
-    openViewModal();
-  }
+    if (!message) {
+      return "Message is required.";
+    }
 
-  // -------- CRUD --------
-  function validateForm() {
-    const title = (fTitle.value || "").trim();
-    const msg = (fMsg.value || "").trim();
-    if (!title) return "Title is required.";
-    if (!msg) return "Message is required.";
-    if (tempFiles.length > 5) return "Please attach up to 5 images only.";
+    // =======================================================
+    // AUDIENCE VALIDATION
+    // =======================================================
+
+    const validAudiences = [
+      "all",
+      "students",
+      "teachers",
+    ];
+
+    if (
+      !validAudiences.includes(
+        fAudience.value
+      )
+    ) {
+      return "Please select a valid audience.";
+    }
+
+    if (
+      fScheduleLater.checked
+    ) {
+      if (
+        !fScheduleDate.value
+      ) {
+        return "Please select a schedule date.";
+      }
+
+      if (
+        !fScheduleTime.value
+      ) {
+        return "Please select a schedule time.";
+      }
+    }
+
     return null;
   }
 
-  function saveAnnouncement({ draft, publish }) {
-    clearFormError();
 
-    const err = validateForm();
-    if (err) return setFormError(err);
-
-    const obj = {
-      title: (fTitle.value || "").trim(),
-      category: fCat.value || "general",
-      message: (fMsg.value || "").trim(),
-      publishAt: fPublishAt.value || "",
-      files: tempFiles.slice(),
-      updatedAt: nowISO(),
-      draft: !!draft,
-      archived: false,
-    };
-
-    if (editingId) {
-      const idx = announcements.findIndex((x) => x.id === editingId);
-      if (idx === -1) return;
-      announcements[idx] = {
-        ...announcements[idx],
-        ...obj,
-        draft: publish ? false : obj.draft,
-      };
-    } else {
-      announcements.push({
-        id: uid(),
-        createdAt: nowISO(),
-        ...obj,
-        draft: publish ? false : obj.draft,
-      });
+  function buildPublishDate() {
+    if (
+      fPublishNow.checked
+    ) {
+      return null;
     }
 
-    writeLS(LS_KEYS.ANN, announcements);
-    closeModal();
-    render();
+    const localValue =
+      `${fScheduleDate.value}T${fScheduleTime.value}`;
+
+    const date =
+      new Date(
+        localValue
+      );
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return null;
+    }
+
+    return date.toISOString();
   }
 
-  function toggleArchive(id) {
-    const idx = announcements.findIndex((x) => x.id === id);
-    if (idx === -1) return;
-    announcements[idx].archived = !announcements[idx].archived;
-    announcements[idx].updatedAt = nowISO();
-    writeLS(LS_KEYS.ANN, announcements);
-    render();
-  }
 
-  function deleteAnn(id) {
-    const a = announcements.find((x) => x.id === id);
-    if (!a) return;
-    const ok = confirm(`Delete "${a.title || "Untitled"}"? This cannot be undone.`);
-    if (!ok) return;
-    announcements = announcements.filter((x) => x.id !== id);
-    writeLS(LS_KEYS.ANN, announcements);
-    render();
-  }
+  async function saveAnnouncement(
+    isDraft
+  ) {
+    clearFormError();
 
-  // -------- Files --------
-  function readAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result || ""));
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
+    const error =
+      validateForm();
 
-  function handleFiles(fileList) {
-    const files = Array.from(fileList || []);
-    if (!files.length) return;
+    if (error) {
+      setFormError(error);
+      return;
+    }
 
-    const images = files.filter((f) => f.type && f.type.startsWith("image/"));
-    if (!images.length) return setFormError("Only image attachments are supported for now.");
 
-    (async () => {
-      for (const f of images) {
-        if (tempFiles.length >= 5) break;
-        const dataUrl = await readAsDataURL(f);
-        tempFiles.push({ name: f.name, dataUrl });
+    // =======================================================
+    // PAYLOAD
+    //
+    // IMPORTANT:
+    // The frontend now sends the backend values directly.
+    //
+    // all
+    // students
+    // teachers
+    //
+    // There is NO audience conversion.
+    // =======================================================
+
+    const payload = {
+      title:
+        (
+          fTitle.value ||
+          ""
+        ).trim(),
+
+      category:
+        fCat.value ||
+        "general",
+
+      audience:
+        fAudience.value ||
+        "all",
+
+      message:
+        (
+          fMsg.value ||
+          ""
+        ).trim(),
+
+      /*
+       * Publish Now:
+       * draft = false
+       * publishAt = null
+       *
+       * Schedule Later:
+       * draft = false
+       * publishAt = selected date/time
+       *
+       * Save as Draft:
+       * draft = true
+       * publishAt = null
+       */
+      publishAt:
+        isDraft
+          ? null
+          : buildPublishDate(),
+
+      draft:
+        !!isDraft,
+
+      archived:
+        false,
+    };
+
+
+    console.log(
+      "Announcement payload:",
+      JSON.stringify(
+        payload,
+        null,
+        2
+      )
+    );
+
+
+    try {
+      if (editingId) {
+        await updateAnnouncement(
+          editingId,
+          payload
+        );
+      } else {
+        await createAnnouncement(
+          payload
+        );
       }
-      renderFiles();
-    })().catch(() => setFormError("Failed to attach image(s). Try a smaller file."));
+
+      closeModal();
+
+      resetFormUI();
+
+      await loadAnnouncements();
+
+    } catch (error2) {
+      console.error(
+        "Save failed:",
+        error2
+      );
+
+      setFormError(
+        error2.message ||
+          "Failed to save announcement."
+      );
+    }
   }
 
-  // -------- Toolbar --------
-  function initToolbar() {
-    const toolbar = $("annToolbar");
-    if (!toolbar) return;
 
-    function wrapSelection(textarea, left, right) {
-      textarea.focus();
-      const start = textarea.selectionStart ?? 0;
-      const end = textarea.selectionEnd ?? 0;
-      const val = textarea.value;
-      const selected = val.slice(start, end);
+  // =========================================================
+  // VIEW
+  // =========================================================
 
-      if (start === end) {
-        const insert = left + right;
-        textarea.value = val.slice(0, start) + insert + val.slice(end);
-        const pos = start + left.length;
-        textarea.setSelectionRange(pos, pos);
+  async function openView(id) {
+    try {
+      const announcement =
+        await getAnnouncementById(
+          id
+        );
+
+      if (!announcement) {
         return;
       }
 
-      textarea.value = val.slice(0, start) + left + selected + right + val.slice(end);
-      textarea.setSelectionRange(start + left.length, end + left.length);
+      viewingId = id;
+
+      const status =
+        announcement.status ||
+        computeStatus(
+          announcement
+        );
+
+      const label =
+        catLabel(
+          announcement.category
+        );
+
+      const pillClass =
+        catPillClass(
+          announcement.category
+        );
+
+
+      if (vMeta) {
+        vMeta.textContent =
+          announcement.publishAt
+            ? (
+                status ===
+                "scheduled"
+                  ? "Scheduled: "
+                  : "Published: "
+              ) +
+              fmtShort(
+                announcement.publishAt
+              )
+            : "No publication date";
+      }
+
+
+      if (vPill) {
+        vPill.className =
+          `ann-pill ${pillClass}`;
+
+        vPill.textContent =
+          label;
+      }
+
+
+      if (vStatus) {
+        vStatus.textContent =
+          statusLabel(
+            status
+          );
+      }
+
+
+      if (vH) {
+        vH.textContent =
+          announcement.title ||
+          "Untitled Announcement";
+      }
+
+
+      if (vAudience) {
+        vAudience.textContent =
+          audienceLabel(
+            announcement.audience
+          );
+      }
+
+
+      if (vMsg) {
+        vMsg.innerHTML =
+          nl2brSafe(
+            announcement.message ||
+              "—"
+          );
+      }
+
+
+      if (viewArchiveBtn) {
+        viewArchiveBtn.textContent =
+          announcement.archived
+            ? "Unarchive"
+            : "Archive";
+      }
+
+      openViewModal();
+
+    } catch (error) {
+      console.error(
+        "Failed to open announcement:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to load announcement."
+      );
     }
-
-    function prefixLines(textarea, prefixFn) {
-      textarea.focus();
-      const val = textarea.value;
-      const start = textarea.selectionStart ?? 0;
-      const end = textarea.selectionEnd ?? 0;
-
-      const selected = val.slice(start, end);
-      const lines = selected ? selected.split("\n") : [""];
-      const updated = lines
-        .map((line, i) => {
-          if (!line.trim()) return line;
-          return prefixFn(i, line) + line;
-        })
-        .join("\n");
-
-      textarea.value = val.slice(0, start) + updated + val.slice(end);
-      textarea.setSelectionRange(start, start + updated.length);
-    }
-
-    toolbar.addEventListener("click", (e) => {
-      const btn = e.target.closest(".ann-tool");
-      if (!btn || btn.disabled) return;
-      const act = btn.dataset.act;
-      if (!act) return;
-
-      if (act === "bold") wrapSelection(fMsg, "**", "**");
-      if (act === "italic") wrapSelection(fMsg, "*", "*");
-      if (act === "underline") wrapSelection(fMsg, "__", "__");
-      if (act === "bullets") prefixLines(fMsg, () => "• ");
-      if (act === "numbered") prefixLines(fMsg, (i) => `${i + 1}. `);
-    });
   }
 
-  // ============================
-  // ✅ ONE CLICK HANDLER (delegation) — removes glitch
-  // ============================
-  feed.addEventListener("click", (e) => {
-    const kebab = e.target.closest(".ann-kebab");
-    const menuBtn = e.target.closest(".ann-menu button[data-act]");
-    const card = e.target.closest(".ann-card");
 
-    // kebab toggle
-    if (kebab && card) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleMenuForCard(card);
+  // =========================================================
+  // MODAL OPEN/CLOSE
+  // =========================================================
+
+  function openModal() {
+    modal.classList.remove(
+      "hidden"
+    );
+
+    modal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    document.body.style.overflow =
+      "hidden";
+  }
+
+
+  function closeModal() {
+    modal.classList.add(
+      "hidden"
+    );
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    document.body.style.overflow =
+      "";
+
+    clearFormError();
+  }
+
+
+  function openViewModal() {
+    viewModal.classList.remove(
+      "hidden"
+    );
+
+    viewModal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    document.body.style.overflow =
+      "hidden";
+  }
+
+
+  function closeViewModal() {
+    viewModal.classList.add(
+      "hidden"
+    );
+
+    viewModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    document.body.style.overflow =
+      "";
+  }
+
+
+  function setFormError(
+    message
+  ) {
+    if (!formError) {
       return;
     }
 
-    // menu action
-    if (menuBtn && card) {
-      e.preventDefault();
-      e.stopPropagation();
-      const id = card.dataset.id;
-      const act = menuBtn.dataset.act;
-      closeAllMenus();
+    formError.textContent =
+      message;
 
-      if (act === "view") openView(id);
-      if (act === "edit") openEdit(id);
-      if (act === "archive") toggleArchive(id);
-      if (act === "delete") deleteAnn(id);
+    formError.classList.remove(
+      "hidden"
+    );
+  }
+
+
+  function clearFormError() {
+    if (!formError) {
       return;
     }
 
-    // click on card body opens view
-    if (card) {
-      // ignore any button clicks
-      if (e.target.closest("button") || e.target.closest("a")) return;
-      openView(card.dataset.id);
+    formError.textContent =
+      "";
+
+    formError.classList.add(
+      "hidden"
+    );
+  }
+
+
+  // =========================================================
+  // ARCHIVE / DELETE
+  // =========================================================
+
+  async function toggleArchive(
+    id
+  ) {
+    try {
+      await archiveAnnouncement(
+        id
+      );
+
+      await loadAnnouncements();
+
+    } catch (error) {
+      console.error(
+        "Archive failed:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to update announcement."
+      );
     }
-  });
+  }
 
-  // -------- other events --------
-  search.addEventListener("input", render);
-  typeFilter.addEventListener("change", render);
-  catFilter.addEventListener("change", render);
 
-  createBtn.addEventListener("click", openCreate);
+  async function deleteAnn(id) {
+    const announcement =
+      announcements.find(
+        (item) =>
+          (
+            item._id ||
+            item.id
+          ) === id
+      );
 
-  modalBackdrop.addEventListener("click", closeModal);
-  modalCloseX.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
+    if (!announcement) {
+      return;
+    }
 
-  draftBtn.addEventListener("click", () => saveAnnouncement({ draft: true, publish: false }));
-  publishBtn.addEventListener("click", () => saveAnnouncement({ draft: false, publish: true }));
+    const confirmed =
+      confirm(
+        `Delete "${
+          announcement.title ||
+          "Untitled"
+        }"? This cannot be undone.`
+      );
 
-  pickFiles.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    fFiles.click();
-  });
-  drop.addEventListener("click", () => fFiles.click());
-  fFiles.addEventListener("change", (e) => handleFiles(e.target.files));
+    if (!confirmed) {
+      return;
+    }
 
-  drop.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    drop.style.filter = "brightness(.99)";
-  });
-  drop.addEventListener("dragleave", () => {
-    drop.style.filter = "";
-  });
-  drop.addEventListener("drop", (e) => {
-    e.preventDefault();
-    drop.style.filter = "";
-    handleFiles(e.dataTransfer.files);
-  });
+    try {
+      await removeAnnouncement(
+        id
+      );
 
-  document.addEventListener("click", () => closeAllMenus());
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (!modal.classList.contains("hidden")) closeModal();
-      if (!viewModal.classList.contains("hidden")) closeViewModal();
+      await loadAnnouncements();
+
+      if (
+        viewingId === id
+      ) {
+        viewingId = null;
+
+        closeViewModal();
+      }
+
+    } catch (error) {
+      console.error(
+        "Delete failed:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to delete announcement."
+      );
+    }
+  }
+
+
+  // =========================================================
+  // FEED EVENTS
+  // =========================================================
+
+  feed.addEventListener(
+    "click",
+    (event) => {
+      const card =
+        event.target.closest(
+          ".ann-card"
+        );
+
+      if (!card) {
+        return;
+      }
+
+      const id =
+        card.dataset.id;
+
+
+      // Three dots
+
+      const kebab =
+        event.target.closest(
+          ".ann-kebab"
+        );
+
+      if (kebab) {
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        toggleMenuForCard(
+          card
+        );
+
+        return;
+      }
+
+
+      // Action buttons
+
+      const action =
+        event.target.closest(
+          ".ann-menu button"
+        );
+
+      if (action) {
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        const act =
+          action.dataset.act;
+
+        closeAllMenus();
+
+        if (
+          act === "view"
+        ) {
+          openView(id);
+        }
+
+        if (
+          act === "edit"
+        ) {
+          openEdit(id);
+        }
+
+        if (
+          act === "archive"
+        ) {
+          toggleArchive(id);
+        }
+
+        if (
+          act === "delete"
+        ) {
+          deleteAnn(id);
+        }
+
+        return;
+      }
+
+
+      // Click title
+
+      const title =
+        event.target.closest(
+          ".ann-title"
+        );
+
+      if (title) {
+        event.preventDefault();
+
+        closeAllMenus();
+
+        openView(id);
+      }
+    }
+  );
+
+
+  // =========================================================
+  // TITLE KEYBOARD
+  // =========================================================
+
+  feed.addEventListener(
+    "keydown",
+    (event) => {
+      const title =
+        event.target.closest(
+          ".ann-title"
+        );
+
+      if (!title) {
+        return;
+      }
+
+      if (
+        event.key ===
+          "Enter" ||
+        event.key === " "
+      ) {
+        event.preventDefault();
+
+        const card =
+          title.closest(
+            ".ann-card"
+          );
+
+        if (!card) {
+          return;
+        }
+
+        openView(
+          card.dataset.id
+        );
+      }
+    }
+  );
+
+
+  // =========================================================
+  // FORM EVENTS
+  // =========================================================
+
+  fPublishNow.addEventListener(
+    "change",
+    setPublicationMode
+  );
+
+  fScheduleLater.addEventListener(
+    "change",
+    setPublicationMode
+  );
+
+
+  createBtn.addEventListener(
+    "click",
+    openCreate
+  );
+
+
+  modalBackdrop.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  modalCloseX.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  cancelBtn.addEventListener(
+    "click",
+    closeModal
+  );
+
+
+  draftBtn.addEventListener(
+    "click",
+    () =>
+      saveAnnouncement(
+        true
+      )
+  );
+
+
+  publishBtn.addEventListener(
+    "click",
+    () =>
+      saveAnnouncement(
+        false
+      )
+  );
+
+
+  // =========================================================
+  // SEARCH / FILTER
+  // =========================================================
+
+  const debouncedLoad =
+    debounce(
+      loadAnnouncements,
+      250
+    );
+
+  search.addEventListener(
+    "input",
+    debouncedLoad
+  );
+
+  typeFilter.addEventListener(
+    "change",
+    loadAnnouncements
+  );
+
+  catFilter.addEventListener(
+    "change",
+    loadAnnouncements
+  );
+
+
+  // =========================================================
+  // OUTSIDE CLICK
+  // =========================================================
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (
+        !event.target.closest(
+          ".ann-card"
+        )
+      ) {
+        closeAllMenus();
+      }
+    }
+  );
+
+
+  // =========================================================
+  // ESCAPE
+  // =========================================================
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !== "Escape"
+      ) {
+        return;
+      }
+
+      if (
+        !modal.classList.contains(
+          "hidden"
+        )
+      ) {
+        closeModal();
+      }
+
+      if (
+        !viewModal.classList.contains(
+          "hidden"
+        )
+      ) {
+        closeViewModal();
+      }
+
       closeAllMenus();
     }
-  });
+  );
 
-  viewBackdrop.addEventListener("click", closeViewModal);
-  viewCloseX.addEventListener("click", closeViewModal);
-  viewCloseBtn.addEventListener("click", closeViewModal);
 
-  viewEditBtn.addEventListener("click", () => {
-    if (!viewingId) return;
-    closeViewModal();
-    openEdit(viewingId);
-  });
+  // =========================================================
+  // VIEW MODAL EVENTS
+  // =========================================================
 
-  viewArchiveBtn.addEventListener("click", () => {
-    if (!viewingId) return;
-    const id = viewingId;
-    closeViewModal();
-    toggleArchive(id);
-    openView(id);
-  });
+  viewBackdrop.addEventListener(
+    "click",
+    closeViewModal
+  );
 
-  // init
-  initToolbar();
-  render();
+
+  viewCloseX.addEventListener(
+    "click",
+    closeViewModal
+  );
+
+
+  viewCloseBtn.addEventListener(
+    "click",
+    closeViewModal
+  );
+
+
+  viewEditBtn.addEventListener(
+    "click",
+    () => {
+      if (!viewingId) {
+        return;
+      }
+
+      closeViewModal();
+
+      openEdit(
+        viewingId
+      );
+    }
+  );
+
+
+  viewArchiveBtn.addEventListener(
+    "click",
+    async () => {
+      if (!viewingId) {
+        return;
+      }
+
+      const id =
+        viewingId;
+
+      await toggleArchive(
+        id
+      );
+
+      closeViewModal();
+    }
+  );
+
+
+  // =========================================================
+  // INIT
+  // =========================================================
+
+  (async function init() {
+    try {
+      await fetchCsrfToken();
+
+      await loadAnnouncements();
+
+    } catch (error) {
+      console.error(
+        "Announcements init failed:",
+        error
+      );
+
+      setFormError(
+        error.message ||
+          "Failed to initialize announcements."
+      );
+    }
+  })();
+
 });

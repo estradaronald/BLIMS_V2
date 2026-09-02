@@ -26,7 +26,6 @@
     <div id="sidebar-mount"></div>
 
     <main class="content">
-      <!-- TOPBAR (match your existing admin pages) -->
       <header class="topbar">
         <div class="topbar-right">
           <button class="tb-icon" type="button" title="Notifications">🔔</button>
@@ -63,7 +62,6 @@
         </div>
 
         <div class="sub-grid">
-          <!-- LEFT -->
           <aside class="card sub-left">
             <div class="sub-left-head">
               <div class="sub-left-title">Grade Levels</div>
@@ -73,7 +71,6 @@
             <div id="gradeList" class="sub-grade-list"></div>
           </aside>
 
-          <!-- RIGHT -->
           <section class="card sub-right">
             <div class="sub-right-head">
               <div>
@@ -115,7 +112,7 @@
   </div>
 
   <!-- ======================
-      SUBJECT PICKER MODAL
+      SUBJECT MODAL
   ======================= -->
   <div id="subjectModal" class="sub-modal hidden" aria-hidden="true">
     <div class="sub-backdrop" id="subjectModalBackdrop"></div>
@@ -123,8 +120,8 @@
     <div class="sub-dialog" role="dialog" aria-modal="true" aria-labelledby="subjectModalTitle" tabindex="-1">
       <div class="sub-mhead">
         <div>
-          <div class="sub-mtitle" id="subjectModalTitle">Add Subjects</div>
-          <div class="sub-msub" id="subjectModalSub">Select subjects for the chosen grade.</div>
+          <div class="sub-mtitle" id="subjectModalTitle">Add Subject</div>
+          <div class="sub-msub" id="subjectModalSub">Manage subjects for the chosen grade.</div>
         </div>
         <button class="sub-x" id="subjectModalCloseX" type="button" aria-label="Close">✕</button>
       </div>
@@ -137,7 +134,7 @@
           </div>
 
           <div class="sub-field sub-wide">
-            <label>Available Subjects</label>
+            <label>Subjects</label>
             <div class="sub-checklist" id="subjectChecklist"></div>
           </div>
 
@@ -147,7 +144,7 @@
               <input id="newSubjectInput" class="sub-input" type="text" placeholder="e.g., Science, Filipino, MAPEH" />
               <button id="addNewSubjectBtn" class="sub-chip" type="button">Add</button>
             </div>
-            <div class="sub-hint">New subjects will appear in the checklist immediately.</div>
+            
           </div>
         </div>
 
@@ -157,7 +154,7 @@
       <div class="sub-mfoot">
         <button class="sub-ghost" id="subjectCancelBtn" type="button">Cancel</button>
         <div class="sub-foot-right">
-          <button class="sub-ghost" id="subjectClearBtn" type="button">Clear</button>
+          <button class="sub-ghost" id="subjectClearBtn" type="button">Close</button>
           <button class="sub-save" id="subjectSaveBtn" type="button">Save</button>
         </div>
       </div>

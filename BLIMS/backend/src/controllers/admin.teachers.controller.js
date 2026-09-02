@@ -3,21 +3,21 @@ const argon2 = require("argon2");
 const Teacher = require("../models/Teacher.model");
 const User = require("../models/User.model");
 const Counter = require("../models/Counter.model");
+const Section = require("../models/Section");
 
 // -----------------------------
-// Category 2 validation helpers
+// validation helpers
 // -----------------------------
 function isPlainObject(v) {
   return v !== null && typeof v === "object" && !Array.isArray(v);
 }
 
-// Block common NoSQL injection / prototype pollution surfaces
 function hasDangerousKeys(obj) {
   if (!isPlainObject(obj)) return true;
 
   for (const k of Object.keys(obj)) {
-    if (k.startsWith("$")) return true; // Mongo operators
-    if (k.includes(".")) return true;   // dotted path injection
+    if (k.startsWith("$")) return true;
+    if (k.includes(".")) return true;
     if (k === "__proto__" || k === "constructor" || k === "prototype") return true;
   }
   return false;
@@ -26,10 +26,13 @@ function hasDangerousKeys(obj) {
 function safeString(v, { trim = true, min = 0, max = 200 } = {}) {
   if (v === undefined || v === null) return { ok: false };
   if (typeof v !== "string") return { ok: false };
+
   let s = v;
   if (trim) s = s.trim();
+
   if (s.length < min) return { ok: false };
   if (s.length > max) return { ok: false };
+
   return { ok: true, value: s };
 }
 
@@ -41,18 +44,27 @@ function safeOptionalString(v, opts) {
 function safeEnum(v, allowed) {
   const s = safeString(v, { trim: true, min: 1, max: 30 });
   if (!s.ok) return { ok: false };
-  const val = s.value;
-  if (!allowed.includes(val)) return { ok: false };
-  return { ok: true, value: val };
+
+  if (!allowed.includes(s.value)) return { ok: false };
+  return { ok: true, value: s.value };
+}
+
+function safeBoolean(v) {
+  if (typeof v === "boolean") return { ok: true, value: v };
+  if (v === "true") return { ok: true, value: true };
+  if (v === "false") return { ok: true, value: false };
+  return { ok: false };
 }
 
 function safeEmail(v) {
   const s = safeOptionalString(v, { trim: true, min: 0, max: 254 });
   if (!s.ok) return { ok: false };
+
   if (s.value === undefined || s.value === "") return { ok: true, value: "" };
-  // basic email format check (not perfect, but good enough for validation)
+
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.value);
   if (!ok) return { ok: false };
+
   return { ok: true, value: s.value.toLowerCase() };
 }
 
@@ -61,15 +73,12 @@ function badRequest(res, message = "Invalid request.") {
 }
 
 // -----------------------------
-// existing helpers
+// helpers
 // -----------------------------
 function digitsOnly(v) {
   return String(v || "").replace(/\D/g, "");
 }
 
-/**
- * Normalize PH mobile to +63XXXXXXXXXX
- */
 function normalizePHMobile(input) {
   const d = digitsOnly(input);
 
@@ -101,7 +110,9 @@ async function nextTeacherId() {
 function generateTempPassword() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#$";
   let out = "";
-  for (let i = 0; i < 12; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 12; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
   return out;
 }
 
@@ -118,11 +129,67 @@ exports.listTeachers = async (req, res) => {
   }
 };
 
+exports.getUnassignedTeachers = async (req, res) => {
+  try {
+    const { sectionId } = req.query;
+
+    const sections = await Section.find(
+      { adviserId: { $exists: true, $ne: null } },
+      { adviserId: 1 }
+    ).lean();
+
+    let assignedIds = sections
+      .map((s) => String(s.adviserId || ""))
+      .filter(Boolean);
+
+    if (sectionId) {
+      const currentSection = await Section.findById(sectionId).lean();
+      if (currentSection?.adviserId) {
+        assignedIds = assignedIds.filter(
+          (id) => id !== String(currentSection.adviserId)
+        );
+      }
+    }
+
+    const teachers = await Teacher.find({
+      isActive: true,
+      _id: { $nin: assignedIds },
+    })
+      .select("_id teacherId firstName middleName lastName email")
+      .sort({ lastName: 1, firstName: 1 })
+      .lean();
+
+    const result = teachers.map((t) => ({
+      id: String(t._id),
+      teacherId: t.teacherId || "",
+      firstName: t.firstName || "",
+      middleName: t.middleName || "",
+      lastName: t.lastName || "",
+      email: t.email || "",
+      name: [t.firstName, t.middleName, t.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    }));
+
+    return res.json({
+      ok: true,
+      teachers: result,
+    });
+  } catch (err) {
+    console.error("getUnassignedTeachers error:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Failed to fetch teachers.",
+    });
+  }
+};
+
 exports.createTeacher = async (req, res) => {
   let createdUserId = null;
 
   try {
-    // ✅ body must be plain object, no dangerous keys
     if (!isPlainObject(req.body) || hasDangerousKeys(req.body)) {
       return badRequest(res);
     }
@@ -130,71 +197,151 @@ exports.createTeacher = async (req, res) => {
     const body = req.body;
     const teacherId = await nextTeacherId();
 
-    // ✅ temp password
     const tempPass = generateTempPassword();
     const passwordHash = await argon2.hash(tempPass);
 
-    // username defaults to teacherId
-    const u = safeOptionalString(body.username, { trim: true, min: 1, max: 64 });
-    if (!u.ok) return badRequest(res);
-    const username = (u.value || teacherId).trim();
+    const usernameInput = safeOptionalString(body.username, {
+      trim: true,
+      min: 1,
+      max: 64,
+    });
+    if (!usernameInput.ok) return badRequest(res);
+
+    const username = (usernameInput.value || teacherId).trim();
 
     const existingUser = await User.findOne({ username }).lean();
     if (existingUser) {
       return res.status(409).json({ ok: false, message: "Username already exists." });
     }
 
-    // Validate key fields used by schema (based on your code comment)
-    const firstName = safeString(body.firstName ?? "", { trim: true, min: 0, max: 80 });
-    const middleName = safeString(body.middleName ?? "", { trim: true, min: 0, max: 80 });
-    const lastName = safeString(body.lastName ?? "", { trim: true, min: 0, max: 80 });
-    if (!firstName.ok || !middleName.ok || !lastName.ok) return badRequest(res);
-
-    // sex: allow common values; if your app uses different values, adjust allowed list
-    let sexValue = "";
-    if (body.sex !== undefined && body.sex !== null && String(body.sex).trim() !== "") {
-      const sex = safeEnum(String(body.sex), ["Male", "Female"]);
-      if (!sex.ok) return badRequest(res);
-      sexValue = sex.value;
+    const firstName = safeString(body.firstName ?? "", { trim: true, min: 1, max: 80 });
+    const middleName = safeOptionalString(body.middleName ?? "", { trim: true, min: 0, max: 80 });
+    const lastName = safeString(body.lastName ?? "", { trim: true, min: 1, max: 80 });
+    if (!firstName.ok || !middleName.ok || !lastName.ok) {
+      return badRequest(res, "Invalid name fields.");
     }
 
-    // REQUIRED fields in your code: dob/className/sectionName must be non-empty string
-    const dob = safeString(String(body.dob ?? body.birthDate ?? ""), { trim: true, min: 1, max: 40 });
-    const className = safeString(String(body.className ?? body.gradeLevel ?? ""), { trim: true, min: 1, max: 60 });
-    const sectionName = safeString(String(body.sectionName ?? body.section ?? ""), { trim: true, min: 1, max: 60 });
-    if (!dob.ok || !className.ok || !sectionName.ok) return badRequest(res);
+    const dob = safeString(String(body.dob ?? body.birthDate ?? ""), {
+      trim: true,
+      min: 1,
+      max: 40,
+    });
+    if (!dob.ok) return badRequest(res, "Date of birth is required.");
+
+    let genderValue = "male";
+
+    if (body.gender !== undefined && body.gender !== null && String(body.gender).trim() !== "") {
+      const gender = safeEnum(String(body.gender).toLowerCase(), ["male", "female"]);
+      if (!gender.ok) return badRequest(res, "Invalid gender.");
+      genderValue = gender.value;
+    } else if (body.sex !== undefined && body.sex !== null && String(body.sex).trim() !== "") {
+      const sex = safeEnum(String(body.sex), ["Male", "Female"]);
+      if (!sex.ok) return badRequest(res, "Invalid sex.");
+      genderValue = sex.value === "Female" ? "female" : "male";
+    }
+
+    const className = safeOptionalString(
+      String(body.className ?? body.gradeLevel ?? ""),
+      { trim: true, min: 0, max: 60 }
+    );
+    const sectionName = safeOptionalString(
+      String(body.sectionName ?? body.section ?? ""),
+      { trim: true, min: 0, max: 60 }
+    );
+
+    if (!className.ok || !sectionName.ok) {
+      return badRequest(res, "Invalid class or section.");
+    }
 
     const email = safeEmail(body.email);
-    if (!email.ok) return badRequest(res);
+    if (!email.ok) return badRequest(res, "Invalid email.");
 
     const phoneRaw = safeOptionalString(body.phone ?? "", { trim: true, min: 0, max: 40 });
-    if (!phoneRaw.ok) return badRequest(res);
+    if (!phoneRaw.ok) return badRequest(res, "Invalid phone.");
     const phone = normalizePHMobile(phoneRaw.value || "");
 
-    const prc = safeOptionalString(body.prcLicenseNo ?? "", { trim: true, min: 0, max: 60 });
-    const pos = safeOptionalString(body.position ?? "", { trim: true, min: 0, max: 80 });
-    if (!prc.ok || !pos.ok) return badRequest(res);
+    const hasPrc = safeBoolean(body.hasPrc ?? false);
+    if (!hasPrc.ok) return badRequest(res, "Invalid PRC flag.");
 
-    const credentials = safeOptionalString(body.credentials ?? "", { trim: true, min: 0, max: 500 });
-    if (!credentials.ok) return badRequest(res);
+    const prcLicenseNo = safeOptionalString(body.prcLicenseNo ?? "", {
+      trim: true,
+      min: 0,
+      max: 60,
+    });
+    const position = safeOptionalString(body.position ?? "Teacher", {
+      trim: true,
+      min: 0,
+      max: 80,
+    });
+    const majorSpec = safeOptionalString(body.majorSpec ?? "", {
+      trim: true,
+      min: 0,
+      max: 100,
+    });
+    const highestEduc = safeOptionalString(body.highestEduc ?? "", {
+      trim: true,
+      min: 0,
+      max: 100,
+    });
+    const dateHired = safeOptionalString(body.dateHired ?? "", {
+      trim: true,
+      min: 0,
+      max: 40,
+    });
 
-    // NOTE: photoDataUrl can be large; your server currently limits /api to 20kb
-    const photoDataUrl = safeOptionalString(body.photoDataUrl ?? "", { trim: false, min: 0, max: 20000 });
-    if (!photoDataUrl.ok) return badRequest(res);
+    if (!prcLicenseNo.ok || !position.ok || !majorSpec.ok || !highestEduc.ok || !dateHired.ok) {
+      return badRequest(res, "Invalid credential fields.");
+    }
 
-    // Address codes / fields
-    const regionCode = safeOptionalString(body.regionCode ?? "", { trim: true, min: 0, max: 20 });
-    const provinceCode = safeOptionalString(body.provinceCode ?? "", { trim: true, min: 0, max: 20 });
-    const cityCode = safeOptionalString(body.cityCode ?? "", { trim: true, min: 0, max: 20 });
-    const barangayCode = safeOptionalString(body.barangayCode ?? "", { trim: true, min: 0, max: 20 });
-    const street = safeOptionalString(body.street ?? "", { trim: true, min: 0, max: 150 });
-    const postalCode = safeOptionalString(body.postalCode ?? "", { trim: true, min: 0, max: 12 });
+    const photoDataUrl = safeOptionalString(body.photoDataUrl ?? "", {
+      trim: false,
+      min: 0,
+      max: 20000,
+    });
+    if (!photoDataUrl.ok) return badRequest(res, "Invalid photo.");
+
+    const regionCode = safeOptionalString(body.regionCode ?? "", {
+      trim: true,
+      min: 0,
+      max: 20,
+    });
+    const provinceCode = safeOptionalString(body.provinceCode ?? "", {
+      trim: true,
+      min: 0,
+      max: 20,
+    });
+    const cityCode = safeOptionalString(body.cityCode ?? "", {
+      trim: true,
+      min: 0,
+      max: 20,
+    });
+    const barangayCode = safeOptionalString(body.barangayCode ?? "", {
+      trim: true,
+      min: 0,
+      max: 20,
+    });
+    const street = safeOptionalString(body.street ?? "", {
+      trim: true,
+      min: 0,
+      max: 150,
+    });
+    const postalCode = safeOptionalString(body.postalCode ?? "", {
+      trim: true,
+      min: 0,
+      max: 12,
+    });
+
     if (
-      !regionCode.ok || !provinceCode.ok || !cityCode.ok || !barangayCode.ok ||
-      !street.ok || !postalCode.ok
-    ) return badRequest(res);
+      !regionCode.ok ||
+      !provinceCode.ok ||
+      !cityCode.ok ||
+      !barangayCode.ok ||
+      !street.ok ||
+      !postalCode.ok
+    ) {
+      return badRequest(res, "Invalid address fields.");
+    }
 
-    // ✅ 1) Create User FIRST
     const user = await User.create({
       username,
       role: "teacher",
@@ -204,40 +351,44 @@ exports.createTeacher = async (req, res) => {
     });
     createdUserId = user._id;
 
-    // ✅ 2) Create Teacher
     const teacherDoc = {
       teacherId,
       userId: user._id,
 
       firstName: firstName.value,
-      middleName: middleName.value,
+      middleName: middleName.value || "",
       lastName: lastName.value,
-      sex: sexValue,
+      gender: genderValue,
 
       dob: dob.value,
-      className: className.value,
-      sectionName: sectionName.value,
+      className: className.value || "Unassigned",
+      sectionName: sectionName.value || "Unassigned",
 
       email: email.value || "",
       phone,
-      prcLicenseNo: prc.value || "",
-      position: pos.value || "",
+      position: position.value || "Teacher",
 
       address: {
         regionCode: regionCode.value || "",
         provinceCode: provinceCode.value || "",
         cityCode: cityCode.value || "",
-        barangayCode: barangayCode.value || "",
+        brgyCode: barangayCode.value || "",
         street: street.value || "",
-        postalCode: postalCode.value || "",
+        postal: postalCode.value || "",
       },
 
-      credentials: credentials.value || "",
+      credentials: {
+        hasPrc: hasPrc.value,
+        prcLicense: hasPrc.value
+          ? (prcLicenseNo.value || "")
+          : "N/A",
+        majorSpec: majorSpec.value || "",
+        highestEduc: highestEduc.value || "",
+        dateHired: dateHired.value || "",
+      },
+
       photoDataUrl: photoDataUrl.value || "",
       isActive: true,
-
-      // keep if your schema includes passwordHash
-      passwordHash,
     };
 
     const teacher = await Teacher.create(teacherDoc);
@@ -270,108 +421,184 @@ exports.updateTeacher = async (req, res) => {
     const body = req.body;
 
     const teacher = await Teacher.findOne({ teacherId });
-    if (!teacher) return res.status(404).json({ ok: false, message: "Teacher not found." });
+    if (!teacher) {
+      return res.status(404).json({ ok: false, message: "Teacher not found." });
+    }
 
-    // Only accept string fields; reject objects/arrays for these
     const setIfProvided = (key, opts) => {
-      if (body[key] === undefined || body[key] === null) return { ok: true, value: undefined };
-      if (isPlainObject(body[key]) || Array.isArray(body[key])) return { ok: false };
+      if (body[key] === undefined || body[key] === null) {
+        return { ok: true, value: undefined };
+      }
+      if (isPlainObject(body[key]) || Array.isArray(body[key])) {
+        return { ok: false };
+      }
       return safeString(String(body[key]), opts);
     };
 
-    const firstName = setIfProvided("firstName", { trim: true, min: 0, max: 80 });
+    const firstName = setIfProvided("firstName", { trim: true, min: 1, max: 80 });
     const middleName = setIfProvided("middleName", { trim: true, min: 0, max: 80 });
-    const lastName = setIfProvided("lastName", { trim: true, min: 0, max: 80 });
-    if (!firstName.ok || !middleName.ok || !lastName.ok) return badRequest(res);
+    const lastName = setIfProvided("lastName", { trim: true, min: 1, max: 80 });
 
-    // sex (optional)
-    if (body.sex !== undefined && body.sex !== null) {
-      if (String(body.sex).trim() === "") {
-        teacher.sex = "";
-      } else {
-        const sex = safeEnum(String(body.sex), ["Male", "Female"]);
-        if (!sex.ok) return badRequest(res);
-        teacher.sex = sex.value;
-      }
+    if (!firstName.ok || !middleName.ok || !lastName.ok) {
+      return badRequest(res, "Invalid name fields.");
     }
 
-    // schema fields
-    if (body.dob !== undefined || body.birthDate !== undefined) {
-      const dob = safeString(String(body.dob ?? body.birthDate ?? ""), { trim: true, min: 1, max: 40 });
-      if (!dob.ok) return badRequest(res);
-      teacher.dob = dob.value;
-    }
-
-    if (body.className !== undefined || body.gradeLevel !== undefined) {
-      const className = safeString(String(body.className ?? body.gradeLevel ?? ""), { trim: true, min: 1, max: 60 });
-      if (!className.ok) return badRequest(res);
-      teacher.className = className.value;
-    }
-
-    if (body.sectionName !== undefined || body.section !== undefined) {
-      const sectionName = safeString(String(body.sectionName ?? body.section ?? ""), { trim: true, min: 1, max: 60 });
-      if (!sectionName.ok) return badRequest(res);
-      teacher.sectionName = sectionName.value;
-    }
-
-    // simple strings
     if (firstName.value !== undefined) teacher.firstName = firstName.value;
     if (middleName.value !== undefined) teacher.middleName = middleName.value;
     if (lastName.value !== undefined) teacher.lastName = lastName.value;
 
+    if (body.gender !== undefined) {
+      const gender = safeEnum(String(body.gender).toLowerCase(), ["male", "female"]);
+      if (!gender.ok) return badRequest(res, "Invalid gender.");
+      teacher.gender = gender.value;
+    } else if (body.sex !== undefined) {
+      const sex = safeEnum(String(body.sex), ["Male", "Female"]);
+      if (!sex.ok) return badRequest(res, "Invalid sex.");
+      teacher.gender = sex.value === "Female" ? "female" : "male";
+    }
+
+    if (body.dob !== undefined || body.birthDate !== undefined) {
+      const dob = safeString(String(body.dob ?? body.birthDate ?? ""), {
+        trim: true,
+        min: 1,
+        max: 40,
+      });
+      if (!dob.ok) return badRequest(res, "Invalid birth date.");
+      teacher.dob = dob.value;
+    }
+
+    if (body.className !== undefined || body.gradeLevel !== undefined) {
+      const className = safeString(String(body.className ?? body.gradeLevel ?? ""), {
+        trim: true,
+        min: 0,
+        max: 60,
+      });
+      if (!className.ok) return badRequest(res, "Invalid class name.");
+      teacher.className = className.value || "Unassigned";
+    }
+
+    if (body.sectionName !== undefined || body.section !== undefined) {
+      const sectionName = safeString(String(body.sectionName ?? body.section ?? ""), {
+        trim: true,
+        min: 0,
+        max: 60,
+      });
+      if (!sectionName.ok) return badRequest(res, "Invalid section name.");
+      teacher.sectionName = sectionName.value || "Unassigned";
+    }
+
     if (body.email !== undefined) {
       const email = safeEmail(body.email);
-      if (!email.ok) return badRequest(res);
+      if (!email.ok) return badRequest(res, "Invalid email.");
       teacher.email = email.value || "";
     }
 
     if (body.phone !== undefined) {
-      const phoneRaw = safeString(String(body.phone ?? ""), { trim: true, min: 0, max: 40 });
-      if (!phoneRaw.ok) return badRequest(res);
+      const phoneRaw = safeString(String(body.phone ?? ""), {
+        trim: true,
+        min: 0,
+        max: 40,
+      });
+      if (!phoneRaw.ok) return badRequest(res, "Invalid phone.");
       teacher.phone = normalizePHMobile(phoneRaw.value);
     }
 
-    if (body.prcLicenseNo !== undefined) {
-      const prc = safeString(String(body.prcLicenseNo ?? ""), { trim: true, min: 0, max: 60 });
-      if (!prc.ok) return badRequest(res);
-      teacher.prcLicenseNo = prc.value;
-    }
-
     if (body.position !== undefined) {
-      const pos = safeString(String(body.position ?? ""), { trim: true, min: 0, max: 80 });
-      if (!pos.ok) return badRequest(res);
-      teacher.position = pos.value;
+      const position = safeString(String(body.position ?? ""), {
+        trim: true,
+        min: 0,
+        max: 80,
+      });
+      if (!position.ok) return badRequest(res, "Invalid position.");
+      teacher.position = position.value || "Teacher";
     }
 
-    if (body.credentials !== undefined) {
-      const credentials = safeString(String(body.credentials ?? ""), { trim: true, min: 0, max: 500 });
-      if (!credentials.ok) return badRequest(res);
-      teacher.credentials = credentials.value;
+    if (!teacher.credentials) {
+      teacher.credentials = {};
+    }
+
+    if (body.hasPrc !== undefined) {
+      const hasPrc = safeBoolean(body.hasPrc);
+      if (!hasPrc.ok) return badRequest(res, "Invalid PRC flag.");
+      teacher.credentials.hasPrc = hasPrc.value;
+
+      if (!hasPrc.value) {
+        teacher.credentials.prcLicense = "N/A";
+      }
+    }
+
+    if (body.prcLicenseNo !== undefined) {
+      const prc = safeString(String(body.prcLicenseNo ?? ""), {
+        trim: true,
+        min: 0,
+        max: 60,
+      });
+      if (!prc.ok) return badRequest(res, "Invalid PRC license.");
+      teacher.credentials.prcLicense = prc.value || "N/A";
+    }
+
+    if (body.majorSpec !== undefined) {
+      const majorSpec = safeString(String(body.majorSpec ?? ""), {
+        trim: true,
+        min: 0,
+        max: 100,
+      });
+      if (!majorSpec.ok) return badRequest(res, "Invalid major.");
+      teacher.credentials.majorSpec = majorSpec.value;
+    }
+
+    if (body.highestEduc !== undefined) {
+      const highestEduc = safeString(String(body.highestEduc ?? ""), {
+        trim: true,
+        min: 0,
+        max: 100,
+      });
+      if (!highestEduc.ok) return badRequest(res, "Invalid highest education.");
+      teacher.credentials.highestEduc = highestEduc.value;
+    }
+
+    if (body.dateHired !== undefined) {
+      const dateHired = safeString(String(body.dateHired ?? ""), {
+        trim: true,
+        min: 0,
+        max: 40,
+      });
+      if (!dateHired.ok) return badRequest(res, "Invalid date hired.");
+      teacher.credentials.dateHired = dateHired.value;
     }
 
     if (body.photoDataUrl !== undefined) {
-      const photo = safeString(String(body.photoDataUrl ?? ""), { trim: false, min: 0, max: 20000 });
-      if (!photo.ok) return badRequest(res);
+      const photo = safeString(String(body.photoDataUrl ?? ""), {
+        trim: false,
+        min: 0,
+        max: 20000,
+      });
+      if (!photo.ok) return badRequest(res, "Invalid photo.");
       teacher.photoDataUrl = photo.value;
     }
 
-    // address
-    if (!teacher.address) teacher.address = {};
+    if (!teacher.address) {
+      teacher.address = {};
+    }
 
     const addrFields = [
-      ["regionCode", 20],
-      ["provinceCode", 20],
-      ["cityCode", 20],
-      ["barangayCode", 20],
-      ["street", 150],
-      ["postalCode", 12],
+      ["regionCode", "regionCode", 20],
+      ["provinceCode", "provinceCode", 20],
+      ["cityCode", "cityCode", 20],
+      ["barangayCode", "brgyCode", 20],
+      ["street", "street", 150],
+      ["postalCode", "postal", 12],
     ];
 
-    for (const [k, max] of addrFields) {
-      if (body[k] !== undefined) {
-        const v = safeString(String(body[k] ?? ""), { trim: true, min: 0, max });
-        if (!v.ok) return badRequest(res);
-        teacher.address[k] = v.value;
+    for (const [bodyKey, docKey, max] of addrFields) {
+      if (body[bodyKey] !== undefined) {
+        const v = safeString(String(body[bodyKey] ?? ""), {
+          trim: true,
+          min: 0,
+          max,
+        });
+        if (!v.ok) return badRequest(res, `Invalid ${bodyKey}.`);
+        teacher.address[docKey] = v.value;
       }
     }
 
@@ -388,13 +615,12 @@ exports.resetTeacherPassword = async (req, res) => {
     const { teacherId } = req.params;
 
     const teacher = await Teacher.findOne({ teacherId });
-    if (!teacher) return res.status(404).json({ ok: false, message: "Teacher not found." });
+    if (!teacher) {
+      return res.status(404).json({ ok: false, message: "Teacher not found." });
+    }
 
     const tempPass = generateTempPassword();
     const passwordHash = await argon2.hash(tempPass);
-
-    teacher.passwordHash = passwordHash;
-    await teacher.save();
 
     if (teacher.userId) {
       await User.updateOne(
@@ -415,7 +641,9 @@ exports.disableTeacher = async (req, res) => {
     const { teacherId } = req.params;
 
     const teacher = await Teacher.findOne({ teacherId });
-    if (!teacher) return res.status(404).json({ ok: false, message: "Teacher not found." });
+    if (!teacher) {
+      return res.status(404).json({ ok: false, message: "Teacher not found." });
+    }
 
     teacher.isActive = false;
     await teacher.save();
@@ -436,7 +664,9 @@ exports.deleteTeacher = async (req, res) => {
     const { teacherId } = req.params;
 
     const teacher = await Teacher.findOne({ teacherId });
-    if (!teacher) return res.status(404).json({ ok: false, message: "Teacher not found." });
+    if (!teacher) {
+      return res.status(404).json({ ok: false, message: "Teacher not found." });
+    }
 
     if (teacher.userId) {
       await User.deleteOne({ _id: teacher.userId });

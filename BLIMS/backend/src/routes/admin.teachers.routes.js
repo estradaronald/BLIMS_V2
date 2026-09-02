@@ -67,6 +67,7 @@ router.use(requireRole("Admin"));
 
 // List
 router.get("/teachers", ctrl.listTeachers);
+router.get("/teachers/unassigned", ctrl.getUnassignedTeachers);
 
 // Create
 router.post("/teachers", requireJsonBody, ctrl.createTeacher);

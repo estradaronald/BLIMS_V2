@@ -15,6 +15,7 @@ const StudentSchema = new mongoose.Schema(
       required: true,
       unique: true,
       index: true,
+      trim: true,
     }, // STD-0001
 
     firstName: { type: String, required: true, trim: true },
@@ -27,7 +28,8 @@ const StudentSchema = new mongoose.Schema(
       default: "male",
     },
 
-    dob: { type: String, default: "" }, // YYYY-MM-DD
+    dob: { type: String, default: "", trim: true },
+
     lrn: {
       type: String,
       required: true,
@@ -36,28 +38,40 @@ const StudentSchema = new mongoose.Schema(
       trim: true,
     },
 
-    className: { type: String, required: true, trim: true },
-    sectionName: { type: String, required: true, trim: true },
+    // optional during account creation, assign later
+    className: {
+      type: String,
+      required: true,
+      default: "Unassigned",
+      trim: true,
+    },
 
-    phone: { type: String, default: "" }, // +63XXXXXXXXXX
+    sectionName: {
+      type: String,
+      required: true,
+      default: "Unassigned",
+      trim: true,
+    },
+
+    phone: { type: String, default: "", trim: true },
     email: { type: String, default: "", lowercase: true, trim: true },
 
     address: {
-      street: { type: String, default: "" },
-      provinceCode: { type: String, default: "" },
-      cityCode: { type: String, default: "" },
-      brgyCode: { type: String, default: "" },
-      postal: { type: String, default: "" },
+      street: { type: String, default: "", trim: true },
+      provinceCode: { type: String, default: "", trim: true },
+      cityCode: { type: String, default: "", trim: true },
+      brgyCode: { type: String, default: "", trim: true },
+      postal: { type: String, default: "", trim: true },
     },
 
     parents: {
-      fatherName: { type: String, default: "" },
-      fatherOccupation: { type: String, default: "" },
-      fatherContact: { type: String, default: "" },
+      fatherName: { type: String, default: "", trim: true },
+      fatherOccupation: { type: String, default: "", trim: true },
+      fatherContact: { type: String, default: "", trim: true },
 
-      motherName: { type: String, default: "" },
-      motherOccupation: { type: String, default: "" },
-      motherContact: { type: String, default: "" },
+      motherName: { type: String, default: "", trim: true },
+      motherOccupation: { type: String, default: "", trim: true },
+      motherContact: { type: String, default: "", trim: true },
     },
 
     photoDataUrl: { type: String, default: "" },

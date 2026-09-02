@@ -1,0 +1,12 @@
+# dependencies
+backend/node_modules
+
+# environment variables
+backend/.env
+
+# backups
+backend/backups
+backend/backup-temp
+
+# logs
+*.log

@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalSection = $("modalSection");
   const modalAdviser = $("modalAdviser");
   const modalCapacity = $("modalCapacity");
+  const removeTeacherBtn = $("removeTeacherBtn");
 
   const confirmModal = $("confirmModal");
   const confirmModalBackdrop = $("confirmModalBackdrop");
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // data cache
   let summaryCounts = {};
   let gradeRows = [];
+  let availableTeachers = [];
 
   // csrf
   let csrfToken = "";
@@ -185,9 +187,121 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetModalFields() {
     modalGrade.value = activeGrade || grades[0] || "";
     modalSection.value = "";
-    modalAdviser.value = "";
     modalCapacity.value = "";
     hideError();
+    toggleRemoveTeacherBtn();
+  }
+
+  function toggleRemoveTeacherBtn() {
+    if (!removeTeacherBtn) return;
+    removeTeacherBtn.style.display = modalAdviser.value ? "inline-block" : "none";
+  }
+
+  // --------------------------
+  // Teacher helpers
+  // --------------------------
+  function teacherIdOf(t) {
+    return String(
+      t?.id ||
+      t?._id ||
+      t?.teacherId ||
+      t?.value ||
+      ""
+    );
+  }
+
+  function teacherNameOf(t) {
+    if (!t) return "";
+
+    if (typeof t.name === "string" && t.name.trim()) return t.name.trim();
+
+    const joined = [
+      t.firstName,
+      t.middleName,
+      t.lastName,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (joined) return joined;
+
+    if (typeof t.fullName === "string" && t.fullName.trim()) return t.fullName.trim();
+    if (typeof t.label === "string" && t.label.trim()) return t.label.trim();
+    if (typeof t.email === "string" && t.email.trim()) return t.email.trim();
+
+    return "Unnamed Teacher";
+  }
+
+  function currentRowById(id) {
+    return (gradeRows || []).find((x) => String(x.id) === String(id));
+  }
+
+  function fillAdviserSelect(teachers, selectedId = "", fallbackName = "") {
+    const selectedIdStr = String(selectedId || "");
+    const list = Array.isArray(teachers) ? [...teachers] : [];
+
+    const hasSelectedAlready =
+      selectedIdStr &&
+      list.some((t) => String(teacherIdOf(t)) === selectedIdStr);
+
+    if (!hasSelectedAlready && (selectedIdStr || fallbackName)) {
+      list.unshift({
+        id: selectedIdStr || `current-${Date.now()}`,
+        name: fallbackName || "Current Adviser",
+      });
+    }
+
+    modalAdviser.innerHTML = "";
+
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Unassigned";
+    modalAdviser.appendChild(defaultOpt);
+
+    list.forEach((teacher) => {
+      const opt = document.createElement("option");
+      opt.value = teacherIdOf(teacher);
+      opt.textContent = teacherNameOf(teacher);
+      modalAdviser.appendChild(opt);
+    });
+
+    if (selectedIdStr) {
+      modalAdviser.value = selectedIdStr;
+    } else {
+      modalAdviser.value = "";
+    }
+
+    toggleRemoveTeacherBtn();
+  }
+
+  async function loadAvailableTeachers(selectedTeacherId = "", selectedTeacherName = "") {
+    try {
+      let path = "/teachers/unassigned";
+
+      if (editingId) {
+        path += `?sectionId=${encodeURIComponent(editingId)}`;
+      }
+
+      const data = await api(path);
+
+      let list = [];
+      if (Array.isArray(data)) {
+        list = data;
+      } else if (data && Array.isArray(data.teachers)) {
+        list = data.teachers;
+      } else if (data && Array.isArray(data.items)) {
+        list = data.items;
+      }
+
+      availableTeachers = list;
+      fillAdviserSelect(availableTeachers, selectedTeacherId, selectedTeacherName);
+    } catch (e) {
+      availableTeachers = [];
+      fillAdviserSelect([], selectedTeacherId, selectedTeacherName);
+      console.warn("Failed to load unassigned teachers:", e);
+    }
   }
 
   // --------------------------
@@ -355,7 +469,6 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadGradeLevels();
     await loadSummary();
 
-    // include grades that appear in summary but not in grade-level list
     Object.keys(summaryCounts || {}).forEach((g) => {
       if (g && !grades.includes(g)) grades.push(g);
     });
@@ -370,18 +483,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------------------------
   // Actions
   // --------------------------
-  function startAdd() {
+  async function startAdd() {
     editingId = null;
     sectionModalTitle.textContent = "Add Section";
     sectionModalSub.textContent =
       "Create a section under the selected grade level.";
+
     fillGradeSelect();
     resetModalFields();
+    await loadAvailableTeachers();
     openModal();
   }
 
-  function startEdit(id) {
-    const item = (gradeRows || []).find((x) => x.id === id);
+  async function startEdit(id) {
+    const item = currentRowById(id);
     if (!item) return;
 
     editingId = id;
@@ -390,17 +505,22 @@ document.addEventListener("DOMContentLoaded", () => {
       "Update section details for the selected grade level.";
 
     fillGradeSelect();
-    modalGrade.value = activeGrade;
+    modalGrade.value = item.grade || activeGrade || "";
     modalSection.value = item.section || "";
-    modalAdviser.value = item.adviser || "";
     modalCapacity.value = item.capacity ?? "";
 
     hideError();
+
+    await loadAvailableTeachers(
+      item.adviserId || item.teacherId || "",
+      item.adviser || item.teacherName || ""
+    );
+
     openModal();
   }
 
   function startDelete(id) {
-    const item = (gradeRows || []).find((x) => x.id === id);
+    const item = currentRowById(id);
     if (!item) return;
 
     pendingDeleteId = id;
@@ -411,8 +531,11 @@ document.addEventListener("DOMContentLoaded", () => {
   async function saveSection() {
     const grade = modalGrade.value;
     const section = modalSection.value.trim();
-    const adviser = modalAdviser.value.trim();
     const capacity = Number(modalCapacity.value);
+
+    const adviserId = modalAdviser.value || "";
+    const adviser =
+      modalAdviser.options[modalAdviser.selectedIndex]?.textContent?.trim() || "";
 
     if (!grade || !grades.includes(grade)) {
       return showError("Please select a valid grade level.");
@@ -422,16 +545,24 @@ document.addEventListener("DOMContentLoaded", () => {
       return showError("Capacity must be a positive number.");
     }
 
+    const payload = {
+      grade,
+      section,
+      adviserId: adviserId || null,
+      adviser: adviserId ? adviser : "",
+      capacity,
+    };
+
     try {
       if (editingId) {
         await api(`/sections/${encodeURIComponent(editingId)}`, {
           method: "PUT",
-          body: JSON.stringify({ section, adviser, capacity }),
+          body: JSON.stringify(payload),
         });
       } else {
         await api("/sections", {
           method: "POST",
-          body: JSON.stringify({ grade, section, adviser, capacity }),
+          body: JSON.stringify(payload),
         });
 
         activeGrade = grade;
@@ -469,15 +600,32 @@ document.addEventListener("DOMContentLoaded", () => {
   sectionModalCloseX.addEventListener("click", closeModal);
   modalCancelBtn.addEventListener("click", closeModal);
 
-  modalResetBtn.addEventListener("click", () => {
-    if (editingId) startEdit(editingId);
-    else {
+  modalResetBtn.addEventListener("click", async () => {
+    if (editingId) {
+      await startEdit(editingId);
+    } else {
       resetModalFields();
+      await loadAvailableTeachers();
       modalSection.focus();
     }
   });
 
   modalSaveBtn.addEventListener("click", saveSection);
+
+  if (removeTeacherBtn) {
+    removeTeacherBtn.addEventListener("click", () => {
+      modalAdviser.value = "";
+      toggleRemoveTeacherBtn();
+      hideError();
+    });
+  }
+
+  if (modalAdviser) {
+    modalAdviser.addEventListener("change", () => {
+      toggleRemoveTeacherBtn();
+      hideError();
+    });
+  }
 
   confirmModalBackdrop.addEventListener("click", closeConfirm);
   confirmCloseX.addEventListener("click", closeConfirm);
@@ -495,6 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // init
   selectedGradeTitle.textContent = activeGrade || "No Grade";
+  toggleRemoveTeacherBtn();
 
   (async () => {
     try {

@@ -1,52 +1,146 @@
 // frontend/src/js/teacher/teacher-assessment.js
-// Teacher Assessment (Classwork / Create / Submissions)
-// LocalStorage-based (same style as your other teacher pages)
+// Teacher Assessment
+// Subjects + Subject Detail + Assignments + Create/Edit/Delete Assignment
 
 (function () {
   const $ = (id) => document.getElementById(id);
 
-  // =========================
-  // LocalStorage keys
-  // =========================
-  const LS_KEYS = {
-    USER: "user",
-    STUDENTS: "rbms_students_v1",
-    CLASSES: "rbms_classes_v1",
-    SECTIONS: "rbms_sections_v1",
-    ASSESS: "rbms_teacher_assessments_v1",
+  // =========================================================
+  // API HELPER
+  // =========================================================
+
+  async function apiFetch(url, options = {}) {
+    const res = await fetch(url, {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || "Request failed");
+    }
+
+    return data;
+  }
+
+  // =========================================================
+  // STATE
+  // =========================================================
+
+  let API_SUBJECTS = [];
+
+  let TEACHER_SCOPE = {
+    className: "",
+    sectionName: "",
   };
 
-  // =========================
-  // Helpers
-  // =========================
-  function readLS(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+  let TEACHER_INFO = null;
+
+  let ACTIVE_SCHOOL_YEAR = null;
+
+  let CURRENT_SUBJECT = null;
+
+  let ALL_ASSIGNMENTS = [];
+
+  let FILTERED_ASSIGNMENTS = [];
+
+  let EDITING_ASSIGNMENT_ID = null;
+
+  // =========================================================
+  // DOM
+  // =========================================================
+
+  const subjectCards = $("asSubjectCards");
+  const subjectsEmpty = $("asSubjectsEmpty");
+  const subjectSearch = $("asSubjectSearch");
+
+  const subjectsView = $("asSubjectsView");
+  const detailView = $("asDetailView");
+
+  const backToSubjectsBtn = $("asBackToSubjectsBtn");
+
+  // =========================================================
+  // DETAIL
+  // =========================================================
+
+  const heroTitle = $("asHeroTitle");
+  const heroSection = $("asHeroSection");
+  const heroTeacher = $("asHeroTeacher");
+  const heroAvatar = $("asHeroAvatar");
+
+  // =========================================================
+  // ASSIGNMENT AREA
+  // =========================================================
+
+  const activityStream = $("asActivityStream");
+  const activityEmpty = $("asActivityEmpty");
+
+  const statusFilter = $("asStatusFilter");
+  const quarterFilter = $("asQuarterFilter");
+
+  const overviewTotal = $("asOverviewTotal");
+  const overviewPublished = $("asOverviewPublished");
+  const overviewDrafts = $("asOverviewDrafts");
+  const overviewDueWeek = $("asOverviewDueWeek");
+
+  const upcomingText = $("asUpcomingText");
+  const jumpLatestBtn = $("asJumpLatestBtn");
+
+  // =========================================================
+  // MODAL
+  // =========================================================
+
+  const createActivityBtn = $("asCreateActivityBtn");
+  const activityModal = $("asActivityModal");
+
+  const modalCloseBtn = $("asModalCloseBtn");
+
+  const modalBackdrop =
+    activityModal?.querySelector(".as-modal-backdrop");
+
+  const activityTitleInput =
+    $("asActivityTitleInput");
+
+  const activityQuarterSelect =
+    $("asActivityQuarterSelect");
+
+  const activityPointsInput =
+    $("asActivityPointsInput");
+
+  const activityDueDateInput =
+    $("asActivityDueDateInput");
+
+  const activityDueTimeInput =
+    $("asActivityDueTimeInput");
+
+  const activityInstructionsInput =
+    $("asActivityInstructionsInput");
+
+  const saveDraftBtn =
+    $("asSaveDraftBtn");
+
+  const publishActivityBtn =
+    $("asPublishActivityBtn");
+
+  const modalTitle =
+    $("asModalTitle");
+
+  const modalSub =
+    $("asModalSub");
+
+  // =========================================================
+  // HELPERS
+  // =========================================================
+
+  function safeStr(value) {
+    return String(value ?? "");
   }
-  function writeLS(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-  function uid(prefix) {
-    return (
-      (prefix || "AS") +
-      "-" +
-      Date.now().toString(16) +
-      "-" +
-      Math.random().toString(16).slice(2, 8).toUpperCase()
-    );
-  }
-  function clampNum(n, min, max) {
-    const x = Number(n);
-    if (Number.isNaN(x)) return min;
-    return Math.max(min, Math.min(max, x));
-  }
-  function safeStr(v) {
-    return String(v ?? "");
-  }
+
   function escapeHTML(str) {
     return safeStr(str)
       .replaceAll("&", "&amp;")
@@ -56,945 +150,1837 @@
       .replaceAll("'", "&#039;");
   }
 
-  function fmtDue(dateStr, timeStr) {
-    if (!dateStr) return "—";
-    // keep it simple: YYYY-MM-DD -> Mon DD, YYYY (browser locale)
-    const d = new Date(dateStr + "T00:00:00");
-    const datePart = isNaN(d.getTime())
-      ? dateStr
-      : d.toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "2-digit",
-        });
+  function getSubjectName(subject) {
+    if (!subject) return "";
 
-    if (!timeStr) return datePart;
-    return `${datePart} ${timeStr}`;
-  }
-
-  // =========================
-  // Topbar menu (same pattern)
-  // =========================
-  function wireTopbarMenu() {
-    const btn = $("userMenuBtn");
-    const menu = $("userMenu");
-    if (!btn || !menu) return;
-
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("open");
-    });
-
-    document.addEventListener("click", () => menu.classList.remove("open"));
-  }
-
-  // =========================
-  // Tabs (3 main tabs)
-  // =========================
-  const views = {
-    classwork: $("asClassworkView"),
-    create: $("asCreateView"),
-    submissions: $("asSubmissionsView"),
-  };
-  const mainTabs = Array.from(document.querySelectorAll(".as-main-tab"));
-
-  function setActiveMainTab(viewKey) {
-    // toggle tabs
-    mainTabs.forEach((t) => {
-      const active = t.dataset.view === viewKey;
-      t.classList.toggle("is-active", active);
-      t.setAttribute("aria-selected", active ? "true" : "false");
-    });
-
-    // toggle views
-    Object.entries(views).forEach(([k, el]) => {
-      if (!el) return;
-      const show = k === viewKey;
-      el.classList.toggle("hidden", !show);
-      el.setAttribute("aria-hidden", show ? "false" : "true");
-    });
-  }
-
-  // =========================
-  // Classwork status tabs (Active / Drafts / Archived)
-  // =========================
-  const statusTabs = Array.from(document.querySelectorAll(".as-tab"));
-  let currentStatus = "active"; // active | draft | archived
-
-  function setStatus(status) {
-    currentStatus = status;
-
-    statusTabs.forEach((b) => {
-      b.classList.toggle("is-active", b.dataset.status === status);
-      b.setAttribute("aria-selected", b.dataset.status === status ? "true" : "false");
-    });
-
-    renderList();
-    renderStats();
-  }
-
-  // =========================
-  // Data model
-  // =========================
-  function getStudents() {
-    // teacher-students.js writes here
-    return readLS(LS_KEYS.STUDENTS, []);
-  }
-  function getAssessments() {
-    return readLS(LS_KEYS.ASSESS, []);
-  }
-  function setAssessments(list) {
-    writeLS(LS_KEYS.ASSESS, list);
-  }
-
-  // Keep current selection (for Edit/Submissions)
-  let activeAssessmentId = null;
-
-  function findAssessment(id) {
-    return getAssessments().find((a) => a.id === id) || null;
-  }
-
-  // =========================
-  // DOM refs (Classwork list)
-  // =========================
-  const listTbody = $("asListTbody");
-  const quarterFilter = $("asQuarterFilter");
-  const typeFilter = $("asTypeFilter");
-  const searchInput = $("asSearchInput");
-
-  // Stats
-  const statActive = $("asStatActive");
-  const statDraft = $("asStatDraft");
-  const statArchived = $("asStatArchived");
-  const statDueWeek = $("asStatDueWeek");
-
-  // Buttons
-  const newBtn = $("asNewBtn");
-  const backToListBtn = $("asBackToListBtn");
-  const backToListBtn2 = $("asBackToListBtn2");
-
-  // =========================
-  // DOM refs (Create form)
-  // =========================
-  const detailHeading = $("asDetailHeading");
-  const detailSub = $("asDetailSub");
-  const statusBadge = $("asStatusBadge");
-
-  const titleInput = $("asTitleInput");
-  const descInput = $("asDescInput");
-  const typeSelect = $("asTypeSelect");
-  const quarterSelect = $("asQuarterSelect");
-  const subjectSelect = $("asSubjectSelect");
-  const pointsInput = $("asPointsInput");
-  const dueDateInput = $("asDueDateInput");
-  const dueTimeInput = $("asDueTimeInput");
-  const scopeSelect = $("asScopeSelect");
-
-  // Attachments (UI-only)
-  const attachBtn = $("asAttachBtn");
-  const attachInput = $("asAttachInput");
-  const attachList = $("asAttachList");
-
-  // Recipients
-  const recipAll = $("asRecipAll");
-  const recipSelected = $("asRecipSelected");
-  const studentPicker = $("asStudentPicker");
-  const studentSearch = $("asStudentSearch");
-  const studentList = $("asStudentList");
-  const recipCount = $("asRecipientCount");
-  const selectAllBtn = $("asSelectAllBtn");
-  const clearAllBtn = $("asClearAllBtn");
-
-  // Form action buttons
-  const saveDraftBtn = $("asSaveDraftBtn");
-  const postBtn = $("asPostBtn");
-
-  // Detail actions
-  const editBtn = $("asEditBtn");
-  const archiveBtn = $("asArchiveBtn");
-  const deleteBtn = $("asDeleteBtn");
-
-  // =========================
-  // DOM refs (Submissions tab)
-  // =========================
-  const assignedCount = $("asAssignedCount");
-  const submittedCount = $("asSubmittedCount");
-  const missingCount = $("asMissingCount");
-  const submissionsTbody = $("asSubmissionsTbody");
-
-  // =========================
-  // Attachments: UI only
-  // =========================
-  let currentAttachments = [];
-
-  function renderAttachments() {
-    if (!attachList) return;
-    if (!currentAttachments.length) {
-      attachList.innerHTML = `<div class="as-attach-empty">No attachments added.</div>`;
-      return;
-    }
-    attachList.innerHTML = currentAttachments
-      .map(
-        (a, idx) => `
-      <div class="as-attach-item">
-        <div class="as-attach-name">${escapeHTML(a.name)}</div>
-        <button class="as-attach-x" type="button" data-idx="${idx}">✕</button>
-      </div>
-    `
-      )
-      .join("");
-
-    attachList.querySelectorAll(".as-attach-x").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const i = Number(btn.dataset.idx);
-        currentAttachments.splice(i, 1);
-        renderAttachments();
-      });
-    });
-  }
-
-  function wireAttachments() {
-    if (!attachBtn || !attachInput) return;
-
-    attachBtn.addEventListener("click", () => attachInput.click());
-    attachInput.addEventListener("change", () => {
-      const file = attachInput.files && attachInput.files[0];
-      if (!file) return;
-      currentAttachments.push({ name: file.name, size: file.size });
-      attachInput.value = "";
-      renderAttachments();
-    });
-  }
-
-  // =========================
-  // Recipients picker
-  // =========================
-  let selectedStudentIds = new Set();
-
-  function setPickerVisible(visible) {
-    if (!studentPicker) return;
-    studentPicker.classList.toggle("hidden", !visible);
-    studentPicker.setAttribute("aria-hidden", visible ? "false" : "true");
-  }
-
-  function getCurrentRecipientsMode() {
-    return recipSelected && recipSelected.checked ? "selected" : "all";
-  }
-
-  function computeRecipientIds() {
-    const students = getStudents();
-    if (getCurrentRecipientsMode() === "all") {
-      return students.map((s) => s.studentId || s.id).filter(Boolean);
-    }
-    return Array.from(selectedStudentIds);
-  }
-
-  function renderRecipientCount() {
-    if (!recipCount) return;
-    const mode = getCurrentRecipientsMode();
-    if (mode === "all") {
-      const total = getStudents().length;
-      recipCount.textContent = `All students (${total})`;
-    } else {
-      recipCount.textContent = `${selectedStudentIds.size} selected`;
-    }
-  }
-
-  function renderStudentPickerList() {
-    if (!studentList) return;
-
-    const students = getStudents();
-    const q = (studentSearch ? studentSearch.value : "").trim().toLowerCase();
-
-    const filtered = students.filter((s) => {
-      const full = `${s.firstName || ""} ${s.lastName || ""}`.trim().toLowerCase();
-      const sid = safeStr(s.studentId || s.id).toLowerCase();
-      const lrn = safeStr(s.lrn || "").toLowerCase();
-      return (
-        !q ||
-        full.includes(q) ||
-        sid.includes(q) ||
-        lrn.includes(q)
-      );
-    });
-
-    if (!filtered.length) {
-      studentList.innerHTML = `<div class="as-student-empty">No students found.</div>`;
-      renderRecipientCount();
-      return;
+    if (typeof subject === "string") {
+      return subject.trim();
     }
 
-    studentList.innerHTML = filtered
-      .map((s) => {
-        const id = s.studentId || s.id;
-        const full = `${s.firstName || ""} ${s.lastName || ""}`.trim() || "Student";
-        const sub = (s.studentId || s.id) ? `ID: ${s.studentId || s.id}` : (s.lrn ? `LRN: ${s.lrn}` : "");
-        const checked = selectedStudentIds.has(id) ? "checked" : "";
-        return `
-          <label class="as-student-item">
-            <input class="as-student-check" type="checkbox" data-id="${escapeHTML(id)}" ${checked} />
-            <div class="as-student-meta">
-              <div class="as-student-name">${escapeHTML(full)}</div>
-              <div class="as-student-sub">${escapeHTML(sub)}</div>
-            </div>
-          </label>
-        `;
-      })
-      .join("");
-
-    // wire checkbox clicks
-    studentList.querySelectorAll(".as-student-check").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const id = cb.getAttribute("data-id");
-        if (!id) return;
-        if (cb.checked) selectedStudentIds.add(id);
-        else selectedStudentIds.delete(id);
-        renderRecipientCount();
-      });
-    });
-
-    renderRecipientCount();
+    return safeStr(
+      subject.label ||
+        subject.name ||
+        subject.value ||
+        ""
+    ).trim();
   }
 
-  function wireRecipients() {
-    if (recipAll) {
-      recipAll.addEventListener("change", () => {
-        if (recipAll.checked) setPickerVisible(false);
-        renderRecipientCount();
-      });
-    }
-    if (recipSelected) {
-      recipSelected.addEventListener("change", () => {
-        if (recipSelected.checked) {
-          setPickerVisible(true);
-          renderStudentPickerList();
-        }
-        renderRecipientCount();
-      });
-    }
-    if (studentSearch) {
-      studentSearch.addEventListener("input", renderStudentPickerList);
-    }
-    if (selectAllBtn) {
-      selectAllBtn.addEventListener("click", () => {
-        getStudents().forEach((s) => {
-          const id = s.studentId || s.id;
-          if (id) selectedStudentIds.add(id);
-        });
-        renderStudentPickerList();
-      });
-    }
-    if (clearAllBtn) {
-      clearAllBtn.addEventListener("click", () => {
-        selectedStudentIds.clear();
-        renderStudentPickerList();
-      });
-    }
-  }
+  function formatDate(dateString) {
+    if (!dateString) return "—";
 
-  // =========================
-  // Populate select options (basic)
-  // =========================
-  function populateScopeSelect() {
-    if (!scopeSelect) return;
+    const date = new Date(
+      `${dateString}T00:00:00`
+    );
 
-    // If you already store classes/sections elsewhere, you can swap this later.
-    // For now: "All (Unassigned)" + unique class-section pairs derived from students.
-    const students = getStudents();
-
-    const pairs = new Map();
-    students.forEach((s) => {
-      const cls = safeStr(s.className || s.class || "").trim();
-      const sec = safeStr(s.sectionName || s.section || "").trim();
-      const key = `${cls}||${sec}`.trim();
-      if (!cls && !sec) return;
-      pairs.set(key, { cls, sec });
-    });
-
-    const options = [
-      `<option value="all">All (Unassigned)</option>`,
-      ...Array.from(pairs.values()).map((p) => {
-        const label = [p.cls, p.sec].filter(Boolean).join(" - ");
-        const value = label || "Unassigned";
-        return `<option value="${escapeHTML(value)}">${escapeHTML(label)}</option>`;
-      }),
-    ];
-
-    scopeSelect.innerHTML = options.join("");
-  }
-
-  // =========================
-  // Classwork list rendering
-  // =========================
-  function filterAssessments(list) {
-    const qf = quarterFilter ? quarterFilter.value : "all";
-    const tf = typeFilter ? typeFilter.value : "all";
-    const q = (searchInput ? searchInput.value : "").trim().toLowerCase();
-
-    return list.filter((a) => {
-      // status filter already applied outside
-      const okQuarter = qf === "all" || a.quarter === qf;
-      const okType = tf === "all" || a.type === tf;
-      const hay = `${a.title || ""} ${a.instructions || ""}`.toLowerCase();
-      const okSearch = !q || hay.includes(q);
-      return okQuarter && okType && okSearch;
-    });
-  }
-
-  function renderList() {
-    if (!listTbody) return;
-
-    const all = getAssessments();
-
-    const byStatus = all.filter((a) => a.status === currentStatus);
-    const shown = filterAssessments(byStatus);
-
-    if (!shown.length) {
-      listTbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="as-empty">
-            No ${escapeHTML(currentStatus)} activities yet.
-          </td>
-        </tr>
-      `;
-      return;
+    if (Number.isNaN(date.getTime())) {
+      return dateString;
     }
 
-    listTbody.innerHTML = shown
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-      .map((a) => {
-        const due = fmtDue(a.dueDate, a.dueTime);
-        const recCount =
-          a.recipientsMode === "all"
-            ? "All"
-            : `${(a.recipientIds || []).length}`;
-
-        const statusLabel =
-          a.status === "active" ? "Active" : a.status === "draft" ? "Draft" : "Archived";
-
-        return `
-          <tr>
-            <td><b>${escapeHTML(a.title || "Untitled")}</b></td>
-            <td>${escapeHTML((a.type || "").toUpperCase())}</td>
-            <td>${escapeHTML(a.quarter || "—")}</td>
-            <td>${escapeHTML(due)}</td>
-            <td>${escapeHTML(a.points ?? "—")}</td>
-            <td>${escapeHTML(recCount)}</td>
-            <td>${escapeHTML(statusLabel)}</td>
-            <td style="text-align:right;">
-              <div class="row-actions">
-                <button class="small" type="button" data-act="view" data-id="${escapeHTML(a.id)}">View</button>
-                <button class="small" type="button" data-act="subs" data-id="${escapeHTML(a.id)}">Submissions</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-
-    listTbody.querySelectorAll("button[data-act]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const act = btn.getAttribute("data-act");
-        const id = btn.getAttribute("data-id");
-        if (!id) return;
-
-        if (act === "view") {
-          openAssessmentInCreate(id, true); // view mode
-        } else if (act === "subs") {
-          openSubmissions(id);
-        }
-      });
-    });
-  }
-
-  function renderStats() {
-    const all = getAssessments();
-    const active = all.filter((a) => a.status === "active").length;
-    const draft = all.filter((a) => a.status === "draft").length;
-    const archived = all.filter((a) => a.status === "archived").length;
-
-    // due this week: simple 7-day window (active only)
-    const now = new Date();
-    const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    const dueWeek = all.filter((a) => {
-      if (a.status !== "active" || !a.dueDate) return false;
-      const d = new Date(a.dueDate + "T00:00:00");
-      return !isNaN(d.getTime()) && d >= now && d <= in7;
-    }).length;
-
-    if (statActive) statActive.textContent = String(active);
-    if (statDraft) statDraft.textContent = String(draft);
-    if (statArchived) statArchived.textContent = String(archived);
-    if (statDueWeek) statDueWeek.textContent = String(dueWeek);
-  }
-
-  // =========================
-  // Create / View / Edit helpers
-  // =========================
-  function clearForm() {
-    activeAssessmentId = null;
-
-    if (titleInput) titleInput.value = "";
-    if (descInput) descInput.value = "";
-    if (typeSelect) typeSelect.value = "activity";
-    if (quarterSelect) quarterSelect.value = "Q1";
-    if (subjectSelect) subjectSelect.value = "all";
-    if (pointsInput) pointsInput.value = "";
-    if (dueDateInput) dueDateInput.value = "";
-    if (dueTimeInput) dueTimeInput.value = "";
-
-    if (scopeSelect) scopeSelect.value = "all";
-
-    currentAttachments = [];
-    renderAttachments();
-
-    if (recipAll) recipAll.checked = true;
-    if (recipSelected) recipSelected.checked = false;
-    selectedStudentIds.clear();
-    setPickerVisible(false);
-    renderRecipientCount();
-
-    setDetailMode("create", "draft");
-  }
-
-  function fillForm(a) {
-    if (!a) return;
-    activeAssessmentId = a.id;
-
-    if (titleInput) titleInput.value = a.title || "";
-    if (descInput) descInput.value = a.instructions || "";
-    if (typeSelect) typeSelect.value = a.type || "activity";
-    if (quarterSelect) quarterSelect.value = a.quarter || "Q1";
-    if (subjectSelect) subjectSelect.value = a.subject || "all";
-    if (pointsInput) pointsInput.value = a.points ?? "";
-    if (dueDateInput) dueDateInput.value = a.dueDate || "";
-    if (dueTimeInput) dueTimeInput.value = a.dueTime || "";
-    if (scopeSelect) scopeSelect.value = a.scope || "all";
-
-    currentAttachments = Array.isArray(a.attachments) ? a.attachments.slice() : [];
-    renderAttachments();
-
-    if (a.recipientsMode === "selected") {
-      if (recipSelected) recipSelected.checked = true;
-      if (recipAll) recipAll.checked = false;
-      selectedStudentIds = new Set((a.recipientIds || []).filter(Boolean));
-      setPickerVisible(true);
-      renderStudentPickerList();
-    } else {
-      if (recipAll) recipAll.checked = true;
-      if (recipSelected) recipSelected.checked = false;
-      selectedStudentIds.clear();
-      setPickerVisible(false);
-    }
-    renderRecipientCount();
-
-    setDetailMode("view", a.status || "draft");
-  }
-
-  function setDetailMode(mode, status) {
-    // mode: create | view | edit
-    const isView = mode === "view";
-    const isEdit = mode === "edit" || mode === "create";
-
-    if (detailHeading) {
-      detailHeading.textContent = mode === "create" ? "New Activity" : "Activity Details";
-    }
-    if (detailSub) {
-      detailSub.textContent =
-        mode === "create"
-          ? "Fill out the details below, then Post."
-          : "Review details. Click Edit to make changes.";
-    }
-
-    if (statusBadge) {
-      const label =
-        status === "active" ? "Active" : status === "archived" ? "Archived" : "Draft";
-      statusBadge.textContent = label;
-    }
-
-    // inputs enabled only in edit/create
-    const inputs = [
-      titleInput,
-      descInput,
-      typeSelect,
-      quarterSelect,
-      subjectSelect,
-      pointsInput,
-      dueDateInput,
-      dueTimeInput,
-      scopeSelect,
-      attachBtn,
-      studentSearch,
-      selectAllBtn,
-      clearAllBtn,
-    ].filter(Boolean);
-
-    inputs.forEach((el) => {
-      // buttons/selects/inputs
-      const tag = el.tagName.toLowerCase();
-      if (tag === "button") {
-        el.disabled = !isEdit;
-      } else {
-        el.disabled = !isEdit;
+    return date.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       }
-    });
+    );
+  }
 
-    if (recipAll) recipAll.disabled = !isEdit;
-    if (recipSelected) recipSelected.disabled = !isEdit;
+  function formatTime(timeString) {
+    if (!timeString) return "";
 
-    // Toggle picker visibility in view mode only if it was selected
-    if (!isEdit) {
-      // keep visible if selected mode, otherwise hidden
-      const wantsPicker = getCurrentRecipientsMode() === "selected";
-      setPickerVisible(wantsPicker);
+    const parts = timeString.split(":");
+
+    if (parts.length < 2) {
+      return timeString;
     }
 
-    // action buttons
-    if (saveDraftBtn) saveDraftBtn.style.display = isEdit ? "" : "none";
-    if (postBtn) postBtn.style.display = isEdit ? "" : "none";
+    const hours = Number(parts[0]);
+    const minutes = Number(parts[1]);
 
-    if (editBtn) editBtn.style.display = isView ? "" : "none";
+    if (
+      Number.isNaN(hours) ||
+      Number.isNaN(minutes)
+    ) {
+      return timeString;
+    }
+
+    const date = new Date();
+
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+
+    return date.toLocaleTimeString(
+      "en-US",
+      {
+        hour: "numeric",
+        minute: "2-digit",
+      }
+    );
   }
 
-  function openCreate() {
-    clearForm();
-    setActiveMainTab("create");
+  function formatStatus(status) {
+    if (!status) return "Unknown";
+
+    return (
+      status.charAt(0).toUpperCase() +
+      status.slice(1)
+    );
   }
 
-  function openAssessmentInCreate(id, viewOnly) {
-    const a = findAssessment(id);
-    if (!a) return;
+  function getStatusClass(status) {
+    switch (status) {
+      case "published":
+        return "published";
 
-    fillForm(a);
-    setActiveMainTab("create");
+      case "draft":
+        return "draft";
 
-    if (!viewOnly) {
-      // switch to edit
-      setDetailMode("edit", a.status || "draft");
+      case "archived":
+        return "archived";
+
+      default:
+        return "";
     }
   }
 
-  function openSubmissions(id) {
-    activeAssessmentId = id;
-    setActiveMainTab("submissions");
-    renderSubmissions();
+  function isDueThisWeek(dateString) {
+    if (!dateString) return false;
+
+    const due = new Date(
+      `${dateString}T00:00:00`
+    );
+
+    if (Number.isNaN(due.getTime())) {
+      return false;
+    }
+
+    const now = new Date();
+
+    const today = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    const end = new Date(today);
+
+    end.setDate(
+      end.getDate() + 7
+    );
+
+    return (
+      due >= today &&
+      due <= end
+    );
   }
 
-  // =========================
-  // Save draft / Post
-  // =========================
-  function getFormPayload() {
-    const title = safeStr(titleInput ? titleInput.value : "").trim();
-    const instructions = safeStr(descInput ? descInput.value : "").trim();
-    const type = safeStr(typeSelect ? typeSelect.value : "activity");
-    const quarter = safeStr(quarterSelect ? quarterSelect.value : "Q1");
-    const subject = safeStr(subjectSelect ? subjectSelect.value : "all");
-    const points = pointsInput && pointsInput.value !== "" ? clampNum(pointsInput.value, 0, 100000) : "";
-    const dueDate = safeStr(dueDateInput ? dueDateInput.value : "");
-    const dueTime = safeStr(dueTimeInput ? dueTimeInput.value : "");
-    const scope = safeStr(scopeSelect ? scopeSelect.value : "all");
+  // =========================================================
+  // LOAD ASSESSMENT META
+  // =========================================================
 
-    const recipientsMode = getCurrentRecipientsMode();
-    const recipientIds = recipientsMode === "selected" ? Array.from(selectedStudentIds) : [];
+  async function loadAssessmentMeta() {
+    try {
+      console.log(
+        "Loading teacher assessment meta..."
+      );
+
+      const res = await apiFetch(
+        "/api/teacher/assessment/meta"
+      );
+
+      const data = res.data || {};
+
+      TEACHER_INFO =
+        data.teacher || null;
+
+      TEACHER_SCOPE =
+        data.scope || {
+          className: "",
+          sectionName: "",
+        };
+
+      ACTIVE_SCHOOL_YEAR =
+        data.schoolYear || null;
+
+      API_SUBJECTS =
+        Array.isArray(data.subjects)
+          ? data.subjects
+          : [];
+
+      console.log(
+        "Teacher:",
+        TEACHER_INFO
+      );
+
+      console.log(
+        "Scope:",
+        TEACHER_SCOPE
+      );
+
+      console.log(
+        "School Year:",
+        ACTIVE_SCHOOL_YEAR
+      );
+
+      console.log(
+        "Subjects:",
+        API_SUBJECTS
+      );
+
+      renderSubjects();
+    } catch (err) {
+      console.error(
+        "loadAssessmentMeta error:",
+        err
+      );
+
+      API_SUBJECTS = [];
+
+      showSubjectsEmpty(
+        "Unable to load subjects.",
+        "Please check your connection or try again."
+      );
+    }
+  }
+
+  // =========================================================
+  // SUBJECTS
+  // =========================================================
+
+  function renderSubjects(searchTerm = "") {
+    if (!subjectCards) return;
+
+    const query = safeStr(searchTerm)
+      .trim()
+      .toLowerCase();
+
+    const filteredSubjects =
+      API_SUBJECTS.filter(
+        (subject) => {
+          const label =
+            getSubjectName(
+              subject
+            ).toLowerCase();
+
+          return (
+            !query ||
+            label.includes(query)
+          );
+        }
+      );
+
+    if (!filteredSubjects.length) {
+      subjectCards.innerHTML = "";
+
+      showSubjectsEmpty(
+        "No subjects found.",
+        query
+          ? `No subject matches "${searchTerm}".`
+          : "No subjects have been assigned to you yet."
+      );
+
+      return;
+    }
+
+    hideSubjectsEmpty();
+
+    subjectCards.innerHTML =
+      filteredSubjects
+        .map(
+          (subject, index) => {
+            const value =
+              getSubjectName(
+                subject
+              );
+
+            const label =
+              getSubjectName(
+                subject
+              );
+
+            const initial =
+              label
+                .charAt(0)
+                .toUpperCase();
+
+            return `
+              <button
+                type="button"
+                class="as-subject-card reveal-item"
+                data-subject-index="${index}"
+              >
+
+                <div class="as-subject-card-icon">
+                  ${escapeHTML(initial)}
+                </div>
+
+                <div class="as-subject-card-content">
+
+                  <div class="as-subject-card-title">
+                    ${escapeHTML(label)}
+                  </div>
+
+                  <div class="as-subject-card-sub">
+                    ${escapeHTML(
+                      TEACHER_SCOPE.className ||
+                        "Class"
+                    )}
+
+                    ${
+                      TEACHER_SCOPE.sectionName
+                        ? ` • ${escapeHTML(
+                            TEACHER_SCOPE.sectionName
+                          )}`
+                        : ""
+                    }
+                  </div>
+
+                </div>
+
+                <div class="as-subject-card-arrow">
+                  →
+                </div>
+
+              </button>
+            `;
+          }
+        )
+        .join("");
+
+    wireSubjectCards(
+      filteredSubjects
+    );
+  }
+
+  function showSubjectsEmpty(
+    title,
+    text
+  ) {
+    if (!subjectsEmpty) return;
+
+    const titleEl =
+      subjectsEmpty.querySelector(
+        ".as-empty-title"
+      );
+
+    const textEl =
+      subjectsEmpty.querySelector(
+        ".as-empty-text"
+      );
+
+    if (titleEl) {
+      titleEl.textContent = title;
+    }
+
+    if (textEl) {
+      textEl.textContent = text;
+    }
+
+    subjectsEmpty.hidden = false;
+
+    subjectsEmpty.classList.remove(
+      "hidden"
+    );
+
+    subjectsEmpty.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+  }
+
+  function hideSubjectsEmpty() {
+    if (!subjectsEmpty) return;
+
+    subjectsEmpty.hidden = true;
+
+    subjectsEmpty.classList.add(
+      "hidden"
+    );
+
+    subjectsEmpty.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  function wireSubjectCards(
+    subjects
+  ) {
+    if (!subjectCards) return;
+
+    const cards =
+      subjectCards.querySelectorAll(
+        ".as-subject-card"
+      );
+
+    cards.forEach(
+      (card) => {
+        card.addEventListener(
+          "click",
+          () => {
+            const index =
+              Number(
+                card.dataset.subjectIndex
+              );
+
+            const subject =
+              subjects[index];
+
+            if (!subject) return;
+
+            openSubject(
+              subject
+            );
+          }
+        );
+      }
+    );
+  }
+
+  // =========================================================
+  // OPEN SUBJECT
+  // =========================================================
+
+  async function openSubject(
+    subject
+  ) {
+    CURRENT_SUBJECT = subject;
+
+    const subjectName =
+      getSubjectName(
+        subject
+      ) || "Subject";
+
+    console.log(
+      "Opening subject:",
+      subjectName
+    );
+
+    if (heroTitle) {
+      heroTitle.textContent =
+        subjectName;
+    }
+
+    if (heroSection) {
+      const className =
+        safeStr(
+          TEACHER_SCOPE.className
+        );
+
+      const sectionName =
+        safeStr(
+          TEACHER_SCOPE.sectionName
+        );
+
+      if (
+        className &&
+        sectionName
+      ) {
+        heroSection.textContent =
+          `${className} - ${sectionName}`;
+      } else if (className) {
+        heroSection.textContent =
+          className;
+      } else {
+        heroSection.textContent =
+          "No class assigned";
+      }
+    }
+
+    if (heroTeacher) {
+      const teacherName =
+        TEACHER_INFO?.name ||
+        TEACHER_INFO?.fullName ||
+        TEACHER_INFO?.teacherName ||
+        "Teacher";
+
+      heroTeacher.textContent =
+        teacherName;
+    }
+
+    if (heroAvatar) {
+      heroAvatar.textContent =
+        subjectName
+          .charAt(0)
+          .toUpperCase();
+    }
+
+    showDetailView();
+
+    await loadAssignments();
+  }
+
+  // =========================================================
+  // LOAD ASSIGNMENTS
+  // =========================================================
+
+  async function loadAssignments() {
+    if (!CURRENT_SUBJECT) return;
+
+    const subjectName =
+      getSubjectName(
+        CURRENT_SUBJECT
+      );
+
+    try {
+      console.log(
+        "Loading assignments for:",
+        subjectName
+      );
+
+      const query =
+        new URLSearchParams();
+
+      query.set(
+        "subject",
+        subjectName
+      );
+
+      const status =
+        statusFilter?.value;
+
+      const quarter =
+        quarterFilter?.value;
+
+      if (
+        status &&
+        status !== "all"
+      ) {
+        query.set(
+          "status",
+          status
+        );
+      }
+
+      if (
+        quarter &&
+        quarter !== "all"
+      ) {
+        query.set(
+          "quarter",
+          quarter
+        );
+      }
+
+      const res =
+        await apiFetch(
+          `/api/teacher/assessment/assignments?${query.toString()}`
+        );
+
+      ALL_ASSIGNMENTS =
+        Array.isArray(
+          res.data
+        )
+          ? res.data
+          : [];
+
+      FILTERED_ASSIGNMENTS =
+        ALL_ASSIGNMENTS;
+
+      console.log(
+        "Assignments:",
+        ALL_ASSIGNMENTS
+      );
+
+      renderAssignments();
+
+      updateOverview();
+
+      updateUpcoming();
+    } catch (err) {
+      console.error(
+        "loadAssignments error:",
+        err
+      );
+
+      ALL_ASSIGNMENTS = [];
+
+      FILTERED_ASSIGNMENTS = [];
+
+      renderAssignmentsError(
+        err.message
+      );
+    }
+  }
+
+  // =========================================================
+  // RENDER ASSIGNMENTS
+  // =========================================================
+
+  function renderAssignments() {
+    if (!activityStream) return;
+
+    if (
+      !FILTERED_ASSIGNMENTS.length
+    ) {
+      activityStream.innerHTML = "";
+
+      showAssignmentEmpty();
+
+      return;
+    }
+
+    hideAssignmentEmpty();
+
+    activityStream.innerHTML =
+      FILTERED_ASSIGNMENTS
+        .map(
+          (assignment) =>
+            renderAssignmentRow(
+              assignment
+            )
+        )
+        .join("");
+
+    wireAssignmentActions();
+  }
+
+  // =========================================================
+  // ASSIGNMENT ROW
+  // =========================================================
+
+  function renderAssignmentRow(
+    assignment
+  ) {
+    const id =
+      safeStr(
+        assignment._id
+      );
+
+    const title =
+      safeStr(
+        assignment.title
+      ) || "Untitled Assignment";
+
+    const quarter =
+      safeStr(
+        assignment.quarter
+      ) || "—";
+
+    const dueDate =
+      formatDate(
+        assignment.dueDate
+      );
+
+    const dueTime =
+      formatTime(
+        assignment.dueTime
+      );
+
+    const points =
+      assignment.totalPoints ??
+      "—";
+
+    const status =
+      safeStr(
+        assignment.status
+      );
+
+    const statusLabel =
+      formatStatus(
+        status
+      );
+
+    const statusClass =
+      getStatusClass(
+        status
+      );
+
+    const instructions =
+      safeStr(
+        assignment.instructions
+      );
+
+    return `
+      <tr
+        class="as-assignment-row"
+        data-assignment-id="${escapeHTML(id)}"
+      >
+
+        <!-- Assignment -->
+
+        <td class="as-assignment-main-cell">
+
+          <div class="as-assignment-main">
+
+            <div class="as-assignment-title">
+              ${escapeHTML(title)}
+            </div>
+
+            ${
+              instructions
+                ? `
+                  <div class="as-assignment-description">
+                    ${escapeHTML(
+                      instructions
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+        </td>
+
+
+        <!-- Quarter -->
+
+        <td class="as-assignment-quarter-cell">
+
+          <span class="as-quarter-badge">
+            ${escapeHTML(
+              quarter
+            )}
+          </span>
+
+        </td>
+
+
+        <!-- Due Date -->
+
+        <td class="as-assignment-due-cell">
+
+          <div class="as-due-date">
+            ${escapeHTML(
+              dueDate
+            )}
+          </div>
+
+          ${
+            dueTime
+              ? `
+                <div class="as-due-time">
+                  ${escapeHTML(
+                    dueTime
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+        </td>
+
+
+        <!-- Points -->
+
+        <td class="as-assignment-points-cell">
+
+          <strong>
+            ${escapeHTML(
+              points
+            )}
+          </strong>
+
+        </td>
+
+
+        <!-- Status -->
+
+        <td class="as-assignment-status-cell">
+
+          <span
+            class="as-status-badge ${escapeHTML(
+              statusClass
+            )}"
+          >
+            ${escapeHTML(
+              statusLabel
+            )}
+          </span>
+
+        </td>
+
+
+        <!-- Actions -->
+
+        <td class="as-assignment-actions-cell">
+
+          <div class="as-assignment-actions">
+
+            <button
+              type="button"
+              class="as-action-btn as-edit-assignment"
+              data-id="${escapeHTML(id)}"
+              title="Edit assignment"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="as-action-btn as-delete-assignment"
+              data-id="${escapeHTML(id)}"
+              title="Delete assignment"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </td>
+
+      </tr>
+    `;
+  }
+
+  // =========================================================
+  // EMPTY ASSIGNMENTS
+  // =========================================================
+
+  function showAssignmentEmpty() {
+    if (!activityEmpty) return;
+
+    activityEmpty.hidden = false;
+
+    activityEmpty.classList.remove(
+      "hidden"
+    );
+
+    activityEmpty.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+  }
+
+  function hideAssignmentEmpty() {
+    if (!activityEmpty) return;
+
+    activityEmpty.hidden = true;
+
+    activityEmpty.classList.add(
+      "hidden"
+    );
+
+    activityEmpty.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  function renderAssignmentsError(
+    message
+  ) {
+    if (!activityStream) return;
+
+    hideAssignmentEmpty();
+
+    activityStream.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          class="as-table-message"
+        >
+          Unable to load assignments.
+          ${
+            message
+              ? `<div>${escapeHTML(
+                  message
+                )}</div>`
+              : ""
+          }
+        </td>
+      </tr>
+    `;
+  }
+
+  // =========================================================
+  // OVERVIEW
+  // =========================================================
+
+  function updateOverview() {
+    const total =
+      ALL_ASSIGNMENTS.length;
+
+    const published =
+      ALL_ASSIGNMENTS.filter(
+        (item) =>
+          item.status ===
+          "published"
+      ).length;
+
+    const drafts =
+      ALL_ASSIGNMENTS.filter(
+        (item) =>
+          item.status ===
+          "draft"
+      ).length;
+
+    const dueThisWeek =
+      ALL_ASSIGNMENTS.filter(
+        (item) =>
+          isDueThisWeek(
+            item.dueDate
+          )
+      ).length;
+
+    if (overviewTotal) {
+      overviewTotal.textContent =
+        total;
+    }
+
+    if (overviewPublished) {
+      overviewPublished.textContent =
+        published;
+    }
+
+    if (overviewDrafts) {
+      overviewDrafts.textContent =
+        drafts;
+    }
+
+    if (overviewDueWeek) {
+      overviewDueWeek.textContent =
+        dueThisWeek;
+    }
+  }
+
+  // =========================================================
+  // UPCOMING
+  // =========================================================
+
+  function updateUpcoming() {
+    if (!upcomingText) return;
+
+    const upcoming =
+      [...ALL_ASSIGNMENTS]
+        .filter(
+          (item) =>
+            item.dueDate &&
+            item.status !==
+              "archived"
+        )
+        .sort(
+          (a, b) => {
+            const dateA =
+              new Date(
+                `${a.dueDate}T${
+                  a.dueTime ||
+                  "23:59"
+                }`
+              );
+
+            const dateB =
+              new Date(
+                `${b.dueDate}T${
+                  b.dueTime ||
+                  "23:59"
+                }`
+              );
+
+            return (
+              dateA - dateB
+            );
+          }
+        )[0];
+
+    if (!upcoming) {
+      upcomingText.textContent =
+        "No upcoming assignments yet.";
+
+      return;
+    }
+
+    const date =
+      formatDate(
+        upcoming.dueDate
+      );
+
+    const time =
+      formatTime(
+        upcoming.dueTime
+      );
+
+    upcomingText.textContent =
+      `${upcoming.title} — Due ${date}${
+        time
+          ? ` at ${time}`
+          : ""
+      }`;
+  }
+
+  // =========================================================
+  // ASSIGNMENT ACTIONS
+  // =========================================================
+
+  function wireAssignmentActions() {
+    if (!activityStream) return;
+
+    const editButtons =
+      activityStream.querySelectorAll(
+        ".as-edit-assignment"
+      );
+
+    editButtons.forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.dataset.id;
+
+            editAssignment(
+              id
+            );
+          }
+        );
+      }
+    );
+
+    const deleteButtons =
+      activityStream.querySelectorAll(
+        ".as-delete-assignment"
+      );
+
+    deleteButtons.forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.dataset.id;
+
+            deleteAssignment(
+              id
+            );
+          }
+        );
+      }
+    );
+  }
+
+  // =========================================================
+  // CREATE / EDIT MODAL
+  // =========================================================
+
+  function openActivityModal(
+    assignment = null
+  ) {
+    if (!activityModal) {
+      console.error(
+        "Assignment modal not found."
+      );
+
+      return;
+    }
+
+    EDITING_ASSIGNMENT_ID =
+      assignment
+        ? assignment._id
+        : null;
+
+    resetActivityForm();
+
+    if (assignment) {
+      if (modalTitle) {
+        modalTitle.textContent =
+          "Edit Assignment";
+      }
+
+      if (modalSub) {
+        modalSub.textContent =
+          "Update the assignment details.";
+      }
+
+      if (activityTitleInput) {
+        activityTitleInput.value =
+          assignment.title ||
+          "";
+      }
+
+      if (activityQuarterSelect) {
+        activityQuarterSelect.value =
+          assignment.quarter ||
+          "Q1";
+      }
+
+      if (activityPointsInput) {
+        activityPointsInput.value =
+          assignment.totalPoints ??
+          "";
+      }
+
+      if (activityDueDateInput) {
+        activityDueDateInput.value =
+          assignment.dueDate ||
+          "";
+      }
+
+      if (activityDueTimeInput) {
+        activityDueTimeInput.value =
+          assignment.dueTime ||
+          "";
+      }
+
+      if (
+        activityInstructionsInput
+      ) {
+        activityInstructionsInput.value =
+          assignment.instructions ||
+          "";
+      }
+
+      if (saveDraftBtn) {
+        saveDraftBtn.textContent =
+          "Save Changes";
+      }
+
+      if (
+        publishActivityBtn
+      ) {
+        publishActivityBtn.textContent =
+          assignment.status ===
+          "published"
+            ? "Update Assignment"
+            : "Publish Assignment";
+      }
+    } else {
+      if (modalTitle) {
+        modalTitle.textContent =
+          "Create Assignment";
+      }
+
+      if (modalSub) {
+        modalSub.textContent =
+          "Create an assignment for the selected subject.";
+      }
+
+      if (saveDraftBtn) {
+        saveDraftBtn.textContent =
+          "Save as Draft";
+      }
+
+      if (
+        publishActivityBtn
+      ) {
+        publishActivityBtn.textContent =
+          "Publish Assignment";
+      }
+    }
+
+    activityModal.classList.remove(
+      "hidden"
+    );
+
+    activityModal.removeAttribute(
+      "hidden"
+    );
+
+    activityModal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    setTimeout(
+      () => {
+        activityTitleInput?.focus();
+      },
+      50
+    );
+  }
+
+  function closeActivityModal() {
+    if (!activityModal) return;
+
+    activityModal.classList.add(
+      "hidden"
+    );
+
+    activityModal.setAttribute(
+      "hidden",
+      ""
+    );
+
+    activityModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    EDITING_ASSIGNMENT_ID =
+      null;
+  }
+
+  function resetActivityForm() {
+    if (activityTitleInput) {
+      activityTitleInput.value =
+        "";
+    }
+
+    if (activityQuarterSelect) {
+      activityQuarterSelect.value =
+        "Q1";
+    }
+
+    if (activityPointsInput) {
+      activityPointsInput.value =
+        "";
+    }
+
+    if (activityDueDateInput) {
+      activityDueDateInput.value =
+        "";
+    }
+
+    if (activityDueTimeInput) {
+      activityDueTimeInput.value =
+        "";
+    }
+
+    if (
+      activityInstructionsInput
+    ) {
+      activityInstructionsInput.value =
+        "";
+    }
+  }
+
+  // =========================================================
+  // FORM DATA
+  // =========================================================
+
+  function getActivityFormData() {
+    const title =
+      safeStr(
+        activityTitleInput?.value
+      ).trim();
+
+    const quarter =
+      safeStr(
+        activityQuarterSelect?.value
+      ).trim();
+
+    const points =
+      Number(
+        activityPointsInput?.value
+      );
+
+    const dueDate =
+      safeStr(
+        activityDueDateInput?.value
+      ).trim();
+
+    const dueTime =
+      safeStr(
+        activityDueTimeInput?.value
+      ).trim();
+
+    const instructions =
+      safeStr(
+        activityInstructionsInput
+          ?.value
+      ).trim();
+
+    const subject =
+      getSubjectName(
+        CURRENT_SUBJECT
+      );
+
+    if (!subject) {
+      alert(
+        "No subject selected."
+      );
+
+      return null;
+    }
+
+    if (!title) {
+      alert(
+        "Please enter an assignment title."
+      );
+
+      activityTitleInput?.focus();
+
+      return null;
+    }
+
+    if (
+      !["Q1", "Q2", "Q3", "Q4"].includes(
+        quarter
+      )
+    ) {
+      alert(
+        "Please select a valid quarter."
+      );
+
+      activityQuarterSelect?.focus();
+
+      return null;
+    }
+
+    if (
+      !Number.isFinite(points) ||
+      points < 1 ||
+      points > 1000
+    ) {
+      alert(
+        "Please enter valid total points between 1 and 1000."
+      );
+
+      activityPointsInput?.focus();
+
+      return null;
+    }
+
+    if (!dueDate) {
+      alert(
+        "Please select a due date."
+      );
+
+      activityDueDateInput?.focus();
+
+      return null;
+    }
 
     return {
-      title,
-      instructions,
-      type,
-      quarter,
       subject,
-      points,
+      title,
+      quarter,
+      totalPoints: points,
       dueDate,
       dueTime,
-      scope,
-      attachments: currentAttachments.slice(),
-      recipientsMode,
-      recipientIds,
+      instructions,
     };
   }
 
-  function validate(payload) {
-    // minimal validation only
-    if (!payload.title) return "Title is required.";
-    if (!payload.instructions) return "Instructions are required.";
-    return "";
-  }
+  // =========================================================
+  // SAVE DRAFT
+  // =========================================================
 
-  function saveAs(status) {
-    const payload = getFormPayload();
-    const err = validate(payload);
-    if (err && status === "active") {
-      alert(err);
-      return;
-    }
+  async function saveDraft() {
+    const formData =
+      getActivityFormData();
 
-    const list = getAssessments();
+    if (!formData) return;
 
-    if (!activeAssessmentId) {
-      // create new
-      const item = {
-        id: uid("AS"),
-        status, // draft | active
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        submissions: [], // future
-        ...payload,
-      };
-      list.push(item);
-      setAssessments(list);
-      activeAssessmentId = item.id;
-      fillForm(item);
-    } else {
-      // update existing
-      const idx = list.findIndex((a) => a.id === activeAssessmentId);
-      if (idx === -1) return;
+    try {
+      setModalButtonsLoading(
+        true
+      );
 
-      list[idx] = {
-        ...list[idx],
-        ...payload,
-        status,
-        updatedAt: Date.now(),
-      };
-      setAssessments(list);
-      fillForm(list[idx]);
-    }
+      if (
+        EDITING_ASSIGNMENT_ID
+      ) {
+        const res =
+          await apiFetch(
+            `/api/teacher/assessment/assignments/${EDITING_ASSIGNMENT_ID}`,
+            {
+              method: "PUT",
+              body: JSON.stringify({
+                ...formData,
+                status: "draft",
+              }),
+            }
+          );
 
-    renderList();
-    renderStats();
-    alert(status === "active" ? "Posted successfully." : "Draft saved.");
-  }
+        alert(
+          res.message ||
+            "Assignment updated successfully."
+        );
+      } else {
+        const res =
+          await apiFetch(
+            "/api/teacher/assessment/assignments",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                ...formData,
+                status: "draft",
+              }),
+            }
+          );
 
-  // =========================
-  // Archive / Delete / Edit
-  // =========================
-  function archiveCurrent() {
-    if (!activeAssessmentId) return;
-    const list = getAssessments();
-    const idx = list.findIndex((a) => a.id === activeAssessmentId);
-    if (idx === -1) return;
-
-    const ok = confirm("Archive this activity?");
-    if (!ok) return;
-
-    list[idx].status = "archived";
-    list[idx].updatedAt = Date.now();
-    setAssessments(list);
-
-    fillForm(list[idx]);
-    renderList();
-    renderStats();
-  }
-
-  function deleteCurrent() {
-    if (!activeAssessmentId) return;
-
-    const ok = confirm("Delete this activity? This cannot be undone.");
-    if (!ok) return;
-
-    const next = getAssessments().filter((a) => a.id !== activeAssessmentId);
-    setAssessments(next);
-
-    activeAssessmentId = null;
-    renderList();
-    renderStats();
-
-    // back to classwork
-    setActiveMainTab("classwork");
-    setStatus("active");
-  }
-
-  function enableEdit() {
-    const a = activeAssessmentId ? findAssessment(activeAssessmentId) : null;
-    setDetailMode("edit", a ? a.status : "draft");
-  }
-
-  // =========================
-  // Submissions rendering (placeholder now)
-  // =========================
-  function renderSubmissions() {
-    const a = activeAssessmentId ? findAssessment(activeAssessmentId) : null;
-
-    const students = getStudents();
-
-    // if no activity selected
-    if (!a) {
-      if (assignedCount) assignedCount.textContent = "0";
-      if (submittedCount) submittedCount.textContent = "0";
-      if (missingCount) missingCount.textContent = "0";
-      if (submissionsTbody) {
-        submissionsTbody.innerHTML = `
-          <tr>
-            <td colspan="3" class="as-empty">Select an activity from Classwork first.</td>
-          </tr>
-        `;
+        alert(
+          res.message ||
+            "Assignment saved as draft."
+        );
       }
+
+      closeActivityModal();
+
+      await loadAssignments();
+    } catch (err) {
+      console.error(
+        "saveDraft error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Failed to save assignment."
+      );
+    } finally {
+      setModalButtonsLoading(
+        false
+      );
+    }
+  }
+
+  // =========================================================
+  // PUBLISH
+  // =========================================================
+
+  async function publishAssignment() {
+    const formData =
+      getActivityFormData();
+
+    if (!formData) return;
+
+    try {
+      setModalButtonsLoading(
+        true
+      );
+
+      if (
+        EDITING_ASSIGNMENT_ID
+      ) {
+        const res =
+          await apiFetch(
+            `/api/teacher/assessment/assignments/${EDITING_ASSIGNMENT_ID}`,
+            {
+              method: "PUT",
+              body: JSON.stringify({
+                ...formData,
+                status: "published",
+              }),
+            }
+          );
+
+        alert(
+          res.message ||
+            "Assignment updated successfully."
+        );
+      } else {
+        const res =
+          await apiFetch(
+            "/api/teacher/assessment/assignments",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                ...formData,
+                status: "published",
+              }),
+            }
+          );
+
+        alert(
+          res.message ||
+            "Assignment published successfully."
+        );
+      }
+
+      closeActivityModal();
+
+      await loadAssignments();
+    } catch (err) {
+      console.error(
+        "publishAssignment error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Failed to publish assignment."
+      );
+    } finally {
+      setModalButtonsLoading(
+        false
+      );
+    }
+  }
+
+  // =========================================================
+  // EDIT
+  // =========================================================
+
+  function editAssignment(id) {
+    const assignment =
+      ALL_ASSIGNMENTS.find(
+        (item) =>
+          String(
+            item._id
+          ) === String(id)
+      );
+
+    if (!assignment) {
+      alert(
+        "Assignment not found."
+      );
+
       return;
     }
 
-    // assigned recipients
-    let recipients = [];
-    if (a.recipientsMode === "all") {
-      recipients = students;
-    } else {
-      const set = new Set((a.recipientIds || []).filter(Boolean));
-      recipients = students.filter((s) => set.has(s.studentId || s.id));
+    openActivityModal(
+      assignment
+    );
+  }
+
+  // =========================================================
+  // DELETE
+  // =========================================================
+
+  async function deleteAssignment(
+    id
+  ) {
+    const assignment =
+      ALL_ASSIGNMENTS.find(
+        (item) =>
+          String(
+            item._id
+          ) === String(id)
+      );
+
+    if (!assignment) {
+      alert(
+        "Assignment not found."
+      );
+
+      return;
     }
 
-    // placeholder submissions (future)
-    const subs = Array.isArray(a.submissions) ? a.submissions : [];
-    const subsById = new Map(subs.map((s) => [s.studentId, s]));
+    const confirmed =
+      confirm(
+        `Delete "${assignment.title}"? This action cannot be undone.`
+      );
 
-    const assigned = recipients.length;
-    let submitted = 0;
+    if (!confirmed) return;
 
-    const rows = recipients.map((stu) => {
-      const sid = stu.studentId || stu.id || "";
-      const full = `${stu.firstName || ""} ${stu.lastName || ""}`.trim() || "Student";
-      const sub = subsById.get(sid);
+    try {
+      const res =
+        await apiFetch(
+          `/api/teacher/assessment/assignments/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
 
-      const status = sub ? "Submitted" : "Missing";
-      if (sub) submitted += 1;
+      alert(
+        res.message ||
+          "Assignment deleted successfully."
+      );
 
-      const fileLabel = sub && sub.fileName ? sub.fileName : "—";
+      await loadAssignments();
+    } catch (err) {
+      console.error(
+        "deleteAssignment error:",
+        err
+      );
 
-      return `
-        <tr>
-          <td>
-            <div class="as-sub-stu">
-              <div class="as-sub-name">${escapeHTML(full)}</div>
-              <div class="as-sub-id">${escapeHTML(sid)}</div>
-            </div>
-          </td>
-          <td>${escapeHTML(status)}</td>
-          <td>${escapeHTML(fileLabel)}</td>
-        </tr>
-      `;
-    });
-
-    const missing = assigned - submitted;
-
-    if (assignedCount) assignedCount.textContent = String(assigned);
-    if (submittedCount) submittedCount.textContent = String(submitted);
-    if (missingCount) missingCount.textContent = String(Math.max(0, missing));
-
-    if (submissionsTbody) {
-      submissionsTbody.innerHTML =
-        rows.length > 0
-          ? rows.join("")
-          : `<tr><td colspan="3" class="as-empty">No recipients found.</td></tr>`;
+      alert(
+        err.message ||
+          "Failed to delete assignment."
+      );
     }
   }
 
-  // =========================
-  // Wiring
-  // =========================
-  function wireMainTabs() {
-    mainTabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const v = tab.dataset.view;
-        if (!v) return;
+  // =========================================================
+  // BUTTON LOADING
+  // =========================================================
 
-        // if submissions tab opened with no selection, keep placeholder
-        setActiveMainTab(v);
-        if (v === "classwork") {
-          renderList();
-          renderStats();
+  function setModalButtonsLoading(
+    loading
+  ) {
+    if (saveDraftBtn) {
+      saveDraftBtn.disabled =
+        loading;
+    }
+
+    if (
+      publishActivityBtn
+    ) {
+      publishActivityBtn.disabled =
+        loading;
+    }
+
+    if (loading) {
+      if (saveDraftBtn) {
+        saveDraftBtn.textContent =
+          "Saving...";
+      }
+
+      if (
+        publishActivityBtn
+      ) {
+        publishActivityBtn.textContent =
+          "Publishing...";
+      }
+    }
+  }
+
+  // =========================================================
+  // VIEW SWITCHING
+  // =========================================================
+
+  function showSubjectsView() {
+    if (
+      !subjectsView ||
+      !detailView
+    ) {
+      return;
+    }
+
+    subjectsView.classList.remove(
+      "hidden"
+    );
+
+    subjectsView.hidden = false;
+
+    subjectsView.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    detailView.classList.add(
+      "hidden"
+    );
+
+    detailView.hidden = true;
+
+    detailView.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  function showDetailView() {
+    if (
+      !subjectsView ||
+      !detailView
+    ) {
+      return;
+    }
+
+    subjectsView.classList.add(
+      "hidden"
+    );
+
+    subjectsView.hidden = true;
+
+    subjectsView.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    detailView.classList.remove(
+      "hidden"
+    );
+
+    detailView.hidden = false;
+
+    detailView.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+  }
+
+  // =========================================================
+  // SEARCH
+  // =========================================================
+
+  function wireSearch() {
+    if (!subjectSearch) return;
+
+    subjectSearch.addEventListener(
+      "input",
+      () => {
+        renderSubjects(
+          subjectSearch.value
+        );
+      }
+    );
+  }
+
+  // =========================================================
+  // FILTERS
+  // =========================================================
+
+  function wireFilters() {
+    statusFilter?.addEventListener(
+      "change",
+      () => {
+        loadAssignments();
+      }
+    );
+
+    quarterFilter?.addEventListener(
+      "change",
+      () => {
+        loadAssignments();
+      }
+    );
+  }
+
+  // =========================================================
+  // BACK BUTTON
+  // =========================================================
+
+  function wireBackButton() {
+    if (!backToSubjectsBtn) return;
+
+    backToSubjectsBtn.addEventListener(
+      "click",
+      () => {
+        closeActivityModal();
+
+        CURRENT_SUBJECT =
+          null;
+
+        ALL_ASSIGNMENTS = [];
+
+        FILTERED_ASSIGNMENTS = [];
+
+        showSubjectsView();
+      }
+    );
+  }
+
+  // =========================================================
+  // LATEST ASSIGNMENT
+  // =========================================================
+
+  function wireJumpLatest() {
+    jumpLatestBtn?.addEventListener(
+      "click",
+      () => {
+        const latest =
+          ALL_ASSIGNMENTS[0];
+
+        if (!latest) return;
+
+        const row =
+          activityStream?.querySelector(
+            `[data-assignment-id="${latest._id}"]`
+          );
+
+        row?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    );
+  }
+
+  // =========================================================
+  // MODAL
+  // =========================================================
+
+  function wireActivityModal() {
+    if (!activityModal) {
+      console.warn(
+        "Create Assignment modal not found."
+      );
+
+      return;
+    }
+
+    createActivityBtn?.addEventListener(
+      "click",
+      () => {
+        openActivityModal();
+      }
+    );
+
+    modalCloseBtn?.addEventListener(
+      "click",
+      () => {
+        closeActivityModal();
+      }
+    );
+
+    modalBackdrop?.addEventListener(
+      "click",
+      () => {
+        closeActivityModal();
+      }
+    );
+
+    saveDraftBtn?.addEventListener(
+      "click",
+      () => {
+        saveDraft();
+      }
+    );
+
+    publishActivityBtn?.addEventListener(
+      "click",
+      () => {
+        publishAssignment();
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Escape" &&
+          activityModal &&
+          !activityModal.hidden
+        ) {
+          closeActivityModal();
         }
-        if (v === "create") {
-          // if nothing selected, prepare empty create
-          if (!activeAssessmentId) clearForm();
-          populateScopeSelect();
-        }
-        if (v === "submissions") {
-          renderSubmissions();
-        }
-      });
-    });
+      }
+    );
   }
 
-  function wireStatusTabs() {
-    statusTabs.forEach((b) => {
-      b.addEventListener("click", () => {
-        const s = b.dataset.status;
-        if (!s) return;
-        setStatus(s);
-      });
-    });
+  // =========================================================
+  // TOPBAR
+  // =========================================================
+
+  function wireTopbarMenu() {
+    const btn =
+      $("userMenuBtn");
+
+    const menu =
+      $("userMenu");
+
+    if (!btn || !menu) return;
+
+    btn.addEventListener(
+      "click",
+      (e) => {
+        e.stopPropagation();
+
+        menu.classList.toggle(
+          "open"
+        );
+      }
+    );
+
+    document.addEventListener(
+      "click",
+      () => {
+        menu.classList.remove(
+          "open"
+        );
+      }
+    );
   }
 
-  function wireListFilters() {
-    [quarterFilter, typeFilter, searchInput].filter(Boolean).forEach((el) => {
-      el.addEventListener("input", () => {
-        renderList();
-      });
-      el.addEventListener("change", () => {
-        renderList();
-      });
-    });
-  }
+  // =========================================================
+  // INIT
+  // =========================================================
 
-  function wireButtons() {
-    if (newBtn) newBtn.addEventListener("click", () => openCreate());
+  async function init() {
+    console.log(
+      "Teacher Assessment initialized."
+    );
 
-    if (backToListBtn) {
-      backToListBtn.addEventListener("click", () => {
-        setActiveMainTab("classwork");
-        setStatus("active");
-      });
-    }
-    if (backToListBtn2) {
-      backToListBtn2.addEventListener("click", () => {
-        setActiveMainTab("classwork");
-        setStatus("active");
-      });
-    }
-
-    if (saveDraftBtn) saveDraftBtn.addEventListener("click", () => saveAs("draft"));
-    if (postBtn) postBtn.addEventListener("click", () => saveAs("active"));
-
-    if (editBtn) editBtn.addEventListener("click", enableEdit);
-    if (archiveBtn) archiveBtn.addEventListener("click", archiveCurrent);
-    if (deleteBtn) deleteBtn.addEventListener("click", deleteCurrent);
-  }
-
-  function wireNewBtnToCreateTab() {
-    // From Classwork header button
-    if (!newBtn) return;
-    newBtn.addEventListener("click", () => {
-      // also toggle main tab button state
-      setActiveMainTab("create");
-      clearForm();
-      populateScopeSelect();
-    });
-  }
-
-  // =========================
-  // Init
-  // =========================
-  function init() {
     wireTopbarMenu();
 
-    wireMainTabs();
-    wireStatusTabs();
-    wireListFilters();
-    wireButtons();
+    wireSearch();
 
-    wireAttachments();
-    wireRecipients();
+    wireFilters();
 
-    // Default view
-    setActiveMainTab("classwork");
-    setStatus("active");
+    wireBackButton();
 
-    // Basic select population
-    populateScopeSelect();
+    wireJumpLatest();
 
-    // Initial render
-    renderList();
-    renderStats();
-    renderRecipientCount();
-    renderAttachments();
+    wireActivityModal();
+
+    showSubjectsView();
+
+    await loadAssessmentMeta();
   }
 
   init();

@@ -1,274 +1,869 @@
 /* frontend/src/styles/student/student-classwork.css */
 
-/* ✅ Required spacing rule (consistency across all pages) */
-.topbar { margin-bottom: 4px; }
-.teachers-wrap { padding: 0; }
+/* =========================================================
+   REQUIRED SPACING
+========================================================= */
 
-/* ===============================
-   HEAD (filters / search)
-   =============================== */
-.cw-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.cw-left{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
-}
-
-.cw-sub{
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(11,44,74,.55);
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.cw-dot{ opacity:.4; }
-
-.cw-actions{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content:flex-end;
-}
-
-.cw-search{ min-width: 260px; }
-
-/* ===============================
-   BODY + LIST
-   =============================== */
-.cw-body{
-  padding: 14px 16px 16px;
-}
-
-.cw-list{
-  display:flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* ===============================
-   CLASSWORK CARD ROW
-   (Google Classroom-ish feel)
-   =============================== */
-.cw-item{
-  border: 1px solid rgba(11,44,74,.12);
-  background:#fff;
-  border-radius: 14px;
-  padding: 12px 12px;
-
-  display:grid;
-  grid-template-columns: 1.2fr 180px 140px 130px;
-  gap: 12px;
-  align-items:center;
-
-  cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
-}
-
-.cw-item:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 10px 18px rgba(0,0,0,.08);
-  border-color: rgba(59,130,246,.25);
-}
-
-@media (max-width: 980px){
-  .cw-item{
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-}
-
-/* left block */
-.cw-title{
-  font-weight: 1000;
-  font-size: 12px;
-  color: rgba(11,44,74,.90);
-  letter-spacing: -0.1px;
+.topbar {
   margin-bottom: 4px;
 }
 
-.cw-meta{
-  font-size: 11px;
+.teachers-wrap {
+  padding: 0;
+}
+
+
+/* =========================================================
+   HEAD
+========================================================= */
+
+.cw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cw-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cw-sub {
+  font-size: 12px;
   font-weight: 800;
-  color: rgba(11,44,74,.55);
-  display:flex;
+  color: rgba(11, 44, 74, 0.55);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   FILTER / SEARCH AREA
+========================================================= */
+
+.cw-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.cw-desc{
-  margin-top: 8px;
+
+/* =========================================================
+   SUBJECT FILTER
+========================================================= */
+
+.cw-filter-wrap {
+  position: relative;
+}
+
+.cw-filter {
+  min-width: 155px;
+  height: 38px;
+
+  padding: 0 36px 0 13px;
+
+  border: 1px solid rgba(11, 44, 74, 0.14);
+  border-radius: 10px;
+
+  background: #fff;
+
+  color: rgba(11, 44, 74, 0.82);
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+
+  outline: none;
+  cursor: pointer;
+
+  appearance: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+
+/* Custom dropdown arrow */
+
+.cw-filter-wrap::after {
+  content: "▾";
+
+  position: absolute;
+  right: 13px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  pointer-events: none;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  color: rgba(11, 44, 74, 0.55);
+}
+
+.cw-filter:hover {
+  border-color: rgba(11, 44, 74, 0.24);
+}
+
+.cw-filter:focus {
+  border-color: rgba(59, 130, 246, 0.40);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.cw-search {
+  width: 270px;
+  min-width: 270px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  position: relative;
+
+  border: 1px solid rgba(11, 44, 74, 0.14);
+  border-radius: 10px;
+
+  background: #fff;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cw-search:focus-within {
+  border-color: rgba(59, 130, 246, 0.40);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+.cw-search .t-search-ico {
+  width: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  font-size: 13px;
+
+  color: rgba(11, 44, 74, 0.45);
+}
+
+.cw-search input {
+  width: 100%;
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  padding: 0 12px 0 0;
+
+  color: rgba(11, 44, 74, 0.85);
+
+  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
-  color: rgba(11,44,74,.70);
+}
+
+.cw-search input::placeholder {
+  color: rgba(11, 44, 74, 0.42);
+}
+
+.cw-search input:focus::placeholder {
+  color: rgba(11, 44, 74, 0.30);
+}
+
+
+/* =========================================================
+   BODY + LIST
+========================================================= */
+
+.cw-body {
+  padding: 14px 16px 16px;
+}
+
+.cw-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+/* =========================================================
+   CLASSWORK CARD ROW
+========================================================= */
+
+.cw-item {
+  border: 1px solid rgba(11, 44, 74, 0.12);
+
+  background: #fff;
+
+  border-radius: 14px;
+
+  padding: 12px;
+
+  display: grid;
+
+  /*
+   * Assignment
+   * Teacher
+   * Due Date
+   * Progress
+   */
+  grid-template-columns:
+    minmax(0, 1fr)
+    150px
+    125px
+    145px;
+
+  gap: 12px;
+
+  align-items: center;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    filter 0.12s ease;
+}
+
+.cw-item:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.08);
+
+  border-color:
+    rgba(59, 130, 246, 0.25);
+}
+
+
+/* =========================================================
+   LEFT BLOCK
+========================================================= */
+
+.cw-title {
+  font-weight: 1000;
+
+  font-size: 12px;
+
+  color: rgba(11, 44, 74, 0.90);
+
+  letter-spacing: -0.1px;
+
+  margin-bottom: 4px;
+
+  word-break: break-word;
+}
+
+.cw-meta {
+  font-size: 11px;
+
+  font-weight: 800;
+
+  color: rgba(11, 44, 74, 0.55);
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+.cw-desc {
+  margin-top: 8px;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  color: rgba(11, 44, 74, 0.70);
+
   line-height: 1.5;
+
+  word-break: break-word;
 }
 
-/* middle blocks */
-.cw-subject{
-  font-size: 11px;
-  font-weight: 1000;
-  color: rgba(11,44,74,.85);
-}
 
-.cw-teacher{
+/* =========================================================
+   TEACHER
+========================================================= */
+
+.cw-teacher {
+  min-width: 0;
+
   font-size: 11px;
+
   font-weight: 900;
-  color: rgba(11,44,74,.78);
+
+  color: rgba(11, 44, 74, 0.78);
+
+  word-break: break-word;
 }
 
-/* due */
-.cw-due{
+
+/* =========================================================
+   DUE DATE
+========================================================= */
+
+.cw-due {
+  min-width: 0;
+
   font-size: 11px;
+
   font-weight: 900;
-  color: rgba(11,44,74,.72);
+
+  color: rgba(11, 44, 74, 0.72);
 }
 
-/* status pill */
-.cw-pill{
-  justify-self: end;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(11,44,74,.12);
-  font-size: 11px;
-  font-weight: 1000;
+.cw-due > div:first-child {
   white-space: nowrap;
 }
 
-.cw-pill.pending{
-  background: rgba(245,158,11,.14);
-  border-color: rgba(245,158,11,.25);
-}
-.cw-pill.submitted{
-  background: rgba(34,197,94,.14);
-  border-color: rgba(34,197,94,.25);
+
+/* =========================================================
+   PROGRESS STATUS
+========================================================= */
+
+.cw-row-status {
+  margin-top: 7px;
+
+  display: flex;
+
+  align-items: center;
 }
 
-@media (max-width: 980px){
-  .cw-pill{ justify-self: start; }
+
+/* Status badge */
+
+.cw-status {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+
+  font-weight: 1000;
+
+  line-height: 1;
+
+  white-space: nowrap;
 }
 
-/* ===============================
-   EMPTY STATE
-   =============================== */
-.cw-empty{
-  text-align:center;
-  padding: 36px 0 28px;
+
+/* Not Started */
+
+.cw-status.not-started {
+  background: rgba(148, 163, 184, 0.16);
+
+  border: 1px solid rgba(148, 163, 184, 0.28);
+
+  color: #475569;
+}
+
+
+/* In Progress */
+
+.cw-status.in-progress {
+  background: rgba(59, 130, 246, 0.10);
+
+  border: 1px solid rgba(59, 130, 246, 0.25);
+
+  color: #2563eb;
+}
+
+
+/* Done */
+
+.cw-status.done {
+  background: rgba(34, 197, 94, 0.12);
+
+  border: 1px solid rgba(34, 197, 94, 0.25);
+
+  color: #15803d;
+}
+
+
+/* =========================================================
+   PROGRESS SELECT
+========================================================= */
+
+.cw-progress-wrap {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+}
+
+.cw-progress-select {
+  width: 100%;
+
+  min-width: 125px;
+
+  height: 36px;
+
+  padding: 0 30px 0 11px;
+
+  border: 1px solid rgba(11, 44, 74, 0.14);
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: rgba(11, 44, 74, 0.82);
+
+  font-family: inherit;
+
+  font-size: 11px;
+
   font-weight: 900;
-  font-size: 13px;
-  color: rgba(11,44,74,.45);
+
+  outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(11, 44, 74, 0.55) 50%),
+    linear-gradient(135deg, rgba(11, 44, 74, 0.55) 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 14px) 15px,
+    calc(100% - 9px) 15px;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
-/* ===============================
-   MODAL INNER CONTENT (keep admin modal shell)
-   =============================== */
-.cw-view-dialog{ max-width: 760px; width: calc(100% - 24px); }
-.cw-submit-dialog{ max-width: 640px; width: calc(100% - 24px); }
+.cw-progress-select:hover {
+  border-color:
+    rgba(11, 44, 74, 0.24);
+}
 
-.cw-view-chips{
-  display:flex;
+.cw-progress-select:focus {
+  border-color:
+    rgba(59, 130, 246, 0.40);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+.cw-progress-select:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.65;
+}
+
+
+/* =========================================================
+   MODAL PROGRESS
+========================================================= */
+
+.cw-modal-progress-wrap {
+  display: flex;
+
+  align-items: center;
+
   gap: 8px;
+}
+
+.cw-modal-progress-label {
+  font-size: 11px;
+
+  font-weight: 900;
+
+  color: rgba(11, 44, 74, 0.65);
+
+  white-space: nowrap;
+}
+
+.cw-modal-progress-wrap
+.cw-progress-select {
+  width: 150px;
+
+  min-width: 150px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.cw-empty {
+  text-align: center;
+
+  padding: 36px 0 28px;
+
+  font-weight: 900;
+
+  font-size: 13px;
+
+  color: rgba(11, 44, 74, 0.45);
+}
+
+
+/* =========================================================
+   LOADING STATE
+========================================================= */
+
+.cw-loading {
+  text-align: center;
+
+  padding: 36px 0 28px;
+
+  font-weight: 900;
+
+  font-size: 13px;
+
+  color: rgba(11, 44, 74, 0.45);
+}
+
+
+/* =========================================================
+   VIEW DETAILS MODAL
+========================================================= */
+
+.cw-view-dialog {
+  max-width: 760px;
+
+  width: calc(100% - 24px);
+}
+
+
+/* =========================================================
+   MODAL CHIPS
+========================================================= */
+
+.cw-view-chips {
+  display: flex;
+
+  gap: 8px;
+
   flex-wrap: wrap;
+
   margin-bottom: 12px;
 }
 
-.cw-chip{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+.cw-chip {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
   height: 24px;
+
   padding: 0 10px;
+
   border-radius: 999px;
+
   font-size: 11px;
+
   font-weight: 1000;
-  border: 1px solid rgba(11,44,74,.12);
-  background:#fff;
-  color:#0b2c4a;
+
+  border: 1px solid rgba(11, 44, 74, 0.12);
+
+  background: #fff;
+
+  color: #0b2c4a;
 }
 
-.cw-chip.blue{ background: rgba(59,130,246,.10); border-color: rgba(59,130,246,.25); }
-.cw-chip.orange{ background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.25); }
-.cw-chip.green{ background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.25); }
-.cw-chip.gray{ background: rgba(148,163,184,.18); border-color: rgba(148,163,184,.25); }
+.cw-chip.blue {
+  background: rgba(59, 130, 246, 0.10);
 
-.cw-view-block{ margin-top: 12px; }
-.cw-view-label{
+  border-color:
+    rgba(59, 130, 246, 0.25);
+}
+
+.cw-chip.orange {
+  background: rgba(245, 158, 11, 0.14);
+
+  border-color:
+    rgba(245, 158, 11, 0.25);
+}
+
+.cw-chip.gray {
+  background: rgba(148, 163, 184, 0.18);
+
+  border-color:
+    rgba(148, 163, 184, 0.25);
+}
+
+
+/* =========================================================
+   PROGRESS CHIP COLORS
+========================================================= */
+
+.cw-chip.not-started {
+  background: rgba(148, 163, 184, 0.16);
+
+  border-color:
+    rgba(148, 163, 184, 0.28);
+
+  color: #475569;
+}
+
+.cw-chip.in-progress {
+  background: rgba(59, 130, 246, 0.10);
+
+  border-color:
+    rgba(59, 130, 246, 0.25);
+
+  color: #2563eb;
+}
+
+.cw-chip.done {
+  background: rgba(34, 197, 94, 0.12);
+
+  border-color:
+    rgba(34, 197, 94, 0.25);
+
+  color: #15803d;
+}
+
+
+/* =========================================================
+   MODAL CONTENT
+========================================================= */
+
+.cw-view-block {
+  margin-top: 12px;
+}
+
+.cw-view-label {
   font-size: 11px;
+
   font-weight: 1000;
-  color: rgba(11,44,74,.70);
+
+  color: rgba(11, 44, 74, 0.70);
+
   margin-bottom: 6px;
 }
-.cw-view-text{
+
+.cw-view-text {
   font-size: 12px;
+
   font-weight: 700;
-  color: rgba(11,44,74,.80);
+
+  color: rgba(11, 44, 74, 0.80);
+
   line-height: 1.6;
+
   white-space: pre-wrap;
 }
 
-.cw-view-file{
-  border: 1px dashed rgba(11,44,74,.18);
+
+/* =========================================================
+   ATTACHMENT
+========================================================= */
+
+.cw-view-file {
+  border:
+    1px dashed rgba(11, 44, 74, 0.18);
+
   border-radius: 12px;
+
   padding: 10px;
-  background: rgba(11,44,74,.03);
+
+  background:
+    rgba(11, 44, 74, 0.03);
+
   font-size: 12px;
+
   font-weight: 800;
-  color: rgba(11,44,74,.75);
-}
-.cw-file-muted{ color: rgba(11,44,74,.55); font-weight: 800; }
 
-/* submit modal */
-.cw-upload{
-  display:flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.cw-upload textarea{
-  border: 1px solid rgba(11,44,74,.12);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(11,44,74,.85);
-  outline: none;
-}
-.cw-upload textarea:focus{
-  border-color: rgba(59,130,246,.35);
-  box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+  color: rgba(11, 44, 74, 0.75);
 }
 
-.cw-help{
-  font-size: 11px;
+.cw-file-muted {
+  color: rgba(11, 44, 74, 0.55);
+
   font-weight: 800;
-  color: rgba(11,44,74,.55);
 }
 
-.cw-msg{
-  margin-top: 10px;
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-size: 12px;
-  font-weight: 900;
-  background: rgba(34,197,94,.14);
-  border: 1px solid rgba(34,197,94,.25);
-  color: rgba(11,44,74,.85);
+
+/* =========================================================
+   RESPONSIVE — TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .cw-item {
+    grid-template-columns:
+      minmax(0, 1fr)
+      130px
+      115px
+      135px;
+  }
+
 }
 
-/* utility */
-.hidden{ display:none !important; }
+
+/* =========================================================
+   RESPONSIVE CARD
+========================================================= */
+
+@media (max-width: 980px) {
+
+  .cw-item {
+    grid-template-columns: 1fr;
+
+    align-items: start;
+  }
+
+  .cw-teacher,
+  .cw-due,
+  .cw-progress-wrap {
+    width: 100%;
+  }
+
+  .cw-progress-wrap {
+    justify-content: flex-start;
+  }
+
+  .cw-progress-select {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE FILTERS
+========================================================= */
+
+@media (max-width: 760px) {
+
+  .cw-head {
+    align-items: stretch;
+  }
+
+  .cw-actions {
+    width: 100%;
+
+    justify-content: stretch;
+  }
+
+  .cw-filter-wrap {
+    flex: 0 0 155px;
+  }
+
+  .cw-filter {
+    width: 100%;
+  }
+
+  .cw-search {
+    flex: 1;
+
+    width: auto;
+
+    min-width: 200px;
+  }
+
+  .cw-modal-progress-wrap {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .cw-modal-progress-wrap
+  .cw-progress-select {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 520px) {
+
+  .cw-actions {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .cw-filter-wrap {
+    width: 100%;
+
+    flex: none;
+  }
+
+  .cw-filter {
+    width: 100%;
+  }
+
+  .cw-search {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .cw-item {
+    padding: 11px;
+  }
+
+  .cw-progress-select {
+    height: 38px;
+  }
+
+}
+
+
+/* =========================================================
+   UTILITY
+========================================================= */
+
+.hidden {
+  display: none !important;
+}

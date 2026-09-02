@@ -11,12 +11,14 @@ function $(id) {
 }
 
 /* ===============================
-   TOPBAR (same pattern as your other student pages)
+   TOPBAR
 ================================= */
+
 function initTopbarMenu() {
   const userMenuBtn = $("userMenuBtn");
   const userMenu = $("userMenu");
   const userbox = $("userbox");
+
   if (!userMenuBtn || !userMenu || !userbox) return;
 
   userMenuBtn.addEventListener("click", (ev) => {
@@ -25,38 +27,43 @@ function initTopbarMenu() {
   });
 
   document.addEventListener("click", (ev) => {
-    if (!userbox.contains(ev.target)) userMenu.classList.remove("open");
+    if (!userbox.contains(ev.target)) {
+      userMenu.classList.remove("open");
+    }
   });
 }
 
+/* ===============================
+   LOGOUT
+================================= */
+
 function initLogout() {
   const btn = $("topbarLogout");
+
   if (!btn) return;
+
   btn.addEventListener("click", () => {
     window.location.href = "../../login.html";
   });
 }
 
 /* ===============================
-   CLASSWORK (student view)
-   - Frontend-only now, backend-ready
-   - Reads:
-     Active class: blims_active_student_class_v1
-     Active SY:    blims_school_years_v1
-     Classwork LS: blims_classwork_v1 (recommended)
+   CLASSWORK
 ================================= */
+
 function initClasswork() {
   const listEl = $("cwList");
   const emptyEl = $("cwEmpty");
 
   const gradeSectionEl = $("cwGradeSection");
-  const syLabelEl = $("cwSYLabel");
 
-  const statusFilter = $("cwStatusFilter");
   const subjectFilter = $("cwSubjectFilter");
   const searchInput = $("cwSearch");
 
-  // view modal
+  /* ===============================
+     VIEW MODAL
+  ================================= */
+
   const viewModal = $("cwViewModal");
   const viewBackdrop = $("cwViewBackdrop");
   const viewCloseX = $("cwViewCloseX");
@@ -68,46 +75,35 @@ function initClasswork() {
   const viewDesc = $("cwViewDesc");
   const viewFile = $("cwViewFile");
   const downloadBtn = $("cwDownloadBtn");
-  const submitOpenBtn = $("cwSubmitOpenBtn");
-
-  // submit modal
-  const submitModal = $("cwSubmitModal");
-  const submitBackdrop = $("cwSubmitBackdrop");
-  const submitCloseX = $("cwSubmitCloseX");
-  const submitCancelBtn = $("cwSubmitCancelBtn");
-  const submitBtn = $("cwSubmitBtn");
-
-  const submitSub = $("cwSubmitSub");
-  const submitFile = $("cwSubmitFile");
-  const submitNotes = $("cwSubmitNotes");
-  const submitMsg = $("cwSubmitMsg");
 
   if (!listEl || !emptyEl) return;
 
-  // LocalStorage keys (prototype)
-  const LS_ACTIVE_CLASS = "blims_active_student_class_v1";
-  const LS_SCHOOL_YEARS = "blims_school_years_v1";
-  const LS_CLASSWORK = "blims_classwork_v1"; // ✅ recommended new LS key
-
   const state = {
-    status: "all",
+    assignments: [],
+
+    /* All subjects for student's grade */
+    subjects: [],
+
     subject: "all",
     q: "",
     selectedId: null,
+
+    progressLoading: false,
   };
 
-  function readJSON(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
+  /* ===============================
+     CONSTANTS
+  ================================= */
 
-  function writeJSON(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
+  const VALID_PROGRESS_STATUSES = [
+    "not_started",
+    "in_progress",
+    "done",
+  ];
+
+  /* ===============================
+     HELPERS
+  ================================= */
 
   function escapeHtml(s) {
     return String(s ?? "")
@@ -119,349 +115,1214 @@ function initClasswork() {
   }
 
   function norm(s) {
-    return String(s || "").trim().toLowerCase();
+    return String(s || "")
+      .trim()
+      .toLowerCase();
   }
 
-  function fmtDue(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  function fmtDue(value) {
+    if (!value) return "—";
+
+    const d = new Date(value);
+
+    if (Number.isNaN(d.getTime())) {
+      return String(value);
+    }
+
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
   }
 
   function clampText(s, n = 120) {
     const t = String(s || "").trim();
-    if (t.length <= n) return t;
+
+    if (t.length <= n) {
+      return t;
+    }
+
     return t.slice(0, n).trim() + "…";
-  }
-
-  function getActiveClass() {
-    try {
-      const raw = localStorage.getItem(LS_ACTIVE_CLASS);
-      if (raw) {
-        const v = JSON.parse(raw);
-        if (v && v.grade != null && v.section != null) {
-          return { grade: String(v.grade), section: String(v.section) };
-        }
-      }
-    } catch {}
-    return { grade: "Grade 6", section: "A" }; // fallback demo
-  }
-
-  function getAdminActiveSY() {
-    const store = readJSON(LS_SCHOOL_YEARS, null);
-    if (!store || !Array.isArray(store.items)) return "";
-    const active = store.items.find((x) => x && x.id === store.activeId);
-    return active ? String(active.name || "").trim() : "";
   }
 
   function openModal(el) {
     if (!el) return;
+
     el.classList.remove("hidden");
     el.setAttribute("aria-hidden", "false");
   }
 
   function closeModal(el) {
     if (!el) return;
+
     el.classList.add("hidden");
     el.setAttribute("aria-hidden", "true");
   }
 
-  // ✅ Mock data seed (you can delete later)
-  // Put your real backend fetch replacement inside getClasswork()
-  function seedMockIfEmpty() {
-    const cur = readJSON(LS_CLASSWORK, null);
-    if (Array.isArray(cur) && cur.length) return;
+  /* ===============================
+     PROGRESS HELPERS
+  ================================= */
 
-    const now = Date.now();
-    const mock = [
-      {
-        id: "CW-" + now,
-        grade: "Grade 6",
-        section: "A",
-        schoolYear: getAdminActiveSY() || "2025-2026",
-        subject: "Mathematics",
-        title: "Worksheet 1: Fractions",
-        description: "Answer pages 12–14. Show your solutions clearly.",
-        teacher: "Ms. Cruz",
-        dueAt: new Date(Date.now() + 3 * 86400000).toISOString(),
-        file: { name: "fractions-worksheet.pdf", url: "" }, // url later
-        status: "pending", // pending | submitted
-        createdAt: Date.now() - 86400000,
-      },
-      {
-        id: "CW-" + (now + 1),
-        grade: "Grade 6",
-        section: "A",
-        schoolYear: getAdminActiveSY() || "2025-2026",
-        subject: "English",
-        title: "Book Report",
-        description: "Write a short report (1–2 pages) on the assigned book.",
-        teacher: "Ms. Cruz",
-        dueAt: new Date(Date.now() + 6 * 86400000).toISOString(),
-        file: null,
-        status: "submitted",
-        createdAt: Date.now() - 2 * 86400000,
-      },
-    ];
+  function getProgressStatus(assignment) {
+    const status =
+      assignment?.progressStatus;
 
-    writeJSON(LS_CLASSWORK, mock);
+    if (
+      VALID_PROGRESS_STATUSES.includes(
+        status
+      )
+    ) {
+      return status;
+    }
+
+    return "not_started";
   }
 
-  function getClasswork() {
-    // ✅ Later replace with fetch:
-    // return fetch("/api/student/classwork", { credentials:"include" }).then(r=>r.json())...
-    const list = readJSON(LS_CLASSWORK, []);
-    return Array.isArray(list) ? list : [];
+  function getProgressLabel(status) {
+    switch (status) {
+      case "in_progress":
+        return "In Progress";
+
+      case "done":
+        return "Done";
+
+      case "not_started":
+      default:
+        return "Not Started";
+    }
   }
 
-  function buildSubjectOptions(items) {
-    const subs = Array.from(
-      new Set(items.map((x) => String(x.subject || "").trim()).filter(Boolean))
-    ).sort((a, b) => a.localeCompare(b));
+  function getProgressClass(status) {
+    switch (status) {
+      case "in_progress":
+        return "in-progress";
 
-    // keep "all"
-    subjectFilter.innerHTML = `<option value="all">Subject: All</option>` +
-      subs.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+      case "done":
+        return "done";
+
+      case "not_started":
+      default:
+        return "not-started";
+    }
   }
+
+  /* ===============================
+     LOAD ASSIGNMENTS
+  ================================= */
+
+  async function loadAssignments() {
+    listEl.innerHTML = `
+      <div class="cw-loading">
+        Loading assignments...
+      </div>
+    `;
+
+    emptyEl.classList.add("hidden");
+
+    try {
+      const response = await fetch(
+        "/api/student/assignments",
+        {
+          method: "GET",
+
+          credentials: "include",
+
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(
+          result.message ||
+            "Failed to load assignments."
+        );
+      }
+
+      /* ===============================
+         ASSIGNMENTS
+      ================================= */
+
+      state.assignments =
+        Array.isArray(result.data)
+          ? result.data
+          : [];
+
+      /* ===============================
+         SUBJECTS
+         
+         These come from the student's
+         grade-level configuration.
+      ================================= */
+
+      state.subjects =
+        Array.isArray(result.subjects)
+          ? result.subjects
+          : [];
+
+      /* ===============================
+         STUDENT CLASS / SECTION
+      ================================= */
+
+      const scope =
+        result.studentScope;
+
+      if (
+        scope &&
+        gradeSectionEl
+      ) {
+        gradeSectionEl.textContent =
+          `${scope.className} - Section ${scope.sectionName}`;
+      }
+
+      /* ===============================
+         SUBJECT FILTER
+      ================================= */
+
+      buildSubjectOptions(
+        state.subjects
+      );
+
+      /* ===============================
+         RENDER
+      ================================= */
+
+      render();
+
+    } catch (err) {
+      console.error(
+        "loadAssignments error:",
+        err
+      );
+
+      state.assignments = [];
+      state.subjects = [];
+
+      listEl.innerHTML = "";
+
+      emptyEl.classList.remove(
+        "hidden"
+      );
+
+      emptyEl.textContent =
+        "Unable to load assignments.";
+    }
+  }
+
+  /* ===============================
+     SUBJECT FILTER
+     
+     Uses ALL subjects assigned to
+     student's grade.
+  ================================= */
+
+  function buildSubjectOptions(
+    subjects
+  ) {
+    if (!subjectFilter) return;
+
+    const normalizedSubjects =
+      Array.from(
+        new Set(
+          (
+            Array.isArray(subjects)
+              ? subjects
+              : []
+          )
+            .map((subject) =>
+              String(
+                subject || ""
+              ).trim()
+            )
+            .filter(Boolean)
+        )
+      ).sort((a, b) =>
+        a.localeCompare(b)
+      );
+
+    state.subjects =
+      normalizedSubjects;
+
+    subjectFilter.innerHTML =
+      `<option value="all">Subject: All</option>` +
+      normalizedSubjects
+        .map(
+          (subject) =>
+            `<option value="${escapeHtml(
+              subject
+            )}">
+              ${escapeHtml(subject)}
+            </option>`
+        )
+        .join("");
+
+    /* ===============================
+       PRESERVE CURRENT FILTER
+    ================================= */
+
+    if (
+      state.subject !== "all" &&
+      normalizedSubjects.includes(
+        state.subject
+      )
+    ) {
+      subjectFilter.value =
+        state.subject;
+    } else {
+      state.subject = "all";
+
+      subjectFilter.value =
+        "all";
+    }
+  }
+
+  /* ===============================
+     FILTERS
+  ================================= */
 
   function applyFilters(items) {
     let out = items.slice();
 
-    if (state.status !== "all") {
-      out = out.filter((x) => String(x.status || "").toLowerCase() === state.status);
-    }
+    /* ===============================
+       SUBJECT
+    ================================= */
 
     if (state.subject !== "all") {
-      out = out.filter((x) => String(x.subject || "") === state.subject);
+      out = out.filter(
+        (x) =>
+          String(
+            x.subject || ""
+          ).trim() ===
+          state.subject
+      );
     }
 
-    const q = norm(state.q);
+    /* ===============================
+       SEARCH
+    ================================= */
+
+    const q = norm(
+      state.q
+    );
+
     if (q) {
       out = out.filter((x) => {
-        const hay = `${x.title || ""} ${x.description || ""} ${x.subject || ""}`.toLowerCase();
+        const hay = `
+          ${x.title || ""}
+          ${x.instructions || ""}
+          ${x.subject || ""}
+          ${x.className || ""}
+          ${x.sectionName || ""}
+        `.toLowerCase();
+
         return hay.includes(q);
       });
     }
 
-    // sort soonest due first (Google Classroom-ish)
-    out.sort((a, b) => new Date(a.dueAt || 0).getTime() - new Date(b.dueAt || 0).getTime());
+    /* ===============================
+       SORT
+       Soonest due date first
+    ================================= */
+
+    out.sort((a, b) => {
+      const dateA =
+        new Date(
+          a.dueDate || 0
+        ).getTime();
+
+      const dateB =
+        new Date(
+          b.dueDate || 0
+        ).getTime();
+
+      return dateA - dateB;
+    });
+
     return out;
   }
 
-  function renderRow(x) {
-    const el = document.createElement("div");
-    el.className = "cw-item";
-    el.dataset.id = x.id;
+  /* ===============================
+     UPDATE PROGRESS
+  ================================= */
 
-    const status = String(x.status || "pending").toLowerCase();
-    const statusText = status === "submitted" ? "Submitted" : "Pending";
+  async function updateAssignmentProgress(
+    assignment,
+    newStatus
+  ) {
+    if (!assignment?._id) {
+      return;
+    }
+
+    if (
+      !VALID_PROGRESS_STATUSES.includes(
+        newStatus
+      )
+    ) {
+      return;
+    }
+
+    if (
+      state.progressLoading
+    ) {
+      return;
+    }
+
+    const previousStatus =
+      getProgressStatus(
+        assignment
+      );
+
+    if (
+      previousStatus ===
+      newStatus
+    ) {
+      return;
+    }
+
+    state.progressLoading =
+      true;
+
+    try {
+      const response =
+        await fetch(
+          `/api/student/assignments/${assignment._id}/progress`,
+          {
+            method: "PATCH",
+
+            credentials: "include",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Accept:
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              status: newStatus,
+            }),
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !result.ok
+      ) {
+        throw new Error(
+          result.message ||
+            "Failed to update assignment progress."
+        );
+      }
+
+      /* ===============================
+         UPDATE LOCAL STATE
+      ================================= */
+
+      assignment.progressStatus =
+        result.data?.progressStatus ||
+        newStatus;
+
+      assignment.startedAt =
+        result.data?.startedAt ||
+        null;
+
+      assignment.completedAt =
+        result.data?.completedAt ||
+        null;
+
+      /* ===============================
+         IMPORTANT
+         
+         Turn loading OFF before
+         rendering the new dropdown.
+      ================================= */
+
+      state.progressLoading =
+        false;
+
+      /* ===============================
+         REFRESH LIST
+      ================================= */
+
+      render();
+
+      /* ===============================
+         REFRESH OPEN MODAL
+      ================================= */
+
+      if (
+        state.selectedId &&
+        String(
+          state.selectedId
+        ) ===
+          String(
+            assignment._id
+          )
+      ) {
+        openDetails(
+          assignment._id
+        );
+      }
+
+    } catch (err) {
+      console.error(
+        "updateAssignmentProgress error:",
+        err
+      );
+
+      /* ===============================
+         RESET LOADING
+      ================================= */
+
+      state.progressLoading =
+        false;
+
+      alert(
+        err.message ||
+          "Unable to update assignment progress."
+      );
+
+      /* ===============================
+         MAKE DROPDOWN USABLE AGAIN
+      ================================= */
+
+      render();
+
+      /* ===============================
+         REOPEN MODAL
+      ================================= */
+
+      if (
+        state.selectedId &&
+        String(
+          state.selectedId
+        ) ===
+          String(
+            assignment._id
+          )
+      ) {
+        openDetails(
+          assignment._id
+        );
+      }
+    }
+  }
+
+  /* ===============================
+     CREATE PROGRESS SELECT
+  ================================= */
+
+  function createProgressSelect(
+    assignment
+  ) {
+    const wrapper =
+      document.createElement(
+        "div"
+      );
+
+    wrapper.className =
+      "cw-progress-wrap";
+
+    const select =
+      document.createElement(
+        "select"
+      );
+
+    select.className =
+      "cw-progress-select";
+
+    select.setAttribute(
+      "aria-label",
+      "Assignment progress"
+    );
+
+    const currentStatus =
+      getProgressStatus(
+        assignment
+      );
+
+    const options = [
+      {
+        value: "not_started",
+        label: "Not Started",
+      },
+
+      {
+        value: "in_progress",
+        label: "In Progress",
+      },
+
+      {
+        value: "done",
+        label: "Done",
+      },
+    ];
+
+    options.forEach(
+      (option) => {
+        const el =
+          document.createElement(
+            "option"
+          );
+
+        el.value =
+          option.value;
+
+        el.textContent =
+          option.label;
+
+        if (
+          option.value ===
+          currentStatus
+        ) {
+          el.selected =
+            true;
+        }
+
+        select.appendChild(
+          el
+        );
+      }
+    );
+
+    select.disabled =
+      state.progressLoading;
+
+    /* ===============================
+       PREVENT ROW CLICK
+    ================================= */
+
+    select.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+      }
+    );
+
+    select.addEventListener(
+      "change",
+      async (event) => {
+        event.stopPropagation();
+
+        const newStatus =
+          event.target.value;
+
+        await updateAssignmentProgress(
+          assignment,
+          newStatus
+        );
+      }
+    );
+
+    wrapper.appendChild(
+      select
+    );
+
+    return wrapper;
+  }
+
+  /* ===============================
+     RENDER ASSIGNMENT
+  ================================= */
+
+  function renderRow(
+    assignment
+  ) {
+    const el =
+      document.createElement(
+        "div"
+      );
+
+    el.className =
+      "cw-item";
+
+    el.dataset.id =
+      assignment._id;
+
+    const progressStatus =
+      getProgressStatus(
+        assignment
+      );
+
+    const progressLabel =
+      getProgressLabel(
+        progressStatus
+      );
+
+    const progressClass =
+      getProgressClass(
+        progressStatus
+      );
 
     el.innerHTML = `
       <div>
-        <div class="cw-title">${escapeHtml(x.title || "Untitled")}</div>
-        <div class="cw-meta">
-          <span>${escapeHtml(x.subject || "—")}</span>
-          <span>•</span>
-          <span>Due: ${escapeHtml(fmtDue(x.dueAt))}</span>
+
+        <div class="cw-title">
+          ${escapeHtml(
+            assignment.title ||
+              "Untitled Assignment"
+          )}
         </div>
-        <div class="cw-desc">${escapeHtml(clampText(x.description || ""))}</div>
+
+        <div class="cw-meta">
+
+          <span>
+            ${escapeHtml(
+              assignment.subject ||
+                "—"
+            )}
+          </span>
+
+          <span>•</span>
+
+          <span>
+            Due:
+            ${escapeHtml(
+              fmtDue(
+                assignment.dueDate
+              )
+            )}
+          </span>
+
+        </div>
+
+        <div class="cw-desc">
+          ${escapeHtml(
+            clampText(
+              assignment.instructions ||
+                ""
+            )
+          )}
+        </div>
+
       </div>
 
-      <div class="cw-teacher">${escapeHtml(x.teacher || "—")}</div>
-      <div class="cw-due">${escapeHtml(fmtDue(x.dueAt))}</div>
-      <div class="cw-pill ${status}">${escapeHtml(statusText)}</div>
+      <div class="cw-teacher">
+        —
+      </div>
+
+      <div class="cw-due">
+
+        <div>
+          ${escapeHtml(
+            fmtDue(
+              assignment.dueDate
+            )
+          )}
+        </div>
+
+        <div class="cw-row-status">
+
+          <span
+            class="cw-status ${progressClass}"
+          >
+            ${escapeHtml(
+              progressLabel
+            )}
+          </span>
+
+        </div>
+
+      </div>
     `;
 
-    el.addEventListener("click", () => openDetails(x.id));
+    /* ===============================
+       PROGRESS SELECT
+    ================================= */
+
+    const progressSelect =
+      createProgressSelect(
+        assignment
+      );
+
+    el.appendChild(
+      progressSelect
+    );
+
+    /* ===============================
+       OPEN DETAILS
+    ================================= */
+
+    el.addEventListener(
+      "click",
+      () =>
+        openDetails(
+          assignment._id
+        )
+    );
+
     return el;
   }
 
+  /* ===============================
+     RENDER
+  ================================= */
+
   function render() {
-    const cls = getActiveClass();
-    const sy = getAdminActiveSY();
-
-    if (gradeSectionEl) gradeSectionEl.textContent = `${cls.grade} - Section ${cls.section}`;
-    if (syLabelEl) syLabelEl.textContent = sy ? `SY ${sy}` : "SY —";
-
-    const all = getClasswork()
-      .filter((x) => x && String(x.grade || "") === String(cls.grade) && String(x.section || "") === String(cls.section))
-      .filter((x) => {
-        // if classwork has SY stored, it must match active SY
-        if (!sy) return true;
-        return !x.schoolYear || String(x.schoolYear) === sy;
-      });
-
-    // build subject dropdown
-    if (subjectFilter) buildSubjectOptions(all);
-
-    const finalList = applyFilters(all);
+    const finalList =
+      applyFilters(
+        state.assignments
+      );
 
     listEl.innerHTML = "";
+
     if (!finalList.length) {
-      emptyEl.classList.remove("hidden");
+      emptyEl.classList.remove(
+        "hidden"
+      );
+
       return;
     }
-    emptyEl.classList.add("hidden");
 
-    finalList.forEach((x) => listEl.appendChild(renderRow(x)));
+    emptyEl.classList.add(
+      "hidden"
+    );
+
+    finalList.forEach(
+      (assignment) => {
+        listEl.appendChild(
+          renderRow(
+            assignment
+          )
+        );
+      }
+    );
   }
 
-  function chip(text, tone) {
-    const c = document.createElement("span");
-    c.className = "cw-chip " + (tone || "gray");
-    c.textContent = text;
+  /* ===============================
+     CHIP
+  ================================= */
+
+  function chip(
+    text,
+    tone
+  ) {
+    const c =
+      document.createElement(
+        "span"
+      );
+
+    c.className =
+      "cw-chip " +
+      (tone || "gray");
+
+    c.textContent =
+      text;
+
     return c;
   }
 
+  /* ===============================
+     OPEN ASSIGNMENT DETAILS
+  ================================= */
+
   function openDetails(id) {
-    const cls = getActiveClass();
-    const sy = getAdminActiveSY();
-    const item = getClasswork().find((x) => x && x.id === id);
+    const item =
+      state.assignments.find(
+        (x) =>
+          x &&
+          String(x._id) ===
+            String(id)
+      );
+
     if (!item) return;
 
-    state.selectedId = id;
+    state.selectedId =
+      item._id;
 
-    if (viewTitle) viewTitle.textContent = item.title || "Classwork Details";
-    if (viewSub) viewSub.textContent = `${cls.grade} - Section ${cls.section}${sy ? " • SY " + sy : ""}`;
+    /* ===============================
+       TITLE
+    ================================= */
 
-    // chips
-    if (viewChips) {
-      viewChips.innerHTML = "";
-      viewChips.appendChild(chip(item.subject || "—", "blue"));
-      viewChips.appendChild(chip("Due: " + fmtDue(item.dueAt), "orange"));
-      viewChips.appendChild(chip(item.teacher || "—", "gray"));
-
-      const st = String(item.status || "pending").toLowerCase();
-      viewChips.appendChild(chip(st === "submitted" ? "Submitted" : "Pending", st === "submitted" ? "green" : "orange"));
+    if (viewTitle) {
+      viewTitle.textContent =
+        item.title ||
+        "Assignment Details";
     }
 
-    if (viewDesc) viewDesc.textContent = item.description || "—";
+    /* ===============================
+       CLASS / SECTION
+    ================================= */
 
-    // file
+    if (viewSub) {
+      viewSub.textContent =
+        `${item.className || "—"} - Section ${
+          item.sectionName || "—"
+        }`;
+    }
+
+    /* ===============================
+       CHIPS
+    ================================= */
+
+    if (viewChips) {
+      viewChips.innerHTML =
+        "";
+
+      viewChips.appendChild(
+        chip(
+          item.subject || "—",
+          "blue"
+        )
+      );
+
+      viewChips.appendChild(
+        chip(
+          "Due: " +
+            fmtDue(
+              item.dueDate
+            ),
+          "orange"
+        )
+      );
+
+      viewChips.appendChild(
+        chip(
+          item.quarter || "—",
+          "gray"
+        )
+      );
+
+      const progressStatus =
+        getProgressStatus(
+          item
+        );
+
+      const progressLabel =
+        getProgressLabel(
+          progressStatus
+        );
+
+      const progressClass =
+        getProgressClass(
+          progressStatus
+        );
+
+      viewChips.appendChild(
+        chip(
+          progressLabel,
+          progressClass
+        )
+      );
+    }
+
+    /* ===============================
+       INSTRUCTIONS
+    ================================= */
+
+    if (viewDesc) {
+      viewDesc.textContent =
+        item.instructions ||
+        "No instructions provided.";
+    }
+
+    /* ===============================
+       FILE
+    ================================= */
+
     if (viewFile) {
-      if (item.file && item.file.name) {
-        viewFile.innerHTML = `<span>${escapeHtml(item.file.name)}</span>`;
-      } else {
-        viewFile.innerHTML = `<span class="cw-file-muted">No file attached.</span>`;
+      viewFile.innerHTML = `
+        <span class="cw-file-muted">
+          No file attached.
+        </span>
+      `;
+    }
+
+    if (downloadBtn) {
+      downloadBtn.disabled =
+        true;
+    }
+
+    /* ===============================
+       MODAL PROGRESS
+    ================================= */
+
+    createModalProgressSelect(
+      item
+    );
+
+    openModal(
+      viewModal
+    );
+  }
+
+  /* ===============================
+     MODAL PROGRESS SELECT
+  ================================= */
+
+  function createModalProgressSelect(
+    assignment
+  ) {
+    if (!viewModal) return;
+
+    const footerRight =
+      viewModal.querySelector(
+        ".tmodal-foot-right"
+      );
+
+    if (!footerRight) return;
+
+    /* ===============================
+       REMOVE PREVIOUS
+    ================================= */
+
+    const oldWrap =
+      footerRight.querySelector(
+        ".cw-modal-progress-wrap"
+      );
+
+    if (oldWrap) {
+      oldWrap.remove();
+    }
+
+    /* ===============================
+       WRAPPER
+    ================================= */
+
+    const wrapper =
+      document.createElement(
+        "div"
+      );
+
+    wrapper.className =
+      "cw-modal-progress-wrap";
+
+    /* ===============================
+       LABEL
+    ================================= */
+
+    const label =
+      document.createElement(
+        "span"
+      );
+
+    label.className =
+      "cw-modal-progress-label";
+
+    label.textContent =
+      "Progress:";
+
+    /* ===============================
+       SELECT
+    ================================= */
+
+    const select =
+      document.createElement(
+        "select"
+      );
+
+    select.className =
+      "cw-progress-select";
+
+    select.setAttribute(
+      "aria-label",
+      "Assignment progress"
+    );
+
+    const currentStatus =
+      getProgressStatus(
+        assignment
+      );
+
+    [
+      [
+        "not_started",
+        "Not Started",
+      ],
+
+      [
+        "in_progress",
+        "In Progress",
+      ],
+
+      [
+        "done",
+        "Done",
+      ],
+    ].forEach(
+      ([value, text]) => {
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          value;
+
+        option.textContent =
+          text;
+
+        option.selected =
+          value ===
+          currentStatus;
+
+        select.appendChild(
+          option
+        );
+      }
+    );
+
+    select.disabled =
+      state.progressLoading;
+
+    /* ===============================
+       PREVENT MODAL INTERFERENCE
+    ================================= */
+
+    select.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+      }
+    );
+
+    select.addEventListener(
+      "change",
+      async () => {
+        await updateAssignmentProgress(
+          assignment,
+          select.value
+        );
+      }
+    );
+
+    /* ===============================
+       APPEND
+    ================================= */
+
+    wrapper.appendChild(
+      label
+    );
+
+    wrapper.appendChild(
+      select
+    );
+
+    footerRight.insertBefore(
+      wrapper,
+      footerRight.firstChild
+    );
+  }
+
+  /* ===============================
+     SUBJECT FILTER EVENT
+  ================================= */
+
+  subjectFilter?.addEventListener(
+    "change",
+    () => {
+      state.subject =
+        subjectFilter.value ||
+        "all";
+
+      render();
+    }
+  );
+
+  /* ===============================
+     SEARCH EVENT
+  ================================= */
+
+  searchInput?.addEventListener(
+    "input",
+    (e) => {
+      state.q =
+        String(
+          e.target.value || ""
+        );
+
+      render();
+    }
+  );
+
+  /* ===============================
+     VIEW MODAL CLOSE
+  ================================= */
+
+  viewBackdrop?.addEventListener(
+    "click",
+    () =>
+      closeModal(
+        viewModal
+      )
+  );
+
+  viewCloseX?.addEventListener(
+    "click",
+    () =>
+      closeModal(
+        viewModal
+      )
+  );
+
+  viewCloseBtn?.addEventListener(
+    "click",
+    () =>
+      closeModal(
+        viewModal
+      )
+  );
+
+  /* ===============================
+     DOWNLOAD
+  ================================= */
+
+  downloadBtn?.addEventListener(
+    "click",
+    () => {
+      const item =
+        state.assignments.find(
+          (x) =>
+            x &&
+            String(x._id) ===
+              String(
+                state.selectedId
+              )
+        );
+
+      if (!item) return;
+
+      alert(
+        "No assignment file is attached."
+      );
+    }
+  );
+
+  /* ===============================
+     ESC
+  ================================= */
+
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") {
+        return;
+      }
+
+      if (
+        viewModal &&
+        !viewModal.classList.contains(
+          "hidden"
+        )
+      ) {
+        closeModal(
+          viewModal
+        );
       }
     }
+  );
 
-    // buttons
-    if (downloadBtn) {
-      downloadBtn.disabled = !(item.file && (item.file.url || item.file.name));
-    }
+  /* ===============================
+     BOOT
+  ================================= */
 
-    if (submitOpenBtn) {
-      const st = String(item.status || "pending").toLowerCase();
-      submitOpenBtn.textContent = st === "submitted" ? "Resubmit" : "Submit";
-    }
-
-    openModal(viewModal);
-  }
-
-  function openSubmit() {
-    const item = getClasswork().find((x) => x && x.id === state.selectedId);
-    if (!item) return;
-
-    if (submitSub) submitSub.textContent = item.title || "—";
-    if (submitFile) submitFile.value = "";
-    if (submitNotes) submitNotes.value = "";
-    if (submitMsg) {
-      submitMsg.textContent = "";
-      submitMsg.classList.add("hidden");
-    }
-
-    openModal(submitModal);
-  }
-
-  function handleSubmit() {
-    const item = getClasswork().find((x) => x && x.id === state.selectedId);
-    if (!item) return;
-
-    // Frontend-only: mark as submitted
-    const fileObj = submitFile?.files?.[0] || null;
-    const notes = String(submitNotes?.value || "").trim();
-
-    const all = getClasswork();
-    const idx = all.findIndex((x) => x && x.id === item.id);
-    if (idx === -1) return;
-
-    all[idx] = {
-      ...all[idx],
-      status: "submitted",
-      submittedAt: new Date().toISOString(),
-      submission: {
-        fileName: fileObj ? fileObj.name : "",
-        notes,
-      },
-    };
-
-    writeJSON(LS_CLASSWORK, all);
-
-    if (submitMsg) {
-      submitMsg.textContent = "Submitted (frontend-only). Hook this to backend upload later.";
-      submitMsg.classList.remove("hidden");
-    }
-
-    // refresh list & modal chips
-    render();
-    openDetails(item.id);
-  }
-
-  // ===============================
-  // EVENTS
-  // ===============================
-  statusFilter?.addEventListener("change", () => {
-    state.status = statusFilter.value || "all";
-    render();
-  });
-
-  subjectFilter?.addEventListener("change", () => {
-    state.subject = subjectFilter.value || "all";
-    render();
-  });
-
-  searchInput?.addEventListener("input", (e) => {
-    state.q = String(e.target.value || "");
-    render();
-  });
-
-  // view modal close
-  viewBackdrop?.addEventListener("click", () => closeModal(viewModal));
-  viewCloseX?.addEventListener("click", () => closeModal(viewModal));
-  viewCloseBtn?.addEventListener("click", () => closeModal(viewModal));
-
-  // view modal actions
-  downloadBtn?.addEventListener("click", () => {
-    const item = getClasswork().find((x) => x && x.id === state.selectedId);
-    if (!item || !item.file) return;
-
-    // later: real file URL
-    if (item.file.url) window.open(item.file.url, "_blank");
-    else alert("No download URL yet (frontend-only).");
-  });
-
-  submitOpenBtn?.addEventListener("click", () => {
-    closeModal(viewModal);
-    openSubmit();
-  });
-
-  // submit modal close
-  submitBackdrop?.addEventListener("click", () => closeModal(submitModal));
-  submitCloseX?.addEventListener("click", () => closeModal(submitModal));
-  submitCancelBtn?.addEventListener("click", () => closeModal(submitModal));
-
-  submitBtn?.addEventListener("click", handleSubmit);
-
-  // ESC close
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (submitModal && !submitModal.classList.contains("hidden")) return closeModal(submitModal);
-    if (viewModal && !viewModal.classList.contains("hidden")) return closeModal(viewModal);
-  });
-
-  // boot
-  seedMockIfEmpty();
-  render();
+  loadAssignments();
 }

@@ -4,21 +4,26 @@
 
 const $ = (id) => document.getElementById(id);
 
-const LS_KEYS = {
-  STUDENTS: "rbms_students_v1",
-};
+/* ---------------------------------------
+   API
+--------------------------------------- */
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
 
-function readLS(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.message || "Request failed");
   }
-}
 
-function writeLS(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  return data;
 }
 
 /* ---------------------------------------
@@ -33,12 +38,23 @@ function fullName(s) {
 }
 
 function classSectionLabel(s) {
-  const out = [s.className, s.sectionName].filter(Boolean).join(" - ");
-  return out || "—";
+  const cls = normalize(s.className);
+  const sec = normalize(s.sectionName);
+
+  if (
+    !cls ||
+    !sec ||
+    cls.toLowerCase() === "unassigned" ||
+    sec.toLowerCase() === "unassigned"
+  ) {
+    return "—";
+  }
+
+  return `${cls} - ${sec}`;
 }
 
 function getStudentById(id) {
-  return students.find((s) => String(s.id) === String(id));
+  return students.find((s) => String(s._id || s.id) === String(id));
 }
 
 function setEnrollError(msg) {
@@ -60,104 +76,78 @@ function getAddressValue(addr, key) {
 }
 
 /* ---------------------------------------
-   TEACHER SCOPE
---------------------------------------- */
-function parseScopeFromText(text) {
-  const raw = normalize(text);
-
-  if (!raw) return { className: "", sectionName: "" };
-
-  const patterns = [
-    /(Class\s*\d+|Grade\s*\d+)\s*-\s*([A-Za-z0-9]+)/i,
-    /(Class\s*\d+|Grade\s*\d+)\s+([A-Za-z0-9]+)/i,
-  ];
-
-  for (const rx of patterns) {
-    const m = raw.match(rx);
-    if (m) {
-      return {
-        className: normalize(m[1]),
-        sectionName: normalize(m[2]),
-      };
-    }
-  }
-
-  return { className: "", sectionName: "" };
-}
-
-function getTeacherScope() {
-  const u = readLS("user", {}) || {};
-
-  let cls =
-    u.handledClass ||
-    u.className ||
-    u.class ||
-    u.advisoryClass ||
-    u.gradeLevel ||
-    "";
-
-  let sec =
-    u.handledSection ||
-    u.sectionName ||
-    u.section ||
-    u.advisorySection ||
-    "";
-
-  const combined =
-    u.classSection ||
-    u.handledClassSection ||
-    u.advisory ||
-    u.assignedClass ||
-    u.roleLabel ||
-    u.roleText ||
-    "";
-
-  if ((!cls || !sec) && combined) {
-    const parsed = parseScopeFromText(combined);
-    cls = cls || parsed.className;
-    sec = sec || parsed.sectionName;
-  }
-
-  // fallback: parse topbar role text like "Class 1 - A Teacher"
-  if (!cls || !sec) {
-    const roleText = document.querySelector(".tb-role")?.textContent || "";
-    const cleaned = roleText.replace(/\bTeacher\b/i, "").trim();
-    const parsed = parseScopeFromText(cleaned);
-    cls = cls || parsed.className;
-    sec = sec || parsed.sectionName;
-  }
-
-  return {
-    className: normalize(cls),
-    sectionName: normalize(sec),
-  };
-}
-
-let TEACHER_SCOPE = { className: "", sectionName: "" };
-
-function hasTeacherScope() {
-  return !!TEACHER_SCOPE.className && !!TEACHER_SCOPE.sectionName;
-}
-
-/* ---------------------------------------
    STATE
 --------------------------------------- */
+let TEACHER_SCOPE = { className: "", sectionName: "" };
 let students = [];
+let unassignedStudents = [];
 let modalStudentId = null;
 
+function hasTeacherScope() {
+  return !!normalize(TEACHER_SCOPE.className) && !!normalize(TEACHER_SCOPE.sectionName);
+}
+
 /* ---------------------------------------
-   ENROLLMENT CHECKS
+   LOADERS
+--------------------------------------- */
+async function loadTeacherScope() {
+  try {
+    const res = await apiFetch("/api/teacher/students/scope");
+    TEACHER_SCOPE = res.data || { className: "", sectionName: "" };
+  } catch (err) {
+    console.error("loadTeacherScope error:", err);
+    TEACHER_SCOPE = { className: "", sectionName: "" };
+  }
+}
+
+async function loadStudents() {
+  if (!hasTeacherScope()) {
+    students = [];
+    renderStudentsTable();
+    return;
+  }
+
+  try {
+    const res = await apiFetch(
+      `/api/teacher/students/class?className=${encodeURIComponent(
+        TEACHER_SCOPE.className
+      )}&sectionName=${encodeURIComponent(TEACHER_SCOPE.sectionName)}`
+    );
+
+    students = Array.isArray(res.data) ? res.data : [];
+    renderStudentsTable();
+  } catch (err) {
+    console.error("loadStudents error:", err);
+    students = [];
+    renderStudentsTable();
+  }
+}
+
+async function loadUnassignedStudents() {
+  try {
+    const res = await apiFetch("/api/teacher/students/unassigned");
+    unassignedStudents = Array.isArray(res.data) ? res.data : [];
+  } catch (err) {
+    console.error("loadUnassignedStudents error:", err);
+    unassignedStudents = [];
+  }
+}
+
+/* ---------------------------------------
+   CHECKS
 --------------------------------------- */
 function isAssignedAnywhere(s) {
-  return !!normalize(s.className) || !!normalize(s.sectionName);
+  const cls = normalize(s.className).toLowerCase();
+  const sec = normalize(s.sectionName).toLowerCase();
+  return !!cls && !!sec && cls !== "unassigned" && sec !== "unassigned";
 }
 
 function isEnrolledInTeacherClass(s) {
   if (!hasTeacherScope()) return false;
 
   return (
-    normalize(s.className) === TEACHER_SCOPE.className &&
-    normalize(s.sectionName) === TEACHER_SCOPE.sectionName
+    normalize(s.className) === normalize(TEACHER_SCOPE.className) &&
+    normalize(s.sectionName) === normalize(TEACHER_SCOPE.sectionName)
   );
 }
 
@@ -171,8 +161,6 @@ function renderStudentsTable() {
   const q = ($("searchInput")?.value || "").toLowerCase().trim();
 
   const filtered = students.filter((s) => {
-    if (!isEnrolledInTeacherClass(s)) return false;
-
     return (
       !q ||
       fullName(s).toLowerCase().includes(q) ||
@@ -197,6 +185,8 @@ function renderStudentsTable() {
   }
 
   filtered.forEach((s, idx) => {
+    const id = s._id || s.id || "";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${String(idx + 1).padStart(2, "0")}</td>
@@ -216,7 +206,7 @@ function renderStudentsTable() {
         <div class="t-actions">
           <button
             class="t-icon-btn t-view"
-            data-id="${s.id}"
+            data-id="${id}"
             type="button"
             title="View"
           >
@@ -225,7 +215,7 @@ function renderStudentsTable() {
 
           <button
             class="t-icon-btn t-unenroll"
-            data-id="${s.id}"
+            data-id="${id}"
             type="button"
             title="Unenroll"
           >
@@ -241,7 +231,7 @@ function renderStudentsTable() {
 /* ---------------------------------------
    ENROLL MODAL
 --------------------------------------- */
-function openEnrollModal() {
+async function openEnrollModal() {
   if (!hasTeacherScope()) {
     alert("Teacher class/section assignment not found.");
     return;
@@ -261,6 +251,7 @@ function openEnrollModal() {
   $("enrollModal")?.classList.remove("hidden");
   $("enrollModal")?.setAttribute("aria-hidden", "false");
 
+  await loadUnassignedStudents();
   renderEnrollList();
 }
 
@@ -278,9 +269,7 @@ function closeEnrollModal() {
 function getAvailableStudentsForEnroll() {
   const q = ($("enrollSearchInput")?.value || "").toLowerCase().trim();
 
-  return students.filter((s) => {
-    if (isEnrolledInTeacherClass(s)) return false;
-
+  return unassignedStudents.filter((s) => {
     return (
       !q ||
       fullName(s).toLowerCase().includes(q) ||
@@ -312,18 +301,12 @@ function renderEnrollList() {
   }
 
   pool.forEach((s) => {
-    const assignedElsewhere = isAssignedAnywhere(s) && !isEnrolledInTeacherClass(s);
-    const currentClassText = classSectionLabel(s);
+    const id = s._id || s.id || "";
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td style="text-align:center;">
-        <input
-          class="tem-check"
-          type="checkbox"
-          value="${s.id}"
-          ${assignedElsewhere ? "disabled" : ""}
-        />
+        <input class="tem-check" type="checkbox" value="${id}" />
       </td>
 
       <td>
@@ -336,14 +319,7 @@ function renderEnrollList() {
       <td>${s.lrn || "—"}</td>
       <td>${s.email || "—"}</td>
       <td>${s.studentId || "—"}</td>
-
-      <td>
-        <span class="tem-current-class ${
-          !assignedElsewhere && !isAssignedAnywhere(s) ? "unassigned" : ""
-        }">
-          ${currentClassText}
-        </span>
-      </td>
+      <td><span class="tem-current-class unassigned">Unassigned</span></td>
     `;
 
     tbody.appendChild(tr);
@@ -370,9 +346,9 @@ function updateSelectAllState() {
 }
 
 /* ---------------------------------------
-   ENROLL ACTION
+   ACTIONS
 --------------------------------------- */
-function enrollSelectedStudents() {
+async function enrollSelectedStudents() {
   clearEnrollError();
 
   if (!hasTeacherScope()) {
@@ -385,37 +361,27 @@ function enrollSelectedStudents() {
     return setEnrollError("Please select at least one student to enroll.");
   }
 
-  const selectedIds = checks.map((c) => c.value);
-  const blockedNames = [];
+  const studentIds = checks.map((c) => c.value);
 
-  selectedIds.forEach((id) => {
-    const s = getStudentById(id);
-    if (!s) return;
+  try {
+    await apiFetch("/api/teacher/students/enroll", {
+      method: "POST",
+      body: JSON.stringify({
+        studentIds,
+        className: TEACHER_SCOPE.className,
+        sectionName: TEACHER_SCOPE.sectionName,
+      }),
+    });
 
-    if (isAssignedAnywhere(s) && !isEnrolledInTeacherClass(s)) {
-      blockedNames.push(fullName(s) || s.studentId || "Student");
-      return;
-    }
-
-    s.className = TEACHER_SCOPE.className;
-    s.sectionName = TEACHER_SCOPE.sectionName;
-  });
-
-  if (blockedNames.length) {
-    return setEnrollError(
-      `These students are already assigned to another class/section: ${blockedNames.join(", ")}.`
-    );
+    closeEnrollModal();
+    await loadStudents();
+  } catch (err) {
+    console.error("enrollSelectedStudents error:", err);
+    setEnrollError(err.message || "Failed to enroll students.");
   }
-
-  writeLS(LS_KEYS.STUDENTS, students);
-  closeEnrollModal();
-  renderStudentsTable();
 }
 
-/* ---------------------------------------
-   UNENROLL
---------------------------------------- */
-function unenrollStudent(id) {
+async function unenrollStudent(id) {
   const s = getStudentById(id);
   if (!s) return;
 
@@ -429,14 +395,19 @@ function unenrollStudent(id) {
   );
   if (!ok) return;
 
-  s.className = "";
-  s.sectionName = "";
+  try {
+    await apiFetch(`/api/teacher/students/unenroll/${id}`, {
+      method: "PATCH",
+    });
 
-  writeLS(LS_KEYS.STUDENTS, students);
-  renderStudentsTable();
+    await loadStudents();
 
-  if (modalStudentId === id) {
-    closeStudentModal();
+    if (modalStudentId === id) {
+      closeStudentModal();
+    }
+  } catch (err) {
+    console.error("unenrollStudent error:", err);
+    alert(err.message || "Failed to unenroll student.");
   }
 }
 
@@ -584,9 +555,10 @@ function bindEvents() {
 /* ---------------------------------------
    INIT
 --------------------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  students = readLS(LS_KEYS.STUDENTS, []);
-  TEACHER_SCOPE = getTeacherScope();
+document.addEventListener("DOMContentLoaded", async () => {
+  bindEvents();
+
+  await loadTeacherScope();
 
   const sub = document.querySelector(".t-subtitle");
   if (sub) {
@@ -595,9 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "Teacher class/section assignment not found.";
   }
 
-  bindEvents();
-  renderStudentsTable();
+  await loadStudents();
 
-  // helpful debug
   console.log("TEACHER_SCOPE:", TEACHER_SCOPE);
 });

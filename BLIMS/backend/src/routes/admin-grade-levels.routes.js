@@ -75,7 +75,6 @@ router.delete(
   "/grade-levels/:gradeLevelId",
   validateObjectIdParam("gradeLevelId"),
   (req, res, next) => {
-    // normalize param so controller can use req.params.id
     req.params.id = req.params.gradeLevelId;
     next();
   },
@@ -96,7 +95,7 @@ router.get("/sections", ctrl.listSections);
 router.post(
   "/sections",
   requireJsonBody,
-  allowOnly(["grade", "section", "adviser", "capacity"]),
+  allowOnly(["grade", "section", "adviserId", "adviser", "capacity"]),
   ctrl.createSection
 );
 
@@ -105,7 +104,7 @@ router.put(
   "/sections/:sectionId",
   validateObjectIdParam("sectionId"),
   requireJsonBody,
-  allowOnly(["section", "adviser", "capacity"]),
+  allowOnly(["grade", "section", "adviserId", "adviser", "capacity"]),
   ctrl.updateSection
 );
 

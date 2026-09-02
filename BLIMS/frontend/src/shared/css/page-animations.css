@@ -1,0 +1,99 @@
+:root {
+  --page-anim-duration: 0.58s;
+  --page-anim-duration-fast: 0.36s;
+  --page-anim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --page-anim-distance: 14px;
+  --page-anim-distance-sm: 8px;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body.login-page {
+  overflow-y: hidden;
+}
+
+.page-animate {
+  opacity: 0;
+  transform: translateY(var(--page-anim-distance));
+}
+
+.page-animate.is-visible {
+  animation: pageFadeUp var(--page-anim-duration) var(--page-anim-ease) both;
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(var(--page-anim-distance-sm));
+}
+
+.page-animate.is-visible .reveal-item {
+  animation: itemFadeUp var(--page-anim-duration-fast) var(--page-anim-ease) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.reveal-soft {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.page-animate.is-visible .reveal-soft {
+  animation: itemFadeUpSoft 0.42s var(--page-anim-ease) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+}
+
+.page-animate.is-visible .reveal-scale {
+  animation: itemFadeScale 0.45s var(--page-anim-ease) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes pageFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--page-anim-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--page-anim-distance-sm));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemFadeUpSoft {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemFadeScale {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

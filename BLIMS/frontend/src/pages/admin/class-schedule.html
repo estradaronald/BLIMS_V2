@@ -14,7 +14,7 @@
   <!-- Shared -->
   <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
   <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  
+
   <!-- Page -->
   <link rel="stylesheet" href="../../styles/admin/admin-class-schedule.css" />
 </head>
@@ -26,7 +26,6 @@
     <div id="sidebar-mount"></div>
 
     <main class="content">
-      <!-- TOPBAR -->
       <header class="topbar">
         <div class="topbar-right">
           <button class="tb-icon" type="button" title="Notifications">🔔</button>
@@ -47,7 +46,6 @@
         </div>
       </header>
 
-      <!-- PAGE -->
       <section class="cs-wrap">
         <div class="cs-head">
           <div>
@@ -61,7 +59,6 @@
         </div>
 
         <div class="cs-grid">
-          <!-- LEFT: grade/section selector -->
           <aside class="card cs-left">
             <div class="cs-left-head">
               <div class="cs-left-title">Select Class</div>
@@ -80,7 +77,6 @@
             </div>
           </aside>
 
-          <!-- RIGHT: filters + schedule table -->
           <section class="card cs-right">
             <div class="cs-right-head">
               <div>
@@ -91,13 +87,10 @@
               <div class="cs-tools">
                 <div class="cs-search">
                   <span class="cs-search-ico">🔎</span>
-                  <input id="searchInput" type="text" placeholder="Search subject, teacher, room..." />
+                  <input id="searchInput" type="text" placeholder="Search subject,room..." />
                 </div>
 
-                <select id="teacherFilter" class="cs-filter">
-                  <option value="all">All Teachers</option>
-                </select>
-
+                
                 <select id="roomFilter" class="cs-filter">
                   <option value="all">All Rooms</option>
                 </select>
@@ -124,30 +117,27 @@
                 </tbody>
               </table>
             </div>
-
           </section>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- ======================
-        ADD/EDIT ENTRY MODAL
-  ======================= -->
+  <!-- ADD/EDIT DAY MODAL -->
   <div id="entryModal" class="cs-modal hidden" aria-hidden="true">
     <div class="cs-backdrop" id="entryBackdrop"></div>
 
-    <div class="cs-dialog" role="dialog" aria-modal="true" aria-labelledby="entryTitle" tabindex="-1">
+    <div class="cs-dialog cs-lg" role="dialog" aria-modal="true" aria-labelledby="entryTitle" tabindex="-1">
       <div class="cs-mhead">
         <div>
-          <div class="cs-mtitle" id="entryTitle">Add Schedule Entry</div>
-          <div class="cs-msub" id="entrySub">Fill in the schedule details.</div>
+          <div class="cs-mtitle" id="entryTitle">Add Day Schedule</div>
+          <div class="cs-msub" id="entrySub">Select grade, section, and day. Then assign time slots for all subjects at once.</div>
         </div>
         <button class="cs-x" id="entryCloseX" type="button" aria-label="Close">✕</button>
       </div>
 
       <div class="cs-mbody">
-        <div class="cs-form">
+        <div class="cs-form cs-form-top">
           <div class="cs-field">
             <label>Grade Level</label>
             <select id="modalGrade" class="cs-input"></select>
@@ -156,11 +146,6 @@
           <div class="cs-field">
             <label>Section</label>
             <select id="modalSection" class="cs-input"></select>
-          </div>
-
-          <div class="cs-field">
-            <label>Subject</label>
-            <select id="modalSubject" class="cs-input"></select>
           </div>
 
           <div class="cs-field">
@@ -174,34 +159,41 @@
             </select>
           </div>
 
-          <div class="cs-field">
-            <label>Start Time</label>
-            <input id="modalStart" class="cs-input" type="time" />
-          </div>
-
-          <div class="cs-field">
-            <label>End Time</label>
-            <input id="modalEnd" class="cs-input" type="time" />
-          </div>
-
-          <div class="cs-field">
-            <label>Room</label>
-            <input id="modalRoom" class="cs-input" type="text" placeholder="e.g., Room 3" />
-          </div>
-
-          <!-- Teacher: dropdown OR fallback to text -->
-          <div class="cs-field">
-            <label>Teacher</label>
-
-            <select id="modalTeacherSelect" class="cs-input"></select>
-            <input id="modalTeacherText" class="cs-input hidden" type="text" placeholder="Enter teacher name" />
-
-            <div class="cs-mini-hint" id="teacherHint">—</div>
-          </div>
+         <div class="cs-field cs-wide">
+  <label>Assigned Teacher</label>
+  <input id="modalAdviser" class="cs-input" type="text" readonly />
+  <div class="cs-mini-hint hidden" id="adviserHint"></div>
+</div>
 
           <div class="cs-field cs-wide">
             <label>Notes (optional)</label>
             <input id="modalNotes" class="cs-input" type="text" placeholder="e.g., Lab day / bring materials" />
+          </div>
+        </div>
+
+        <div class="cs-bulk-box">
+          <div class="cs-bulk-head">
+            <div class="cs-bulk-title">Subjects for Selected Grade</div>
+            <div class="cs-bulk-sub">Set the start time, end time, and room for each subject you want to schedule.</div>
+          </div>
+
+          <div class="cs-bulk-table-wrap">
+            <table class="cs-bulk-table">
+              <thead>
+                <tr>
+                  <th style="width:60px;">#</th>
+                  <th>Subject</th>
+                  <th style="width:180px;">Start Time</th>
+                  <th style="width:180px;">End Time</th>
+                  <th style="width:180px;">Room</th>
+                </tr>
+              </thead>
+              <tbody id="subjectScheduleBody">
+                <tr>
+                  <td colspan="5">No subjects found.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -212,15 +204,13 @@
         <button class="cs-ghost" id="entryCancel" type="button">Cancel</button>
         <div class="cs-foot-right">
           <button class="cs-ghost" id="entryReset" type="button">Reset</button>
-          <button class="cs-save" id="entrySave" type="button">Save</button>
+          <button class="cs-save" id="entrySave" type="button">Save Day Schedule</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ======================
-        CONFIRM DELETE MODAL
-  ======================= -->
+  <!-- CONFIRM DELETE MODAL -->
   <div id="confirmModal" class="cs-modal hidden" aria-hidden="true">
     <div class="cs-backdrop" id="confirmBackdrop"></div>
 
@@ -245,6 +235,7 @@
       </div>
     </div>
   </div>
+
   <script src="../../js/auth/admin-guard.js"></script>
   <script src="../../js/admin/sidebar.js"></script>
   <script src="../../js/admin/admin-dashboard.js"></script>

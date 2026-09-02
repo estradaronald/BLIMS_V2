@@ -209,8 +209,10 @@ exports.createStudent = async (req, res) => {
 
     const dob = safeOptionalString(body.dob ?? "", { trim: true, min: 0, max: 40 });
     const lrn = safeString(body.lrn ?? "", { trim: true, min: 12, max: 12 });
-    const className = safeString(body.className ?? "", { trim: true, min: 1, max: 60 });
-    const sectionName = safeString(body.sectionName ?? "", { trim: true, min: 1, max: 60 });
+
+    // grade/section are OPTIONAL during account creation
+    const className = safeOptionalString(body.className ?? "", { trim: true, min: 0, max: 60 });
+    const sectionName = safeOptionalString(body.sectionName ?? "", { trim: true, min: 0, max: 60 });
 
     const email = safeEmail(body.email ?? "");
     const phoneRaw = safeOptionalString(body.phone ?? "", { trim: true, min: 0, max: 40 });
@@ -318,8 +320,8 @@ exports.createStudent = async (req, res) => {
       dob: dob.value || "",
       lrn: lrn.value,
 
-      className: className.value,
-      sectionName: sectionName.value,
+      className: className.value || "Unassigned",
+      sectionName: sectionName.value || "Unassigned",
 
       phone,
       email: email.value || "",
@@ -358,6 +360,7 @@ exports.createStudent = async (req, res) => {
       try {
         await User.deleteOne({ _id: createdUserId });
       } catch {}
+
     }
 
     res.status(500).json({ ok: false, message: "Failed to create student." });
@@ -396,16 +399,28 @@ exports.updateStudent = async (req, res) => {
     const lastName = setIfProvided("lastName", { trim: true, min: 1, max: 80 });
     const dob = setIfProvided("dob", { trim: true, min: 0, max: 40 });
     const lrn = setIfProvided("lrn", { trim: true, min: 12, max: 12 });
-    const className = setIfProvided("className", { trim: true, min: 1, max: 60 });
-    const sectionName = setIfProvided("sectionName", { trim: true, min: 1, max: 60 });
 
-    if (!firstName.ok || !middleName.ok || !lastName.ok || !dob.ok || !lrn.ok || !className.ok || !sectionName.ok) {
+    // optional on update too
+    const className = setIfProvided("className", { trim: true, min: 0, max: 60 });
+    const sectionName = setIfProvided("sectionName", { trim: true, min: 0, max: 60 });
+
+    if (
+      !firstName.ok ||
+      !middleName.ok ||
+      !lastName.ok ||
+      !dob.ok ||
+      !lrn.ok ||
+      !className.ok ||
+      !sectionName.ok
+    ) {
       return badRequest(res);
     }
 
     if (body.gender !== undefined) {
       const g = String(body.gender || "").trim().toLowerCase();
-      if (!["male", "female"].includes(g)) return badRequest(res, "Invalid gender.");
+      if (!["male", "female"].includes(g)) {
+        return badRequest(res, "Invalid gender.");
+      }
       student.gender = g;
     }
 
@@ -413,8 +428,14 @@ exports.updateStudent = async (req, res) => {
     if (middleName.value !== undefined) student.middleName = middleName.value;
     if (lastName.value !== undefined) student.lastName = lastName.value;
     if (dob.value !== undefined) student.dob = dob.value;
-    if (className.value !== undefined) student.className = className.value;
-    if (sectionName.value !== undefined) student.sectionName = sectionName.value;
+
+    if (className.value !== undefined) {
+      student.className = className.value || "Unassigned";
+    }
+
+    if (sectionName.value !== undefined) {
+      student.sectionName = sectionName.value || "Unassigned";
+    }
 
     if (lrn.value !== undefined) {
       if (!/^\d{12}$/.test(lrn.value)) {

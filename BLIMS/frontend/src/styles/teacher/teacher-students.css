@@ -1,7 +1,6 @@
 /* frontend/src/styles/teacher/teacher-students.css */
 
-@import url("../admin-students.css");
-
+@import url("../admin/admin-students.css");
 .t-form-error {
   margin: 0 0 12px;
   padding: 10px 12px;

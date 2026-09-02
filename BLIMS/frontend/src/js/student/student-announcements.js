@@ -1,332 +1,1558 @@
 // frontend/src/js/student/student-announcements.js
-document.addEventListener("DOMContentLoaded", () => {
-  initTopbarMenu();
-  initLogout();
+//
+// STUDENT ANNOUNCEMENTS
+//
+// Student:
+//   - View announcements
+//   - Search
+//   - Filter by source
+//   - Filter by category
+//
+// Student CANNOT:
+//   - Create
+//   - Edit
+//   - Delete
+//   - Archive
+//
+// Sources:
+//   - Admin
+//   - Teacher
+//
+// Students only see:
+//   - Published
+//   - Non-archived
+//   - Non-future announcements
+//
 
-  const feed = $("annFeed");
-  const empty = $("annEmpty");
 
-  const search = $("annSearch");
-  const sourceFilter = $("sourceFilter");
-  const catFilter = $("catFilter");
+// =========================================================
+// API
+// =========================================================
 
-  // Modal elements
-  const viewModal = $("annViewModal");
-  const viewBackdrop = $("annViewBackdrop");
-  const viewCloseX = $("annViewCloseX");
-  const viewCloseBtn = $("annViewCloseBtn");
+const ANNOUNCEMENTS_API =
+  "/api/student/announcements";
 
-  const vTitleTop = $("annViewTitle");   // top modal title (small header)
-  const vMeta = $("annViewMeta");
-  const vSource = $("annViewSource");
-  const vPill = $("annViewPill");
-  const vH = $("annViewH");
-  const vMsg = $("annViewMsg");
-  const vFiles = $("annViewFiles");
 
-  const LS_KEYS = { ANN: "rbms_announcements_v1" };
+// =========================================================
+// STATE
+// =========================================================
 
-  function readLS(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+let announcements = [];
+
+
+// =========================================================
+// DOM
+// =========================================================
+
+function $(id) {
+
+  return document.getElementById(id);
+
+}
+
+
+// =========================================================
+// HELPERS
+// =========================================================
+
+function normalize(value) {
+
+  return String(
+    value ?? ""
+  ).trim();
+
+}
+
+
+function escapeHtml(value) {
+
+  return String(
+    value ?? ""
+  )
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+// =========================================================
+// USER
+// =========================================================
+
+function readUser() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem("user") || "{}"
+    );
+
+  } catch {
+
+    return {};
+
   }
 
-  function escapeHtml(s) {
-    return String(s || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+}
+
+
+function getStudentName() {
+
+  const user =
+    readUser();
+
+
+  return (
+    user.fullName ||
+
+    [
+      user.firstName,
+      user.middleName,
+      user.lastName,
+    ]
+      .filter(Boolean)
+      .join(" ") ||
+
+    user.username ||
+
+    "Student"
+  );
+
+}
+
+
+// =========================================================
+// DATE
+// =========================================================
+
+function formatDate(value) {
+
+  if (!value) {
+
+    return "—";
+
   }
 
-  function fmtShort(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleString(undefined, {
+
+  const date =
+    new Date(value);
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return "—";
+
+  }
+
+
+  return date.toLocaleString(
+    undefined,
+    {
       year: "numeric",
       month: "short",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  }
-
-  function clampText(s, n = 180) {
-    const t = String(s || "").trim();
-    if (t.length <= n) return t;
-    return t.slice(0, n).trim() + "…";
-  }
-
-  function catLabel(cat) {
-    return (
-      {
-        general: "General",
-        events: "Event",
-        academic: "Notice",
-        priority: "Alert",
-      }[cat] || "General"
-    );
-  }
-
-  function catPillClass(cat) {
-    return (
-      {
-        general: "",
-        events: "events",
-        academic: "academic",
-        priority: "priority",
-      }[cat] || ""
-    );
-  }
-
-  // ✅ Students only see published:
-  function isVisibleToStudent(a) {
-    if (!a) return false;
-    if (a.archived) return false;
-    if (a.draft) return false;
-    if (a.publishAt) {
-      const t = new Date(a.publishAt).getTime();
-      if (!Number.isNaN(t) && t > Date.now()) return false;
     }
-    return true;
+  );
+
+}
+
+
+// =========================================================
+// CATEGORY
+// =========================================================
+
+function categoryLabel(category) {
+
+  const labels = {
+
+    general:
+      "General",
+
+    events:
+      "School Event",
+
+    academic:
+      "Academic",
+
+    priority:
+      "Priority",
+
+  };
+
+
+  return (
+    labels[category] ||
+    "General"
+  );
+
+}
+
+
+function categoryClass(category) {
+
+  return (
+
+    {
+      general: "",
+      events: "events",
+      academic: "academic",
+      priority: "priority",
+    }[category] || ""
+
+  );
+
+}
+
+
+// =========================================================
+// SOURCE
+// =========================================================
+
+function getSource(announcement) {
+
+  const source =
+    normalize(
+      announcement?.source
+    ).toLowerCase();
+
+
+  const authorRole =
+    normalize(
+      announcement?.authorRole
+    ).toLowerCase();
+
+
+  const createdByRole =
+    normalize(
+      announcement?.createdByRole
+    ).toLowerCase();
+
+
+  const nestedRole =
+    normalize(
+      announcement?.createdBy?.role
+    ).toLowerCase();
+
+
+  if (
+    source === "teacher" ||
+    source === "faculty"
+  ) {
+
+    return "teacher";
+
   }
 
-  // ✅ Source detection
-  function getSource(a) {
-    const s = String(a.source || a.createdByRole || a.authorRole || "").toLowerCase();
-    if (s.includes("teacher")) return "teacher";
-    if (s.includes("admin")) return "admin";
+
+  if (
+    source === "admin" ||
+    source === "administrator"
+  ) {
+
     return "admin";
+
   }
 
-  // =========================
-  // Modal helpers
-  // =========================
-  function openViewModal() {
-    if (!viewModal) return;
-    viewModal.classList.remove("hidden");
-    viewModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+
+  if (
+    authorRole === "teacher" ||
+    authorRole === "faculty"
+  ) {
+
+    return "teacher";
+
   }
 
-  function closeViewModal() {
-    if (!viewModal) return;
-    viewModal.classList.add("hidden");
-    viewModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+
+  if (
+    authorRole === "admin" ||
+    authorRole === "administrator"
+  ) {
+
+    return "admin";
+
   }
 
-  viewBackdrop?.addEventListener("click", closeViewModal);
-  viewCloseX?.addEventListener("click", closeViewModal);
-  viewCloseBtn?.addEventListener("click", closeViewModal);
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && viewModal && !viewModal.classList.contains("hidden")) {
-      closeViewModal();
-    }
-  });
+  if (
+    createdByRole === "teacher" ||
+    createdByRole === "faculty"
+  ) {
 
-  function renderAttachments(files) {
-    if (!vFiles) return;
-    vFiles.innerHTML = "";
+    return "teacher";
 
-    if (!Array.isArray(files) || files.length === 0) return;
-
-    files.forEach((f) => {
-      // Possible shapes:
-      // - string dataUrl
-      // - { dataUrl, name }
-      // - { url, name }
-      const src =
-        (typeof f === "string" && f) ||
-        (f && (f.dataUrl || f.url || f.src)) ||
-        "";
-
-      if (!src) return;
-
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = (f && f.name) ? f.name : "attachment";
-      vFiles.appendChild(img);
-    });
   }
 
-  function showAnnouncementInModal(a) {
-    if (!a) return;
 
-    const srcKey = getSource(a);
-    const srcLabel = srcKey === "teacher" ? "Teacher" : "Admin";
+  if (
+    createdByRole === "admin" ||
+    createdByRole === "administrator"
+  ) {
 
-    // Source pill
-    if (vSource) {
-      vSource.className = `ann-source ${srcKey}`;
-      vSource.textContent = srcLabel;
-    }
+    return "admin";
 
-    // Category pill (ann-pill already styled by admin css)
-    if (vPill) {
-      vPill.className = `ann-pill ${catPillClass(a.category)}`;
-      vPill.textContent = catLabel(a.category);
-    }
-
-    // Titles + body
-    const title = a.title || "Untitled";
-    const message = a.message || "";
-
-    if (vTitleTop) vTitleTop.textContent = "Announcement";
-    if (vH) vH.textContent = title;
-    if (vMsg) vMsg.textContent = message;
-
-    // Meta
-    const posted = fmtShort(a.createdAt);
-    if (vMeta) vMeta.textContent = `Posted: ${posted}`;
-
-    // Files
-    renderAttachments(a.files);
-
-    openViewModal();
   }
 
-  // =========================
-  // Render list
-  // =========================
-  function render() {
-    const q = (search?.value || "").trim().toLowerCase();
-    const src = sourceFilter?.value || "all";
-    const cat = catFilter?.value || "all";
 
-    let list = readLS(LS_KEYS.ANN, []);
-    if (!Array.isArray(list)) list = [];
+  if (
+    nestedRole === "teacher" ||
+    nestedRole === "faculty"
+  ) {
 
-    // newest first
-    list = list.slice().sort((a, b) => {
-      const ta = new Date(a.createdAt || 0).getTime();
-      const tb = new Date(b.createdAt || 0).getTime();
-      return tb - ta;
-    });
+    return "teacher";
 
-    list = list.filter(isVisibleToStudent);
+  }
 
-    if (cat !== "all") list = list.filter((a) => (a.category || "general") === cat);
-    if (src !== "all") list = list.filter((a) => getSource(a) === src);
 
-    if (q) {
-      list = list.filter((a) => {
-        const hay = `${a.title || ""} ${a.message || ""}`.toLowerCase();
-        return hay.includes(q);
-      });
+  return "admin";
+
+}
+
+
+// =========================================================
+// VISIBILITY
+// =========================================================
+
+function isVisibleToStudent(announcement) {
+
+  if (!announcement) {
+
+    return false;
+
+  }
+
+
+  /*
+    Archived announcements
+    are not visible.
+  */
+
+  if (
+    announcement.archived === true
+  ) {
+
+    return false;
+
+  }
+
+
+  /*
+    Draft announcements
+    are not visible.
+  */
+
+  if (
+    announcement.draft === true
+  ) {
+
+    return false;
+
+  }
+
+
+  /*
+    Future scheduled announcements
+    are not visible yet.
+  */
+
+  if (
+    announcement.publishAt
+  ) {
+
+    const publishTime =
+      new Date(
+        announcement.publishAt
+      ).getTime();
+
+
+    if (
+      !Number.isNaN(
+        publishTime
+      ) &&
+      publishTime >
+        Date.now()
+    ) {
+
+      return false;
+
     }
 
-    feed.innerHTML = "";
+  }
 
-    if (!list.length) {
-      empty.classList.remove("hidden");
-      return;
-    }
-    empty.classList.add("hidden");
 
-    list.forEach((a) => {
-      const pillText = catLabel(a.category);
-      const pillClass = catPillClass(a.category);
+  return true;
 
-      const srcKey = getSource(a);
-      const srcLabel = srcKey === "teacher" ? "Teacher" : "Admin";
+}
 
-      const el = document.createElement("div");
-      el.className = "ann-card";
 
-      // store full announcement for modal use
-      el.__ann = a;
+// =========================================================
+// API REQUEST
+// =========================================================
 
-      el.innerHTML = `
-        <div class="ann-card-top">
-          <div class="ann-card-left">
-            <div class="ann-title-row">
-              <h3 class="ann-title">${escapeHtml(a.title || "Untitled")}</h3>
-            </div>
+async function apiRequest(
+  url,
+  options = {}
+) {
 
-            <p class="ann-body">${escapeHtml(clampText(a.message || ""))}</p>
+  const response =
+    await fetch(
+      url,
+      {
 
-            <div class="ann-meta">
-              <span>Posted: ${escapeHtml(fmtShort(a.createdAt))}</span>
-              ${a.files && a.files.length ? `<span>• Attachments: ${a.files.length}</span>` : ""}
-            </div>
-          </div>
+        credentials:
+          "include",
 
-          <div class="ann-card-right">
-            <span class="ann-source ${srcKey}">${srcLabel}</span>
-            <span class="ann-pill ${pillClass}">${pillText}</span>
-            <button class="ann-view-btn" type="button" data-act="view">View</button>
-          </div>
+        ...options,
+
+        headers: {
+
+          "Content-Type":
+            "application/json",
+
+          ...(options.headers || {}),
+
+        },
+
+      }
+    );
+
+
+  let data = null;
+
+
+  try {
+
+    data =
+      await response.json();
+
+  } catch {
+
+    data = null;
+
+  }
+
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      data?.message ||
+      `Request failed with status ${response.status}.`
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// =========================================================
+// LOAD ANNOUNCEMENTS
+// =========================================================
+
+async function loadAnnouncements() {
+
+  const feed =
+    $("annFeed");
+
+
+  const empty =
+    $("annEmpty");
+
+
+  if (feed) {
+
+    feed.innerHTML = `
+
+      <div class="student-announcement-empty">
+
+        <div class="student-empty-icon">
+          ⏳
         </div>
+
+        <strong>
+          Loading announcements...
+        </strong>
+
+      </div>
+
+    `;
+
+  }
+
+
+  try {
+
+    /*
+      Student announcements are now loaded
+      directly from the backend.
+    */
+
+    const result =
+      await apiRequest(
+        ANNOUNCEMENTS_API
+      );
+
+
+    if (
+      Array.isArray(result)
+    ) {
+
+      announcements =
+        result;
+
+    }
+
+    else if (
+      Array.isArray(result?.data)
+    ) {
+
+      announcements =
+        result.data;
+
+    }
+
+    else if (
+      Array.isArray(result?.announcements)
+    ) {
+
+      announcements =
+        result.announcements;
+
+    }
+
+    else {
+
+      announcements =
+        [];
+
+    }
+
+
+    console.log(
+      "[student-announcements] loaded:",
+      announcements
+    );
+
+
+    render();
+
+  } catch (err) {
+
+    console.error(
+      "[student-announcements] load error:",
+      err
+    );
+
+
+    announcements =
+      [];
+
+
+    if (feed) {
+
+      feed.innerHTML = `
+
+        <div class="student-announcement-empty">
+
+          <div class="student-empty-icon">
+            ⚠️
+          </div>
+
+          <strong>
+            Unable to load announcements.
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              err?.message ||
+              "Please try again later."
+            )}
+          </p>
+
+        </div>
+
       `;
 
-      feed.appendChild(el);
+    }
 
-      // Clicking the whole card opens modal (except clicking the View button is already handled)
-        el.addEventListener("click", (ev) => {
-        // If user clicks the View button, that handler already covers it
-        if (ev.target.closest('button[data-act="view"]')) return;
 
-        // Avoid triggering when user highlights/selects text
-        const sel = window.getSelection?.();
-        if (sel && String(sel).trim().length > 0) return;
+    if (empty) {
 
-        showAnnouncementInModal(a);
-        });
-    });
+      empty.classList.add(
+        "hidden"
+      );
+
+    }
+
   }
 
-  // Delegate click for View buttons
-  feed.addEventListener("click", (e) => {
-    const btn = e.target.closest('button[data-act="view"]');
-    if (!btn) return;
-
-    const card = btn.closest(".ann-card");
-    const a = card?.__ann;
-    if (!a) return;
-
-    showAnnouncementInModal(a);
-  });
-
-  // events
-  search?.addEventListener("input", render);
-  sourceFilter?.addEventListener("change", render);
-  catFilter?.addEventListener("change", render);
-
-  render();
-});
-
-function $(id) {
-  return document.getElementById(id);
 }
+
+
+// =========================================================
+// FILTERS
+// =========================================================
+
+function getFilters() {
+
+  return {
+
+    search:
+      normalize(
+        $("annSearch")?.value
+      ).toLowerCase(),
+
+    source:
+      $("sourceFilter")?.value ||
+      "all",
+
+    category:
+      $("catFilter")?.value ||
+      "all",
+
+  };
+
+}
+
+
+// =========================================================
+// FILTER
+// =========================================================
+
+function getVisibleAnnouncements() {
+
+  const filters =
+    getFilters();
+
+
+  let rows =
+    [...announcements];
+
+
+  /*
+    STUDENT VISIBILITY
+  */
+
+  rows =
+    rows.filter(
+      isVisibleToStudent
+    );
+
+
+  /*
+    SOURCE
+  */
+
+  if (
+    filters.source !== "all"
+  ) {
+
+    rows =
+      rows.filter(
+        (announcement) =>
+          getSource(
+            announcement
+          ) ===
+          filters.source
+      );
+
+  }
+
+
+  /*
+    CATEGORY
+  */
+
+  if (
+    filters.category !== "all"
+  ) {
+
+    rows =
+      rows.filter(
+        (announcement) =>
+          (
+            announcement.category ||
+            "general"
+          ) ===
+          filters.category
+      );
+
+  }
+
+
+  /*
+    SEARCH
+  */
+
+  if (
+    filters.search
+  ) {
+
+    rows =
+      rows.filter(
+        (announcement) => {
+
+          const haystack = [
+
+            announcement.title,
+
+            announcement.message,
+
+            announcement.category,
+
+            getSource(
+              announcement
+            ),
+
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+
+          return haystack.includes(
+            filters.search
+          );
+
+        }
+      );
+
+  }
+
+
+  /*
+    NEWEST FIRST
+  */
+
+  rows.sort(
+    (a, b) => {
+
+      const aTime =
+        new Date(
+          a.createdAt ||
+          a.updatedAt ||
+          a.publishAt ||
+          0
+        ).getTime();
+
+
+      const bTime =
+        new Date(
+          b.createdAt ||
+          b.updatedAt ||
+          b.publishAt ||
+          0
+        ).getTime();
+
+
+      return (
+        bTime - aTime
+      );
+
+    }
+  );
+
+
+  return rows;
+
+}
+
+
+// =========================================================
+// RENDER
+// =========================================================
+
+function render() {
+
+  const feed =
+    $("annFeed");
+
+
+  const empty =
+    $("annEmpty");
+
+
+  if (
+    !feed ||
+    !empty
+  ) {
+
+    return;
+
+  }
+
+
+  const rows =
+    getVisibleAnnouncements();
+
+
+  feed.innerHTML =
+    "";
+
+
+  if (
+    rows.length === 0
+  ) {
+
+    empty.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  empty.classList.add(
+    "hidden"
+  );
+
+
+  rows.forEach(
+    (announcement) => {
+
+      const source =
+        getSource(
+          announcement
+        );
+
+
+      const sourceLabel =
+        source === "teacher"
+          ? "Teacher"
+          : "Admin";
+
+
+      const category =
+        announcement.category ||
+        "general";
+
+
+      const item =
+        document.createElement(
+          "article"
+        );
+
+
+      item.className =
+        "student-announcement-item";
+
+
+      item.innerHTML = `
+
+        <div class="student-announcement-item-top">
+
+
+          <!-- LEFT -->
+
+          <div class="student-announcement-item-main">
+
+            <h3
+              class="student-announcement-item-title"
+            >
+              ${escapeHtml(
+                announcement.title ||
+                "Untitled"
+              )}
+            </h3>
+
+
+            <p
+              class="student-announcement-item-message"
+            >
+              ${escapeHtml(
+                announcement.message ||
+                ""
+              )}
+            </p>
+
+
+            <div
+              class="student-announcement-item-meta"
+            >
+
+              <span>
+                Posted:
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  formatDate(
+                    announcement.publishAt ||
+                    announcement.createdAt
+                  )
+                )}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- RIGHT -->
+
+          <div
+            class="student-announcement-item-right"
+          >
+
+            <span
+              class="student-source-pill ${source}"
+            >
+              ${sourceLabel}
+            </span>
+
+
+            <span
+              class="student-category-pill ${categoryClass(
+                category
+              )}"
+            >
+              ${escapeHtml(
+                categoryLabel(
+                  category
+                )
+              )}
+            </span>
+
+
+            <button
+              type="button"
+              class="student-announcement-view-btn"
+              data-action="view"
+            >
+              View
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      /*
+        Save announcement reference.
+      */
+
+      item.__announcement =
+        announcement;
+
+
+      feed.appendChild(
+        item
+      );
+
+    }
+  );
+
+}
+
+
+// =========================================================
+// MODAL
+// =========================================================
+
+function openViewModal(
+  announcement
+) {
+
+  const modal =
+    $("annViewModal");
+
+
+  if (
+    !modal ||
+    !announcement
+  ) {
+
+    return;
+
+  }
+
+
+  const source =
+    getSource(
+      announcement
+    );
+
+
+  const sourceLabel =
+    source === "teacher"
+      ? "Teacher"
+      : "Admin";
+
+
+  const category =
+    announcement.category ||
+    "general";
+
+
+  /*
+    Source
+  */
+
+  const sourceElement =
+    $("annViewSource");
+
+
+  if (
+    sourceElement
+  ) {
+
+    sourceElement.className =
+      `student-source-pill ${source}`;
+
+    sourceElement.textContent =
+      sourceLabel;
+
+  }
+
+
+  /*
+    Category
+  */
+
+  const categoryElement =
+    $("annViewPill");
+
+
+  if (
+    categoryElement
+  ) {
+
+    categoryElement.className =
+      `student-category-pill ${categoryClass(
+        category
+      )}`;
+
+    categoryElement.textContent =
+      categoryLabel(
+        category
+      );
+
+  }
+
+
+  /*
+    Header title
+  */
+
+  const title =
+    announcement.title ||
+    "Announcement";
+
+
+  if (
+    $("annViewTitle")
+  ) {
+
+    $("annViewTitle").textContent =
+      "Announcement";
+
+  }
+
+
+  if (
+    $("annViewH")
+  ) {
+
+    $("annViewH").textContent =
+      title;
+
+  }
+
+
+  /*
+    Date
+  */
+
+  if (
+    $("annViewMeta")
+  ) {
+
+    $("annViewMeta").textContent =
+      `Posted: ${formatDate(
+        announcement.publishAt ||
+        announcement.createdAt
+      )}`;
+
+  }
+
+
+  /*
+    Message
+  */
+
+  if (
+    $("annViewMsg")
+  ) {
+
+    $("annViewMsg").textContent =
+      announcement.message ||
+      "";
+
+  }
+
+
+  /*
+    Attachments
+  */
+
+  renderAttachments(
+    announcement.files
+  );
+
+
+  /*
+    Open
+  */
+
+  modal.classList.remove(
+    "hidden"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  document.body.style.overflow =
+    "hidden";
+
+
+  $("annViewCloseBtn")?.focus();
+
+}
+
+
+// =========================================================
+// CLOSE MODAL
+// =========================================================
+
+function closeViewModal() {
+
+  const modal =
+    $("annViewModal");
+
+
+  if (!modal) {
+
+    return;
+
+  }
+
+
+  modal.classList.add(
+    "hidden"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  document.body.style.overflow =
+    "";
+
+}
+
+
+// =========================================================
+// ATTACHMENTS
+// =========================================================
+
+function renderAttachments(
+  files
+) {
+
+  const container =
+    $("annViewFiles");
+
+
+  if (!container) {
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    "";
+
+
+  if (
+    !Array.isArray(files) ||
+    files.length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  files.forEach(
+    (file) => {
+
+      const src =
+        typeof file === "string"
+          ? file
+          : file?.dataUrl ||
+            file?.url ||
+            file?.src ||
+            "";
+
+
+      if (!src) {
+
+        return;
+
+      }
+
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+
+      image.src =
+        src;
+
+
+      image.alt =
+        file?.name ||
+        "Announcement attachment";
+
+
+      container.appendChild(
+        image
+      );
+
+    }
+  );
+
+}
+
+
+// =========================================================
+// EVENTS
+// =========================================================
+
+function bindEvents() {
+
+  /*
+    Search
+  */
+
+  $("annSearch")
+    ?.addEventListener(
+      "input",
+      render
+    );
+
+
+  /*
+    Source
+  */
+
+  $("sourceFilter")
+    ?.addEventListener(
+      "change",
+      render
+    );
+
+
+  /*
+    Category
+  */
+
+  $("catFilter")
+    ?.addEventListener(
+      "change",
+      render
+    );
+
+
+  /*
+    Feed
+  */
+
+  $("annFeed")
+    ?.addEventListener(
+      "click",
+      (event) => {
+
+        const button =
+          event.target.closest(
+            '[data-action="view"]'
+          );
+
+
+        const item =
+          event.target.closest(
+            ".student-announcement-item"
+          );
+
+
+        if (
+          button &&
+          item
+        ) {
+
+          openViewModal(
+            item.__announcement
+          );
+
+          return;
+
+        }
+
+
+        /*
+          Clicking the announcement itself
+          also opens View.
+        */
+
+        if (
+          item
+        ) {
+
+          openViewModal(
+            item.__announcement
+          );
+
+        }
+
+      }
+    );
+
+
+  /*
+    Modal
+  */
+
+  $("annViewBackdrop")
+    ?.addEventListener(
+      "click",
+      closeViewModal
+    );
+
+
+  $("annViewCloseX")
+    ?.addEventListener(
+      "click",
+      closeViewModal
+    );
+
+
+  $("annViewCloseBtn")
+    ?.addEventListener(
+      "click",
+      closeViewModal
+    );
+
+
+  /*
+    Escape
+  */
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        const modal =
+          $("annViewModal");
+
+
+        if (
+          modal &&
+          !modal.classList.contains(
+            "hidden"
+          )
+        ) {
+
+          closeViewModal();
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+
+// =========================================================
+// TOPBAR
+// =========================================================
 
 function initTopbarMenu() {
-  const userMenuBtn = $("userMenuBtn");
-  const userMenu = $("userMenu");
-  const userbox = $("userbox");
-  if (!userMenuBtn || !userMenu || !userbox) return;
 
-  userMenuBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    userMenu.classList.toggle("open");
-  });
+  const button =
+    $("userMenuBtn");
 
-  document.addEventListener("click", (ev) => {
-    if (!userbox.contains(ev.target)) userMenu.classList.remove("open");
-  });
+
+  const menu =
+    $("userMenu");
+
+
+  const userbox =
+    $("userbox");
+
+
+  if (
+    !button ||
+    !menu ||
+    !userbox
+  ) {
+
+    return;
+
+  }
+
+
+  button.addEventListener(
+    "click",
+    (event) => {
+
+      event.stopPropagation();
+
+      menu.classList.toggle(
+        "open"
+      );
+
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    (event) => {
+
+      if (
+        !userbox.contains(
+          event.target
+        )
+      ) {
+
+        menu.classList.remove(
+          "open"
+        );
+
+      }
+
+    }
+  );
+
 }
+
+
+// =========================================================
+// LOGOUT
+// =========================================================
 
 function initLogout() {
-  const btn = $("topbarLogout");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    window.location.href = "../../login.html";
-  });
+
+  const button =
+    $("topbarLogout");
+
+
+  if (!button) {
+
+    return;
+
+  }
+
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      window.location.href =
+        "../../login.html";
+
+    }
+  );
+
 }
+
+
+// =========================================================
+// HEADER
+// =========================================================
+
+function renderHeader() {
+
+  const name =
+    getStudentName();
+
+
+  if (
+    $("tbName")
+  ) {
+
+    $("tbName").textContent =
+      name;
+
+  }
+
+
+  if (
+    $("tbRole")
+  ) {
+
+    $("tbRole").textContent =
+      "Student";
+
+  }
+
+}
+
+
+// =========================================================
+// INIT
+// =========================================================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    console.log(
+      "[student-announcements] loaded"
+    );
+
+
+    initTopbarMenu();
+
+    initLogout();
+
+    bindEvents();
+
+    renderHeader();
+
+    await loadAnnouncements();
+
+  }
+);

@@ -12,7 +12,7 @@ const ZIP_PASSWORD = process.env.BACKUP_PASSWORD || "BLIMSbackup123";
 const SEVEN_ZIP_PATH = `"C:\\Program Files\\7-Zip\\7z.exe"`;
 
 // backup time
-const CRON_SCHEDULE = "* * */10 * *";
+const CRON_SCHEDULE = "*/2 * * * *";
 
 function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) {

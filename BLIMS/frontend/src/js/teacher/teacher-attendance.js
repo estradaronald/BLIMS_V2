@@ -1,703 +1,1610 @@
 // frontend/src/js/teacher/teacher-attendance.js
-// Teacher Attendance: one page, two states (home vs take attendance).
-// Stores sessions in localStorage and shows YTD summary for the school year (Jun 1 – Mar 31).
+// Teacher Attendance: backend-driven version
+//
+// Rules:
+// - Attendance is recorded for TODAY only.
+// - Date is automatically populated.
+// - Date cannot be changed by the teacher.
+// - Active School Year comes from the backend.
+// - Teacher class/section comes from the backend.
+// - YTD summary comes from the active school year.
+// - School year information is NEVER displayed on this page.
 
-const $ = (id) => document.getElementById(id);
+/* =========================================================
+   DOM HELPER
+========================================================= */
 
-const LS_KEYS = {
-  STUDENTS: "rbms_students_v1",
-  ATTENDANCE: "rbms_attendance_v1",
-};
+const $ = (id) =>
+  document.getElementById(id);
 
-function readLS(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-function writeLS(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
 
-// ---------- Teacher scope (same idea as teacher-students.js) ----------
-function normalize(s) {
-  return String(s || "").trim();
-}
-function getTeacherScope() {
-  const u = readLS("user", {}) || {};
+/* =========================================================
+   API
+========================================================= */
 
-  const cls =
-    u.handledClass ||
-    u.className ||
-    u.class ||
-    u.advisoryClass ||
-    u.gradeLevel ||
-    "";
+async function apiFetch(url, options = {}) {
 
-  const sec =
-    u.handledSection ||
-    u.sectionName ||
-    u.section ||
-    u.advisorySection ||
-    "";
+  const res = await fetch(url, {
+    credentials: "include",
 
-  const combined =
-    u.classSection ||
-    u.handledClassSection ||
-    u.advisory ||
-    u.assignedClass ||
-    u.roleLabel ||
-    u.roleText ||
-    "";
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
 
-  if ((!cls || !sec) && combined) {
-    const m = String(combined).match(
-      /(Class\s*\d+|Grade\s*\d+)\s*-\s*([A-Za-z0-9]+)/i
-    );
-    if (m)
-      return {
-        className: normalize(cls || m[1]),
-        sectionName: normalize(sec || m[2]),
-      };
-  }
-
-  return { className: normalize(cls), sectionName: normalize(sec) };
-}
-const TEACHER_SCOPE = getTeacherScope();
-
-// ---------- State ----------
-let students = [];
-let attendanceSessions = [];
-
-let activeScope = { className: "", sectionName: "" };
-let activeDateISO = "";
-let viewMode = "home"; // "home" | "take"
-let rowFilter = "all"; // all|present|absent|late|excused
-
-// temp (unsaved) marks for current take session: { [studentId]: status }
-let draftMarks = {};
-let savedForThisSession = false;
-
-// ---------- Utilities ----------
-function fullName(s) {
-  return [s.firstName, s.middleName, s.lastName].filter(Boolean).join(" ");
-}
-function pad2(n) {
-  return String(n).padStart(2, "0");
-}
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-}
-function formatLongDate(iso) {
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+    ...options,
   });
+
+  const data =
+    await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(
+      data.message || "Request failed"
+    );
+  }
+
+  return data;
 }
-function scopeLabel(scope) {
-  return [scope.className, scope.sectionName].filter(Boolean).join(" - ") || "—";
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function normalize(value) {
+  return String(value ?? "").trim();
 }
-function sessionId(iso, scope) {
-  // stable ID per date + scope
-  const c = (scope.className || "").replace(/\s+/g, "_");
-  const s = (scope.sectionName || "").replace(/\s+/g, "_");
-  return `ATT-${iso}-${c}_${s}`;
+
+
+function fullName(student) {
+  return [
+    student.firstName,
+    student.middleName,
+    student.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
-function inTeacherScope(stu) {
-  if (!TEACHER_SCOPE.className || !TEACHER_SCOPE.sectionName) return true;
+
+
+function pad2(number) {
+  return String(number).padStart(2, "0");
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+function todayISO() {
+
+  const d = new Date();
+
   return (
-    (stu.className || "") === TEACHER_SCOPE.className &&
-    (stu.sectionName || "") === TEACHER_SCOPE.sectionName
+    `${d.getFullYear()}-` +
+    `${pad2(d.getMonth() + 1)}-` +
+    `${pad2(d.getDate())}`
   );
 }
-function studentsInActiveScope() {
-  return students.filter((s) => {
-    const okTeacher = inTeacherScope(s);
-    if (!okTeacher) return false;
 
-    if (activeScope.className && activeScope.sectionName) {
-      return (
-        (s.className || "") === activeScope.className &&
-        (s.sectionName || "") === activeScope.sectionName
-      );
+
+/* =========================================================
+   DATE FORMATTING
+========================================================= */
+
+function formatLongDate(iso) {
+
+  if (!iso) {
+    return "—";
+  }
+
+  const d =
+    new Date(`${iso}T00:00:00`);
+
+  if (Number.isNaN(d.getTime())) {
+    return "—";
+  }
+
+  return d.toLocaleDateString(
+    undefined,
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     }
-    return true;
-  });
+  );
 }
 
-// ---------- School year range: June 1 – March 31 ----------
-function getSchoolYearRange(forDateISO) {
-  const d = new Date(forDateISO + "T00:00:00");
-  const y = d.getFullYear();
-  const m = d.getMonth() + 1; // 1-12
 
-  // If date is Jan/Feb/Mar, the school year started last year June 1
-  const startYear = m <= 3 ? y - 1 : y;
+/* =========================================================
+   SCOPE
+========================================================= */
 
-  const start = `${startYear}-06-01`;
-  const end = `${startYear + 1}-03-31`;
+function scopeLabel(scope) {
 
-  return { start, end };
-}
-function withinRange(iso, startISO, endISO) {
-  return iso >= startISO && iso <= endISO;
+  return [
+    scope?.className,
+    scope?.sectionName,
+  ]
+    .filter(Boolean)
+    .join(" - ") || "—";
 }
 
-// ---------- View switching ----------
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let TEACHER_SCOPE = {
+  className: "",
+  sectionName: "",
+};
+
+
+/*
+ * School year is still stored because
+ * the backend uses it for YTD calculations.
+ *
+ * It is NOT displayed anywhere.
+ */
+
+let SCHOOL_YEAR = {
+  id: "",
+  name: "",
+  start: "",
+  end: "",
+};
+
+
+let students = [];
+
+let ytdSummary = [];
+
+let existingSession = null;
+
+
+let activeScope = {
+  className: "",
+  sectionName: "",
+};
+
+
+let activeDateISO = "";
+
+let viewMode = "home";
+
+let rowFilter = "all";
+
+let draftMarks = {};
+
+let savedForThisSession = false;
+
+
+/* =========================================================
+   UI STATE
+========================================================= */
+
 function setView(mode) {
+
   viewMode = mode;
-  const home = $("attHomeView");
-  const take = $("attTakeView");
-  const backBtn = $("attBackBtn");
+
+  const home =
+    $("attHomeView");
+
+  const take =
+    $("attTakeView");
+
+  const backBtn =
+    $("attBackBtn");
 
   if (mode === "home") {
+
     home?.classList.remove("hidden");
+
     take?.classList.add("hidden");
+
     backBtn?.classList.add("hidden");
+
     return;
   }
 
   home?.classList.add("hidden");
+
   take?.classList.remove("hidden");
+
   backBtn?.classList.remove("hidden");
 }
 
-// ---------- Scope selector ----------
-function buildScopeOptions() {
-  const sel = $("scopeSelect");
-  if (!sel) return;
 
-  sel.innerHTML = "";
+/* =========================================================
+   HOME SUBTITLE
+========================================================= */
 
-  // If teacher scope exists, lock to it
-  if (TEACHER_SCOPE.className && TEACHER_SCOPE.sectionName) {
-    const opt = document.createElement("option");
-    opt.value = `${TEACHER_SCOPE.className}||${TEACHER_SCOPE.sectionName}`;
-    opt.textContent = `${TEACHER_SCOPE.className} - ${TEACHER_SCOPE.sectionName}`;
-    sel.appendChild(opt);
-    sel.value = opt.value;
-    sel.disabled = true;
-
-    activeScope = {
-      className: TEACHER_SCOPE.className,
-      sectionName: TEACHER_SCOPE.sectionName,
-    };
-    return;
-  }
-
-  // fallback: derive scopes from students list
-  const scopes = new Map(); // key -> label
-  students.forEach((s) => {
-    const c = (s.className || "").trim();
-    const sec = (s.sectionName || "").trim();
-    if (!c || !sec) return;
-    const key = `${c}||${sec}`;
-    if (!scopes.has(key)) scopes.set(key, `${c} - ${sec}`);
-  });
-
-  if (scopes.size === 0) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No class/section found";
-    sel.appendChild(opt);
-    sel.disabled = true;
-    activeScope = { className: "", sectionName: "" };
-    return;
-  }
-
-  // ✅ FIX: correct iteration
-  [...scopes.entries()]
-    .sort((a, b) => a[1].localeCompare(b[1]))
-    .forEach(([key, label]) => {
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = label;
-      sel.appendChild(opt);
-    });
-
-  sel.disabled = false;
-  sel.value = sel.options[0].value;
-  const [c, sec] = sel.value.split("||");
-  activeScope = { className: c, sectionName: sec };
-}
+/*
+ * IMPORTANT:
+ *
+ * School year is intentionally NOT included here.
+ *
+ * Display:
+ *
+ * Grade/Section • Today's Date
+ *
+ * Example:
+ *
+ * Grade 6 - Rizal • Friday, August 28, 2026
+ */
 
 function syncHomeSubtitle() {
-  const sub = $("attHomeSub");
-  if (!sub) return;
-  sub.textContent = `Ready for ${scopeLabel(activeScope)} • ${formatLongDate(
-    activeDateISO
-  )}`;
+
+  const sub =
+    $("attHomeSub");
+
+  if (!sub) {
+    return;
+  }
+
+  const scope =
+    scopeLabel(activeScope);
+
+  const date =
+    formatLongDate(activeDateISO);
+
+  sub.textContent =
+    `${scope} • ${date}`;
 }
 
-// ---------- YTD summary ----------
-function computeYtdCounts(scope, baseDateISO) {
-  const { start, end } = getSchoolYearRange(baseDateISO);
 
-  const sessions = attendanceSessions.filter((sess) => {
-    if ((sess.className || "") !== scope.className) return false;
-    if ((sess.sectionName || "") !== scope.sectionName) return false;
-    if (!sess.date) return false;
-    return withinRange(sess.date, start, end);
-  });
+/* =========================================================
+   HIDE SCHOOL YEAR SUBTITLE
+========================================================= */
 
-  // Map studentId => counts
-  const counts = new Map();
-  const classStudents = studentsInActiveScope();
+/*
+ * This function is intentionally kept as a safety layer.
+ *
+ * If #attYtdSub still exists in the HTML,
+ * it will always remain empty and hidden.
+ *
+ * NO school year is displayed.
+ */
 
-  classStudents.forEach((stu) => {
-    counts.set(stu.studentId, {
-      present: 0,
-      absent: 0,
-      late: 0,
-      excused: 0,
-      total: 0,
-    });
-  });
+function syncSchoolYearSubtitle() {
 
-  sessions.forEach((sess) => {
-    (sess.records || []).forEach((r) => {
-      const sid = r.studentId;
-      if (!counts.has(sid)) return;
-      const c = counts.get(sid);
-      const st = (r.status || "").toLowerCase();
+  const element =
+    $("attYtdSub");
 
-      if (st === "present") c.present++;
-      else if (st === "absent") c.absent++;
-      else if (st === "late") c.late++;
-      else if (st === "excused") c.excused++;
+  if (!element) {
+    return;
+  }
 
-      c.total++;
-    });
-  });
+  element.textContent = "";
 
-  return { start, end, counts, sessionDays: sessions.length };
+  element.style.display = "none";
 }
+
+
+/* =========================================================
+   SESSION HEADER
+========================================================= */
+
+function setSessionHeader() {
+
+  const title =
+    $("sessionTitle");
+
+  const date =
+    $("sessionDateLabel");
+
+  if (title) {
+
+    title.textContent =
+      scopeLabel(activeScope);
+
+  }
+
+  if (date) {
+
+    date.textContent =
+      formatLongDate(activeDateISO);
+
+  }
+}
+
+
+/* =========================================================
+   SESSION STATUS
+========================================================= */
+
+function setSessionStatus(isSaved) {
+
+  const box =
+    $("sessionStatus");
+
+  if (!box) {
+    return;
+  }
+
+  if (isSaved) {
+
+    box.textContent = "Saved";
+
+    box.style.background =
+      "rgba(25, 135, 84, 0.14)";
+
+    box.style.color =
+      "#0f5132";
+
+  } else {
+
+    box.textContent = "Not Saved";
+
+    box.style.background =
+      "rgba(255, 193, 7, 0.16)";
+
+    box.style.color =
+      "#7a5b00";
+  }
+}
+
+
+/* =========================================================
+   LOCK DATE FIELD
+========================================================= */
+
+function lockDateField() {
+
+  const dateInput =
+    $("dateInput");
+
+  if (!dateInput) {
+    return;
+  }
+
+  /*
+   * Always force today's date.
+   */
+
+  dateInput.value =
+    todayISO();
+
+  /*
+   * Completely disable date selection.
+   */
+
+  dateInput.disabled = true;
+
+  dateInput.readOnly = true;
+
+  dateInput.setAttribute(
+    "aria-disabled",
+    "true"
+  );
+
+  dateInput.setAttribute(
+    "title",
+    "Attendance can only be recorded for today."
+  );
+}
+
+
+/* =========================================================
+   BACKEND LOADERS
+========================================================= */
+
+async function loadBootstrap(dateISO) {
+
+  const response =
+    await apiFetch(
+      `/api/teacher/attendance/bootstrap?date=${encodeURIComponent(
+        dateISO
+      )}`
+    );
+
+  const data =
+    response.data || {};
+
+
+  /* -------------------------------------------------------
+     TEACHER SCOPE
+  ------------------------------------------------------- */
+
+  TEACHER_SCOPE =
+    data.teacherScope || {
+      className: "",
+      sectionName: "",
+    };
+
+
+  /* -------------------------------------------------------
+     ACTIVE SCHOOL YEAR
+     
+     Backend data is still stored internally.
+     It is NOT displayed.
+  ------------------------------------------------------- */
+
+  SCHOOL_YEAR =
+    data.schoolYear || {
+      id: "",
+      name: "",
+      start: "",
+      end: "",
+    };
+
+
+  /* -------------------------------------------------------
+     STUDENTS
+  ------------------------------------------------------- */
+
+  students =
+    Array.isArray(data.students)
+      ? data.students
+      : [];
+
+
+  /* -------------------------------------------------------
+     TODAY'S EXISTING SESSION
+  ------------------------------------------------------- */
+
+  existingSession =
+    data.session || null;
+
+
+  /* -------------------------------------------------------
+     ACTIVE TEACHER SCOPE
+  ------------------------------------------------------- */
+
+  activeScope = {
+
+    className:
+      normalize(
+        TEACHER_SCOPE.className
+      ),
+
+    sectionName:
+      normalize(
+        TEACHER_SCOPE.sectionName
+      ),
+  };
+
+
+  /* -------------------------------------------------------
+     GRADE / SECTION
+  ------------------------------------------------------- */
+
+  const scopeInput =
+    $("scopeInput");
+
+  if (scopeInput) {
+
+    scopeInput.value =
+      scopeLabel(activeScope);
+
+  }
+
+
+  /* -------------------------------------------------------
+     HOME SUBTITLE
+     
+     ONLY CLASS + DATE
+     
+     NO SCHOOL YEAR
+  ------------------------------------------------------- */
+
+  syncHomeSubtitle();
+}
+
+
+/* =========================================================
+   LOAD YTD SUMMARY
+========================================================= */
+
+async function loadYtdSummary() {
+
+  const response =
+    await apiFetch(
+      "/api/teacher/attendance/summary"
+    );
+
+  const data =
+    response.data || {};
+
+
+  /* -------------------------------------------------------
+     SUMMARY
+  ------------------------------------------------------- */
+
+  ytdSummary =
+    Array.isArray(data.summary)
+      ? data.summary
+      : [];
+
+
+  /* -------------------------------------------------------
+     SCHOOL YEAR
+     
+     Keep backend data internally.
+     
+     DO NOT DISPLAY IT.
+  ------------------------------------------------------- */
+
+  if (data.schoolYear) {
+
+    SCHOOL_YEAR = {
+
+      id:
+        normalize(
+          data.schoolYear.id
+        ),
+
+      name:
+        normalize(
+          data.schoolYear.name
+        ),
+
+      start:
+        normalize(
+          data.schoolYear.start
+        ),
+
+      end:
+        normalize(
+          data.schoolYear.end
+        ),
+    };
+  }
+
+
+  /* -------------------------------------------------------
+     REMOVE / HIDE ANY SCHOOL YEAR SUBTITLE
+  ------------------------------------------------------- */
+
+  syncSchoolYearSubtitle();
+
+
+  /*
+   * Refresh home subtitle.
+   *
+   * It only contains:
+   *
+   * Class / Section
+   * +
+   * Today's date
+   */
+
+  syncHomeSubtitle();
+}
+
+
+/* =========================================================
+   YTD TABLE
+========================================================= */
 
 function renderYtdTable() {
-  const tbody = $("ytdTbody");
-  if (!tbody) return;
 
-  const classStudents = studentsInActiveScope();
+  const tbody =
+    $("ytdTbody");
+
+  if (!tbody) {
+    return;
+  }
+
   tbody.innerHTML = "";
+
 
   if (
     !activeScope.className ||
     !activeScope.sectionName ||
-    classStudents.length === 0
+    !ytdSummary.length
   ) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="8" class="att-empty">No students found for this class & section.</td>`;
+
+    const tr =
+      document.createElement("tr");
+
+    tr.innerHTML = `
+      <td
+        colspan="8"
+        class="att-empty"
+      >
+        No students found for this class & section.
+      </td>
+    `;
+
     tbody.appendChild(tr);
+
     return;
   }
 
-  const { start, end, counts, sessionDays } = computeYtdCounts(
-    activeScope,
-    activeDateISO
-  );
-  const sub = $("attYtdSub");
-  if (sub)
-    sub.textContent = `Counts are within the school year: ${start} to ${end} • Sessions recorded: ${sessionDays}`;
 
-  classStudents.forEach((stu, idx) => {
-    const c = counts.get(stu.studentId) || {
-      present: 0,
-      absent: 0,
-      late: 0,
-      excused: 0,
-      total: 0,
-    };
-    const pct = c.total ? Math.round((c.present / c.total) * 100) : 0;
+  ytdSummary.forEach(
+    (row, index) => {
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${String(idx + 1).padStart(2, "0")}</td>
-      <td>
-        <div class="att-student-cell">
-          <img class="att-avatar" src="${
-            stu.photoDataUrl || "../../assets/images/bg.jpg"
-          }" alt="">
-          <div>
-            <div class="att-name">${fullName(stu) || "—"}</div>
-            <div class="att-subid">${stu.studentId || "—"}</div>
+      const tr =
+        document.createElement("tr");
+
+      tr.innerHTML = `
+
+        <td>
+          ${String(index + 1).padStart(2, "0")}
+        </td>
+
+        <td>
+
+          <div class="att-student-cell">
+
+            <img
+              class="att-avatar"
+              src="${
+                row.photoDataUrl ||
+                "../../assets/images/bg.jpg"
+              }"
+              alt=""
+            />
+
+            <div>
+
+              <div class="att-name">
+                ${row.fullName || "—"}
+              </div>
+
+              <div class="att-subid">
+                ${row.studentId || "—"}
+              </div>
+
+            </div>
+
           </div>
-        </div>
-      </td>
-      <td>${c.present}</td>
-      <td>${c.absent}</td>
-      <td>${c.late}</td>
-      <td>${c.excused}</td>
-      <td>${c.total}</td>
-      <td>${c.total ? `${pct}%` : "—"}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+
+        </td>
+
+        <td>
+          ${row.present || 0}
+        </td>
+
+        <td>
+          ${row.absent || 0}
+        </td>
+
+        <td>
+          ${row.late || 0}
+        </td>
+
+        <td>
+          ${row.excused || 0}
+        </td>
+
+        <td>
+          ${row.total || 0}
+        </td>
+
+        <td>
+          ${
+            row.total
+              ? `${row.attendancePercent || 0}%`
+              : "—"
+          }
+        </td>
+
+      `;
+
+      tbody.appendChild(tr);
+    }
+  );
 }
 
-// ---------- Take session rendering ----------
-function setSessionHeader() {
-  $("sessionTitle").textContent = scopeLabel(activeScope);
-  $("sessionDateLabel").textContent = formatLongDate(activeDateISO);
-}
+
+/* =========================================================
+   TAKE ATTENDANCE
+========================================================= */
 
 function ensureDraftMarks() {
-  const list = studentsInActiveScope();
 
-  // default to blank
   draftMarks = {};
-  list.forEach((stu) => {
-    draftMarks[stu.studentId] = "";
-  });
 
-  // If session exists, load existing marks
-  const sid = sessionId(activeDateISO, activeScope);
-  const existing = attendanceSessions.find((s) => s.id === sid);
-  if (existing) {
-    (existing.records || []).forEach((r) => {
-      if (draftMarks.hasOwnProperty(r.studentId)) {
-        draftMarks[r.studentId] = (r.status || "").toLowerCase();
+
+  students.forEach(
+    (student) => {
+
+      draftMarks[
+        student.studentId
+      ] = "";
+
+    }
+  );
+
+
+  /*
+   * Load today's saved attendance.
+   */
+
+  if (
+    existingSession &&
+    Array.isArray(
+      existingSession.records
+    )
+  ) {
+
+    existingSession.records.forEach(
+      (record) => {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            draftMarks,
+            record.studentId
+          )
+        ) {
+
+          draftMarks[
+            record.studentId
+          ] =
+            normalize(
+              record.status
+            ).toLowerCase();
+
+        }
       }
-    });
-    savedForThisSession = true;
+    );
+
+
+    savedForThisSession =
+      true;
+
     setSessionStatus(true);
+
   } else {
-    savedForThisSession = false;
+
+    savedForThisSession =
+      false;
+
     setSessionStatus(false);
   }
 }
 
-function setSessionStatus(isSaved) {
-  const box = $("sessionStatus");
-  if (!box) return;
 
-  if (isSaved) {
-    box.textContent = "Saved";
-    box.style.background = "rgba(25, 135, 84, 0.14)";
-    box.style.color = "#0f5132";
-  } else {
-    box.textContent = "Not Saved";
-    box.style.background = "rgba(255, 193, 7, 0.16)";
-    box.style.color = "#7a5b00";
-  }
-}
+/* =========================================================
+   RENDER TAKE TABLE
+========================================================= */
 
 function renderTakeTable() {
-  const tbody = $("takeTbody");
-  if (!tbody) return;
 
-  const list = studentsInActiveScope();
+  const tbody =
+    $("takeTbody");
+
+  if (!tbody) {
+    return;
+  }
+
   tbody.innerHTML = "";
 
-  if (list.length === 0) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="5" class="att-empty">No students found.</td>`;
-    tbody.appendChild(tr);
-    renderSideSummary();
-    return;
-  }
 
-  const filtered = list.filter((stu) => {
-    if (rowFilter === "all") return true;
-    return (draftMarks[stu.studentId] || "") === rowFilter;
-  });
+  if (!students.length) {
 
-  if (filtered.length === 0) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="5" class="att-empty">No students match this filter.</td>`;
-    tbody.appendChild(tr);
-    renderSideSummary();
-    return;
-  }
+    const tr =
+      document.createElement("tr");
 
-  filtered.forEach((stu) => {
-    const sid = stu.studentId;
-    const status = (draftMarks[sid] || "").toLowerCase();
-
-    const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>
-        <div class="att-student-cell">
-          <img class="att-avatar" src="${
-            // ✅ FIX fallback path
-            stu.photoDataUrl || "../../assets/images/bg.jpg"
-          }" alt="">
-          <div>
-            <div class="att-name">${fullName(stu) || "—"}</div>
-            <div class="att-subid">${sid || "—"}</div>
-          </div>
-        </div>
-      </td>
-
-      <td style="text-align:center">
-        <input class="att-radio" type="radio" name="att_${sid}" data-sid="${sid}" value="present" ${
-          status === "present" ? "checked" : ""
-        } />
-      </td>
-      <td style="text-align:center">
-        <input class="att-radio" type="radio" name="att_${sid}" data-sid="${sid}" value="absent" ${
-          status === "absent" ? "checked" : ""
-        } />
-      </td>
-      <td style="text-align:center">
-        <input class="att-radio" type="radio" name="att_${sid}" data-sid="${sid}" value="late" ${
-          status === "late" ? "checked" : ""
-        } />
-      </td>
-      <td style="text-align:center">
-        <input class="att-radio" type="radio" name="att_${sid}" data-sid="${sid}" value="excused" ${
-          status === "excused" ? "checked" : ""
-        } />
+      <td
+        colspan="5"
+        class="att-empty"
+      >
+        No students found.
       </td>
     `;
+
     tbody.appendChild(tr);
-  });
+
+    renderSideSummary();
+
+    return;
+  }
+
+
+  const filtered =
+    students.filter(
+      (student) => {
+
+        if (
+          rowFilter === "all"
+        ) {
+          return true;
+        }
+
+        return (
+          normalize(
+            draftMarks[
+              student.studentId
+            ]
+          )
+            .toLowerCase() ===
+          rowFilter
+        );
+      }
+    );
+
+
+  if (!filtered.length) {
+
+    const tr =
+      document.createElement("tr");
+
+    tr.innerHTML = `
+      <td
+        colspan="5"
+        class="att-empty"
+      >
+        No students match this filter.
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    renderSideSummary();
+
+    return;
+  }
+
+
+  filtered.forEach(
+    (student) => {
+
+      const sid =
+        student.studentId;
+
+      const status =
+        normalize(
+          draftMarks[sid]
+        ).toLowerCase();
+
+
+      const tr =
+        document.createElement("tr");
+
+
+      tr.innerHTML = `
+
+        <td>
+
+          <div class="att-student-cell">
+
+            <img
+              class="att-avatar"
+              src="${
+                student.photoDataUrl ||
+                "../../assets/images/bg.jpg"
+              }"
+              alt=""
+            />
+
+            <div>
+
+              <div class="att-name">
+                ${fullName(student) || "—"}
+              </div>
+
+              <div class="att-subid">
+                ${sid || "—"}
+              </div>
+
+            </div>
+
+          </div>
+
+        </td>
+
+
+        <td style="text-align:center">
+
+          <input
+            class="att-radio"
+            type="radio"
+            name="att_${sid}"
+            data-sid="${sid}"
+            value="present"
+            ${
+              status === "present"
+                ? "checked"
+                : ""
+            }
+          />
+
+        </td>
+
+
+        <td style="text-align:center">
+
+          <input
+            class="att-radio"
+            type="radio"
+            name="att_${sid}"
+            data-sid="${sid}"
+            value="absent"
+            ${
+              status === "absent"
+                ? "checked"
+                : ""
+            }
+          />
+
+        </td>
+
+
+        <td style="text-align:center">
+
+          <input
+            class="att-radio"
+            type="radio"
+            name="att_${sid}"
+            data-sid="${sid}"
+            value="late"
+            ${
+              status === "late"
+                ? "checked"
+                : ""
+            }
+          />
+
+        </td>
+
+
+        <td style="text-align:center">
+
+          <input
+            class="att-radio"
+            type="radio"
+            name="att_${sid}"
+            data-sid="${sid}"
+            value="excused"
+            ${
+              status === "excused"
+                ? "checked"
+                : ""
+            }
+          />
+
+        </td>
+
+      `;
+
+
+      tbody.appendChild(tr);
+    }
+  );
+
 
   renderSideSummary();
 }
 
+
+/* =========================================================
+   SIDE SUMMARY
+========================================================= */
+
 function renderSideSummary() {
-  const list = studentsInActiveScope();
-  const total = list.length;
 
-  let p = 0,
-    a = 0,
-    l = 0,
-    e = 0;
-  list.forEach((stu) => {
-    const st = (draftMarks[stu.studentId] || "").toLowerCase();
-    if (st === "present") p++;
-    else if (st === "absent") a++;
-    else if (st === "late") l++;
-    else if (st === "excused") e++;
-  });
+  const total =
+    students.length;
 
-  $("sumPresent").textContent = String(p);
-  $("sumAbsent").textContent = String(a);
-  $("sumLate").textContent = String(l);
-  $("sumExcused").textContent = String(e);
-  $("sumTotal").textContent = String(total);
+  let present = 0;
+  let absent = 0;
+  let late = 0;
+  let excused = 0;
+
+
+  students.forEach(
+    (student) => {
+
+      const status =
+        normalize(
+          draftMarks[
+            student.studentId
+          ]
+        ).toLowerCase();
+
+
+      if (status === "present") {
+        present++;
+      }
+
+      else if (status === "absent") {
+        absent++;
+      }
+
+      else if (status === "late") {
+        late++;
+      }
+
+      else if (status === "excused") {
+        excused++;
+      }
+    }
+  );
+
+
+  if ($("sumPresent")) {
+    $("sumPresent").textContent =
+      String(present);
+  }
+
+  if ($("sumAbsent")) {
+    $("sumAbsent").textContent =
+      String(absent);
+  }
+
+  if ($("sumLate")) {
+    $("sumLate").textContent =
+      String(late);
+  }
+
+  if ($("sumExcused")) {
+    $("sumExcused").textContent =
+      String(excused);
+  }
+
+  if ($("sumTotal")) {
+    $("sumTotal").textContent =
+      String(total);
+  }
 }
 
-// ---------- Actions ----------
+
+/* =========================================================
+   FILTER
+========================================================= */
+
 function setChipActive(filter) {
-  rowFilter = filter;
-  document.querySelectorAll("#statusChips .att-chip").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.filter === filter);
-  });
+
+  rowFilter =
+    filter;
+
+
+  document
+    .querySelectorAll(
+      "#statusChips .att-chip"
+    )
+    .forEach(
+      (button) => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.filter === filter
+        );
+
+      }
+    );
+
+
   renderTakeTable();
 }
+
+
+/* =========================================================
+   MARK ALL
+========================================================= */
 
 function markAll(status) {
-  const list = studentsInActiveScope();
-  list.forEach((stu) => {
-    draftMarks[stu.studentId] = status;
-  });
-  savedForThisSession = false;
+
+  students.forEach(
+    (student) => {
+
+      draftMarks[
+        student.studentId
+      ] = status;
+
+    }
+  );
+
+
+  savedForThisSession =
+    false;
+
   setSessionStatus(false);
+
   renderTakeTable();
 }
+
+
+/* =========================================================
+   CLEAR ALL
+========================================================= */
 
 function clearAll() {
-  const list = studentsInActiveScope();
-  list.forEach((stu) => {
-    draftMarks[stu.studentId] = "";
-  });
-  savedForThisSession = false;
+
+  students.forEach(
+    (student) => {
+
+      draftMarks[
+        student.studentId
+      ] = "";
+
+    }
+  );
+
+
+  savedForThisSession =
+    false;
+
   setSessionStatus(false);
+
   renderTakeTable();
 }
 
-function loadLastSession() {
-  // find most recent session before activeDateISO for this scope
-  const relevant = attendanceSessions
-    .filter(
-      (s) =>
-        (s.className || "") === activeScope.className &&
-        (s.sectionName || "") === activeScope.sectionName
-    )
-    .filter((s) => s.date && s.date < activeDateISO)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
 
-  if (relevant.length === 0) {
-    alert("No previous session found.");
+/* =========================================================
+   LAST SESSION
+========================================================= */
+
+function loadLastSession() {
+
+  alert(
+    "Last Session backend loading is not added yet."
+  );
+}
+
+
+/* =========================================================
+   SAVE ATTENDANCE
+========================================================= */
+
+async function saveAttendance() {
+
+  if (!students.length) {
+
+    alert(
+      "No students to mark."
+    );
+
     return;
   }
 
-  const last = relevant[0];
-  // reset to empty then fill
-  const list = studentsInActiveScope();
-  list.forEach((stu) => (draftMarks[stu.studentId] = ""));
-  (last.records || []).forEach((r) => {
-    if (draftMarks.hasOwnProperty(r.studentId)) {
-      draftMarks[r.studentId] = (r.status || "").toLowerCase();
-    }
-  });
 
-  savedForThisSession = false;
-  setSessionStatus(false);
-  renderTakeTable();
-}
+  /*
+   * ALWAYS use today's date.
+   */
 
-function saveAttendance() {
-  const list = studentsInActiveScope();
-  if (list.length === 0) return alert("No students to mark.");
+  activeDateISO =
+    todayISO();
 
-  const auto = $("autoExcused")?.checked;
 
-  const records = list.map((stu) => {
-    let st = (draftMarks[stu.studentId] || "").toLowerCase();
-    if (!st && auto) st = "excused";
-    return { studentId: stu.studentId, status: st || "excused" };
-  });
+  /*
+   * Keep date field locked.
+   */
 
-  const sid = sessionId(activeDateISO, activeScope);
-  const now = Date.now();
+  lockDateField();
 
-  const payload = {
-    id: sid,
-    date: activeDateISO,
-    className: activeScope.className,
-    sectionName: activeScope.sectionName,
-    records,
-    updatedAt: now,
-  };
 
-  const existingIdx = attendanceSessions.findIndex((s) => s.id === sid);
-  if (existingIdx >= 0) {
-    payload.createdAt = attendanceSessions[existingIdx].createdAt || now;
-    attendanceSessions[existingIdx] = payload;
-  } else {
-    payload.createdAt = now;
-    attendanceSessions.push(payload);
+  const auto =
+    $("autoExcused")?.checked;
+
+
+  const records =
+    students.map(
+      (student) => {
+
+        let status =
+          normalize(
+            draftMarks[
+              student.studentId
+            ]
+          ).toLowerCase();
+
+
+        if (
+          !status &&
+          auto
+        ) {
+
+          status =
+            "excused";
+        }
+
+
+        return {
+
+          studentId:
+            student.studentId,
+
+          status:
+            status || "excused",
+        };
+      }
+    );
+
+
+  try {
+
+    await apiFetch(
+      "/api/teacher/attendance/save",
+      {
+        method: "POST",
+
+        body:
+          JSON.stringify({
+            date:
+              activeDateISO,
+
+            records,
+          }),
+      }
+    );
+
+
+    savedForThisSession =
+      true;
+
+    setSessionStatus(true);
+
+
+    /*
+     * Reload today's backend data.
+     */
+
+    await loadBootstrap(
+      activeDateISO
+    );
+
+
+    /*
+     * Reload YTD data.
+     */
+
+    await loadYtdSummary();
+
+
+    renderYtdTable();
+
+
+    /*
+     * Make absolutely sure
+     * no school year subtitle
+     * appears.
+     */
+
+    syncSchoolYearSubtitle();
+
+
+    setView("home");
+
+  } catch (err) {
+
+    console.error(
+      "saveAttendance error:",
+      err
+    );
+
+    alert(
+      err.message ||
+      "Failed to save attendance."
+    );
   }
-
-  writeLS(LS_KEYS.ATTENDANCE, attendanceSessions);
-
-  savedForThisSession = true;
-  setSessionStatus(true);
-
-  // refresh home summary too
-  renderYtdTable();
-
-  // ✅ go back to home view after saving
-  setView("home");
 }
 
-// ---------- Init ----------
-function loadData() {
-  students = readLS(LS_KEYS.STUDENTS, []).filter(inTeacherScope);
-  attendanceSessions = readLS(LS_KEYS.ATTENDANCE, []);
-}
 
-// ✅ Refresh when returning from Students page (or another tab)
-function refreshFromStorage() {
-  const prevScope = `${activeScope.className}||${activeScope.sectionName}`;
-
-  loadData();
-  buildScopeOptions();
-
-  // keep previous selection if still exists and not locked
-  const sel = $("scopeSelect");
-  if (sel && !sel.disabled) {
-    const found = [...sel.options].some((o) => o.value === prevScope);
-    if (found) {
-      sel.value = prevScope;
-      const [c, s] = prevScope.split("||");
-      activeScope = { className: c || "", sectionName: s || "" };
-    }
-  }
-
-  syncHomeSubtitle();
-  renderYtdTable();
-
-  if (viewMode === "take") {
-    ensureDraftMarks();
-    renderTakeTable();
-  }
-}
+/* =========================================================
+   EVENTS
+========================================================= */
 
 function bindEvents() {
-  $("dateInput")?.addEventListener("change", () => {
-    activeDateISO = $("dateInput").value || todayISO();
-    syncHomeSubtitle();
-    renderYtdTable();
-  });
 
-  $("scopeSelect")?.addEventListener("change", () => {
-    const v = $("scopeSelect").value || "";
-    const [c, s] = v.split("||");
-    activeScope = { className: c || "", sectionName: s || "" };
-    syncHomeSubtitle();
-    renderYtdTable();
-  });
 
-  $("takeAttendanceBtn")?.addEventListener("click", () => {
-    setView("take");
-    setSessionHeader();
-    setChipActive("all");
-    ensureDraftMarks();
-    renderTakeTable();
-  });
+  /* -------------------------------------------------------
+     TAKE ATTENDANCE
+  ------------------------------------------------------- */
 
-  $("attBackBtn")?.addEventListener("click", () => setView("home"));
-  $("cancelTakeBtn")?.addEventListener("click", () => setView("home"));
+  $("takeAttendanceBtn")
+    ?.addEventListener(
+      "click",
+      () => {
 
-  $("statusChips")?.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-filter]");
-    if (!btn) return;
-    setChipActive(btn.dataset.filter);
-  });
+        /*
+         * Always use today's date.
+         */
 
-  $("takeTbody")?.addEventListener("change", (e) => {
-    const el = e.target;
-    if (!(el instanceof HTMLInputElement)) return;
-    if (!el.classList.contains("att-radio")) return;
+        activeDateISO =
+          todayISO();
 
-    const sid = el.dataset.sid;
-    const val = (el.value || "").toLowerCase();
-    if (!sid) return;
 
-    draftMarks[sid] = val;
-    savedForThisSession = false;
-    setSessionStatus(false);
-    renderSideSummary();
-  });
+        lockDateField();
 
-  $("markAllPresentBtn")?.addEventListener("click", () => markAll("present"));
-  $("quickMarkAllPresent")?.addEventListener("click", () => markAll("present"));
 
-  $("quickClearAll")?.addEventListener("click", () => clearAll());
+        setView("take");
 
-  $("loadLastSessionBtn")?.addEventListener("click", () => loadLastSession());
 
-  $("saveAttendanceBtn")?.addEventListener("click", () => saveAttendance());
+        setSessionHeader();
 
-  // ✅ refresh when user returns to this page
-  window.addEventListener("focus", refreshFromStorage);
-  window.addEventListener("pageshow", refreshFromStorage); // handles bfcache
-  window.addEventListener("storage", (e) => {
-    if (e.key === LS_KEYS.STUDENTS) refreshFromStorage();
-  });
+
+        setChipActive("all");
+
+
+        ensureDraftMarks();
+
+
+        renderTakeTable();
+
+      }
+    );
+
+
+  /* -------------------------------------------------------
+     BACK
+  ------------------------------------------------------- */
+
+  $("attBackBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        setView("home");
+      }
+    );
+
+
+  $("cancelTakeBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        setView("home");
+      }
+    );
+
+
+  /* -------------------------------------------------------
+     STATUS FILTERS
+  ------------------------------------------------------- */
+
+  $("statusChips")
+    ?.addEventListener(
+      "click",
+      (event) => {
+
+        const button =
+          event.target.closest(
+            "button[data-filter]"
+          );
+
+        if (!button) {
+          return;
+        }
+
+        setChipActive(
+          button.dataset.filter
+        );
+      }
+    );
+
+
+  /* -------------------------------------------------------
+     RADIO CHANGE
+  ------------------------------------------------------- */
+
+  $("takeTbody")
+    ?.addEventListener(
+      "change",
+      (event) => {
+
+        const element =
+          event.target;
+
+
+        if (
+          !(element instanceof HTMLInputElement)
+        ) {
+          return;
+        }
+
+
+        if (
+          !element.classList.contains(
+            "att-radio"
+          )
+        ) {
+          return;
+        }
+
+
+        const sid =
+          element.dataset.sid;
+
+
+        const value =
+          normalize(
+            element.value
+          ).toLowerCase();
+
+
+        if (!sid) {
+          return;
+        }
+
+
+        draftMarks[sid] =
+          value;
+
+
+        savedForThisSession =
+          false;
+
+
+        setSessionStatus(false);
+
+
+        renderSideSummary();
+      }
+    );
+
+
+  /* -------------------------------------------------------
+     QUICK ACTIONS
+  ------------------------------------------------------- */
+
+  $("markAllPresentBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        markAll("present");
+      }
+    );
+
+
+  $("quickMarkAllPresent")
+    ?.addEventListener(
+      "click",
+      () => {
+        markAll("present");
+      }
+    );
+
+
+  $("quickClearAll")
+    ?.addEventListener(
+      "click",
+      clearAll
+    );
+
+
+  $("loadLastSessionBtn")
+    ?.addEventListener(
+      "click",
+      loadLastSession
+    );
+
+
+  $("saveAttendanceBtn")
+    ?.addEventListener(
+      "click",
+      saveAttendance
+    );
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadData();
 
-  activeDateISO = todayISO();
-  const dateInput = $("dateInput");
-  if (dateInput) dateInput.value = activeDateISO;
+/* =========================================================
+   INIT
+========================================================= */
 
-  buildScopeOptions();
-  syncHomeSubtitle();
+async function init() {
 
-  renderYtdTable();
-  setView("home");
+  try {
 
-  bindEvents();
-});
+    /*
+     * Always initialize attendance
+     * to TODAY.
+     */
+
+    activeDateISO =
+      todayISO();
+
+
+    /*
+     * Lock date immediately.
+     */
+
+    lockDateField();
+
+
+    /* -----------------------------------------------------
+       LOAD BACKEND DATA
+    ----------------------------------------------------- */
+
+    await loadBootstrap(
+      activeDateISO
+    );
+
+
+    /* -----------------------------------------------------
+       LOAD YTD SUMMARY
+    ----------------------------------------------------- */
+
+    await loadYtdSummary();
+
+
+    /* -----------------------------------------------------
+       RENDER
+    ----------------------------------------------------- */
+
+    /*
+     * Re-lock date after backend
+     * loading just in case.
+     */
+
+    activeDateISO =
+      todayISO();
+
+    lockDateField();
+
+
+    syncHomeSubtitle();
+
+
+    /*
+     * IMPORTANT:
+     *
+     * Do NOT display school year.
+     *
+     * This only clears the old HTML
+     * element if it still exists.
+     */
+
+    syncSchoolYearSubtitle();
+
+
+    renderYtdTable();
+
+
+    setView("home");
+
+
+    bindEvents();
+
+  } catch (err) {
+
+    console.error(
+      "teacher attendance init error:",
+      err
+    );
+
+
+    const tbody =
+      $("ytdTbody");
+
+
+    if (tbody) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="8"
+            class="att-empty"
+          >
+            Failed to load attendance data.
+          </td>
+        </tr>
+      `;
+    }
+
+
+    const subtitle =
+      $("attHomeSub");
+
+
+    if (subtitle) {
+
+      subtitle.textContent =
+        err.message ||
+        "Failed to load attendance data.";
+    }
+
+
+    console.error(
+      err.message ||
+      "Failed to load attendance page."
+    );
+  }
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  init
+);

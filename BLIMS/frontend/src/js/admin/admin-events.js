@@ -2,37 +2,34 @@
 (function () {
   const $ = (id) => document.getElementById(id);
 
-  const LS_KEYS = {
-    EV: "rbms_events_v1",
-  };
-
-  function readLS(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-  function writeLS(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
+  const API_BASE = "/api/admin/events";
+  let csrfToken = "";
 
   // -------- Helpers --------
-  function uid(prefix = "EVT") {
-    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 900 + 100)}`;
-  }
-
   function nowISO() {
     return new Date().toISOString();
   }
 
   function toISOFromLocal(localStr) {
-    // "YYYY-MM-DDTHH:mm"
     if (!localStr) return "";
     const d = new Date(localStr);
     if (Number.isNaN(d.getTime())) return "";
     return d.toISOString();
+  }
+
+  function toLocalInputValue(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
   }
 
   function fmtShort(iso) {
@@ -88,6 +85,23 @@
     );
   }
 
+  function normalizeEvent(ev) {
+    return {
+      id: String(ev._id || ev.id || ""),
+      _id: String(ev._id || ev.id || ""),
+      title: ev.title || "",
+      type: ev.type || "school",
+      audience: ev.audience || "all",
+      start: ev.start ? toLocalInputValue(ev.start) : "",
+      end: ev.end ? toLocalInputValue(ev.end) : "",
+      location: ev.location || "",
+      description: ev.description || "",
+      image: ev.image || null,
+      createdAt: ev.createdAt || nowISO(),
+      updatedAt: ev.updatedAt || nowISO(),
+    };
+  }
+
   function computeStatus(ev) {
     const startISO = toISOFromLocal(ev.start);
     const endISO = toISOFromLocal(ev.end);
@@ -120,13 +134,68 @@
     );
   }
 
+  function escapeHtml(s) {
+    return String(s || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  async function ensureCsrfToken() {
+    if (csrfToken) return csrfToken;
+
+    const res = await fetch("/api/csrf-token", {
+      credentials: "include",
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data?.ok || !data?.csrfToken) {
+      throw new Error(data?.message || "Failed to get CSRF token.");
+    }
+
+    csrfToken = data.csrfToken;
+    return csrfToken;
+  }
+
+  async function api(url, options = {}) {
+    const method = String(options.method || "GET").toUpperCase();
+
+    const headers = {
+      ...(options.headers || {}),
+    };
+
+    if (method !== "GET") {
+      await ensureCsrfToken();
+      headers["x-csrf-token"] = csrfToken;
+    }
+
+    if (options.body && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data?.ok === false) {
+      throw new Error(data?.message || "Request failed.");
+    }
+
+    return data;
+  }
+
   // -------- State --------
-  let events = readLS(LS_KEYS.EV, []);
+  let events = [];
   let editingId = null;
   let tempImage = null; // {name, dataUrl} | null
   let viewingId = null;
-
-  // ✅ kebab menu state
   let openMenuId = null;
 
   // -------- DOM --------
@@ -181,49 +250,12 @@
   const vImgWrap = $("evViewImgWrap");
   const vImg = $("evViewImg");
 
-  // -------- Seed sample --------
-  if (!Array.isArray(events) || events.length === 0) {
-    const base = new Date();
-    const tomorrow = new Date(base.getTime() + 24 * 60 * 60 * 1000);
-    const nextWeek = new Date(base.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    events = [
-      {
-        id: uid(),
-        title: "School Assembly",
-        type: "school",
-        audience: "all",
-        start: `${tomorrow.toISOString().slice(0, 10)}T08:00`,
-        end: `${tomorrow.toISOString().slice(0, 10)}T09:00`,
-        location: "Gymnasium",
-        description: "All students and teachers are required to attend. Please be on time.",
-        image: null,
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-      },
-      {
-        id: uid(),
-        title: "Quarterly Exam Schedule",
-        type: "exam",
-        audience: "students",
-        start: `${nextWeek.toISOString().slice(0, 10)}T07:30`,
-        end: `${nextWeek.toISOString().slice(0, 10)}T12:00`,
-        location: "Respective classrooms",
-        description: "Exams will start promptly. Bring your permits and required materials.",
-        image: null,
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-      },
-    ];
-
-    writeLS(LS_KEYS.EV, events);
-  }
-
   // -------- UI helpers --------
   function setFormError(msg) {
     formError.textContent = msg;
     formError.classList.remove("hidden");
   }
+
   function clearFormError() {
     formError.textContent = "";
     formError.classList.add("hidden");
@@ -234,6 +266,7 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   }
+
   function closeModal() {
     modal.classList.add("hidden");
     modal.setAttribute("aria-hidden", "true");
@@ -246,6 +279,7 @@
     viewModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   }
+
   function closeViewModal() {
     viewModal.classList.add("hidden");
     viewModal.setAttribute("aria-hidden", "true");
@@ -323,6 +357,7 @@
   function openView(id) {
     const ev = events.find((x) => x.id === id);
     if (!ev) return;
+
     viewingId = id;
 
     const st = computeStatus(ev);
@@ -356,15 +391,31 @@
     openViewModal();
   }
 
-  // ✅ close all kebab menus
   function closeAllMenus() {
     openMenuId = null;
     document.querySelectorAll(".ev-menu").forEach((m) => m.classList.add("hidden"));
   }
 
+  // -------- Data loading --------
+  async function loadEvents() {
+    feed.innerHTML = "";
+    empty.classList.add("hidden");
+
+    try {
+      const data = await api(API_BASE);
+      const rows = Array.isArray(data?.data) ? data.data : [];
+      events = rows.map(normalizeEvent);
+      render();
+    } catch (err) {
+      console.error("loadEvents error:", err);
+      events = [];
+      empty.classList.remove("hidden");
+      if (empty) empty.textContent = err.message || "Failed to load events.";
+    }
+  }
+
   // -------- Render list --------
   function render() {
-    // close any open menu when rerendering
     closeAllMenus();
 
     const q = (search.value || "").trim().toLowerCase();
@@ -374,18 +425,14 @@
 
     let list = events.slice();
 
-    // sort: soonest start first
     list.sort((a, b) => {
       const sa = new Date(toISOFromLocal(a.start) || a.createdAt).getTime();
       const sb = new Date(toISOFromLocal(b.start) || b.createdAt).getTime();
       return sa - sb;
     });
 
-    // filters
     if (ty !== "all") list = list.filter((e) => (e.type || "school") === ty);
 
-    // NOTE: your HTML has duplicate "all" values in audience options.
-    // We'll treat "teachers"/"students" as filters, and "all" means no filter.
     if (aud === "teachers" || aud === "students") {
       list = list.filter((e) => (e.audience || "all") === aud);
     }
@@ -407,6 +454,7 @@
       empty.classList.remove("hidden");
       return;
     }
+
     empty.classList.add("hidden");
 
     list.forEach((ev) => {
@@ -451,7 +499,6 @@
         </div>
       `;
 
-      // card click = view
       el.addEventListener("click", () => openView(ev.id));
 
       const kebab = el.querySelector(".ev-kebab");
@@ -461,8 +508,6 @@
         e.stopPropagation();
 
         const isOpen = openMenuId === ev.id;
-
-        // close all first
         closeAllMenus();
 
         if (!isOpen) {
@@ -501,10 +546,11 @@
     if (end) {
       const s = new Date(start).getTime();
       const e = new Date(end).getTime();
-      if (!Number.isNaN(s) && !Number.isNaN(e) && e < s) return "End time must be after Start time.";
+      if (!Number.isNaN(s) && !Number.isNaN(e) && e < s) {
+        return "End time must be after Start time.";
+      }
     }
 
-    // basic localStorage safety
     if (tempImage && tempImage.dataUrl && tempImage.dataUrl.length > 2_500_000) {
       return "Image is too large. Please use a smaller image.";
     }
@@ -512,7 +558,7 @@
     return null;
   }
 
-  function saveEvent() {
+  async function saveEvent() {
     clearFormError();
 
     const err = validateForm();
@@ -521,54 +567,68 @@
       return;
     }
 
-    const obj = {
+    const payload = {
       title: (fTitle.value || "").trim(),
       type: fType.value || "school",
       audience: fAudience.value || "all",
-      start: fStart.value || "",
-      end: fEnd.value || "",
+      start: fStart.value ? new Date(fStart.value).toISOString() : null,
+      end: fEnd.value ? new Date(fEnd.value).toISOString() : null,
       location: (fLoc.value || "").trim(),
       description: (fDesc.value || "").trim(),
       image: tempImage ? { ...tempImage } : null,
-      updatedAt: nowISO(),
     };
 
-    if (editingId) {
-      const idx = events.findIndex((x) => x.id === editingId);
-      if (idx === -1) return;
-      events[idx] = { ...events[idx], ...obj };
-    } else {
-      events.push({
-        id: uid(),
-        createdAt: nowISO(),
-        ...obj,
-      });
-    }
+    saveBtn.disabled = true;
 
-    writeLS(LS_KEYS.EV, events);
-    closeModal();
-    render();
+    try {
+      if (editingId) {
+        await api(`${API_BASE}/${encodeURIComponent(editingId)}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await api(API_BASE, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+
+      closeModal();
+      await loadEvents();
+    } catch (err) {
+      console.error("saveEvent error:", err);
+      setFormError(err.message || "Failed to save event.");
+    } finally {
+      saveBtn.disabled = false;
+    }
   }
 
-  function deleteEvent(id) {
+  async function deleteEvent(id) {
     const ev = events.find((x) => x.id === id);
     if (!ev) return;
+
     const ok = confirm(`Delete "${ev.title || "Untitled"}"? This cannot be undone.`);
     if (!ok) return;
 
-    events = events.filter((x) => x.id !== id);
-    writeLS(LS_KEYS.EV, events);
+    try {
+      await api(`${API_BASE}/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
 
-    // if editing this, close modal
-    if (editingId === id) closeModal();
-    if (viewingId === id) closeViewModal();
+      if (editingId === id) closeModal();
+      if (viewingId === id) closeViewModal();
 
-    render();
+      await loadEvents();
+    } catch (err) {
+      console.error("deleteEvent error:", err);
+      alert(err.message || "Failed to delete event.");
+    }
   }
 
   // -------- Image handling --------
   function handleImage(file) {
     if (!file) return;
+
     if (!file.type || !file.type.startsWith("image/")) {
       setFormError("Only image files are supported for the banner.");
       return;
@@ -613,17 +673,19 @@
     e.stopPropagation();
     fFile.click();
   });
+
   drop.addEventListener("click", () => fFile.click());
   fFile.addEventListener("change", (e) => handleImage(e.target.files?.[0]));
 
-  // drag-drop (optional)
   drop.addEventListener("dragover", (e) => {
     e.preventDefault();
     drop.style.filter = "brightness(.99)";
   });
+
   drop.addEventListener("dragleave", () => {
     drop.style.filter = "";
   });
+
   drop.addEventListener("drop", (e) => {
     e.preventDefault();
     drop.style.filter = "";
@@ -631,10 +693,8 @@
     if (file) handleImage(file);
   });
 
-  // ✅ close menus if click outside
   document.addEventListener("click", () => closeAllMenus());
 
-  // view modal controls
   viewBackdrop.addEventListener("click", closeViewModal);
   viewCloseX.addEventListener("click", closeViewModal);
   viewCloseBtn.addEventListener("click", closeViewModal);
@@ -645,7 +705,6 @@
     openEdit(viewingId);
   });
 
-  // escape key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (!modal.classList.contains("hidden")) closeModal();
@@ -654,15 +713,6 @@
     }
   });
 
-  function escapeHtml(s) {
-    return String(s || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   // init
-  render();
+  loadEvents();
 })();

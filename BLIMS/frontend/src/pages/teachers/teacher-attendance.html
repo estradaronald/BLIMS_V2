@@ -4,31 +4,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teacher - Attendance</title>
 
-  <!-- ✅ Prevent sidebar "flash" on load (TEACHER key) -->
-  <script>
-    (function () {
-      try {
-        const collapsed =
-          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-        if (collapsed) document.documentElement.classList.add("sb-collapsed");
-      } catch {}
-    })();
-  </script>
+  <title>Teacher - Attendance</title>
 
   <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
- <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/teacher/teacher-attendance.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared -->
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  />
+
+  <!-- Teacher Attendance -->
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-attendance.css"
+  />
+
+  <!-- Page animations -->
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  />
 </head>
 
 <body data-page="teacher-attendance">
-  <!-- floating collapse button -->
+
+  <!-- =========================================================
+       SIDEBAR FLOAT TOGGLE
+  ========================================================== -->
+
   <button
     class="sidebar-float-toggle"
     id="sidebarFloatToggle"
@@ -38,191 +55,647 @@
     ←
   </button>
 
+
   <div class="app">
+
+    <!-- =======================================================
+         SIDEBAR
+    ======================================================== -->
+
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <!-- TOPBAR (same pattern as your teacher pages) -->
-      <header class="topbar">
-        <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+    <!-- =======================================================
+         MAIN CONTENT
+    ======================================================== -->
+
+    <main class="content page-animate">
+
+
+      <!-- =====================================================
+           TOPBAR
+      ====================================================== -->
+
+      <header class="topbar reveal-soft">
+
+        <div class="topbar-right">
+
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            🔔
+          </button>
+
+
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="Teacher avatar"
+            />
+
+
             <div class="tb-meta">
-              <div class="tb-name">Teacher</div>
-              <div class="tb-role">Advisory Class</div>
+
+              <div class="tb-name">
+                Teacher
+              </div>
+
+              <div class="tb-role">
+                Advisory Class
+              </div>
+
             </div>
 
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+              aria-expanded="false"
+            >
+              ▾
+            </button>
+
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
                 Logout
               </button>
+
             </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- PAGE WRAP -->
-      <!-- ✅ Match My Schedule page header structure -->
-      <section class="att-wrap ms-page">
-        <div class="att-head">
 
-          <!-- ✅ Same title hook as Schedule/Grades -->
-          <div class="att-title ms-title">Attendance</div>
+
+      <!-- =====================================================
+           PAGE
+      ====================================================== -->
+
+      <section class="att-wrap ms-page">
+
+
+        <!-- PAGE TITLE -->
+
+        <div class="att-head reveal-soft">
+
+          <div class="att-title ms-title reveal-item">
+            Attendance
+          </div>
+
         </div>
 
-        <!-- =========================
+
+
+        <!-- ===================================================
              STATE A: HOME
-        ========================== -->
-        <section id="attHomeView" class="att-view">
-          <div class="card att-card">
-            <div class="att-card-top">
+        ==================================================== -->
+
+        <section
+          id="attHomeView"
+          class="att-view"
+        >
+
+
+          <!-- =================================================
+               DAILY ATTENDANCE CARD
+          ================================================== -->
+
+          <div class="card att-card reveal-scale">
+
+            <div class="att-card-top reveal-item">
+
               <div>
-                <div class="att-card-title">My Daily Class Attendance</div>
-                <div class="att-card-sub" id="attHomeSub">Select a class and date.</div>
+
+                <div class="att-card-title">
+                  My Daily Class Attendance
+                </div>
+
+                <div
+                  class="att-card-sub"
+                  id="attHomeSub"
+                >
+                  Loading class and school year...
+                </div>
+
               </div>
 
-              <button id="takeAttendanceBtn" class="att-take-btn" type="button">
+
+              <button
+                id="takeAttendanceBtn"
+                class="att-take-btn"
+                type="button"
+              >
                 Take Attendance
               </button>
+
             </div>
 
-            <div class="att-controls">
-              <div class="att-control">
-                <label>Grade / Section</label>
-                <select id="scopeSelect" class="att-select"></select>
-              </div>
+
+
+            <!-- CONTROLS -->
+
+            <div class="att-controls reveal-item">
+
+
+              <!-- GRADE / SECTION -->
 
               <div class="att-control">
-                <label>Date</label>
-                <input id="dateInput" class="att-input" type="date" />
+
+                <label for="scopeInput">
+                  Grade / Section
+                </label>
+
+                <input
+                  id="scopeInput"
+                  class="att-input"
+                  type="text"
+                  readonly
+                  placeholder="Assigned class and section"
+                />
+
               </div>
+
+
+
+              <!-- DATE -->
+
+              <div class="att-control">
+
+                <label for="dateInput">
+                  Date
+                </label>
+
+                <input
+                  id="dateInput"
+                  class="att-input"
+                  type="date"
+                  readonly
+                  aria-readonly="true"
+                  title="Attendance can only be recorded for today."
+                />
+
+              </div>
+
             </div>
+
           </div>
 
-          <!-- Year-to-date summary -->
-          <div class="card att-card">
-            <div class="att-card-top slim">
+
+
+          <!-- =================================================
+               YEAR-TO-DATE SUMMARY
+          ================================================== -->
+
+          <div class="card att-card reveal-scale">
+
+            <div class="att-card-top slim reveal-item">
+
               <div>
-                <div class="att-card-title">Year-to-date Attendance Summary</div>
-                <div class="att-card-sub" id="attYtdSub">Counts are within the current school year (Jun 1 – Mar 31).</div>
+
+                <div class="att-card-title">
+                  Year-to-date Attendance Summary
+                </div>
+
+                <div
+                  class="att-card-sub"
+                  id="attYtdSub"
+                >
+                  Loading current school year...
+                </div>
+
               </div>
+
             </div>
 
-            <div class="att-table-wrap">
+
+
+            <div class="att-table-wrap reveal-item">
+
               <table class="att-table">
+
                 <thead>
+
                   <tr>
-                    <th style="width:70px">No.</th>
-                    <th>Student</th>
-                    <th style="width:90px">Present</th>
-                    <th style="width:90px">Absent</th>
-                    <th style="width:90px">Late</th>
-                    <th style="width:110px">Excused</th>
-                    <th style="width:110px">Total Days</th>
-                    <th style="width:120px">Attendance %</th>
+
+                    <th style="width:70px">
+                      No.
+                    </th>
+
+                    <th>
+                      Student
+                    </th>
+
+                    <th style="width:90px">
+                      Present
+                    </th>
+
+                    <th style="width:90px">
+                      Absent
+                    </th>
+
+                    <th style="width:90px">
+                      Late
+                    </th>
+
+                    <th style="width:110px">
+                      Excused
+                    </th>
+
+                    <th style="width:110px">
+                      Total Days
+                    </th>
+
+                    <th style="width:120px">
+                      Attendance %
+                    </th>
+
                   </tr>
+
                 </thead>
+
+
                 <tbody id="ytdTbody">
+
                   <tr>
-                    <td colspan="8" class="att-empty">No students found for this class & section.</td>
+
+                    <td
+                      colspan="8"
+                      class="att-empty"
+                    >
+                      Loading attendance summary...
+                    </td>
+
                   </tr>
+
                 </tbody>
+
               </table>
+
             </div>
+
           </div>
+
         </section>
 
-        <!-- =========================
+
+
+        <!-- ===================================================
              STATE B: TAKE ATTENDANCE
-        ========================== -->
-        <section id="attTakeView" class="att-view hidden">
-          <div class="card att-session-head">
-            <div class="att-session-left">
-              <div class="att-session-title" id="sessionTitle">Class - Section</div>
-              <div class="att-session-date" id="sessionDateLabel">Monday, January 1, 2026</div>
+        ==================================================== -->
+
+        <section
+          id="attTakeView"
+          class="att-view hidden"
+        >
+
+
+          <!-- SESSION HEADER -->
+
+          <div class="card att-session-head reveal-scale">
+
+            <div class="att-session-left reveal-item">
+
+              <div
+                class="att-session-title"
+                id="sessionTitle"
+              >
+                Class - Section
+              </div>
+
+
+              <div
+                class="att-session-date"
+                id="sessionDateLabel"
+              >
+                Today
+              </div>
+
             </div>
 
-            <button id="cancelTakeBtn" class="att-cancel" type="button">Cancel</button>
+
+            <button
+              id="cancelTakeBtn"
+              class="att-cancel reveal-item"
+              type="button"
+            >
+              Cancel
+            </button>
+
           </div>
+
+
+
+          <!-- SESSION GRID -->
 
           <div class="att-session-grid">
-            <!-- LEFT: Student table -->
-            <div class="card att-session-card">
-              <div class="att-session-toolbar">
-                <div class="att-chips" id="statusChips">
-                  <button class="att-chip active" data-filter="all" type="button">All</button>
-                  <button class="att-chip" data-filter="present" type="button">Present</button>
-                  <button class="att-chip" data-filter="absent" type="button">Absent</button>
-                  <button class="att-chip" data-filter="late" type="button">Late</button>
-                  <button class="att-chip" data-filter="excused" type="button">Excused</button>
+
+
+            <!-- =================================================
+                 LEFT: STUDENT TABLE
+            ================================================== -->
+
+            <div class="card att-session-card reveal-scale">
+
+
+              <!-- TOOLBAR -->
+
+              <div class="att-session-toolbar reveal-item">
+
+
+                <div
+                  class="att-chips"
+                  id="statusChips"
+                >
+
+                  <button
+                    class="att-chip active"
+                    data-filter="all"
+                    type="button"
+                  >
+                    All
+                  </button>
+
+                  <button
+                    class="att-chip"
+                    data-filter="present"
+                    type="button"
+                  >
+                    Present
+                  </button>
+
+                  <button
+                    class="att-chip"
+                    data-filter="absent"
+                    type="button"
+                  >
+                    Absent
+                  </button>
+
+                  <button
+                    class="att-chip"
+                    data-filter="late"
+                    type="button"
+                  >
+                    Late
+                  </button>
+
+                  <button
+                    class="att-chip"
+                    data-filter="excused"
+                    type="button"
+                  >
+                    Excused
+                  </button>
+
                 </div>
+
+
 
                 <div class="att-actions-row">
-                  <button id="markAllPresentBtn" class="att-btn" type="button">Mark All Present</button>
-                  <button id="loadLastSessionBtn" class="att-btn" type="button">Last Session</button>
+
+                  <button
+                    id="markAllPresentBtn"
+                    class="att-btn"
+                    type="button"
+                  >
+                    Mark All Present
+                  </button>
+
+
+                  <button
+                    id="loadLastSessionBtn"
+                    class="att-btn"
+                    type="button"
+                  >
+                    Last Session
+                  </button>
+
                 </div>
+
               </div>
 
-              <div class="att-table-wrap">
+
+
+              <!-- STUDENT TABLE -->
+
+              <div class="att-table-wrap reveal-item">
+
                 <table class="att-table">
+
                   <thead>
+
                     <tr>
-                      <th>Student</th>
-                      <th style="width:90px">Present</th>
-                      <th style="width:90px">Absent</th>
-                      <th style="width:90px">Late</th>
-                      <th style="width:110px">Excused</th>
+
+                      <th>
+                        Student
+                      </th>
+
+                      <th style="width:90px">
+                        Present
+                      </th>
+
+                      <th style="width:90px">
+                        Absent
+                      </th>
+
+                      <th style="width:90px">
+                        Late
+                      </th>
+
+                      <th style="width:110px">
+                        Excused
+                      </th>
+
                     </tr>
+
                   </thead>
+
+
                   <tbody id="takeTbody">
+
                     <tr>
-                      <td colspan="5" class="att-empty">No students found.</td>
+
+                      <td
+                        colspan="5"
+                        class="att-empty"
+                      >
+                        No students found.
+                      </td>
+
                     </tr>
+
                   </tbody>
+
                 </table>
+
               </div>
+
             </div>
 
-            <!-- RIGHT: Summary + Save -->
-            <aside class="card att-side">
-              <div class="att-side-title">Attendance Summary</div>
 
-              <div class="att-summary">
-                <div class="att-sum-row"><span>Present</span><b id="sumPresent">0</b></div>
-                <div class="att-sum-row"><span>Absent</span><b id="sumAbsent">0</b></div>
-                <div class="att-sum-row"><span>Late</span><b id="sumLate">0</b></div>
-                <div class="att-sum-row"><span>Excused</span><b id="sumExcused">0</b></div>
-                <div class="att-sum-row total"><span>Total Students</span><b id="sumTotal">0</b></div>
+
+            <!-- =================================================
+                 RIGHT: SUMMARY
+            ================================================== -->
+
+            <aside class="card att-side reveal-scale">
+
+
+              <div class="att-side-title reveal-item">
+                Attendance Summary
               </div>
 
-              <div class="att-side-title" style="margin-top:14px;">Quick Actions</div>
-              <div class="att-quick">
-                <button id="quickMarkAllPresent" class="att-quick-btn" type="button">✓ Mark All Present</button>
-                <button id="quickClearAll" class="att-quick-btn" type="button">🧹 Clear All</button>
+
+              <div class="att-summary reveal-item">
+
+                <div class="att-sum-row">
+                  <span>Present</span>
+                  <b id="sumPresent">0</b>
+                </div>
+
+                <div class="att-sum-row">
+                  <span>Absent</span>
+                  <b id="sumAbsent">0</b>
+                </div>
+
+                <div class="att-sum-row">
+                  <span>Late</span>
+                  <b id="sumLate">0</b>
+                </div>
+
+                <div class="att-sum-row">
+                  <span>Excused</span>
+                  <b id="sumExcused">0</b>
+                </div>
+
+                <div class="att-sum-row total">
+                  <span>Total Students</span>
+                  <b id="sumTotal">0</b>
+                </div>
+
+              </div>
+
+
+
+              <div
+                class="att-side-title reveal-item"
+                style="margin-top:14px;"
+              >
+                Quick Actions
+              </div>
+
+
+              <div class="att-quick reveal-item">
+
+                <button
+                  id="quickMarkAllPresent"
+                  class="att-quick-btn"
+                  type="button"
+                >
+                  ✓ Mark All Present
+                </button>
+
+
+                <button
+                  id="quickClearAll"
+                  class="att-quick-btn"
+                  type="button"
+                >
+                  🧹 Clear All
+                </button>
+
+
                 <label class="att-check">
-                  <input id="autoExcused" type="checkbox" />
-                  <span>Auto-mark unchecked as Excused</span>
+
+                  <input
+                    id="autoExcused"
+                    type="checkbox"
+                  />
+
+                  <span>
+                    Auto-mark unchecked as Excused
+                  </span>
+
                 </label>
+
               </div>
 
-              <div class="att-session-status" id="sessionStatus">Not Saved</div>
 
-              <button id="saveAttendanceBtn" class="att-save" type="button">
+
+              <!-- SESSION STATUS -->
+
+              <div
+                class="att-session-status reveal-item"
+                id="sessionStatus"
+              >
+                Not Saved
+              </div>
+
+
+
+              <!-- SAVE -->
+
+              <button
+                id="saveAttendanceBtn"
+                class="att-save reveal-item"
+                type="button"
+              >
                 Save Attendance
               </button>
+
             </aside>
+
           </div>
+
         </section>
+
       </section>
+
     </main>
+
   </div>
-   <script src="../../js/auth/teacher-guard.js"></script>
+
+
+
+  <!-- =========================================================
+       SCRIPTS
+  ========================================================== -->
+
+  <script src="../../shared/js/page-animations.js"></script>
+
   <script src="../../js/teacher/teacher-sidebar.js"></script>
+
   <script src="../../js/teacher/teacher-attendance.js"></script>
+
 </body>
 </html>

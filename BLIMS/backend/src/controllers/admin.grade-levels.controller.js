@@ -1,5 +1,7 @@
+const mongoose = require("mongoose");
 const Section = require("../models/Section");
 const GradeLevel = require("../models/GradeLevel.model");
+const Teacher = require("../models/Teacher.model");
 
 function norm(s) {
   return String(s || "").trim().toLowerCase();
@@ -39,7 +41,10 @@ exports.createGrade = async (req, res) => {
     if (!grade) return badRequest(res, "Grade level name is required.");
 
     const exists = await GradeLevel.findOne({
-      grade: { $regex: `^${grade.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" },
+      grade: {
+        $regex: `^${grade.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i",
+      },
       isActive: true,
     }).lean();
 
@@ -75,7 +80,11 @@ exports.deleteGrade = async (req, res) => {
       return res.status(404).json({ ok: false, message: "Grade level not found." });
     }
 
-    const linkedSections = await Section.countDocuments({ grade: gradeDoc.grade });
+    const linkedSections = await Section.countDocuments({
+      grade: gradeDoc.grade,
+      isActive: { $ne: false },
+    });
+
     if (linkedSections > 0) {
       return res.status(409).json({
         ok: false,
@@ -98,15 +107,23 @@ exports.getSummary = async (req, res) => {
       .lean();
 
     const agg = await Section.aggregate([
-      { $group: { _id: "$grade", count: { $sum: 1 } } },
+      { $match: { isActive: { $ne: false } } },
+      {
+        $group: {
+          _id: { $toLower: { $trim: { input: "$grade" } } },
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     const countMap = {};
-    for (const r of agg) countMap[r._id] = r.count;
+    for (const r of agg) {
+      countMap[String(r._id || "").trim().toLowerCase()] = r.count;
+    }
 
     const out = {};
     for (const g of grades) {
-      out[g.grade] = Number(countMap[g.grade] || 0);
+      out[g.grade] = Number(countMap[norm(g.grade)] || 0);
     }
 
     return res.json({ ok: true, data: out });
@@ -119,7 +136,7 @@ exports.listSections = async (req, res) => {
   try {
     const { grade, q, capacityFilter = "all" } = req.query;
 
-    const query = {};
+    const query = { isActive: { $ne: false } };
 
     if (grade !== undefined) {
       const g = String(grade).trim();
@@ -151,6 +168,7 @@ exports.listSections = async (req, res) => {
       id: String(r._id),
       grade: r.grade,
       section: r.section,
+      adviserId: r.adviserId ? String(r.adviserId) : "",
       adviser: r.adviser || "",
       capacity: r.capacity,
       createdAt: r.createdAt,
@@ -164,24 +182,90 @@ exports.listSections = async (req, res) => {
 
 exports.createSection = async (req, res) => {
   try {
-    const { grade, section, adviser = "", capacity } = req.body || {};
+    const {
+      grade,
+      section,
+      adviserId = "",
+      adviser = "",
+      capacity,
+    } = req.body || {};
 
     const g = String(grade || "").trim();
+    const s = String(section || "").trim();
+    const advId = String(adviserId || "").trim();
+    let advName = String(adviser || "").trim();
+
     const gradeExists = await GradeLevel.findOne({ grade: g, isActive: true }).lean();
     if (!gradeExists) return badRequest(res, "Invalid request.");
-
-    const s = String(section || "").trim();
     if (!s) return badRequest(res, "Invalid request.");
 
     const cap = Number(capacity);
     if (!Number.isFinite(cap) || cap <= 0) return badRequest(res, "Invalid request.");
 
+    const duplicate = await Section.findOne({
+      grade: g,
+      sectionNorm: norm(s),
+      isActive: { $ne: false },
+    }).lean();
+
+    if (duplicate) {
+      return res.status(409).json({ ok: false, message: "Section already exists." });
+    }
+
+    let teacher = null;
+
+    if (advId) {
+      if (!mongoose.Types.ObjectId.isValid(advId)) {
+        return badRequest(res, "Invalid request.");
+      }
+
+      teacher = await Teacher.findById(advId).lean();
+      if (!teacher || teacher.isActive === false) {
+        return badRequest(res, "Invalid request.");
+      }
+
+      const usedByOtherSection = await Section.findOne({
+        adviserId: teacher._id,
+        isActive: { $ne: false },
+      }).lean();
+
+      if (usedByOtherSection) {
+        return res.status(409).json({
+          ok: false,
+          message: "Teacher is already assigned to another section.",
+        });
+      }
+
+      advName =
+        advName ||
+        [teacher.firstName, teacher.middleName, teacher.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+    } else {
+      advName = "";
+    }
+
     const doc = await Section.create({
       grade: g,
       section: s,
-      adviser: String(adviser || "").trim(),
+      sectionNorm: norm(s),
+      adviserId: teacher?._id || null,
+      adviser: advName,
+      adviserNorm: norm(advName),
       capacity: cap,
+      isActive: true,
     });
+
+    if (teacher?._id) {
+      await Teacher.findByIdAndUpdate(teacher._id, {
+        $set: {
+          className: g,
+          sectionName: s,
+        },
+      });
+    }
 
     return res.status(201).json({
       ok: true,
@@ -189,6 +273,7 @@ exports.createSection = async (req, res) => {
         id: String(doc._id),
         grade: doc.grade,
         section: doc.section,
+        adviserId: String(doc.adviserId || ""),
         adviser: doc.adviser || "",
         capacity: doc.capacity,
         createdAt: doc.createdAt,
@@ -205,19 +290,90 @@ exports.createSection = async (req, res) => {
 exports.updateSection = async (req, res) => {
   try {
     const { sectionId } = req.params;
-    const { section, adviser = "", capacity } = req.body || {};
+    const {
+      grade,
+      section,
+      adviserId = "",
+      adviser = "",
+      capacity,
+    } = req.body || {};
 
-    const s = String(section || "").trim();
-    if (!s) return badRequest(res, "Invalid request.");
+    const current = await Section.findById(sectionId).lean();
+    if (!current) return res.status(404).json({ ok: false, message: "Not found" });
+
+    const nextGrade = String(grade || current.grade || "").trim();
+    const nextSection = String(section || "").trim();
+    const advId = String(adviserId || "").trim();
+    let advName = String(adviser || "").trim();
+
+    if (!nextSection) return badRequest(res, "Invalid request.");
+
+    const gradeExists = await GradeLevel.findOne({ grade: nextGrade, isActive: true }).lean();
+    if (!gradeExists) return badRequest(res, "Invalid request.");
 
     const cap = Number(capacity);
     if (!Number.isFinite(cap) || cap <= 0) return badRequest(res, "Invalid request.");
 
+    const duplicate = await Section.findOne({
+      grade: nextGrade,
+      sectionNorm: norm(nextSection),
+      _id: { $ne: current._id },
+      isActive: { $ne: false },
+    }).lean();
+
+    if (duplicate) {
+      return res.status(409).json({ ok: false, message: "Section already exists." });
+    }
+
+    let teacher = null;
+    let nextAdviserId = null;
+
+    if (advId) {
+      if (!mongoose.Types.ObjectId.isValid(advId)) {
+        return badRequest(res, "Invalid request.");
+      }
+
+      teacher = await Teacher.findById(advId).lean();
+      if (!teacher || teacher.isActive === false) {
+        return badRequest(res, "Invalid request.");
+      }
+
+      const usedByOtherSection = await Section.findOne({
+        adviserId: teacher._id,
+        _id: { $ne: current._id },
+        isActive: { $ne: false },
+      }).lean();
+
+      if (usedByOtherSection) {
+        return res.status(409).json({
+          ok: false,
+          message: "Teacher is already assigned to another section.",
+        });
+      }
+
+      advName =
+        advName ||
+        [teacher.firstName, teacher.middleName, teacher.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+      nextAdviserId = teacher._id;
+    } else {
+      advName = "";
+      nextAdviserId = null;
+    }
+
     const updated = await Section.findByIdAndUpdate(
       sectionId,
       {
-        section: s,
-        adviser: String(adviser || "").trim(),
+        grade: nextGrade,
+        section: nextSection,
+        sectionNorm: norm(nextSection),
+        adviserId: nextAdviserId,
+        adviser: advName,
+        adviserNorm: norm(advName),
         capacity: cap,
       },
       { new: true, runValidators: true }
@@ -225,12 +381,31 @@ exports.updateSection = async (req, res) => {
 
     if (!updated) return res.status(404).json({ ok: false, message: "Not found" });
 
+    if (current.adviserId && String(current.adviserId) !== String(nextAdviserId || "")) {
+      await Teacher.findByIdAndUpdate(current.adviserId, {
+        $set: {
+          className: "Unassigned",
+          sectionName: "Unassigned",
+        },
+      });
+    }
+
+    if (nextAdviserId) {
+      await Teacher.findByIdAndUpdate(nextAdviserId, {
+        $set: {
+          className: nextGrade,
+          sectionName: nextSection,
+        },
+      });
+    }
+
     return res.json({
       ok: true,
       data: {
         id: String(updated._id),
         grade: updated.grade,
         section: updated.section,
+        adviserId: String(updated.adviserId || ""),
         adviser: updated.adviser || "",
         capacity: updated.capacity,
         createdAt: updated.createdAt,
@@ -250,6 +425,15 @@ exports.deleteSection = async (req, res) => {
 
     const gone = await Section.findByIdAndDelete(sectionId).lean();
     if (!gone) return res.status(404).json({ ok: false, message: "Not found" });
+
+    if (gone.adviserId) {
+      await Teacher.findByIdAndUpdate(gone.adviserId, {
+        $set: {
+          className: "Unassigned",
+          sectionName: "Unassigned",
+        },
+      });
+    }
 
     return res.json({ ok: true });
   } catch (err) {

@@ -1,35 +1,92 @@
-<!-- frontend/src/pages/teachers/teacher-my-schedule.html -->
+<!-- frontend/src/pages/teacher/teacher-my-schedule.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
   <title>Teacher - My Schedule</title>
 
-  <!-- ✅ Prevent sidebar "flash" on load (TEACHER key) -->
+  <!-- =========================================================
+       PREVENT SIDEBAR FLASH
+       ========================================================= -->
   <script>
     (function () {
       try {
         const collapsed =
           localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-        if (collapsed) document.documentElement.classList.add("sb-collapsed");
-      } catch {}
+
+        if (collapsed) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
+      } catch (_) {}
     })();
   </script>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- =========================================================
+       FONT
+       ========================================================= -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
 
- 
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/teacher/teacher-my-schedule.css" />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- =========================================================
+       SHARED ADMIN / TEACHER STYLES
+       ========================================================= -->
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin-announcements.css"
+  />
+
+  <!-- =========================================================
+       TEACHER SCHEDULE STYLES
+       IMPORTANT:
+       We are NOT loading student-schedule.css here.
+       ========================================================= -->
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-my-schedule.css"
+  />
+
+  <!-- =========================================================
+       PAGE ANIMATIONS
+       ========================================================= -->
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  />
 </head>
 
 <body data-page="teacher-schedule">
-  <!-- floating collapse button -->
+
+  <!-- =========================================================
+       SIDEBAR FLOAT TOGGLE
+       ========================================================= -->
   <button
     class="sidebar-float-toggle"
     id="sidebarFloatToggle"
@@ -40,263 +97,370 @@
   </button>
 
   <div class="app">
+
+    <!-- =======================================================
+         SIDEBAR
+         ======================================================= -->
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <!-- TOPBAR -->
-      <header class="topbar">
+    <!-- =======================================================
+         MAIN CONTENT
+         ======================================================= -->
+    <main class="content page-animate">
+
+      <!-- =====================================================
+           TOP BAR
+           ===================================================== -->
+      <header class="topbar reveal-soft">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar">
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            🔔
+          </button>
+
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="Teacher avatar"
+            />
+
             <div class="tb-meta">
-              <div class="tb-name">Giselle Meneses</div>
-              <div class="tb-role">Class 1 - A Teacher</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+              <div class="tb-name">
+                Teacher
+              </div>
+
+              <div class="tb-role">
+                My Schedule
+              </div>
+
             </div>
+
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+              aria-expanded="false"
+            >
+              ▾
+            </button>
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
+            </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- PAGE -->
-      <section class="ms-page">
-        <div class="ms-title">Schedule</div>
 
-        <div class="card ms-card">
-          <!-- Header inside card -->
-          <div class="ms-head">
-            <div class="ms-head-left">
-              <div class="ms-h1">My Weekly Teaching Schedule</div>
-              <div class="ms-h2">
-                No schedule set up yet. Add your weekly class schedule this year.
+      <!-- =====================================================
+           PAGE
+           ===================================================== -->
+      <section class="teachers-wrap">
+
+        <!-- PAGE TITLE -->
+        <div class="teachers-page-head reveal-soft">
+
+          <h2 class="teachers-title">
+            My Schedule
+          </h2>
+
+        </div>
+
+
+        <!-- ===================================================
+             SCHEDULE CARD
+             =================================================== -->
+        <div class="card t-card sched-card reveal-scale">
+
+          <!-- =================================================
+               CARD HEADER
+               ================================================= -->
+          <div class="t-card-head sched-head reveal-item">
+
+            <!-- LEFT -->
+            <div class="sched-left">
+
+              <div class="t-subtitle">
+                Weekly Timetable
               </div>
+
+              <!--
+                Only show the teacher's assigned
+                grade/section here.
+
+                Room and School Year are intentionally
+                not displayed in the header.
+              -->
+              <div class="sched-sub">
+
+                <span id="schedGradeSection">
+                  —
+                </span>
+
+              </div>
+
+              <!--
+                Hidden compatibility elements.
+
+                These remain in the DOM so the existing
+                JavaScript can continue referencing
+                schedRoom and schedSY without errors.
+
+                They are NOT displayed to the teacher.
+              -->
+              <span
+                id="schedRoom"
+                hidden
+              >
+                Room —
+              </span>
+
+              <span
+                id="schedSY"
+                hidden
+              ></span>
+
             </div>
 
-            <div class="ms-head-right">
-              <!-- ✅ Class & Section filter + add button -->
-              <div class="ms-select-add">
-                <select class="ms-select" id="filterClass">
-                  <!-- JS populates this list -->
-                  <option value="class-1-a">Class 1 - A</option>
-                </select>
+
+            <!-- RIGHT -->
+            <div class="sched-actions reveal-item">
+
+              <!-- VIEW TOGGLE -->
+              <div
+                class="sched-toggle"
+                role="tablist"
+                aria-label="Schedule View Toggle"
+              >
 
                 <button
-                  class="ms-addmini"
-                  id="btnAddClass"
+                  class="sched-tab active"
+                  id="viewWeekBtn"
                   type="button"
-                  title="Add Class & Section"
-                  aria-label="Add Class & Section"
+                  role="tab"
+                  aria-selected="true"
                 >
-                  ＋
+                  Week View
                 </button>
-              </div>
-
-              <!-- ✅ Subject filter + add button -->
-              <div class="ms-select-add">
-                <select class="ms-select" id="filterSubject">
-                  <!-- JS will populate (default includes All Subjects) -->
-                  <option value="all">All Subjects</option>
-                </select>
 
                 <button
-                  class="ms-addmini"
-                  id="btnAddSubject"
+                  class="sched-tab"
+                  id="viewDayBtn"
                   type="button"
-                  title="Add Subject"
-                  aria-label="Add Subject"
+                  role="tab"
+                  aria-selected="false"
                 >
-                  ＋
+                  Day View
                 </button>
+
               </div>
+
+
+              <!-- DAY SELECT -->
+              <select
+                id="daySelect"
+                class="t-filter sched-day"
+                aria-label="Select day"
+                disabled
+              >
+
+                <option value="mon">
+                  Monday
+                </option>
+
+                <option value="tue">
+                  Tuesday
+                </option>
+
+                <option value="wed">
+                  Wednesday
+                </option>
+
+                <option value="thu">
+                  Thursday
+                </option>
+
+                <option value="fri">
+                  Friday
+                </option>
+
+              </select>
+
             </div>
+
           </div>
 
-          <div class="ms-divider"></div>
 
-          <!-- Week nav -->
-          <div class="ms-weekbar">
-            <button class="ms-nav" id="weekPrev" type="button" aria-label="Previous week">←</button>
+          <!-- =================================================
+               SCHEDULE BODY
+               ================================================= -->
+          <div class="sched-body reveal-item">
 
-            <div class="ms-weekpill" id="weekLabel">January 21 - 25, 2026</div>
-
-            <button class="ms-nav" id="weekNext" type="button" aria-label="Next week">→</button>
-          </div>
-
-          <!-- Calendar Grid -->
-          <div class="ms-grid-wrap">
-            <div class="ms-grid" id="msGrid">
-              <!-- JS renders header row + time column + day columns -->
+            <!-- =================================================
+                 LOADING
+                 ================================================= -->
+            <div
+              id="schedLoading"
+              class="sched-empty reveal-item"
+            >
+              Loading schedule...
             </div>
 
-            <!-- ✅ NEW: Manage bar (hidden unless manage mode is ON) -->
-            <div class="ms-managebar hidden" id="msManageBar">
-              <div class="ms-managebar-left">
-                <span class="ms-manage-label" id="msSelectedLabel">Select a schedule block to edit or delete.</span>
-              </div>
-              <div class="ms-managebar-right">
-                <button class="ms-ghost" id="btnEditSelected" type="button" disabled>Edit</button>
-                <button class="ms-ghost ms-danger" id="btnDeleteSelected" type="button" disabled>Delete</button>
-                <button class="ms-save" id="btnDoneManage" type="button">Done</button>
-              </div>
-            </div>
 
-            <!-- Empty state overlay -->
-            <div class="ms-empty" id="msEmpty">
-              <div class="ms-empty-ico">
-                <span class="ms-cal">📅</span>
-                <span class="ms-plus">＋</span>
-              </div>
+            <!-- =================================================
+                 WEEK VIEW
+                 ================================================= -->
+            <div
+              id="weekView"
+              class="sched-week hidden"
+            >
 
-              <div class="ms-empty-title">No Schedule Set Up</div>
-              <div class="ms-empty-sub">Set up your weekly class schedule for this year</div>
+              <!-- MONDAY -->
+              <div class="sched-col reveal-item">
 
-              <button class="ms-primary" id="btnSetupSchedule" type="button">
-                Set up schedule
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ✅ Add Class & Section modal -->
-        <div class="ms-modal hidden" id="classModal">
-          <div class="ms-modal-backdrop" id="classModalBackdrop"></div>
-
-          <div class="ms-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="classModalTitle">
-            <div class="ms-modal-head">
-              <div class="ms-modal-title" id="classModalTitle">Add Class & Section</div>
-              <button class="ms-modal-x" id="classModalClose" type="button" aria-label="Close">✕</button>
-            </div>
-
-            <div class="ms-modal-body">
-              <div class="ms-row2">
-                <div class="ms-field">
-                  <label for="inpClass">Class</label>
-                  <input id="inpClass" type="text" placeholder="e.g., Class 1" />
+                <div class="sched-col-head">
+                  Monday
                 </div>
 
-                <div class="ms-field">
-                  <label for="inpSection">Section</label>
-                  <input id="inpSection" type="text" placeholder="e.g., A" />
-                </div>
               </div>
 
-              <div class="ms-hint" id="classModalHint"></div>
+
+              <!-- TUESDAY -->
+              <div class="sched-col reveal-item">
+
+                <div class="sched-col-head">
+                  Tuesday
+                </div>
+
+              </div>
+
+
+              <!-- WEDNESDAY -->
+              <div class="sched-col reveal-item">
+
+                <div class="sched-col-head">
+                  Wednesday
+                </div>
+
+              </div>
+
+
+              <!-- THURSDAY -->
+              <div class="sched-col reveal-item">
+
+                <div class="sched-col-head">
+                  Thursday
+                </div>
+
+              </div>
+
+
+              <!-- FRIDAY -->
+              <div class="sched-col reveal-item">
+
+                <div class="sched-col-head">
+                  Friday
+                </div>
+
+              </div>
+
             </div>
 
-            <div class="ms-modal-foot">
-              <button class="ms-ghost" id="classModalCancel" type="button">Cancel</button>
-              <button class="ms-save" id="classModalSave" type="button">Save</button>
+
+            <!-- =================================================
+                 DAY VIEW
+                 ================================================= -->
+            <div
+              id="dayView"
+              class="sched-dayview hidden"
+            >
+
+              <div class="sched-day-head reveal-item">
+
+                <div
+                  class="sched-col-head"
+                  id="dayViewTitle"
+                >
+                  Monday
+                </div>
+
+              </div>
+
+
+              <div
+                class="sched-day-list"
+                id="dayViewList"
+              ></div>
+
             </div>
+
+
+            <!-- =================================================
+                 EMPTY / ERROR
+                 ================================================= -->
+            <div
+              id="schedEmpty"
+              class="sched-empty hidden reveal-item"
+            >
+              No schedule available yet.
+            </div>
+
           </div>
-        </div>
 
-        <!-- ✅ Add Subject modal -->
-        <div class="ms-modal hidden" id="subjectModal">
-          <div class="ms-modal-backdrop" id="subjectModalBackdrop"></div>
-
-          <div class="ms-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subjectModalTitle">
-            <div class="ms-modal-head">
-              <div>
-                <div class="ms-modal-title" id="subjectModalTitle">Add Subject</div>
-                <div class="ms-modal-sub">Add a subject that will appear in filters and schedule setup.</div>
-              </div>
-              <button class="ms-modal-x" id="subjectModalClose" type="button" aria-label="Close">✕</button>
-            </div>
-
-            <div class="ms-modal-body">
-              <div class="ms-field">
-                <label for="inpSubject">Subject Name <span class="ms-req">*</span></label>
-                <input class="ms-input" id="inpSubject" type="text" placeholder="e.g., English" />
-              </div>
-
-              <div class="ms-hint" id="subjectModalHint"></div>
-            </div>
-
-            <div class="ms-modal-foot">
-              <button class="ms-ghost" id="subjectModalCancel" type="button">Cancel</button>
-              <button class="ms-save" id="subjectModalSave" type="button">Save</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ✅ Set Up Schedule modal -->
-        <div class="ms-modal hidden" id="setupModal">
-          <div class="ms-modal-backdrop" id="setupModalBackdrop"></div>
-
-          <div class="ms-modal-dialog ms-modal-lg" role="dialog" aria-modal="true" aria-labelledby="setupModalTitle">
-            <div class="ms-modal-head">
-              <div>
-                <div class="ms-modal-title" id="setupModalTitle">Set Up Schedule</div>
-                <div class="ms-modal-sub">Create your weekly class schedule for the school year.</div>
-              </div>
-              <button class="ms-modal-x" id="setupModalClose" type="button" aria-label="Close">✕</button>
-            </div>
-
-            <div class="ms-modal-body">
-              <div class="ms-field">
-                <label for="setupSubject">Subject <span class="ms-req">*</span></label>
-                <select class="ms-select ms-select-wide" id="setupSubject"></select>
-              </div>
-
-              <div class="ms-field">
-                <label for="setupClass">Grade / Section</label>
-                <select class="ms-select ms-select-wide" id="setupClass"></select>
-              </div>
-
-              <div class="ms-field">
-                <div class="ms-days" id="setupDays">
-                  <button class="ms-daypill active" type="button" data-day="Mon">Mon</button>
-                  <button class="ms-daypill" type="button" data-day="Tue">Tue</button>
-                  <button class="ms-daypill" type="button" data-day="Wed">Wed</button>
-                  <button class="ms-daypill" type="button" data-day="Thu">Thu</button>
-                  <button class="ms-daypill" type="button" data-day="Fri">Fri</button>
-                </div>
-              </div>
-
-              <div class="ms-time-row">
-                <div class="ms-field">
-                  <label>Time</label>
-                  <div class="ms-time-pair">
-                    <select class="ms-select" id="setupStart"></select>
-                    <div class="ms-dash">-</div>
-                    <select class="ms-select" id="setupEnd"></select>
-                  </div>
-                </div>
-
-                <div class="ms-field">
-                  <label for="setupRoom">Room</label>
-                  <input class="ms-input" id="setupRoom" type="text" placeholder="Room 205" />
-                </div>
-              </div>
-
-              <button class="ms-addline" id="btnAddLine" type="button">＋ Add to Schedule</button>
-
-              <div class="ms-hint ms-hint-warn" id="setupHint"></div>
-
-              <div class="ms-list" id="setupList"></div>
-            </div>
-
-            <div class="ms-modal-foot">
-              <!-- ✅ Delete appears only when editing (JS will toggle) -->
-              <button class="ms-ghost ms-danger hidden" id="setupDelete" type="button">Delete</button>
-
-              <button class="ms-ghost" id="setupCancel" type="button">Cancel</button>
-              <button class="ms-save" id="setupSave" type="button">Save</button>
-            </div>
-          </div>
         </div>
 
       </section>
+
     </main>
+
   </div>
-   <script src="../../js/auth/teacher-guard.js"></script>
+
+
+  <!-- =========================================================
+       SHARED JAVASCRIPT
+       ========================================================= -->
+
+  <script src="../../shared/js/page-animations.js"></script>
+
+  <!-- Teacher sidebar -->
   <script src="../../js/teacher/teacher-sidebar.js"></script>
+
+  <!-- Teacher schedule -->
   <script src="../../js/teacher/teacher-my-schedule.js"></script>
+
 </body>
 </html>

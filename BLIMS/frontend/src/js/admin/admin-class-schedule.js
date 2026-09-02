@@ -1,36 +1,21 @@
-// frontend/src/js/admin-class-schedule.js
-// Class Schedule (Admin) - hybrid version
-// - Grade levels + section counts + sections fetched from backend
-// - Subjects from localStorage subjects page
-// - Teachers from localStorage fallback keys
-// - Schedule entries still stored in localStorage
-// - Conflict checks:
-//   A) overlaps per Grade+Section+Day
-//   B) overlaps per Teacher+Day
-
+// frontend/src/js/admin/admin-class-schedule.js
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
 
-  // Storage
-  const LS_SCHEDULE = "blims_class_schedule_v1";
-  const LS_SUBJECTS = "blims_subjects_v1";
-
   const API_BASE = "/api/admin";
 
-  // Unknown teacher key in your project; try common keys first
-  const TEACHER_KEYS_TRY = [
-    "blims_teachers_v1",
-    "rbms_teachers_v1",
-    "rbms_teachers",
-    "teachers_v1",
-    "blims_admin_teachers_v1"
+  const DEFAULT_GRADES = [
+    "Kinder",
+    "Grade 1",
+    "Grade 2",
+    "Grade 3",
+    "Grade 4",
+    "Grade 5",
+    "Grade 6"
   ];
 
-  const DEFAULT_GRADES = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
   const DEFAULT_SECTIONS = ["A"];
-  const DEFAULT_SUBJECTS = ["English", "Filipino", "Mathematics", "Science", "Araling Panlipunan", "MAPEH", "ESP"];
 
-  // UI
   const gradeList = $("gradeList");
   const sectionSelect = $("sectionSelect");
   const sectionHint = $("sectionHint");
@@ -38,12 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const scheduleTbody = $("scheduleTbody");
 
   const addEntryBtn = $("addEntryBtn");
-
   const searchInput = $("searchInput");
-  const teacherFilter = $("teacherFilter");
   const roomFilter = $("roomFilter");
 
-  // modal
   const entryModal = $("entryModal");
   const entryBackdrop = $("entryBackdrop");
   const entryCloseX = $("entryCloseX");
@@ -56,17 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const modalGrade = $("modalGrade");
   const modalSection = $("modalSection");
-  const modalSubject = $("modalSubject");
   const modalDay = $("modalDay");
-  const modalStart = $("modalStart");
-  const modalEnd = $("modalEnd");
-  const modalRoom = $("modalRoom");
-  const modalTeacherSelect = $("modalTeacherSelect");
-  const modalTeacherText = $("modalTeacherText");
-  const teacherHint = $("teacherHint");
+  const modalAdviser = $("modalAdviser");
+  const adviserHint = $("adviserHint");
   const modalNotes = $("modalNotes");
+  const subjectScheduleBody = $("subjectScheduleBody");
 
-  // confirm
   const confirmModal = $("confirmModal");
   const confirmBackdrop = $("confirmBackdrop");
   const confirmCloseX = $("confirmCloseX");
@@ -74,18 +51,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmDelete = $("confirmDelete");
   const confirmText = $("confirmText");
 
-  // state
   let activeGrade = DEFAULT_GRADES[0];
   let activeSection = DEFAULT_SECTIONS[0];
-  let editingId = null;
+
+  let editingDayKey = null;
   let pendingDeleteId = null;
 
-  // backend caches
   let backendGrades = [];
   let backendSectionsMap = {};
+  let backendSubjectsMap = {};
   let summaryCounts = {};
+  let scheduleCache = [];
+  let csrfToken = "";
 
-  // ---------- helpers ----------
+  // ==============================
+  // helpers
+  // ==============================
+
   function uid(prefix = "SCH") {
     return `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now()}`;
   }
@@ -105,13 +87,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function parseTimeToMin(t) {
     if (!t || typeof t !== "string" || !t.includes(":")) return NaN;
+
     const [hh, mm] = t.split(":").map(Number);
-    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return NaN;
+
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) {
+      return NaN;
+    }
+
     return hh * 60 + mm;
   }
 
   function overlaps(aStart, aEnd, bStart, bEnd) {
     return aStart < bEnd && bStart < aEnd;
+  }
+
+  function dayKey(grade, section, day) {
+    return `${grade}|||${section}|||${day}`;
   }
 
   function showErr(msg) {
@@ -127,20 +118,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function openModal() {
     entryModal.classList.remove("hidden");
     entryModal.setAttribute("aria-hidden", "false");
-    setTimeout(() => modalSubject.focus(), 0);
   }
 
   function closeModal() {
     entryModal.classList.add("hidden");
     entryModal.setAttribute("aria-hidden", "true");
     hideErr();
-    editingId = null;
+    editingDayKey = null;
   }
 
   function openConfirm() {
     confirmModal.classList.remove("hidden");
     confirmModal.setAttribute("aria-hidden", "false");
-    setTimeout(() => confirmDelete.focus(), 0);
   }
 
   function closeConfirm() {
@@ -149,14 +138,55 @@ document.addEventListener("DOMContentLoaded", () => {
     pendingDeleteId = null;
   }
 
-  // ---------- backend ----------
-  async function api(path) {
+  // ==============================
+  // csrf + api
+  // ==============================
+
+  async function getCsrfToken() {
+    if (csrfToken) return csrfToken;
+
+    const res = await fetch("/api/csrf-token", {
+      credentials: "include",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    const data = await res.json();
+
+    csrfToken = data?.csrfToken || "";
+
+    return csrfToken;
+  }
+
+  async function api(path, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+
+    const headers = {
+      Accept: "application/json",
+      ...(options.headers || {})
+    };
+
+    if (options.body && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (method !== "GET" && method !== "HEAD") {
+      const token = await getCsrfToken();
+
+      if (token) {
+        headers["x-csrf-token"] = token;
+      }
+    }
+
     const res = await fetch(`${API_BASE}${path}`, {
       credentials: "include",
-      headers: { Accept: "application/json" }
+      ...options,
+      headers
     });
 
     const text = await res.text();
+
     let data = null;
 
     try {
@@ -166,20 +196,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!res.ok) {
-      throw new Error((data && (data.message || data.error)) || `Request failed (${res.status})`);
+      throw new Error(
+        (data && (data.message || data.error)) ||
+        `Request failed (${res.status})`
+      );
     }
 
-    if (data && typeof data === "object" && data.ok === true && "data" in data) {
+    if (
+      data &&
+      typeof data === "object" &&
+      data.ok === true &&
+      "data" in data
+    ) {
       return data.data;
     }
 
     return data;
   }
 
+  // ==============================
+  // backend grades
+  // ==============================
+
   async function loadBackendGrades() {
     const data = await api("/grade-levels");
 
     let list = [];
+
     if (Array.isArray(data)) {
       list = data;
     } else if (data && Array.isArray(data.items)) {
@@ -190,7 +233,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     backendGrades = list
       .map((item) => {
-        if (typeof item === "string") return item;
+        if (typeof item === "string") {
+          return item;
+        }
+
         return item?.grade || item?.name || "";
       })
       .filter(Boolean);
@@ -200,147 +246,221 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ==============================
+  // backend subjects
+  // ==============================
+
+  async function loadBackendSubjectsForGrade(grade) {
+    if (!grade) return;
+
+    const data = await api(
+      `/subjects?grade=${encodeURIComponent(grade)}`
+    );
+
+    let subjects = [];
+
+    if (Array.isArray(data)) {
+      subjects = data;
+    } else if (data && Array.isArray(data.subjects)) {
+      subjects = data.subjects;
+    } else if (data && Array.isArray(data.items)) {
+      subjects = data.items;
+    }
+
+    backendSubjectsMap[grade] = subjects
+      .map((subject) => {
+        if (typeof subject === "string") {
+          return subject.trim();
+        }
+
+        return String(
+          subject?.name ||
+          subject?.subject ||
+          subject?.title ||
+          ""
+        ).trim();
+      })
+      .filter(Boolean)
+      .filter((subject, index, arr) => {
+        return (
+          arr.findIndex(
+            (existing) => norm(existing) === norm(subject)
+          ) === index
+        );
+      })
+      .sort((a, b) => a.localeCompare(b));
+  }
+
+  function getSubjectsForGrade(grade) {
+    if (!grade) return [];
+
+    return Array.isArray(backendSubjectsMap[grade])
+      ? backendSubjectsMap[grade].slice()
+      : [];
+  }
+
+  // ==============================
+  // backend sections
+  // ==============================
+
   async function loadSummaryCounts() {
     const data = await api("/sections/summary");
-    summaryCounts = data && typeof data === "object" ? data : {};
+
+    summaryCounts =
+      data && typeof data === "object"
+        ? data
+        : {};
   }
 
   async function loadBackendSectionsForGrade(grade) {
     if (!grade) return;
 
-    const data = await api(`/sections?grade=${encodeURIComponent(grade)}`);
-    const rows = Array.isArray(data) ? data : [];
+    const data = await api(
+      `/sections?grade=${encodeURIComponent(grade)}`
+    );
 
-    const sectionNames = rows
-      .map((item) => item?.section || "")
-      .filter(Boolean);
+    const rows = Array.isArray(data)
+      ? data
+      : [];
 
-    backendSectionsMap[grade] = sectionNames.length ? sectionNames : DEFAULT_SECTIONS.slice();
+    backendSectionsMap[grade] = rows.length
+      ? rows
+          .map((item) => ({
+            section: item?.section || "",
+            adviser: item?.adviser || "",
+            adviserId: item?.adviserId || null
+          }))
+          .filter((x) => x.section)
+      : DEFAULT_SECTIONS.map((s) => ({
+          section: s,
+          adviser: "",
+          adviserId: null
+        }));
   }
 
   async function ensureSectionsLoaded(grade) {
     if (!grade) return;
+
     if (!Array.isArray(backendSectionsMap[grade])) {
       await loadBackendSectionsForGrade(grade);
     }
   }
 
-  // ---------- storage ----------
+  // ==============================
+  // schedules
+  // ==============================
+
+  async function loadSchedules() {
+    const data = await api("/class-schedules");
+
+    scheduleCache = Array.isArray(data)
+      ? data
+      : [];
+  }
+
   function readSchedule() {
-    try {
-      const raw = localStorage.getItem(LS_SCHEDULE);
-      const data = raw ? JSON.parse(raw) : [];
-      return Array.isArray(data) ? data : [];
-    } catch {
-      return [];
-    }
+    return Array.isArray(scheduleCache)
+      ? scheduleCache.slice()
+      : [];
   }
 
-  function writeSchedule(list) {
-    localStorage.setItem(LS_SCHEDULE, JSON.stringify(list));
-  }
+  // ==============================
+  // grades / sections
+  // ==============================
 
-  function readSubjectsStore() {
-    try {
-      const raw = localStorage.getItem(LS_SUBJECTS);
-      const obj = raw ? JSON.parse(raw) : null;
-      if (!obj || typeof obj !== "object") return null;
-      return obj;
-    } catch {
-      return null;
-    }
-  }
-
-  function readTeachersList() {
-    for (const key of TEACHER_KEYS_TRY) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-
-        const obj = JSON.parse(raw);
-
-        if (Array.isArray(obj)) {
-          return obj
-            .map((t) => typeof t === "string" ? t : (t?.name || t?.fullName || t?.teacherName || ""))
-            .map((s) => String(s).trim())
-            .filter(Boolean);
-        }
-
-        const candidate = obj.items || obj.list || obj.teachers || obj.data || obj.records;
-
-        if (Array.isArray(candidate)) {
-          return candidate
-            .map((t) => typeof t === "string" ? t : (t?.name || t?.fullName || t?.teacherName || ""))
-            .map((s) => String(s).trim())
-            .filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-    return [];
-  }
-
-  // ---------- data sources ----------
   function getGradeOptions() {
-    return backendGrades.length ? backendGrades.slice() : DEFAULT_GRADES.slice();
+    return backendGrades.length
+      ? backendGrades.slice()
+      : DEFAULT_GRADES.slice();
   }
 
   function getSectionsForGrade(grade) {
-    if (Array.isArray(backendSectionsMap[grade]) && backendSectionsMap[grade].length) {
+    if (
+      Array.isArray(backendSectionsMap[grade]) &&
+      backendSectionsMap[grade].length
+    ) {
       return backendSectionsMap[grade].slice();
     }
-    return DEFAULT_SECTIONS.slice();
+
+    return DEFAULT_SECTIONS.map((s) => ({
+      section: s,
+      adviser: "",
+      adviserId: null
+    }));
   }
 
-  function getSubjectsForGrade(grade) {
-    const sub = readSubjectsStore();
+  function getSectionInfo(grade, sectionName) {
+    const sections = getSectionsForGrade(grade);
 
-    if (sub?.gradeSubjects && Array.isArray(sub.gradeSubjects[grade]) && sub.gradeSubjects[grade].length) {
-      return sub.gradeSubjects[grade].slice();
-    }
-
-    if (sub?.masterSubjects && Array.isArray(sub.masterSubjects) && sub.masterSubjects.length) {
-      return sub.masterSubjects.slice();
-    }
-
-    return DEFAULT_SUBJECTS.slice();
+    return (
+      sections.find(
+        (s) => s.section === sectionName
+      ) || null
+    );
   }
 
-  // ---------- UI builders ----------
+  // ==============================
+  // selected class
+  // ==============================
+
   function setSelectedTitle() {
-    selectedClassTitle.textContent = `${activeGrade} • Section ${activeSection}`;
-    sectionHint.textContent = `Editing schedules for ${activeGrade} — ${activeSection}`;
+    selectedClassTitle.textContent =
+      `${activeGrade} • Section ${activeSection}`;
+
+    sectionHint.textContent =
+      `Editing schedules for ${activeGrade} — ${activeSection}`;
   }
+
+  // ==============================
+  // grade list
+  // ==============================
 
   async function buildGradeList() {
     const grades = getGradeOptions();
+
     gradeList.innerHTML = "";
 
     grades.forEach((g) => {
       const btn = document.createElement("button");
+
       btn.type = "button";
-      btn.className = "cs-grade-btn" + (g === activeGrade ? " active" : "");
+
+      btn.className =
+        "cs-grade-btn" +
+        (g === activeGrade ? " active" : "");
 
       const left = document.createElement("span");
       left.textContent = g;
 
       const pill = document.createElement("span");
       pill.className = "cs-pill";
+
       const n = Number(summaryCounts[g] || 0);
-      pill.textContent = `${n} section${n === 1 ? "" : "s"}`;
+
+      pill.textContent =
+        `${n} section${n === 1 ? "" : "s"}`;
 
       btn.appendChild(left);
       btn.appendChild(pill);
 
       btn.addEventListener("click", async () => {
         activeGrade = g;
-        await ensureSectionsLoaded(activeGrade);
-        const secs = getSectionsForGrade(activeGrade);
-        activeSection = secs[0] || DEFAULT_SECTIONS[0];
 
-        await buildGradeList(); // refresh active highlight
+        await ensureSectionsLoaded(activeGrade);
+
+        // Fetch subjects from MongoDB/backend
+        await loadBackendSubjectsForGrade(activeGrade);
+
+        const secs =
+          getSectionsForGrade(activeGrade);
+
+        activeSection =
+          secs[0]?.section ||
+          DEFAULT_SECTIONS[0];
+
+        await buildGradeList();
         await buildSectionSelect();
+
         setSelectedTitle();
         renderTable();
       });
@@ -349,399 +469,1190 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (!grades.includes(activeGrade)) {
-      activeGrade = grades[0] || DEFAULT_GRADES[0];
+      activeGrade =
+        grades[0] ||
+        DEFAULT_GRADES[0];
     }
   }
+
+  // ==============================
+  // section select
+  // ==============================
 
   async function buildSectionSelect() {
     await ensureSectionsLoaded(activeGrade);
 
-    const secs = getSectionsForGrade(activeGrade);
-    sectionSelect.innerHTML = secs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    const secs =
+      getSectionsForGrade(activeGrade);
 
-    if (!secs.includes(activeSection)) {
-      activeSection = secs[0] || DEFAULT_SECTIONS[0];
+    sectionSelect.innerHTML = secs
+      .map(
+        (s) =>
+          `<option value="${esc(s.section)}">${esc(
+            s.section
+          )}</option>`
+      )
+      .join("");
+
+    if (
+      !secs.some(
+        (s) => s.section === activeSection
+      )
+    ) {
+      activeSection =
+        secs[0]?.section ||
+        DEFAULT_SECTIONS[0];
     }
 
     sectionSelect.value = activeSection;
 
     sectionSelect.onchange = () => {
-      activeSection = sectionSelect.value;
+      activeSection =
+        sectionSelect.value;
+
       setSelectedTitle();
       renderTable();
     };
   }
 
-  function buildFiltersFromSchedule(list) {
-    const teachers = Array.from(new Set(list.map((x) => x.teacher).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-    teacherFilter.innerHTML =
-      `<option value="all">All Teachers</option>` +
-      teachers.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+  // ==============================
+  // room filters
+  // ==============================
 
-    const rooms = Array.from(new Set(list.map((x) => x.room).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  function buildFiltersFromSchedule(list) {
+    const rooms = Array.from(
+      new Set(
+        list
+          .map((x) => x.room)
+          .filter(Boolean)
+      )
+    ).sort((a, b) =>
+      a.localeCompare(b)
+    );
+
     roomFilter.innerHTML =
       `<option value="all">All Rooms</option>` +
-      rooms.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
+      rooms
+        .map(
+          (r) =>
+            `<option value="${esc(r)}">${esc(r)}</option>`
+        )
+        .join("");
   }
 
-  // ---------- modal field builders ----------
+  // ==============================
+  // modal grade / section
+  // ==============================
+
   async function fillModalGradeSection() {
     const grades = getGradeOptions();
-    modalGrade.innerHTML = grades.map((g) => `<option value="${esc(g)}">${esc(g)}</option>`).join("");
+
+    modalGrade.innerHTML = grades
+      .map(
+        (g) =>
+          `<option value="${esc(g)}">${esc(g)}</option>`
+      )
+      .join("");
+
     modalGrade.value = activeGrade;
 
-    await ensureSectionsLoaded(modalGrade.value);
-    const secs = getSectionsForGrade(modalGrade.value);
-    modalSection.innerHTML = secs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-    modalSection.value = activeSection;
+    await ensureSectionsLoaded(
+      modalGrade.value
+    );
+
+    // Fetch subjects for selected grade
+    await loadBackendSubjectsForGrade(
+      modalGrade.value
+    );
+
+    buildModalSectionOptions(
+      modalGrade.value,
+      activeSection
+    );
+
+    updateModalAdviser();
+
+    renderSubjectScheduleRows();
 
     modalGrade.onchange = async () => {
-      const newGrade = modalGrade.value;
-      await ensureSectionsLoaded(newGrade);
-      const newSecs = getSectionsForGrade(newGrade);
-      modalSection.innerHTML = newSecs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-      modalSection.value = newSecs[0] || "";
-      fillModalSubjects();
+      const newGrade =
+        modalGrade.value;
+
+      await ensureSectionsLoaded(
+        newGrade
+      );
+
+      // Fetch subjects for newly selected grade
+      await loadBackendSubjectsForGrade(
+        newGrade
+      );
+
+      buildModalSectionOptions(
+        newGrade
+      );
+
+      updateModalAdviser();
+
+      renderSubjectScheduleRows();
     };
 
-    modalSection.onchange = () => {};
+    modalSection.onchange = () => {
+      updateModalAdviser();
+    };
   }
 
-  function fillModalSubjects() {
-    const subs = getSubjectsForGrade(modalGrade.value);
-    modalSubject.innerHTML = subs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-  }
+  function buildModalSectionOptions(
+    grade,
+    selected = ""
+  ) {
+    const secs =
+      getSectionsForGrade(grade);
 
-  function fillTeacherField() {
-    const teachers = readTeachersList();
+    modalSection.innerHTML = secs
+      .map(
+        (s) =>
+          `<option value="${esc(s.section)}">${esc(
+            s.section
+          )}</option>`
+      )
+      .join("");
 
-    if (teachers.length) {
-      modalTeacherSelect.classList.remove("hidden");
-      modalTeacherText.classList.add("hidden");
-      teacherHint.textContent = "Teacher list loaded from saved teachers.";
-      modalTeacherSelect.innerHTML =
-        `<option value="">Select teacher</option>` +
-        teachers.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+    if (
+      secs.some(
+        (s) => s.section === selected
+      )
+    ) {
+      modalSection.value = selected;
     } else {
-      modalTeacherSelect.classList.add("hidden");
-      modalTeacherText.classList.remove("hidden");
-      teacherHint.textContent = "No saved teachers found — type the teacher name.";
-      modalTeacherText.value = "";
+      modalSection.value =
+        secs[0]?.section || "";
     }
   }
 
-  function getTeacherValue() {
-    if (!modalTeacherSelect.classList.contains("hidden")) {
-      return (modalTeacherSelect.value || "").trim();
-    }
-    return (modalTeacherText.value || "").trim();
-  }
+  function updateModalAdviser() {
+    const info = getSectionInfo(
+      modalGrade.value,
+      modalSection.value
+    );
 
-  function setTeacherValue(v) {
-    const val = (v || "").trim();
+    const adviser =
+      (info?.adviser || "").trim();
 
-    if (!modalTeacherSelect.classList.contains("hidden")) {
-      const opt = Array.from(modalTeacherSelect.options).some((o) => norm(o.value) === norm(val));
-      if (opt) {
-        modalTeacherSelect.value = val;
-      } else {
-        modalTeacherSelect.classList.add("hidden");
-        modalTeacherText.classList.remove("hidden");
-        modalTeacherText.value = val;
-        teacherHint.textContent = "Teacher not in list — using text input.";
-      }
+    modalAdviser.value = adviser;
+
+    if (adviser) {
+      adviserHint.textContent = "";
+      adviserHint.classList.add("hidden");
     } else {
-      modalTeacherText.value = val;
+      adviserHint.textContent =
+        "No adviser assigned yet for this section.";
+
+      adviserHint.classList.remove(
+        "hidden"
+      );
     }
   }
+
+  // ==============================
+  // subject schedule rows
+  // ==============================
+
+  function renderSubjectScheduleRows(
+    prefillMap = {}
+  ) {
+    const subjects =
+      getSubjectsForGrade(
+        modalGrade.value
+      );
+
+    if (!subjects.length) {
+      subjectScheduleBody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            No subjects found for ${esc(
+              modalGrade.value || "this grade"
+            )}.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    subjectScheduleBody.innerHTML =
+      subjects
+        .map((subject, idx) => {
+          const existing =
+            prefillMap[subject] || {};
+
+          return `
+            <tr data-subject="${esc(subject)}">
+              <td class="cs-bulk-index">
+                ${idx + 1}
+              </td>
+
+              <td class="cs-bulk-subject">
+                ${esc(subject)}
+              </td>
+
+              <td>
+                <input
+                  class="cs-time-input js-start"
+                  type="time"
+                  value="${esc(
+                    existing.start || ""
+                  )}"
+                />
+              </td>
+
+              <td>
+                <input
+                  class="cs-time-input js-end"
+                  type="time"
+                  value="${esc(
+                    existing.end || ""
+                  )}"
+                />
+              </td>
+
+              <td>
+                <input
+                  class="cs-room-input js-room"
+                  type="text"
+                  value="${esc(
+                    existing.room || ""
+                  )}"
+                  placeholder="e.g., Room 3"
+                />
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+  }
+
+  function getSubjectRowsFromModal() {
+    const rows =
+      Array.from(
+        subjectScheduleBody.querySelectorAll(
+          "tr[data-subject]"
+        )
+      );
+
+    return rows.map((tr) => {
+      const subject =
+        tr.getAttribute(
+          "data-subject"
+        ) || "";
+
+      const start =
+        tr.querySelector(
+          ".js-start"
+        )?.value || "";
+
+      const end =
+        tr.querySelector(
+          ".js-end"
+        )?.value || "";
+
+      const room =
+        (
+          tr.querySelector(
+            ".js-room"
+          )?.value || ""
+        ).trim();
+
+      return {
+        subject,
+        start,
+        end,
+        room
+      };
+    });
+  }
+
+  // ==============================
+  // modal reset
+  // ==============================
 
   async function resetModalFields() {
     await fillModalGradeSection();
-    fillModalSubjects();
-    fillTeacherField();
 
     modalDay.value = "Monday";
-    modalStart.value = "";
-    modalEnd.value = "";
-    modalRoom.value = "";
     modalNotes.value = "";
+
     hideErr();
   }
 
-  // ---------- conflict validation ----------
-  function validateEntry(candidate, list) {
-    const startMin = parseTimeToMin(candidate.start);
-    const endMin = parseTimeToMin(candidate.end);
+  // ==============================
+  // validation
+  // ==============================
 
-    if (!candidate.grade) return "Grade is required.";
-    if (!candidate.section) return "Section is required.";
-    if (!candidate.subject) return "Subject is required.";
-    if (!candidate.day) return "Day is required.";
-    if (!Number.isFinite(startMin)) return "Start time is required.";
-    if (!Number.isFinite(endMin)) return "End time is required.";
-    if (endMin <= startMin) return "End time must be after start time.";
-    if (!candidate.teacher) return "Teacher is required.";
-    if (!candidate.room) return "Room is required.";
+  function validateSingleEntry(
+    candidate,
+    list,
+    ignoreIds = []
+  ) {
+    const hasAnyValue =
+      candidate.start ||
+      candidate.end ||
+      candidate.room;
 
-    const others = list.filter((x) => x.id !== candidate.id);
+    if (!hasAnyValue) return null;
+
+    const startMin =
+      parseTimeToMin(candidate.start);
+
+    const endMin =
+      parseTimeToMin(candidate.end);
+
+    if (!candidate.grade) {
+      return "Grade is required.";
+    }
+
+    if (!candidate.section) {
+      return "Section is required.";
+    }
+
+    if (!candidate.subject) {
+      return "Subject is required.";
+    }
+
+    if (!candidate.day) {
+      return "Day is required.";
+    }
+
+    if (!candidate.start) {
+      return `Start time is required for ${candidate.subject}.`;
+    }
+
+    if (!candidate.end) {
+      return `End time is required for ${candidate.subject}.`;
+    }
+
+    if (!Number.isFinite(startMin)) {
+      return `Invalid start time for ${candidate.subject}.`;
+    }
+
+    if (!Number.isFinite(endMin)) {
+      return `Invalid end time for ${candidate.subject}.`;
+    }
+
+    if (endMin <= startMin) {
+      return `End time must be after start time for ${candidate.subject}.`;
+    }
+
+    const others =
+      list.filter(
+        (x) => !ignoreIds.includes(x.id)
+      );
 
     for (const e of others) {
-      if (e.day !== candidate.day) continue;
-
-      const eStart = parseTimeToMin(e.start);
-      const eEnd = parseTimeToMin(e.end);
-      if (!Number.isFinite(eStart) || !Number.isFinite(eEnd)) continue;
-
-      const timeHit = overlaps(startMin, endMin, eStart, eEnd);
-
-      if (timeHit && e.grade === candidate.grade && e.section === candidate.section) {
-        return `Conflict: overlaps ${e.day} ${e.start}-${e.end} for ${e.grade} Section ${e.section}.`;
+      if (e.day !== candidate.day) {
+        continue;
       }
 
-      if (timeHit && norm(e.teacher) === norm(candidate.teacher)) {
-        return `Conflict: teacher "${candidate.teacher}" already has ${e.day} ${e.start}-${e.end}.`;
+      const eStart =
+        parseTimeToMin(e.start);
+
+      const eEnd =
+        parseTimeToMin(e.end);
+
+      if (
+        !Number.isFinite(eStart) ||
+        !Number.isFinite(eEnd)
+      ) {
+        continue;
+      }
+
+      const timeHit =
+        overlaps(
+          startMin,
+          endMin,
+          eStart,
+          eEnd
+        );
+
+      if (
+        timeHit &&
+        e.grade === candidate.grade &&
+        e.section === candidate.section
+      ) {
+        return `Time already taken: ${candidate.subject} overlaps ${e.subject} (${e.start} - ${e.end}) for ${e.grade} Section ${e.section}.`;
+      }
+
+      if (
+        candidate.teacher &&
+        e.teacher &&
+        timeHit &&
+        norm(e.teacher) ===
+          norm(candidate.teacher)
+      ) {
+        return `Teacher conflict: "${candidate.teacher}" already has ${e.day} ${e.start}-${e.end}.`;
       }
     }
 
     return null;
   }
 
-  // ---------- CRUD ----------
+  function validateBulkEntries(
+    entries,
+    list,
+    ignoreIds = []
+  ) {
+    const activeEntries =
+      entries.filter(
+        (entry) =>
+          entry.start ||
+          entry.end ||
+          entry.room
+      );
+
+    if (!activeEntries.length) {
+      return "Please enter at least one subject schedule.";
+    }
+
+    for (const entry of activeEntries) {
+      const err =
+        validateSingleEntry(
+          entry,
+          list,
+          ignoreIds
+        );
+
+      if (err) return err;
+    }
+
+    for (
+      let i = 0;
+      i < activeEntries.length;
+      i++
+    ) {
+      for (
+        let j = i + 1;
+        j < activeEntries.length;
+        j++
+      ) {
+        const a =
+          activeEntries[i];
+
+        const b =
+          activeEntries[j];
+
+        if (a.day !== b.day) {
+          continue;
+        }
+
+        if (
+          a.grade !== b.grade ||
+          a.section !== b.section
+        ) {
+          continue;
+        }
+
+        const aStart =
+          parseTimeToMin(a.start);
+
+        const aEnd =
+          parseTimeToMin(a.end);
+
+        const bStart =
+          parseTimeToMin(b.start);
+
+        const bEnd =
+          parseTimeToMin(b.end);
+
+        if (
+          !Number.isFinite(aStart) ||
+          !Number.isFinite(aEnd)
+        ) {
+          continue;
+        }
+
+        if (
+          !Number.isFinite(bStart) ||
+          !Number.isFinite(bEnd)
+        ) {
+          continue;
+        }
+
+        if (
+          overlaps(
+            aStart,
+            aEnd,
+            bStart,
+            bEnd
+          )
+        ) {
+          return `Time already taken: "${a.subject}" (${a.start} - ${a.end}) overlaps "${b.subject}" (${b.start} - ${b.end}).`;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // ==============================
+  // add schedule
+  // ==============================
+
   async function startAdd() {
-    editingId = null;
-    entryTitle.textContent = "Add Schedule Entry";
-    entrySub.textContent = "Fill in the schedule details.";
+    editingDayKey = null;
+
+    entryTitle.textContent =
+      "Add Day Schedule";
+
+    entrySub.textContent =
+      "Select grade, section, and day. Then assign time slots for all subjects at once.";
+
     await resetModalFields();
 
     modalGrade.value = activeGrade;
-    await ensureSectionsLoaded(activeGrade);
-    const secs = getSectionsForGrade(activeGrade);
-    modalSection.innerHTML = secs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-    modalSection.value = activeSection;
 
-    fillModalSubjects();
+    await ensureSectionsLoaded(
+      activeGrade
+    );
+
+    // Make sure current grade subjects are loaded
+    await loadBackendSubjectsForGrade(
+      activeGrade
+    );
+
+    buildModalSectionOptions(
+      activeGrade,
+      activeSection
+    );
+
+    updateModalAdviser();
+
+    renderSubjectScheduleRows();
+
     openModal();
   }
 
-  async function startEdit(id) {
-    const list = readSchedule();
-    const item = list.find((x) => x.id === id);
-    if (!item) return;
+  // ==============================
+  // edit schedule
+  // ==============================
 
-    editingId = id;
-    entryTitle.textContent = "Edit Schedule Entry";
-    entrySub.textContent = "Update the schedule details.";
+  async function startEditByDay(id) {
+    const list = readSchedule();
+
+    const clicked =
+      list.find(
+        (x) => x.id === id
+      );
+
+    if (!clicked) return;
+
+    const key =
+      dayKey(
+        clicked.grade,
+        clicked.section,
+        clicked.day
+      );
+
+    const dayRows =
+      list.filter(
+        (x) =>
+          dayKey(
+            x.grade,
+            x.section,
+            x.day
+          ) === key
+      );
+
+    editingDayKey = key;
+
+    entryTitle.textContent =
+      "Edit Day Schedule";
+
+    entrySub.textContent =
+      `Update all subject schedules for ${clicked.grade} • Section ${clicked.section} • ${clicked.day}.`;
+
     await resetModalFields();
 
-    modalGrade.value = item.grade;
-    await ensureSectionsLoaded(item.grade);
-    const secs = getSectionsForGrade(item.grade);
-    modalSection.innerHTML = secs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-    modalSection.value = item.section;
+    modalGrade.value =
+      clicked.grade;
 
-    fillModalSubjects();
-    modalSubject.value = item.subject;
+    await ensureSectionsLoaded(
+      clicked.grade
+    );
 
-    modalDay.value = item.day;
-    modalStart.value = item.start;
-    modalEnd.value = item.end;
-    modalRoom.value = item.room || "";
-    modalNotes.value = item.notes || "";
+    // Fetch subjects for the edited grade
+    await loadBackendSubjectsForGrade(
+      clicked.grade
+    );
 
-    setTeacherValue(item.teacher);
+    buildModalSectionOptions(
+      clicked.grade,
+      clicked.section
+    );
+
+    modalDay.value =
+      clicked.day;
+
+    modalNotes.value =
+      clicked.notes || "";
+
+    updateModalAdviser();
+
+    const prefillMap = {};
+
+    dayRows.forEach((row) => {
+      prefillMap[row.subject] = {
+        start: row.start || "",
+        end: row.end || "",
+        room: row.room || ""
+      };
+    });
+
+    renderSubjectScheduleRows(
+      prefillMap
+    );
 
     openModal();
   }
 
+  // ==============================
+  // save schedule
+  // ==============================
+
   async function saveEntry() {
-    const list = readSchedule();
+    const grade =
+      modalGrade.value;
 
-    const entry = {
-      id: editingId || uid("ENTRY"),
-      grade: modalGrade.value,
-      section: modalSection.value,
-      subject: modalSubject.value,
-      day: modalDay.value,
-      start: modalStart.value,
-      end: modalEnd.value,
-      room: modalRoom.value.trim(),
-      teacher: getTeacherValue(),
-      notes: modalNotes.value.trim(),
-      updatedAt: Date.now(),
-      createdAt: editingId ? undefined : Date.now(),
-    };
+    const section =
+      modalSection.value;
 
-    const err = validateEntry(entry, list);
-    if (err) return showErr(err);
+    const day =
+      modalDay.value;
 
-    if (editingId) {
-      const idx = list.findIndex((x) => x.id === editingId);
-      if (idx === -1) return showErr("Could not find entry to edit.");
-      list[idx] = { ...list[idx], ...entry, createdAt: list[idx].createdAt || Date.now() };
-    } else {
-      list.push(entry);
-      activeGrade = entry.grade;
-      activeSection = entry.section;
-      await ensureSectionsLoaded(activeGrade);
-      await loadSummaryCounts();
-      await buildGradeList();
-      await buildSectionSelect();
-      setSelectedTitle();
+    const notes =
+      modalNotes.value.trim();
+
+    const rawRows =
+      getSubjectRowsFromModal();
+
+    const entries =
+      rawRows
+        .filter(
+          (r) =>
+            r.start ||
+            r.end ||
+            r.room
+        )
+        .map((r) => ({
+          subject: r.subject,
+          start: r.start,
+          end: r.end,
+          room: r.room
+        }));
+
+    const tempList =
+      entries.map((r) => ({
+        id: uid("ENTRY"),
+        grade,
+        section,
+        subject: r.subject,
+        day,
+        start: r.start,
+        end: r.end,
+        room: r.room,
+        teacher: "",
+        notes
+      }));
+
+    const err =
+      validateBulkEntries(
+        tempList,
+        [],
+        []
+      );
+
+    if (err) {
+      return showErr(err);
     }
 
-    writeSchedule(list);
+    if (editingDayKey) {
+      const [
+        oldGrade,
+        oldSection,
+        oldDay
+      ] = editingDayKey.split(
+        "|||"
+      );
+
+      await api(
+        `/class-schedules/${encodeURIComponent(
+          oldGrade
+        )}/${encodeURIComponent(
+          oldSection
+        )}/${encodeURIComponent(
+          oldDay
+        )}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            notes,
+            entries
+          })
+        }
+      );
+    } else {
+      await api(
+        "/class-schedules",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            grade,
+            section,
+            day,
+            notes,
+            entries
+          })
+        }
+      );
+    }
+
+    activeGrade = grade;
+    activeSection = section;
+
+    await ensureSectionsLoaded(
+      activeGrade
+    );
+
+    await loadBackendSubjectsForGrade(
+      activeGrade
+    );
+
+    await loadSummaryCounts();
+
+    await buildGradeList();
+    await buildSectionSelect();
+
+    setSelectedTitle();
+
     closeModal();
+
     await render();
   }
 
+  // ==============================
+  // delete
+  // ==============================
+
   function startDelete(id) {
     const list = readSchedule();
-    const item = list.find((x) => x.id === id);
+
+    const item =
+      list.find(
+        (x) => x.id === id
+      );
+
     if (!item) return;
 
     pendingDeleteId = id;
-    confirmText.textContent = `Delete ${item.day} ${item.start}-${item.end} (${item.subject}) for ${item.grade} Section ${item.section}?`;
+
+    confirmText.textContent =
+      `Delete ${item.day} ${item.start}-${item.end} (${item.subject}) for ${item.grade} Section ${item.section}?`;
+
     openConfirm();
   }
 
   async function deletePending() {
     if (!pendingDeleteId) return;
-    const list = readSchedule().filter((x) => x.id !== pendingDeleteId);
-    writeSchedule(list);
+
+    await api(
+      `/class-schedules/entry/${encodeURIComponent(
+        pendingDeleteId
+      )}`,
+      {
+        method: "DELETE"
+      }
+    );
+
     closeConfirm();
+
     await render();
   }
 
-  // ---------- render table ----------
+  // ==============================
+  // schedule table
+  // ==============================
+
   function renderTable() {
-    const list = readSchedule();
+    const list =
+      readSchedule();
 
-    let rows = list.filter((x) => x.grade === activeGrade && x.section === activeSection);
+    let rows =
+      list.filter(
+        (x) =>
+          x.grade === activeGrade &&
+          x.section === activeSection
+      );
 
-    const q = norm(searchInput.value);
-    const tf = teacherFilter.value;
-    const rf = roomFilter.value;
+    const q =
+      norm(searchInput.value);
 
-    if (tf !== "all") rows = rows.filter((x) => x.teacher === tf);
-    if (rf !== "all") rows = rows.filter((x) => x.room === rf);
+    const rf =
+      roomFilter.value;
 
-    if (q) {
-      rows = rows.filter((x) => {
-        const blob = norm(`${x.subject} ${x.teacher} ${x.room} ${x.day} ${x.start} ${x.end} ${x.notes || ""}`);
-        return blob.includes(q);
-      });
+    if (rf !== "all") {
+      rows =
+        rows.filter(
+          (x) =>
+            x.room === rf
+        );
     }
 
-    const dayOrder = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5 };
+    if (q) {
+      rows =
+        rows.filter((x) => {
+          const blob =
+            norm(
+              `${x.subject} ${x.teacher} ${x.room} ${x.day} ${x.start} ${x.end} ${x.notes || ""}`
+            );
+
+          return blob.includes(q);
+        });
+    }
+
+    const dayOrder = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5
+    };
+
     rows.sort((a, b) => {
-      const da = dayOrder[a.day] || 99;
-      const db = dayOrder[b.day] || 99;
-      if (da !== db) return da - db;
-      const ta = parseTimeToMin(a.start);
-      const tb = parseTimeToMin(b.start);
-      return (ta || 0) - (tb || 0);
+      const da =
+        dayOrder[a.day] || 99;
+
+      const db =
+        dayOrder[b.day] || 99;
+
+      if (da !== db) {
+        return da - db;
+      }
+
+      const ta =
+        parseTimeToMin(a.start);
+
+      const tb =
+        parseTimeToMin(b.start);
+
+      return (
+        (ta || 0) -
+        (tb || 0)
+      );
     });
 
-    buildFiltersFromSchedule(list.filter((x) => x.grade === activeGrade && x.section === activeSection));
+    buildFiltersFromSchedule(
+      list.filter(
+        (x) =>
+          x.grade === activeGrade &&
+          x.section === activeSection
+      )
+    );
 
     if (!rows.length) {
       scheduleTbody.innerHTML = `
         <tr class="cs-empty">
-          <td colspan="7">No schedule entries yet.</td>
-        </tr>
-      `;
-      return;
-    }
-
-    scheduleTbody.innerHTML = rows.map((r, idx) => {
-      return `
-        <tr>
-          <td>${idx + 1}</td>
-          <td><strong>${esc(r.day)}</strong></td>
-          <td>${esc(r.start)} - ${esc(r.end)}</td>
-          <td>${esc(r.subject)}</td>
-          <td>${esc(r.teacher)}</td>
-          <td>${esc(r.room)}</td>
-          <td style="text-align:center;">
-            <div class="cs-actions">
-              <button class="cs-icon-btn cs-edit" type="button" data-act="edit" data-id="${esc(r.id)}" title="Edit">✎</button>
-              <button class="cs-icon-btn cs-del" type="button" data-act="del" data-id="${esc(r.id)}" title="Delete">🗑</button>
-            </div>
+          <td colspan="7">
+            No schedule entries yet.
           </td>
         </tr>
       `;
-    }).join("");
 
-    scheduleTbody.querySelectorAll("button[data-act]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-id");
-        const act = btn.getAttribute("data-act");
-        if (!id) return;
-        if (act === "edit") await startEdit(id);
-        if (act === "del") startDelete(id);
+      return;
+    }
+
+    scheduleTbody.innerHTML =
+      rows
+        .map(
+          (r, idx) => `
+            <tr>
+              <td>${idx + 1}</td>
+
+              <td>
+                <strong>
+                  ${esc(r.day)}
+                </strong>
+              </td>
+
+              <td>
+                ${esc(r.start)} -
+                ${esc(r.end)}
+              </td>
+
+              <td>
+                ${esc(r.subject)}
+              </td>
+
+              <td>
+                ${esc(r.teacher)}
+              </td>
+
+              <td>
+                ${esc(r.room)}
+              </td>
+
+              <td style="text-align:center;">
+                <div class="cs-actions">
+
+                  <button
+                    class="cs-icon-btn cs-edit"
+                    type="button"
+                    data-act="edit"
+                    data-id="${esc(r.id)}"
+                    title="Edit whole day"
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    class="cs-icon-btn cs-del"
+                    type="button"
+                    data-act="del"
+                    data-id="${esc(r.id)}"
+                    title="Delete row"
+                  >
+                    🗑
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+          `
+        )
+        .join("");
+
+    scheduleTbody
+      .querySelectorAll(
+        "button[data-act]"
+      )
+      .forEach((btn) => {
+        btn.addEventListener(
+          "click",
+          async () => {
+            const id =
+              btn.getAttribute(
+                "data-id"
+              );
+
+            const act =
+              btn.getAttribute(
+                "data-act"
+              );
+
+            if (!id) return;
+
+            if (act === "edit") {
+              await startEditByDay(id);
+            }
+
+            if (act === "del") {
+              startDelete(id);
+            }
+          }
+        );
       });
-    });
   }
 
+  // ==============================
+  // render
+  // ==============================
+
   async function render() {
+    await loadSchedules();
+
     await loadSummaryCounts();
+
     await buildGradeList();
+
     await buildSectionSelect();
+
+    // Make sure the currently selected grade's
+    // subjects are available.
+    await loadBackendSubjectsForGrade(
+      activeGrade
+    );
+
     setSelectedTitle();
+
     renderTable();
   }
 
-  // ---------- events ----------
-  addEntryBtn.addEventListener("click", startAdd);
+  // ==============================
+  // events
+  // ==============================
 
-  entryBackdrop.addEventListener("click", closeModal);
-  entryCloseX.addEventListener("click", closeModal);
-  entryCancel.addEventListener("click", closeModal);
+  addEntryBtn.addEventListener(
+    "click",
+    startAdd
+  );
 
-  entryReset.addEventListener("click", async () => {
-    if (editingId) await startEdit(editingId);
-    else await resetModalFields();
-  });
+  entryBackdrop.addEventListener(
+    "click",
+    closeModal
+  );
 
-  entrySave.addEventListener("click", saveEntry);
+  entryCloseX.addEventListener(
+    "click",
+    closeModal
+  );
 
-  searchInput.addEventListener("input", renderTable);
-  teacherFilter.addEventListener("change", renderTable);
-  roomFilter.addEventListener("change", renderTable);
+  entryCancel.addEventListener(
+    "click",
+    closeModal
+  );
 
-  confirmBackdrop.addEventListener("click", closeConfirm);
-  confirmCloseX.addEventListener("click", closeConfirm);
-  confirmCancel.addEventListener("click", closeConfirm);
-  confirmDelete.addEventListener("click", deletePending);
+  entryReset.addEventListener(
+    "click",
+    async () => {
+      if (editingDayKey) {
+        const list =
+          readSchedule();
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!confirmModal.classList.contains("hidden")) return closeConfirm();
-    if (!entryModal.classList.contains("hidden")) return closeModal();
-  });
+        const dayRows =
+          list.filter(
+            (x) =>
+              dayKey(
+                x.grade,
+                x.section,
+                x.day
+              ) === editingDayKey
+          );
 
-  // init
-  (async () => {
-    try {
-      await loadBackendGrades();
+        if (dayRows.length) {
+          await startEditByDay(
+            dayRows[0].id
+          );
 
-      const grades = getGradeOptions();
-      if (!grades.includes(activeGrade)) {
-        activeGrade = grades[0] || DEFAULT_GRADES[0];
+          return;
+        }
       }
 
-      await ensureSectionsLoaded(activeGrade);
+      await resetModalFields();
+    }
+  );
+
+  entrySave.addEventListener(
+    "click",
+    saveEntry
+  );
+
+  searchInput.addEventListener(
+    "input",
+    renderTable
+  );
+
+  roomFilter.addEventListener(
+    "change",
+    renderTable
+  );
+
+  confirmBackdrop.addEventListener(
+    "click",
+    closeConfirm
+  );
+
+  confirmCloseX.addEventListener(
+    "click",
+    closeConfirm
+  );
+
+  confirmCancel.addEventListener(
+    "click",
+    closeConfirm
+  );
+
+  confirmDelete.addEventListener(
+    "click",
+    deletePending
+  );
+
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") {
+        return;
+      }
+
+      if (
+        !confirmModal.classList.contains(
+          "hidden"
+        )
+      ) {
+        return closeConfirm();
+      }
+
+      if (
+        !entryModal.classList.contains(
+          "hidden"
+        )
+      ) {
+        return closeModal();
+      }
+    }
+  );
+
+  // ==============================
+  // initialization
+  // ==============================
+
+  (async () => {
+    try {
+      // Load grades from MongoDB/backend
+      await loadBackendGrades();
+
+      const grades =
+        getGradeOptions();
+
+      if (!grades.includes(activeGrade)) {
+        activeGrade =
+          grades[0] ||
+          DEFAULT_GRADES[0];
+      }
+
+      // Load sections
+      await ensureSectionsLoaded(
+        activeGrade
+      );
+
+      // Load subjects from MongoDB/backend
+      await loadBackendSubjectsForGrade(
+        activeGrade
+      );
+
+      // Load section counts
       await loadSummaryCounts();
 
-      const secs = getSectionsForGrade(activeGrade);
-      activeSection = secs[0] || DEFAULT_SECTIONS[0];
+      const secs =
+        getSectionsForGrade(
+          activeGrade
+        );
+
+      activeSection =
+        secs[0]?.section ||
+        DEFAULT_SECTIONS[0];
 
       await render();
     } catch (err) {
-      console.error("Class schedule init failed:", err);
+      console.error(
+        "Class schedule init failed:",
+        err
+      );
+
       scheduleTbody.innerHTML = `
         <tr class="cs-empty">
-          <td colspan="7">${esc(err?.message || "Failed to load grade levels and sections.")}</td>
+          <td colspan="7">
+            ${esc(
+              err?.message ||
+                "Failed to load grade levels, sections, or subjects."
+            )}
+          </td>
         </tr>
       `;
     }

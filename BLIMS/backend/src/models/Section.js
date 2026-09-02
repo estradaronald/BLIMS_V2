@@ -15,10 +15,31 @@ const SectionSchema = new mongoose.Schema(
       trim: true,
     },
 
+    sectionNorm: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+
+    adviserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Teacher",
+      default: null,
+      index: true,
+    },
+
     adviser: {
       type: String,
       default: "",
       trim: true,
+    },
+
+    adviserNorm: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
     },
 
     capacity: {
@@ -30,9 +51,12 @@ const SectionSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   { timestamps: true }
 );
+
+SectionSchema.index({ grade: 1, sectionNorm: 1 }, { unique: true });
 
 module.exports = mongoose.model("Section", SectionSchema);

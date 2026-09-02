@@ -1,34 +1,86 @@
 <!-- frontend/src/pages/teacher/teacher-assessment.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teacher - Assessment</title>
 
-  <!-- ✅ Prevent sidebar "flash" on load (TEACHER key) -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Teacher - Assignments</title>
+
   <script>
     (function () {
       try {
         const collapsed =
-          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-        if (collapsed) document.documentElement.classList.add("sb-collapsed");
+          localStorage.getItem(
+            "teacher_sidebar_collapsed_v1"
+          ) === "1";
+
+        if (collapsed) {
+          document.documentElement.classList.add(
+            "sb-collapsed"
+          );
+        }
       } catch {}
     })();
   </script>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
 
- <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/teacher/teacher-assessment.css" />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Shared styles -->
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin-announcements.css"
+  />
+
+  <!-- Teacher assignment styles -->
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-assessment.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  />
 </head>
 
+
 <body data-page="teacher-assessment">
-  <!-- floating collapse button -->
+
+  <!-- =====================================================
+       SIDEBAR TOGGLE
+  ====================================================== -->
+
   <button
     class="sidebar-float-toggle"
     id="sidebarFloatToggle"
@@ -38,360 +90,920 @@
     ←
   </button>
 
+
   <div class="app">
+
+    <!-- ===================================================
+         SIDEBAR
+    ==================================================== -->
+
     <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <!-- TOPBAR -->
-      <header class="topbar">
+
+    <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
+
+    <main class="content page-animate">
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+      <header class="topbar reveal-soft">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+          >
+            🔔
+          </button>
+
+
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="avatar"
+            />
+
             <div class="tb-meta">
-              <div class="tb-name">Giselle Meneses</div>
-              <div class="tb-role">Class 1 - A Teacher</div>
+
+              <div
+                class="tb-name"
+                id="tbName"
+              >
+                Giselle Meneses
+              </div>
+
+              <div
+                class="tb-role"
+                id="tbRole"
+              >
+                Teacher
+              </div>
+
             </div>
 
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+            >
+              ▾
+            </button>
+
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
             </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- PAGE -->
-      <section class="as-page ms-page">
-        <div class="as-title ms-title" id="asPageTitle">Assessment</div>
 
-        <!-- ✅ 3 MAIN TABS -->
-        <div class="as-main-tabs" role="tablist" aria-label="Assessment views">
-          <button class="as-main-tab is-active" type="button" data-view="classwork" role="tab" aria-selected="true">
-            Classwork
-          </button>
-          <button class="as-main-tab" type="button" data-view="create" role="tab" aria-selected="false">
-            Create
-          </button>
-          <button class="as-main-tab" type="button" data-view="submissions" role="tab" aria-selected="false">
-            Submissions
-          </button>
+      <!-- =================================================
+           ASSIGNMENTS PAGE
+      ================================================== -->
+
+      <section class="as-page ms-page">
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <div class="as-page-head reveal-soft">
+
+          <div class="as-title-wrap">
+
+            <div
+              class="as-title ms-title"
+              id="asPageTitle"
+            >
+              Assignments
+            </div>
+
+          </div>
+
         </div>
 
-        <!-- =========================
-             VIEW 1: CLASSWORK LIST
-        ========================== -->
-        <section id="asClassworkView" class="as-view">
-          <div class="as-grid">
-            <!-- LEFT -->
-            <section class="card as-card">
-              <div class="as-card-top">
-                <div>
-                  <div class="as-card-title">Classwork</div>
-                  <div class="as-card-sub" id="asListSub">
-                    Create activities, choose recipients, and track submissions.
-                  </div>
+
+        <!-- =================================================
+             SUBJECTS VIEW
+        ================================================== -->
+
+        <section
+          id="asSubjectsView"
+          class="as-view"
+          aria-hidden="false"
+        >
+
+          <div
+            class="as-subjects-shell card reveal-scale"
+          >
+
+            <!-- ---------------------------------------------
+                 SUBJECT HEADER
+            ---------------------------------------------- -->
+
+            <div class="as-subjects-top reveal-item">
+
+              <div class="as-subjects-copy">
+
+                <div class="as-section-title">
+                  Your Subjects
                 </div>
 
-                <div class="as-card-actions">
-                  <button id="asNewBtn" class="as-btn as-btn-primary" type="button">
-                    ＋ New Activity
-                  </button>
-                </div>
-              </div>
-
-              <!-- Toolbar (status tabs + filters) -->
-              <div class="as-toolbar">
-                <div class="as-tabs" role="tablist" aria-label="Classwork status tabs">
-                  <button class="as-tab is-active" type="button" data-status="active" role="tab">Active</button>
-                  <button class="as-tab" type="button" data-status="draft" role="tab">Drafts</button>
-                  <button class="as-tab" type="button" data-status="archived" role="tab">Archived</button>
+                <div class="as-section-sub">
+                  Select a subject to manage its assignments.
                 </div>
 
-                <div class="as-filters">
-                  <div class="as-field">
-                    <label class="as-label">Quarter</label>
-                    <select id="asQuarterFilter" class="as-select">
-                      <option value="all">All</option>
-                      <option value="Q1">Quarter 1</option>
-                      <option value="Q2">Quarter 2</option>
-                      <option value="Q3">Quarter 3</option>
-                      <option value="Q4">Quarter 4</option>
-                    </select>
-                  </div>
+              </div>
 
-                  <div class="as-field">
-                    <label class="as-label">Type</label>
-                    <select id="asTypeFilter" class="as-select">
-                      <option value="all">All</option>
-                      <option value="assignment">Assignment</option>
-                      <option value="quiz">Quiz</option>
-                      <option value="activity">Activity</option>
-                      <option value="project">Project</option>
-                    </select>
-                  </div>
 
-                  <div class="as-field as-search">
-                    <label class="as-label">Search</label>
-                    <input
-                      id="asSearchInput"
-                      class="as-input"
-                      type="text"
-                      placeholder="Search title or instructions..."
-                    />
-                  </div>
+              <!-- Search -->
+
+              <div class="as-subjects-tools">
+
+                <div class="t-search as-search">
+
+                  <span class="t-search-ico">
+                    🔎
+                  </span>
+
+                  <input
+                    id="asSubjectSearch"
+                    type="text"
+                    placeholder="Search subject..."
+                    aria-label="Search subject"
+                  />
+
                 </div>
+
               </div>
 
-              <!-- List -->
-              <div class="as-table-wrap">
-                <table class="as-table" aria-label="Classwork list">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th style="width:120px">Type</th>
-                      <th style="width:110px">Quarter</th>
-                      <th style="width:120px">Due</th>
-                      <th style="width:90px">Points</th>
-                      <th style="width:120px">Recipients</th>
-                      <th style="width:120px">Status</th>
-
-                      <!-- ✅ UPDATED: action header hook like Students page -->
-                      <th class="t-action-head" style="width:150px">Action</th>
-                    </tr>
-                  </thead>
-
-                  <!-- ✅ NOTE:
-                       JS will render icon-style buttons inside the Action cell.
-                       (ex: 👁 for View, 📥 for Submissions) using the same style as Students.
-                  -->
-                  <tbody id="asListTbody">
-                    <tr>
-                      <td colspan="8" class="as-empty">
-                        No activities yet. Click <b>New Activity</b> to create one.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <!-- RIGHT -->
-            <aside class="card as-side">
-              <div class="as-side-title">Quick Summary</div>
-              <div class="as-side-sub">This school year</div>
-
-              <div class="as-stats">
-                <div class="as-stat"><span>Active</span><b id="asStatActive">0</b></div>
-                <div class="as-stat"><span>Drafts</span><b id="asStatDraft">0</b></div>
-                <div class="as-stat"><span>Archived</span><b id="asStatArchived">0</b></div>
-                <div class="as-stat"><span>Due this week</span><b id="asStatDueWeek">0</b></div>
-              </div>
-
-              <div class="as-hint">
-                Tip: Select recipients from your <b>Students</b> list so only chosen learners can submit.
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <!-- =========================
-             VIEW 2: CREATE / EDIT
-        ========================== -->
-        <section id="asCreateView" class="as-view hidden" aria-hidden="true">
-          <div class="as-detail-top">
-            <button id="asBackToListBtn" class="as-btn as-btn-ghost" type="button">← Back to Classwork</button>
-
-            <div class="as-detail-actions" id="asDetailActions">
-              <button id="asEditBtn" class="as-btn as-btn-ghost" type="button">Edit</button>
-              <button id="asArchiveBtn" class="as-btn as-btn-ghost" type="button">Archive</button>
-              <button id="asDeleteBtn" class="as-btn as-btn-danger" type="button">Delete</button>
             </div>
-          </div>
 
-          <div class="as-grid">
-            <!-- LEFT: Composer -->
-            <section class="card as-card">
-              <div class="as-card-top">
-                <div>
-                  <div class="as-card-title" id="asDetailHeading">New Activity</div>
-                  <div class="as-card-sub" id="asDetailSub">Fill out the details below, then Post.</div>
-                </div>
 
-                <div class="as-badge" id="asStatusBadge">Draft</div>
+            <!-- ---------------------------------------------
+                 SUBJECT CARDS
+            ---------------------------------------------- -->
+
+            <div
+              id="asSubjectCards"
+              class="as-subject-grid reveal-item"
+            >
+              <!-- JS renders subject cards -->
+            </div>
+
+
+            <!-- ---------------------------------------------
+                 EMPTY SUBJECT STATE
+            ---------------------------------------------- -->
+
+            <div
+              id="asSubjectsEmpty"
+              class="as-empty-state reveal-item hidden"
+              aria-hidden="true"
+              hidden
+            >
+
+              <div class="as-empty-icon">
+                📚
               </div>
 
-              <div class="as-form">
-                <div class="as-form-grid">
-                  <div class="as-field col-12">
-                    <label class="as-label">Title</label>
-                    <input id="asTitleInput" class="as-input" type="text" placeholder="e.g., Math Activity: Addition Practice" />
-                  </div>
-
-                  <div class="as-field col-12">
-                    <label class="as-label">Instructions</label>
-                    <textarea id="asDescInput" class="as-textarea" placeholder="Write instructions for students..."></textarea>
-                  </div>
-
-                  <div class="as-field col-4">
-                    <label class="as-label">Type</label>
-                    <select id="asTypeSelect" class="as-select">
-                      <option value="assignment">Assignment</option>
-                      <option value="quiz">Quiz</option>
-                      <option value="activity" selected>Activity</option>
-                      <option value="project">Project</option>
-                    </select>
-                  </div>
-
-                  <div class="as-field col-4">
-                    <label class="as-label">Quarter</label>
-                    <select id="asQuarterSelect" class="as-select">
-                      <option value="Q1">Quarter 1</option>
-                      <option value="Q2">Quarter 2</option>
-                      <option value="Q3">Quarter 3</option>
-                      <option value="Q4">Quarter 4</option>
-                    </select>
-                  </div>
-
-                  <div class="as-field col-4">
-                    <label class="as-label">Subject</label>
-                    <select id="asSubjectSelect" class="as-select">
-                      <option value="all">All Subjects</option>
-                    </select>
-                  </div>
-
-                  <div class="as-field col-3">
-                    <label class="as-label">Points</label>
-                    <input id="asPointsInput" class="as-input" type="number" min="0" placeholder="e.g., 100" />
-                  </div>
-
-                  <div class="as-field col-3">
-                    <label class="as-label">Due Date</label>
-                    <input id="asDueDateInput" class="as-input" type="date" />
-                  </div>
-
-                  <div class="as-field col-3">
-                    <label class="as-label">Due Time</label>
-                    <input id="asDueTimeInput" class="as-input" type="time" />
-                  </div>
-
-                  <div class="as-field col-3">
-                    <label class="as-label">Class / Section</label>
-                    <select id="asScopeSelect" class="as-select">
-                      <option value="all">All (Unassigned)</option>
-                    </select>
-                  </div>
-
-                  <div class="as-field col-12">
-                    <label class="as-label">Attachments</label>
-                    <div class="as-attach">
-                      <input id="asAttachInput" type="file" hidden />
-                      <button id="asAttachBtn" class="as-btn as-btn-ghost" type="button">＋ Add attachment</button>
-                      <div class="as-attach-list" id="asAttachList">
-                        <div class="as-attach-empty">No attachments added.</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="as-field col-12">
-                    <label class="as-label">Recipients</label>
-                    <div class="as-recips">
-                      <label class="as-radio">
-                        <input id="asRecipAll" type="radio" name="asRecipientsMode" value="all" checked />
-                        <span>All Students</span>
-                      </label>
-                      <label class="as-radio">
-                        <input id="asRecipSelected" type="radio" name="asRecipientsMode" value="selected" />
-                        <span>Select Students</span>
-                      </label>
-                    </div>
-
-                    <div class="as-picker hidden" id="asStudentPicker" aria-hidden="true">
-                      <div class="as-picker-top">
-                        <div class="as-picker-left">
-                          <input id="asStudentSearch" class="as-input" type="text" placeholder="Search students..." />
-                        </div>
-                        <div class="as-picker-right">
-                          <button id="asSelectAllBtn" class="as-btn as-btn-ghost" type="button">Select All</button>
-                          <button id="asClearAllBtn" class="as-btn as-btn-ghost" type="button">Clear</button>
-                        </div>
-                      </div>
-
-                      <div class="as-student-list" id="asStudentList" role="listbox" aria-label="Student recipients list">
-                        <div class="as-student-empty">Loading students…</div>
-                      </div>
-
-                      <div class="as-picker-note" id="asRecipientCount">0 selected</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="as-form-actions">
-                  <button id="asSaveDraftBtn" class="as-btn as-btn-ghost" type="button">Save Draft</button>
-                  <button id="asPostBtn" class="as-btn as-btn-primary" type="button">Post / Assign</button>
-                </div>
+              <div class="as-empty-title">
+                No assigned subjects yet
               </div>
-            </section>
 
-            <!-- RIGHT (kept for layout; we can remove later cleanly after CSS/JS adjustments) -->
+              <div class="as-empty-text">
+                Once subjects are assigned to your
+                handled class and section, they will
+                appear here.
+              </div>
+
+            </div>
+
           </div>
+
         </section>
 
-        <!-- =========================
-             VIEW 3: SUBMISSIONS
-        ========================== -->
-        <section id="asSubmissionsView" class="as-view hidden" aria-hidden="true">
-          <div class="as-detail-top">
-            <button id="asBackToListBtn2" class="as-btn as-btn-ghost" type="button">← Back to Classwork</button>
+
+        <!-- =================================================
+             SUBJECT DETAIL VIEW
+        ================================================== -->
+
+        <section
+          id="asDetailView"
+          class="as-view hidden"
+          aria-hidden="true"
+          hidden
+        >
+
+
+          <!-- =================================================
+               BACK BUTTON
+          ================================================== -->
+
+          <div class="as-detail-top reveal-soft">
+
+            <button
+              id="asBackToSubjectsBtn"
+              class="as-chip-btn"
+              type="button"
+            >
+              ← Back to Subjects
+            </button>
+
           </div>
 
-          <div class="as-grid">
-            <!-- LEFT: Submissions table -->
-            <section class="card as-card">
-              <div class="as-card-top">
-                <div>
-                  <div class="as-card-title">Submissions</div>
-                  <div class="as-card-sub" id="asSubmissionsSub">
-                    Select an activity from Classwork to view submissions (later we’ll connect this).
-                  </div>
+
+          <!-- =================================================
+               SUBJECT HERO
+          ================================================== -->
+
+          <section
+            class="as-hero card reveal-scale"
+          >
+
+            <div
+              class="as-hero-cover"
+              id="asHeroCover"
+            >
+
+              <div
+                class="as-hero-main reveal-item"
+              >
+
+                <div
+                  class="as-hero-kicker"
+                  id="asHeroKicker"
+                >
+                  Assignments
                 </div>
+
+
+                <h2
+                  class="as-hero-title"
+                  id="asHeroTitle"
+                >
+                  Subject Title
+                </h2>
+
+
+                <div
+                  class="as-hero-meta"
+                  id="asHeroMeta"
+                >
+
+                  <span id="asHeroSection">
+                    Grade 1 - Section A
+                  </span>
+
+                  <span class="as-meta-dot">
+                    •
+                  </span>
+
+                  <span id="asHeroTeacher">
+                    Teacher Name
+                  </span>
+
+                </div>
+
               </div>
 
-              <div class="as-sub-stats">
-                <div class="as-stat"><span>Assigned to</span><b id="asAssignedCount">0</b></div>
-                <div class="as-stat"><span>Submitted</span><b id="asSubmittedCount">0</b></div>
-                <div class="as-stat"><span>Missing</span><b id="asMissingCount">0</b></div>
+
+              <div
+                class="as-hero-avatar reveal-item"
+                id="asHeroAvatar"
+              >
+                A
               </div>
 
-              <div class="as-submissions-wrap">
-                <table class="as-submissions" aria-label="Submissions table">
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th style="width:110px">Status</th>
-                      <th style="width:140px">File</th>
-                    </tr>
-                  </thead>
-                  <tbody id="asSubmissionsTbody">
-                    <tr>
-                      <td colspan="3" class="as-empty">No submissions yet.</td>
-                    </tr>
-                  </tbody>
-                </table>
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+               DETAIL GRID
+          ================================================== -->
+
+          <div class="as-detail-grid">
+
+
+            <!-- =================================================
+                 LEFT SIDEBAR / OVERVIEW
+            ================================================== -->
+
+            <aside
+              class="as-upcoming card reveal-scale"
+            >
+
+              <div class="as-side-head reveal-item">
+
+                <div class="as-side-title">
+                  Overview
+                </div>
+
+                <div class="as-side-sub">
+                  This subject
+                </div>
+
               </div>
+
+
+              <!-- ---------------------------------------------
+                   ASSIGNMENT COUNTS
+              ---------------------------------------------- -->
+
+              <div
+                class="as-overview-list reveal-item"
+              >
+
+                <div class="as-overview-item">
+
+                  <span>
+                    Total Assignments
+                  </span>
+
+                  <b id="asOverviewTotal">
+                    0
+                  </b>
+
+                </div>
+
+
+                <div class="as-overview-item">
+
+                  <span>
+                    Published
+                  </span>
+
+                  <b id="asOverviewPublished">
+                    0
+                  </b>
+
+                </div>
+
+
+                <div class="as-overview-item">
+
+                  <span>
+                    Drafts
+                  </span>
+
+                  <b id="asOverviewDrafts">
+                    0
+                  </b>
+
+                </div>
+
+
+                <div class="as-overview-item">
+
+                  <span>
+                    Due This Week
+                  </span>
+
+                  <b id="asOverviewDueWeek">
+                    0
+                  </b>
+
+                </div>
+
+              </div>
+
+
+              <!-- ---------------------------------------------
+                   UPCOMING ASSIGNMENT
+              ---------------------------------------------- -->
+
+              <div
+                class="as-upcoming-box reveal-item"
+              >
+
+                <div class="as-upcoming-title">
+                  Upcoming
+                </div>
+
+                <div
+                  class="as-upcoming-copy"
+                  id="asUpcomingText"
+                >
+                  No upcoming assignments yet.
+                </div>
+
+                <button
+                  id="asJumpLatestBtn"
+                  class="as-link-btn"
+                  type="button"
+                >
+                  View latest assignment
+                </button>
+
+              </div>
+
+            </aside>
+
+
+            <!-- =================================================
+                 ASSIGNMENT AREA
+            ================================================== -->
+
+            <section
+              class="as-stream reveal-scale"
+            >
+
+
+              <!-- ---------------------------------------------
+                   TOOLBAR
+              ---------------------------------------------- -->
+
+              <div
+                class="as-stream-toolbar reveal-item"
+              >
+
+                <button
+                  id="asCreateActivityBtn"
+                  class="as-primary-pill"
+                  type="button"
+                >
+                  + Create Assignment
+                </button>
+
+
+                <div
+                  class="as-stream-filters"
+                >
+
+                  <!-- Status -->
+
+                  <select
+                    id="asStatusFilter"
+                    class="as-select"
+                    aria-label="Filter by status"
+                  >
+
+                    <option value="all">
+                      All Status
+                    </option>
+
+                    <option value="published">
+                      Published
+                    </option>
+
+                    <option value="draft">
+                      Draft
+                    </option>
+
+                    <option value="archived">
+                      Archived
+                    </option>
+
+                  </select>
+
+
+                  <!-- Quarter -->
+
+                  <select
+                    id="asQuarterFilter"
+                    class="as-select"
+                    aria-label="Filter by quarter"
+                  >
+
+                    <option value="all">
+                      All Quarters
+                    </option>
+
+                    <option value="Q1">
+                      Quarter 1
+                    </option>
+
+                    <option value="Q2">
+                      Quarter 2
+                    </option>
+
+                    <option value="Q3">
+                      Quarter 3
+                    </option>
+
+                    <option value="Q4">
+                      Quarter 4
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+
+              <!-- =================================================
+                   ASSIGNMENTS TABLE
+              ================================================== -->
+
+              <div
+                class="as-table-wrap card"
+              >
+
+                <div class="as-table-scroll">
+
+                  <table
+                    class="as-assignment-table"
+                  >
+
+                    <thead>
+
+                      <tr>
+
+                        <th>
+                          Assignment
+                        </th>
+
+                        <th>
+                          Quarter
+                        </th>
+
+                        <th>
+                          Due Date
+                        </th>
+
+                        <th>
+                          Points
+                        </th>
+
+                        <th>
+                          Status
+                        </th>
+
+                        <th>
+                          Actions
+                        </th>
+
+                      </tr>
+
+                    </thead>
+
+
+                    <tbody
+                      id="asActivityStream"
+                    >
+                      <!--
+                        JS renders assignment rows here.
+                      -->
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+
+                <!-- ---------------------------------------------
+                     EMPTY ASSIGNMENT STATE
+                ---------------------------------------------- -->
+
+                <div
+                  id="asActivityEmpty"
+                  class="as-empty-feed reveal-item hidden"
+                  aria-hidden="true"
+                  hidden
+                >
+
+                  <div class="as-empty-icon">
+                    📝
+                  </div>
+
+                  <div class="as-empty-title">
+                    No assignments yet
+                  </div>
+
+                  <div class="as-empty-text">
+                    Create your first assignment for
+                    this subject.
+                  </div>
+
+                </div>
+
+              </div>
+
+
             </section>
 
-            <!-- RIGHT (kept for layout; we can remove later cleanly after CSS/JS adjustments) -->
           </div>
+
         </section>
+
       </section>
+
     </main>
+
   </div>
-  <script src="../../js/auth/teacher-guard.js"></script>
+
+
+  <!-- =====================================================
+       CREATE ASSIGNMENT MODAL
+  ====================================================== -->
+
+  <div
+    id="asActivityModal"
+    class="as-modal hidden"
+    aria-hidden="true"
+    hidden
+  >
+
+    <div
+      class="as-modal-backdrop"
+      data-close="true"
+    ></div>
+
+
+    <div
+      class="as-modal-dialog card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="asModalTitle"
+    >
+
+
+      <!-- =================================================
+           MODAL HEADER
+      ================================================== -->
+
+      <div class="as-modal-head">
+
+        <div>
+
+          <div
+            class="as-modal-title"
+            id="asModalTitle"
+          >
+            Create Assignment
+          </div>
+
+          <div
+            class="as-modal-sub"
+            id="asModalSub"
+          >
+            Create an assignment for the selected subject.
+          </div>
+
+        </div>
+
+
+        <button
+          id="asModalCloseBtn"
+          class="as-icon-btn"
+          type="button"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           MODAL BODY
+      ================================================== -->
+
+      <div class="as-modal-body">
+
+        <div class="as-form-grid">
+
+
+          <!-- ---------------------------------------------
+               TITLE
+          ---------------------------------------------- -->
+
+          <div class="as-field col-12">
+
+            <label
+              class="as-label"
+              for="asActivityTitleInput"
+            >
+              Assignment Title
+            </label>
+
+            <input
+              id="asActivityTitleInput"
+              class="as-input"
+              type="text"
+              maxlength="150"
+              placeholder="e.g. Reading Activity 1"
+            />
+
+          </div>
+
+
+          <!-- ---------------------------------------------
+               QUARTER
+          ---------------------------------------------- -->
+
+          <div class="as-field col-6">
+
+            <label
+              class="as-label"
+              for="asActivityQuarterSelect"
+            >
+              Quarter
+            </label>
+
+            <select
+              id="asActivityQuarterSelect"
+              class="as-select"
+            >
+
+              <option value="Q1">
+                Quarter 1
+              </option>
+
+              <option value="Q2">
+                Quarter 2
+              </option>
+
+              <option value="Q3">
+                Quarter 3
+              </option>
+
+              <option value="Q4">
+                Quarter 4
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ---------------------------------------------
+               POINTS
+          ---------------------------------------------- -->
+
+          <div class="as-field col-6">
+
+            <label
+              class="as-label"
+              for="asActivityPointsInput"
+            >
+              Total Points
+            </label>
+
+            <input
+              id="asActivityPointsInput"
+              class="as-input"
+              type="number"
+              min="1"
+              max="1000"
+              step="1"
+              placeholder="e.g. 20"
+            />
+
+          </div>
+
+
+          <!-- ---------------------------------------------
+               DUE DATE
+          ---------------------------------------------- -->
+
+          <div class="as-field col-6">
+
+            <label
+              class="as-label"
+              for="asActivityDueDateInput"
+            >
+              Due Date
+            </label>
+
+            <input
+              id="asActivityDueDateInput"
+              class="as-input"
+              type="date"
+            />
+
+          </div>
+
+
+          <!-- ---------------------------------------------
+               DUE TIME
+          ---------------------------------------------- -->
+
+          <div class="as-field col-6">
+
+            <label
+              class="as-label"
+              for="asActivityDueTimeInput"
+            >
+              Due Time
+            </label>
+
+            <input
+              id="asActivityDueTimeInput"
+              class="as-input"
+              type="time"
+            />
+
+          </div>
+
+
+          <!-- ---------------------------------------------
+               INSTRUCTIONS
+          ---------------------------------------------- -->
+
+          <div class="as-field col-12">
+
+            <label
+              class="as-label"
+              for="asActivityInstructionsInput"
+            >
+              Instructions
+            </label>
+
+            <textarea
+              id="asActivityInstructionsInput"
+              class="as-textarea"
+              rows="6"
+              maxlength="5000"
+              placeholder="Write the instructions that students should follow..."
+            ></textarea>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           MODAL FOOTER
+      ================================================== -->
+
+      <div class="as-modal-foot">
+
+        <button
+          id="asSaveDraftBtn"
+          class="as-btn as-btn-ghost"
+          type="button"
+        >
+          Save as Draft
+        </button>
+
+
+        <button
+          id="asPublishActivityBtn"
+          class="as-btn as-btn-primary"
+          type="button"
+        >
+          Publish Assignment
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script src="../../shared/js/page-animations.js"></script>
+
   <script src="../../js/teacher/teacher-sidebar.js"></script>
+
   <script src="../../js/teacher/teacher-assessment.js"></script>
+
 </body>
 </html>
