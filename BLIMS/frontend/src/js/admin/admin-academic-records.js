@@ -1,415 +1,1958 @@
-// frontend/src/js/admin-academic-records.js
-// Academic Records (Admin) - standalone LocalStorage
-// - Filter by grade/section + search
-// - Editable Q1-Q4 in table
-// - Final Average auto-calculated
-// - Promote button + status tracking
-// - Export CSV: All vs Current Class/Section
+// frontend/src/js/admin/admin-academic-records.js
+// Academic Records (Admin) - Backend Connected
+//
+// Data sources:
+//   GET /api/admin/students?q=&class=all
+//   GET /api/admin/grade-levels
+//   GET /api/admin/sections?grade=...
+//   GET /api/admin/school-years
+//
+// Responsibilities:
+//   - Load real students from Admin Students API
+//   - Load real grade levels
+//   - Load real sections
+//   - Load active school year + terms
+//   - Display academic records as READ-ONLY
+//   - Dynamically generate term columns
+//   - Search students
+//   - Export current filtered view
+//   - Export selected grade level
+//   - Export all academic records
+//
+// NOTE:
+// Actual grade values are read from the student object if available.
+// We should connect the actual grade-record backend once its model/
+// controller is confirmed.
 
 document.addEventListener("DOMContentLoaded", () => {
-  const $ = (id) => document.getElementById(id);
+  const $ = (id) =>
+    document.getElementById(id);
 
-  const LS_KEY = "blims_academic_records_v1";
-  const LS_GRADESECTIONS = "blims_grade_sections_v1";
+  /* =========================================================
+     API
+  ========================================================= */
 
-  const DEFAULT_GRADES = ["Kinder","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6"];
-  const DEFAULT_SECTION = "A";
+  const ADMIN_API =
+    "/api/admin";
 
-  // UI
-  const gradeSelect = $("gradeSelect");
-  const sectionSelect = $("sectionSelect");
-  const searchInput = $("searchInput");
-  const recordsTbody = $("recordsTbody");
-  const summaryLine = $("summaryLine");
+  let csrfToken = "";
 
-  const exportBtn = $("exportBtn");
-  const exportMenu = $("exportMenu");
-  const exportAllBtn = $("exportAllBtn");
-  const exportClassBtn = $("exportClassBtn");
 
-  // confirm modal
-  const confirmModal = $("confirmModal");
-  const confirmBackdrop = $("confirmBackdrop");
-  const confirmCloseX = $("confirmCloseX");
-  const confirmCancel = $("confirmCancel");
-  const confirmYes = $("confirmYes");
-  const confirmText = $("confirmText");
-  const confirmError = $("confirmError");
+  /* =========================================================
+     UI
+  ========================================================= */
 
-  let pendingPromoteId = null;
+  const gradeSelect =
+    $("gradeSelect");
 
-  function esc(s) {
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+  const sectionSelect =
+    $("sectionSelect");
+
+  const searchInput =
+    $("searchInput");
+
+  const recordsTbody =
+    $("recordsTbody");
+
+  const summaryLine =
+    $("summaryLine");
+
+  const exportBtn =
+    $("exportBtn");
+
+  const exportMenu =
+    $("exportMenu");
+
+  const exportClassBtn =
+    $("exportClassBtn");
+
+  const exportGradeBtn =
+    $("exportGradeBtn");
+
+  const exportAllBtn =
+    $("exportAllBtn");
+
+
+  /* =========================================================
+     STATE
+  ========================================================= */
+
+  let students = [];
+
+  let gradeLevels = [];
+
+  let sections = [];
+
+  let activeSchoolYear = null;
+
+  let terms = [];
+
+  let currentRows = [];
+
+
+  /* =========================================================
+     HELPERS
+  ========================================================= */
+
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
   }
-  function norm(s) {
-    return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+
+  function norm(value) {
+    return String(value ?? "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
-  // ---------- grade/section store ----------
-  function readGradeSectionsStore() {
+
+  function fullName(student) {
+    return [
+      student?.firstName,
+      student?.middleName,
+      student?.lastName,
+      student?.suffix,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+
+  function getStudentName(student) {
+    return (
+      fullName(student) ||
+      student?.name ||
+      student?.fullName ||
+      student?.studentName ||
+      "Unnamed Student"
+    );
+  }
+
+
+  /* =========================================================
+     CSRF
+  ========================================================= */
+
+  async function loadCsrfToken() {
     try {
-      const raw = localStorage.getItem(LS_GRADESECTIONS);
-      const obj = raw ? JSON.parse(raw) : null;
-      if (!obj || typeof obj !== "object") return null;
-      return obj;
-    } catch {
-      return null;
+      const response =
+        await fetch(
+          "/api/csrf-token",
+          {
+            credentials:
+              "include",
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      csrfToken =
+        data?.csrfToken ||
+        "";
+
+      return csrfToken;
+
+    } catch (error) {
+
+      console.warn(
+        "Failed to load CSRF token:",
+        error
+      );
+
+      return "";
     }
-  }
-  function getGrades() {
-    const gs = readGradeSectionsStore();
-    if (gs) {
-      const keys = Object.keys(gs);
-      if (keys.length) return keys;
-    }
-    return DEFAULT_GRADES.slice();
-  }
-  function getSections(grade) {
-    const gs = readGradeSectionsStore();
-    if (gs && Array.isArray(gs[grade]) && gs[grade].length) {
-      const names = gs[grade].map((x) => x.section).filter(Boolean);
-      if (names.length) return names;
-    }
-    return [DEFAULT_SECTION];
   }
 
-  // ---------- records store ----------
-  function seedStore() {
-    const data = [];
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  /* =========================================================
+     API HELPER
+  ========================================================= */
+
+  async function api(
+    path,
+    options = {}
+  ) {
+    const method =
+      String(
+        options.method ||
+          "GET"
+      ).toUpperCase();
+
+    const headers = {
+      ...(options.headers || {}),
+    };
+
+
+    if (
+      [
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+      ].includes(method)
+    ) {
+      if (!csrfToken) {
+        await loadCsrfToken();
+      }
+
+      headers[
+        "X-CSRF-Token"
+      ] =
+        csrfToken || "";
+    }
+
+
+    if (
+      options.body &&
+      !headers[
+        "Content-Type"
+      ]
+    ) {
+      headers[
+        "Content-Type"
+      ] =
+        "application/json";
+    }
+
+
+    const response =
+      await fetch(
+        `${ADMIN_API}${path}`,
+        {
+          ...options,
+
+          credentials:
+            "include",
+
+          headers,
+        }
+      );
+
+
+    let data = null;
+
+
+    try {
+      data =
+        await response.json();
+    } catch {
+      data = null;
+    }
+
+
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+          data?.error ||
+          `Request failed (${response.status})`
+      );
+    }
+
+
+    if (
+      data &&
+      typeof data ===
+        "object" &&
+      data.ok === true &&
+      "data" in data
+    ) {
+      return data.data;
+    }
+
+
     return data;
   }
 
-  function readStore() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      const data = raw ? JSON.parse(raw) : null;
-      if (!Array.isArray(data)) return seedStore();
-      return data;
-    } catch {
-      return seedStore();
-    }
-  }
 
-  function writeStore(data) {
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
-  }
+  /* =========================================================
+     LOAD GRADE LEVELS
+  ========================================================= */
 
-  function ensureClassRecords(grade, section) {
-    // If no records exist for this class, create a lightweight starter list.
-    // This keeps the page usable even before student pages are wired.
-    const store = readStore();
-    const exists = store.some((r) => r.grade === grade && r.section === section);
-    if (exists) return;
+  async function loadGradeLevels() {
+    const data =
+      await api(
+        "/grade-levels"
+      );
 
-    const starters = [
-      "Juan Dela Cruz",
-      "Maria Santos",
-      "Jose Rizal",
-      "Ana Reyes",
-      "Carlo Mendoza",
-    ];
 
-    starters.forEach((name) => {
-      store.push({
-        id: `AR-${Math.random().toString(16).slice(2)}-${Date.now()}`,
-        grade,
-        section,
-        student: name,
-        q1: "",
-        q2: "",
-        q3: "",
-        q4: "",
-        status: "pending", // pending | promoted | retained
-        updatedAt: Date.now(),
-      });
-    });
+    let list = [];
 
-    writeStore(store);
-  }
 
-  // ---------- compute ----------
-  function toNum(v) {
-    const n = Number(String(v ?? "").trim());
-    return Number.isFinite(n) ? n : null;
-  }
+    if (
+      Array.isArray(data)
+    ) {
+      list = data;
 
-  function computeFinal(rec) {
-    const vals = [toNum(rec.q1), toNum(rec.q2), toNum(rec.q3), toNum(rec.q4)].filter((x) => x != null);
-    if (!vals.length) return null;
-    const sum = vals.reduce((a, b) => a + b, 0);
-    const avg = sum / vals.length;
-    return Math.round(avg * 100) / 100;
-  }
+    } else if (
+      data &&
+      Array.isArray(
+        data.items
+      )
+    ) {
+      list =
+        data.items;
 
-  function statusPill(status) {
-    const s = norm(status);
-    const cls = ["promoted","retained","pending"].includes(s) ? s : "pending";
-    const label = cls === "pending" ? "Pending" : cls.charAt(0).toUpperCase() + cls.slice(1);
-    return `<span class="ar-status ${cls}">${esc(label)}</span>`;
-  }
-
-  // ---------- filters ----------
-  function buildGradeSelect() {
-    const grades = getGrades();
-    gradeSelect.innerHTML = grades.map((g) => `<option value="${esc(g)}">${esc(g)}</option>`).join("");
-    if (!grades.includes(gradeSelect.value)) gradeSelect.value = grades[0] || DEFAULT_GRADES[0];
-  }
-
-  function buildSectionSelect() {
-    const secs = getSections(gradeSelect.value);
-    sectionSelect.innerHTML = secs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-    if (!secs.includes(sectionSelect.value)) sectionSelect.value = secs[0] || DEFAULT_SECTION;
-  }
-
-  function applyFilters(store) {
-    const g = gradeSelect.value;
-    const s = sectionSelect.value;
-    const q = norm(searchInput.value);
-
-    let out = store.filter((r) => r.grade === g && r.section === s);
-
-    if (q) {
-      out = out.filter((r) => norm(r.student).includes(q));
+    } else if (
+      data &&
+      Array.isArray(
+        data.gradeLevels
+      )
+    ) {
+      list =
+        data.gradeLevels;
     }
 
-    out.sort((a, b) => (a.student || "").localeCompare(b.student || ""));
-    return out;
+
+    gradeLevels =
+      list
+        .map(
+          (item) => {
+            if (
+              typeof item ===
+              "string"
+            ) {
+              return item;
+            }
+
+            return (
+              item?.grade ||
+              item?.name ||
+              ""
+            );
+          }
+        )
+        .filter(Boolean);
+
+
+    gradeLevels =
+      [
+        ...new Set(
+          gradeLevels
+        ),
+      ];
   }
 
-  // ---------- render ----------
-  function render() {
-    buildGradeSelect();
-    buildSectionSelect();
 
-    // ensure starter records for current class so page isn't dead
-    ensureClassRecords(gradeSelect.value, sectionSelect.value);
+  /* =========================================================
+     LOAD SECTIONS
+  ========================================================= */
 
-    const store = readStore();
-    const rows = applyFilters(store);
+  async function loadSections(
+    grade
+  ) {
+    sections = [];
 
-    summaryLine.textContent = `Showing: ${gradeSelect.value} • Section ${sectionSelect.value} • ${rows.length} student(s)`;
 
-    if (!rows.length) {
-      recordsTbody.innerHTML = `<tr class="ar-empty"><td colspan="9">No records found.</td></tr>`;
+    if (!grade) {
+      buildSectionSelect();
       return;
     }
 
-    recordsTbody.innerHTML = rows.map((r, idx) => {
-      const avg = computeFinal(r);
-      const promoteDisabled = norm(r.status) === "promoted";
 
-      return `
-        <tr data-id="${esc(r.id)}">
-          <td>${idx + 1}</td>
-          <td><strong>${esc(r.student)}</strong></td>
+    const data =
+      await api(
+        `/sections?grade=${encodeURIComponent(
+          grade
+        )}`
+      );
 
-          <td style="text-align:center;">
-            <input class="ar-grade" data-k="q1" inputmode="decimal" value="${esc(r.q1)}" placeholder="—" />
-          </td>
-          <td style="text-align:center;">
-            <input class="ar-grade" data-k="q2" inputmode="decimal" value="${esc(r.q2)}" placeholder="—" />
-          </td>
-          <td style="text-align:center;">
-            <input class="ar-grade" data-k="q3" inputmode="decimal" value="${esc(r.q3)}" placeholder="—" />
-          </td>
-          <td style="text-align:center;">
-            <input class="ar-grade" data-k="q4" inputmode="decimal" value="${esc(r.q4)}" placeholder="—" />
-          </td>
 
-          <td class="ar-avg">${avg == null ? "—" : esc(avg)}</td>
-          <td style="text-align:center;">${statusPill(r.status)}</td>
-          <td style="text-align:center;">
-            <div class="ar-actions">
-              <button class="ar-btn ar-promote" data-act="promote" ${promoteDisabled ? "disabled" : ""}>Promote</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join("");
+    let list = [];
 
-    // bind edit inputs
-    recordsTbody.querySelectorAll("tr[data-id]").forEach((tr) => {
-      const id = tr.getAttribute("data-id");
-      if (!id) return;
 
-      tr.querySelectorAll("input[data-k]").forEach((inp) => {
-        inp.addEventListener("input", () => {
-          // basic sanitization: allow digits + dot
-          inp.value = inp.value.replace(/[^0-9.]/g, "");
+    if (
+      Array.isArray(data)
+    ) {
+      list = data;
 
-          const k = inp.getAttribute("data-k");
-          const storeNow = readStore();
-          const idx = storeNow.findIndex((x) => x.id === id);
-          if (idx === -1) return;
+    } else if (
+      data &&
+      Array.isArray(
+        data.items
+      )
+    ) {
+      list =
+        data.items;
 
-          storeNow[idx][k] = inp.value;
-          storeNow[idx].updatedAt = Date.now();
-          writeStore(storeNow);
-
-          // update avg display live
-          const avgCell = tr.querySelector(".ar-avg");
-          if (avgCell) {
-            const avg = computeFinal(storeNow[idx]);
-            avgCell.textContent = avg == null ? "—" : String(avg);
-          }
-        });
-      });
-
-      const promoteBtn = tr.querySelector("button[data-act='promote']");
-      if (promoteBtn) {
-        promoteBtn.addEventListener("click", () => {
-          openConfirm(id);
-        });
-      }
-    });
-  }
-
-  // ---------- promote confirm ----------
-  function openConfirm(id) {
-    pendingPromoteId = id;
-    confirmError.classList.add("hidden");
-    confirmError.textContent = "";
-
-    const store = readStore();
-    const rec = store.find((x) => x.id === id);
-    if (!rec) return;
-
-    const avg = computeFinal(rec);
-    confirmText.textContent = `Promote "${rec.student}" from ${rec.grade} Section ${rec.section}? Final Avg: ${avg == null ? "—" : avg}`;
-    confirmModal.classList.remove("hidden");
-    confirmModal.setAttribute("aria-hidden", "false");
-    setTimeout(() => confirmYes.focus(), 0);
-  }
-
-  function closeConfirm() {
-    confirmModal.classList.add("hidden");
-    confirmModal.setAttribute("aria-hidden", "true");
-    pendingPromoteId = null;
-  }
-
-  function confirmPromote() {
-    if (!pendingPromoteId) return;
-
-    const store = readStore();
-    const idx = store.findIndex((x) => x.id === pendingPromoteId);
-    if (idx === -1) return;
-
-    const avg = computeFinal(store[idx]);
-    // Optional simple rule: if avg exists and < 75, keep pending (or mark retained)
-    // For now: allow promoting regardless (admin decision).
-    store[idx].status = "promoted";
-    store[idx].updatedAt = Date.now();
-    writeStore(store);
-
-    closeConfirm();
-    render();
-  }
-
-  // ---------- export ----------
-  function csvEscape(value) {
-    const s = String(value ?? "");
-    const needs = /[",\n]/.test(s);
-    const out = s.replaceAll('"', '""');
-    return needs ? `"${out}"` : out;
-  }
-
-  function exportCSV(mode) {
-    const store = readStore();
-    let rows = store.slice();
-
-    if (mode === "class") {
-      rows = rows.filter((r) => r.grade === gradeSelect.value && r.section === sectionSelect.value);
+    } else if (
+      data &&
+      Array.isArray(
+        data.sections
+      )
+    ) {
+      list =
+        data.sections;
     }
 
-    rows.sort((a, b) => (a.student || "").localeCompare(b.student || ""));
 
-    const headers = ["Grade Level","Section","Student","Q1","Q2","Q3","Q4","Final Average","Status"];
-    const lines = [headers.join(",")];
+    sections =
+      list
+        .map(
+          (item) => {
+            if (
+              typeof item ===
+              "string"
+            ) {
+              return item;
+            }
 
-    rows.forEach((r) => {
-      const avg = computeFinal(r);
-      lines.push([
-        csvEscape(r.grade),
-        csvEscape(r.section),
-        csvEscape(r.student),
-        csvEscape(r.q1),
-        csvEscape(r.q2),
-        csvEscape(r.q3),
-        csvEscape(r.q4),
-        csvEscape(avg == null ? "" : avg),
-        csvEscape(r.status),
-      ].join(","));
-    });
+            return (
+              item?.section ||
+              item?.name ||
+              ""
+            );
+          }
+        )
+        .filter(Boolean);
 
-    const csv = lines.join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+
+    sections =
+      [
+        ...new Set(
+          sections
+        ),
+      ];
+
+
+    buildSectionSelect();
+  }
+
+
+  /* =========================================================
+     LOAD ACTIVE SCHOOL YEAR
+  ========================================================= */
+
+  async function loadActiveSchoolYear() {
+    const data =
+      await api(
+        "/school-years"
+      );
+
+
+    let schoolYears =
+      [];
+
+
+    if (
+      Array.isArray(data)
+    ) {
+      schoolYears =
+        data;
+
+    } else if (
+      data &&
+      Array.isArray(
+        data.items
+      )
+    ) {
+      schoolYears =
+        data.items;
+
+    } else if (
+      data &&
+      Array.isArray(
+        data.schoolYears
+      )
+    ) {
+      schoolYears =
+        data.schoolYears;
+    }
+
+
+    activeSchoolYear =
+      schoolYears.find(
+        (item) =>
+          item?.isActive ===
+          true
+      ) || null;
+
+
+    if (
+      !activeSchoolYear
+    ) {
+      terms = [];
+      return;
+    }
+
+
+    terms =
+      Array.isArray(
+        activeSchoolYear.terms
+      )
+        ? activeSchoolYear.terms
+            .slice()
+            .sort(
+              (a, b) =>
+                (
+                  a.order ||
+                  0
+                ) -
+                (
+                  b.order ||
+                  0
+                )
+            )
+        : [];
+  }
+
+
+  /* =========================================================
+     LOAD STUDENTS
+  ========================================================= */
+
+  async function loadStudents() {
+    const data =
+      await api(
+        "/students?class=all"
+      );
+
+
+    if (
+      Array.isArray(data)
+    ) {
+      students =
+        data;
+
+    } else if (
+      data &&
+      Array.isArray(
+        data.students
+      )
+    ) {
+      students =
+        data.students;
+
+    } else if (
+      data &&
+      Array.isArray(
+        data.items
+      )
+    ) {
+      students =
+        data.items;
+
+    } else {
+      students = [];
+    }
+  }
+
+
+  /* =========================================================
+     GRADE / SECTION HELPERS
+  ========================================================= */
+
+  function getStudentGrade(
+    student
+  ) {
+    return (
+      student?.className ||
+      student?.grade ||
+      student?.gradeLevel ||
+      ""
+    );
+  }
+
+
+  function getStudentSection(
+    student
+  ) {
+    return (
+      student?.sectionName ||
+      student?.section ||
+      ""
+    );
+  }
+
+
+  /* =========================================================
+     BUILD GRADE SELECT
+  ========================================================= */
+
+  function buildGradeSelect() {
+    const current =
+      gradeSelect.value;
+
+
+    gradeSelect.innerHTML =
+      gradeLevels
+        .map(
+          (grade) => `
+            <option
+              value="${esc(
+                grade
+              )}"
+            >
+              ${esc(
+                grade
+              )}
+            </option>
+          `
+        )
+        .join("");
+
+
+    if (
+      gradeLevels.includes(
+        current
+      )
+    ) {
+      gradeSelect.value =
+        current;
+
+    } else {
+      gradeSelect.value =
+        gradeLevels[0] ||
+        "";
+    }
+  }
+
+
+  /* =========================================================
+     BUILD SECTION SELECT
+  ========================================================= */
+
+  function buildSectionSelect() {
+    const current =
+      sectionSelect.value;
+
+
+    sectionSelect.innerHTML =
+      sections
+        .map(
+          (section) => `
+            <option
+              value="${esc(
+                section
+              )}"
+            >
+              ${esc(
+                section
+              )}
+            </option>
+          `
+        )
+        .join("");
+
+
+    if (
+      sections.includes(
+        current
+      )
+    ) {
+      sectionSelect.value =
+        current;
+
+    } else {
+      sectionSelect.value =
+        sections[0] ||
+        "";
+    }
+  }
+
+
+  /* =========================================================
+     FILTER STUDENTS
+  ========================================================= */
+
+  function getFilteredStudents() {
+    const grade =
+      gradeSelect.value;
+
+    const section =
+      sectionSelect.value;
+
+    const query =
+      norm(
+        searchInput.value
+      );
+
+
+    let result =
+      students.filter(
+        (student) => {
+
+          const studentGrade =
+            getStudentGrade(
+              student
+            );
+
+          const studentSection =
+            getStudentSection(
+              student
+            );
+
+
+          const matchesGrade =
+            norm(
+              studentGrade
+            ) ===
+            norm(
+              grade
+            );
+
+
+          const matchesSection =
+            norm(
+              studentSection
+            ) ===
+            norm(
+              section
+            );
+
+
+          return (
+            matchesGrade &&
+            matchesSection
+          );
+        }
+      );
+
+
+    if (query) {
+      result =
+        result.filter(
+          (student) =>
+            norm(
+              getStudentName(
+                student
+              )
+            ).includes(
+              query
+            )
+        );
+    }
+
+
+    result.sort(
+      (a, b) =>
+        getStudentName(
+          a
+        ).localeCompare(
+          getStudentName(
+            b
+          )
+        )
+    );
+
+
+    currentRows =
+      result;
+
+
+    return result;
+  }
+
+
+  /* =========================================================
+     GET TERM GRADE
+  ========================================================= */
+
+  function getTermGrade(
+    student,
+    term,
+    index
+  ) {
+
+    /*
+     * Supports a few possible
+     * structures if grades are
+     * already included in the
+     * student response.
+     */
+
+    if (
+      Array.isArray(
+        student?.terms
+      )
+    ) {
+
+      const exact =
+        student.terms.find(
+          (item) =>
+            norm(
+              item?.name
+            ) ===
+            norm(
+              term?.name
+            )
+        );
+
+
+      if (exact) {
+        return (
+          exact.grade ??
+          exact.score ??
+          exact.value ??
+          null
+        );
+      }
+
+
+      const indexed =
+        student.terms[
+          index
+        ];
+
+
+      if (indexed) {
+        return (
+          indexed.grade ??
+          indexed.score ??
+          indexed.value ??
+          null
+        );
+      }
+    }
+
+
+    /*
+     * grades object
+     */
+
+    if (
+      student?.grades &&
+      typeof student.grades ===
+        "object"
+    ) {
+
+      const exact =
+        student.grades[
+          term?.name
+        ];
+
+
+      if (
+        exact !==
+        undefined
+      ) {
+        return exact;
+      }
+
+
+      const key =
+        Object.keys(
+          student.grades
+        ).find(
+          (item) =>
+            norm(item) ===
+            norm(
+              term?.name
+            )
+        );
+
+
+      if (key) {
+        return (
+          student.grades[
+            key
+          ]
+        );
+      }
+    }
+
+
+    /*
+     * Direct Q1-Q4 fields.
+     */
+
+    const keys = [
+      `q${index + 1}`,
+      `term${index + 1}`,
+      `grade${index + 1}`,
+    ];
+
+
+    for (
+      const key of keys
+    ) {
+      if (
+        student?.[key] !==
+        undefined
+      ) {
+        return student[key];
+      }
+    }
+
+
+    return null;
+  }
+
+
+  /* =========================================================
+     FINAL AVERAGE
+  ========================================================= */
+
+  function toNumber(
+    value
+  ) {
+    if (
+      value ===
+        null ||
+      value ===
+        undefined ||
+      String(
+        value
+      ).trim() ===
+        ""
+    ) {
+      return null;
+    }
+
+
+    const number =
+      Number(value);
+
+
+    return Number.isFinite(
+      number
+    )
+      ? number
+      : null;
+  }
+
+
+  function computeFinal(
+    student
+  ) {
+    const values =
+      terms
+        .map(
+          (
+            term,
+            index
+          ) =>
+            toNumber(
+              getTermGrade(
+                student,
+                term,
+                index
+              )
+            )
+        )
+        .filter(
+          (
+            value
+          ) =>
+            value !==
+            null
+        );
+
+
+    if (!values.length) {
+      return null;
+    }
+
+
+    const total =
+      values.reduce(
+        (
+          sum,
+          value
+        ) =>
+          sum + value,
+        0
+      );
+
+
+    return Math.round(
+      (
+        total /
+        values.length
+      ) *
+        100
+    ) / 100;
+  }
+
+
+  /* =========================================================
+     STATUS
+  ========================================================= */
+
+  function statusPill(
+    status
+  ) {
+    const normalized =
+      norm(
+        status
+      );
+
+
+    let className =
+      "pending";
+
+    let label =
+      "Pending";
+
+
+    if (
+      normalized ===
+      "promoted"
+    ) {
+      className =
+        "promoted";
+
+      label =
+        "Promoted";
+
+    } else if (
+      normalized ===
+      "retained"
+    ) {
+      className =
+        "retained";
+
+      label =
+        "Retained";
+
+    } else if (
+      normalized ===
+      "missed"
+    ) {
+      className =
+        "missed";
+
+      label =
+        "Missed";
+    }
+
+
+    return `
+      <span
+        class="ar-status ${className}"
+      >
+        ${esc(
+          label
+        )}
+      </span>
+    `;
+  }
+
+
+  /* =========================================================
+     RENDER TABLE HEADER
+  ========================================================= */
+
+  function renderHeaders() {
+    const table =
+      document.querySelector(
+        ".ar-table"
+      );
+
+
+    if (!table) {
+      return;
+    }
+
+
+    const thead =
+      table.querySelector(
+        "thead"
+      );
+
+
+    if (!thead) {
+      return;
+    }
+
+
+    const termHeaders =
+      terms
+        .map(
+          (term) => `
+            <th
+              style="
+                width:90px;
+                text-align:center;
+              "
+            >
+              ${esc(
+                term?.name ||
+                "Term"
+              )}
+            </th>
+          `
+        )
+        .join("");
+
+
+    thead.innerHTML = `
+      <tr>
+
+        <th
+          style="width:70px;"
+        >
+          No.
+        </th>
+
+        <th>
+          Student
+        </th>
+
+        ${termHeaders}
+
+        <th
+          style="
+            width:130px;
+            text-align:center;
+          "
+        >
+          Final Avg
+        </th>
+
+        <th
+          style="
+            width:140px;
+            text-align:center;
+          "
+        >
+          Status
+        </th>
+
+      </tr>
+    `;
+  }
+
+
+  /* =========================================================
+     RENDER TABLE
+  ========================================================= */
+
+  function render() {
+    renderHeaders();
+
+
+    const rows =
+      getFilteredStudents();
+
+
+    const grade =
+      gradeSelect.value ||
+      "—";
+
+    const section =
+      sectionSelect.value ||
+      "—";
+
+
+    summaryLine.textContent =
+      `Showing: ${grade} • Section ${section} • ${rows.length} student(s)`;
+
+
+    const colspan =
+      2 +
+      terms.length +
+      2;
+
+
+    if (!rows.length) {
+      recordsTbody.innerHTML = `
+        <tr class="ar-empty">
+
+          <td colspan="${colspan}">
+            No students found.
+          </td>
+
+        </tr>
+      `;
+
+      return;
+    }
+
+
+    recordsTbody.innerHTML =
+      rows
+        .map(
+          (
+            student,
+            index
+          ) => {
+
+            const finalAverage =
+              computeFinal(
+                student
+              );
+
+
+            const termCells =
+              terms
+                .map(
+                  (
+                    term,
+                    termIndex
+                  ) => {
+
+                    const grade =
+                      getTermGrade(
+                        student,
+                        term,
+                        termIndex
+                      );
+
+
+                    return `
+                      <td
+                        style="
+                          text-align:center;
+                        "
+                      >
+                        ${
+                          grade ===
+                            null ||
+                          grade ===
+                            undefined ||
+                          String(
+                            grade
+                          ).trim() ===
+                            ""
+                            ? "—"
+                            : esc(
+                                grade
+                              )
+                        }
+                      </td>
+                    `;
+                  }
+                )
+                .join("");
+
+
+            return `
+              <tr
+                data-id="${esc(
+                  student.id ||
+                  student._id ||
+                  ""
+                )}"
+              >
+
+                <td>
+                  ${index + 1}
+                </td>
+
+                <td>
+                  <strong>
+                    ${esc(
+                      getStudentName(
+                        student
+                      )
+                    )}
+                  </strong>
+                </td>
+
+                ${termCells}
+
+                <td
+                  class="ar-avg"
+                >
+                  ${
+                    finalAverage ===
+                    null
+                      ? "—"
+                      : esc(
+                          finalAverage
+                        )
+                  }
+                </td>
+
+                <td
+                  style="
+                    text-align:center;
+                  "
+                >
+                  ${statusPill(
+                    student.status
+                  )}
+                </td>
+
+              </tr>
+            `;
+          }
+        )
+        .join("");
+  }
+
+
+  /* =========================================================
+     CSV HELPERS
+  ========================================================= */
+
+  function csvEscape(
+    value
+  ) {
+    const text =
+      String(
+        value ?? ""
+      );
+
+
+    const escaped =
+      text.replaceAll(
+        '"',
+        '""'
+      );
+
+
+    if (
+      /[",\n]/.test(
+        text
+      )
+    ) {
+      return `"${escaped}"`;
+    }
+
+
+    return escaped;
+  }
+
+
+  function downloadCsv(
+    rows,
+    filename
+  ) {
+    const headers = [
+      "Grade Level",
+      "Section",
+      "Student",
+      ...terms.map(
+        (term) =>
+          term?.name ||
+          "Term"
+      ),
+      "Final Average",
+      "Status",
+    ];
+
+
+    const lines = [
+      headers
+        .map(
+          csvEscape
+        )
+        .join(","),
+    ];
+
+
+    rows.forEach(
+      (student) => {
+
+        const values = [
+          getStudentGrade(
+            student
+          ),
+          getStudentSection(
+            student
+          ),
+          getStudentName(
+            student
+          ),
+        ];
+
+
+        terms.forEach(
+          (
+            term,
+            index
+          ) => {
+
+            values.push(
+              getTermGrade(
+                student,
+                term,
+                index
+              ) ?? ""
+            );
+          }
+        );
+
+
+        values.push(
+          computeFinal(
+            student
+          ) ?? ""
+        );
+
+
+        values.push(
+          student.status ||
+          "Pending"
+        );
+
+
+        lines.push(
+          values
+            .map(
+              csvEscape
+            )
+            .join(",")
+        );
+      }
+    );
+
+
+    const csv =
+      lines.join(
+        "\n"
+      );
+
+
+    const blob =
+      new Blob(
+        [csv],
+        {
+          type:
+            "text/csv;charset=utf-8",
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.href =
+      url;
+
+    link.download =
+      filename;
+
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+
+
+    setTimeout(
+      () =>
+        URL.revokeObjectURL(
+          url
+        ),
+      1200
+    );
+  }
+
+
+  /* =========================================================
+     EXPORT CURRENT VIEW
+  ========================================================= */
+
+  function exportCurrentView() {
+    const rows =
+      currentRows.slice();
+
+
+    if (!rows.length) {
+      alert(
+        "There are no student records to export."
+      );
+
+      return;
+    }
+
+
+    const grade =
+      gradeSelect.value ||
+      "All";
+
+    const section =
+      sectionSelect.value ||
+      "All";
+
 
     const filename =
-      mode === "class"
-        ? `academic_records_${gradeSelect.value}_Section_${sectionSelect.value}.csv`
-        : `academic_records_ALL.csv`;
+      `academic_records_${grade}_Section_${section}.csv`
+        .replaceAll(
+          " ",
+          "_"
+        );
 
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename.replaceAll(" ", "_");
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1200);
+
+    downloadCsv(
+      rows,
+      filename
+    );
   }
 
-  // ---------- export menu UX ----------
+
+  /* =========================================================
+     EXPORT GRADE LEVEL
+  ========================================================= */
+
+  function exportGradeLevel() {
+    const selectedGrade =
+      gradeSelect.value;
+
+
+    if (!selectedGrade) {
+      alert(
+        "Please select a grade level first."
+      );
+
+      return;
+    }
+
+
+    /*
+     * Get every student belonging
+     * to the selected grade.
+     *
+     * Section is intentionally
+     * ignored here because
+     * Grade Level export includes
+     * ALL sections under that grade.
+     */
+
+    const rows =
+      students
+        .filter(
+          (student) =>
+            norm(
+              getStudentGrade(
+                student
+              )
+            ) ===
+            norm(
+              selectedGrade
+            )
+        )
+        .sort(
+          (a, b) => {
+
+            const sectionCompare =
+              getStudentSection(
+                a
+              ).localeCompare(
+                getStudentSection(
+                  b
+                )
+              );
+
+
+            if (
+              sectionCompare !==
+              0
+            ) {
+              return sectionCompare;
+            }
+
+
+            return getStudentName(
+              a
+            ).localeCompare(
+              getStudentName(
+                b
+              )
+            );
+          }
+        );
+
+
+    if (!rows.length) {
+      alert(
+        `No student records found for ${selectedGrade}.`
+      );
+
+      return;
+    }
+
+
+    const filename =
+      `academic_records_${selectedGrade}.csv`
+        .replaceAll(
+          " ",
+          "_"
+        );
+
+
+    downloadCsv(
+      rows,
+      filename
+    );
+  }
+
+
+  /* =========================================================
+     EXPORT ALL RECORDS
+  ========================================================= */
+
+  function exportAllRecords() {
+
+    /*
+     * Export every student.
+     *
+     * Students are sorted by:
+     *
+     * Grade Level
+     *     ↓
+     * Section
+     *     ↓
+     * Student Name
+     */
+
+    const rows =
+      students
+        .slice()
+        .sort(
+          (a, b) => {
+
+            const gradeCompare =
+              getStudentGrade(
+                a
+              ).localeCompare(
+                getStudentGrade(
+                  b
+                )
+              );
+
+
+            if (
+              gradeCompare !==
+              0
+            ) {
+              return gradeCompare;
+            }
+
+
+            const sectionCompare =
+              getStudentSection(
+                a
+              ).localeCompare(
+                getStudentSection(
+                  b
+                )
+              );
+
+
+            if (
+              sectionCompare !==
+              0
+            ) {
+              return sectionCompare;
+            }
+
+
+            return getStudentName(
+              a
+            ).localeCompare(
+              getStudentName(
+                b
+              )
+            );
+          }
+        );
+
+
+    if (!rows.length) {
+      alert(
+        "There are no student records to export."
+      );
+
+      return;
+    }
+
+
+    const filename =
+      "academic_records_all.csv";
+
+
+    downloadCsv(
+      rows,
+      filename
+    );
+  }
+
+
+  /* =========================================================
+     EXPORT MENU
+  ========================================================= */
+
   function toggleExportMenu() {
-    exportMenu.classList.toggle("hidden");
+    exportMenu?.classList.toggle(
+      "hidden"
+    );
   }
+
+
   function closeExportMenu() {
-    exportMenu.classList.add("hidden");
+    exportMenu?.classList.add(
+      "hidden"
+    );
   }
 
-  exportBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleExportMenu();
-  });
-  exportAllBtn.addEventListener("click", () => {
-    closeExportMenu();
-    exportCSV("all");
-  });
-  exportClassBtn.addEventListener("click", () => {
-    closeExportMenu();
-    exportCSV("class");
-  });
 
-  document.addEventListener("click", () => closeExportMenu());
-  exportMenu.addEventListener("click", (e) => e.stopPropagation());
+  exportBtn?.addEventListener(
+    "click",
+    (event) => {
 
-  // confirm modal events
-  confirmBackdrop.addEventListener("click", closeConfirm);
-  confirmCloseX.addEventListener("click", closeConfirm);
-  confirmCancel.addEventListener("click", closeConfirm);
-  confirmYes.addEventListener("click", confirmPromote);
+      event.stopPropagation();
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!confirmModal.classList.contains("hidden")) closeConfirm();
-    closeExportMenu();
-  });
+      toggleExportMenu();
+    }
+  );
 
-  // filters
-  gradeSelect.addEventListener("change", () => {
-    buildSectionSelect();
-    render();
-  });
-  sectionSelect.addEventListener("change", render);
-  searchInput.addEventListener("input", render);
 
-  // init
-  buildGradeSelect();
-  buildSectionSelect();
-  render();
+  /* ---------------------------------------------------------
+     Current View
+  --------------------------------------------------------- */
+
+  exportClassBtn?.addEventListener(
+    "click",
+    () => {
+
+      closeExportMenu();
+
+      exportCurrentView();
+    }
+  );
+
+
+  /* ---------------------------------------------------------
+     Grade Level
+  --------------------------------------------------------- */
+
+  exportGradeBtn?.addEventListener(
+    "click",
+    () => {
+
+      closeExportMenu();
+
+      exportGradeLevel();
+    }
+  );
+
+
+  /* ---------------------------------------------------------
+     All Records
+  --------------------------------------------------------- */
+
+  exportAllBtn?.addEventListener(
+    "click",
+    () => {
+
+      closeExportMenu();
+
+      exportAllRecords();
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    () => {
+
+      closeExportMenu();
+    }
+  );
+
+
+  exportMenu?.addEventListener(
+    "click",
+    (event) => {
+
+      event.stopPropagation();
+    }
+  );
+
+
+  /* =========================================================
+     GRADE CHANGE
+  ========================================================= */
+
+  gradeSelect?.addEventListener(
+    "change",
+    async () => {
+
+      try {
+
+        gradeSelect.disabled =
+          true;
+
+        sectionSelect.disabled =
+          true;
+
+
+        await loadSections(
+          gradeSelect.value
+        );
+
+
+        render();
+
+      } catch (error) {
+
+        showTableError(
+          error.message ||
+            "Failed to load sections."
+        );
+
+      } finally {
+
+        gradeSelect.disabled =
+          false;
+
+        sectionSelect.disabled =
+          false;
+      }
+    }
+  );
+
+
+  /* =========================================================
+     SECTION CHANGE
+  ========================================================= */
+
+  sectionSelect?.addEventListener(
+    "change",
+    () => {
+
+      render();
+    }
+  );
+
+
+  /* =========================================================
+     SEARCH
+  ========================================================= */
+
+  searchInput?.addEventListener(
+    "input",
+    () => {
+
+      render();
+    }
+  );
+
+
+  /* =========================================================
+     ERROR
+  ========================================================= */
+
+  function showTableError(
+    message
+  ) {
+    const colspan =
+      2 +
+      terms.length +
+      2;
+
+
+    recordsTbody.innerHTML = `
+      <tr class="ar-empty">
+
+        <td
+          colspan="${colspan}"
+        >
+          ${esc(
+            message ||
+              "Failed to load records."
+          )}
+        </td>
+
+      </tr>
+    `;
+  }
+
+
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
+
+  async function init() {
+
+    try {
+
+      await loadCsrfToken();
+
+
+      /*
+       * Load the school configuration
+       * and actual students.
+       */
+
+      await Promise.all([
+        loadGradeLevels(),
+        loadActiveSchoolYear(),
+        loadStudents(),
+      ]);
+
+
+      /*
+       * Build the real grade selector.
+       */
+
+      buildGradeSelect();
+
+
+      /*
+       * Load sections belonging to
+       * the selected grade.
+       */
+
+      await loadSections(
+        gradeSelect.value
+      );
+
+
+      /*
+       * Render everything.
+       */
+
+      render();
+
+    } catch (error) {
+
+      console.error(
+        "Academic Records initialization failed:",
+        error
+      );
+
+
+      showTableError(
+        error.message ||
+          "Failed to load academic records."
+      );
+    }
+  }
+
+
+  init();
 });

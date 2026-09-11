@@ -4,36 +4,51 @@
 //
 // Backend:
 // GET  /api/teacher/grades/encoding
+// GET  /api/teacher/grades/grades
 // POST /api/teacher/grades/save
 //
-// Data comes from MongoDB through the backend.
-// No grade localStorage.
-//
+// IMPORTANT:
+// - No localStorage for grades.
+// - Assessment IDs are persisted.
+// - School-year terms come from MongoDB.
+// - Locked terms are read-only.
+// - Assessment definitions persist even when scores are blank.
+// ============================================================
+
 
 // ============================================================
 // API
 // ============================================================
 
-const $ = (id) => document.getElementById(id);
+const $ = (id) =>
+  document.getElementById(id);
+
 
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, {
     credentials: "include",
+
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
+
     ...options,
   });
 
-  const data = await res.json().catch(() => ({}));
+  const data =
+    await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error(data.message || "Request failed");
+    throw new Error(
+      data.message ||
+        "Request failed"
+    );
   }
 
   return data;
 }
+
 
 // ============================================================
 // HELPERS
@@ -42,6 +57,7 @@ async function apiFetch(url, options = {}) {
 function normalize(value) {
   return String(value ?? "").trim();
 }
+
 
 function escapeHTML(value) {
   return String(value ?? "")
@@ -52,25 +68,40 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
+
 function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random()
     .toString(36)
     .slice(2, 8)}`;
 }
 
+
 function fullName(student) {
   return [
     student.firstName,
     student.middleName,
     student.lastName,
+    student.suffix,
   ]
     .filter(Boolean)
     .join(" ");
 }
 
+
 function roundOne(value) {
-  return Math.round(value * 10) / 10;
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
+    return null;
+  }
+
+  return (
+    Math.round(Number(value) * 10) / 10
+  );
 }
+
 
 // ============================================================
 // STATE
@@ -81,46 +112,166 @@ let TEACHER_SCOPE = {
   sectionName: "",
 };
 
+
 let SCHOOL_YEAR = {
   id: "",
   name: "",
+  terms: [],
 };
 
+
 let students = [];
+
 let subjects = [];
+
+
+// Structure:
+//
+// gradesStore[scope||termId||subject] = {
+//
+//   meta: {
+//     ww: [],
+//     pt: [],
+//     exam: []
+//   },
+//
+//   scores: {
+//
+//     [studentId]: {
+//
+//       ww: {
+//         [assessmentId]: score
+//       },
+//
+//       pt: {
+//         [assessmentId]: score
+//       },
+//
+//       exam: {
+//         [assessmentId]: score
+//       }
+//
+//     }
+//
+//   }
+//
+// }
 
 let gradesStore = {};
 
-let quarter = "1";
+
+// This now stores the actual SchoolYear term ID.
+//
+// The variable name "quarter" is kept so the rest
+// of the page architecture remains compatible.
+let quarter = "";
+
 let subject = "";
 
 let dirty = false;
+
 let currentKey = "";
+
+
+// ============================================================
+// TERM HELPERS
+// ============================================================
+
+function getTerms() {
+  return Array.isArray(
+    SCHOOL_YEAR.terms
+  )
+    ? SCHOOL_YEAR.terms
+    : [];
+}
+
+
+function getSelectedTerm() {
+  return (
+    getTerms().find(
+      (term) =>
+        String(term.id) ===
+        String(quarter)
+    ) || null
+  );
+}
+
+
+function isCurrentTermLocked() {
+  const term =
+    getSelectedTerm();
+
+  return Boolean(
+    term?.locked
+  );
+}
+
+
+function getTermLabel(term) {
+  if (!term) {
+    return "";
+  }
+
+  return (
+    normalize(term.name) ||
+    `Term ${term.order}`
+  );
+}
+
+
+function getTermIndexLabel(term) {
+  if (!term) {
+    return "";
+  }
+
+  return (
+    normalize(term.name) ||
+    `Term ${term.order}`
+  );
+}
+
 
 // ============================================================
 // GRADING HELPERS
 // ============================================================
 
-function clampScore(value, maxPoints) {
-  if (value === "" || value == null) {
+function clampScore(
+  value,
+  maxPoints
+) {
+  if (
+    value === "" ||
+    value === null ||
+    value === undefined
+  ) {
     return null;
   }
 
-  const number = Number(value);
-  const max = Number(maxPoints);
+  const number =
+    Number(value);
 
-  if (!Number.isFinite(number)) {
+  const max =
+    Number(maxPoints);
+
+  if (
+    !Number.isFinite(number) ||
+    !Number.isFinite(max) ||
+    max <= 0
+  ) {
     return null;
   }
 
-  if (!Number.isFinite(max) || max <= 0) {
-    return null;
-  }
-
-  return Math.max(0, Math.min(max, number));
+  return Math.max(
+    0,
+    Math.min(max, number)
+  );
 }
 
-function percentage(score, points) {
+
+function percentage(
+  score,
+  points
+) {
   if (
     typeof score !== "number" ||
     !Number.isFinite(score) ||
@@ -131,38 +282,66 @@ function percentage(score, points) {
     return null;
   }
 
-  return (score / points) * 100;
+  return (
+    (score / points) * 100
+  );
 }
 
+
 function average(values) {
-  const valid = values.filter(
-    (value) =>
-      typeof value === "number" &&
-      Number.isFinite(value)
-  );
+  const valid =
+    values.filter(
+      (value) =>
+        typeof value === "number" &&
+        Number.isFinite(value)
+    );
 
   if (!valid.length) {
     return null;
   }
 
-  const total = valid.reduce(
-    (sum, value) => sum + value,
-    0
-  );
+  const total =
+    valid.reduce(
+      (sum, value) =>
+        sum + value,
+      0
+    );
 
-  return roundOne(total / valid.length);
+  return roundOne(
+    total / valid.length
+  );
 }
+
 
 // ============================================================
 // TEACHER DATA
 // ============================================================
 
 async function loadTeacherData() {
-  const response = await apiFetch(
-    "/api/teacher/grades/encoding"
-  );
+  const response =
+    await apiFetch(
+      "/api/teacher/grades/encoding"
+    );
 
-  const data = response.data || {};
+  /*
+   * Support both:
+   *
+   * {
+   *   teacherScope: ...
+   * }
+   *
+   * and:
+   *
+   * {
+   *   data: {
+   *     teacherScope: ...
+   *   }
+   * }
+   */
+  const data =
+    response.data ||
+    response;
+
 
   // ----------------------------------------------------------
   // Teacher scope
@@ -178,6 +357,7 @@ async function loadTeacherData() {
     ),
   };
 
+
   // ----------------------------------------------------------
   // School year
   // ----------------------------------------------------------
@@ -190,35 +370,122 @@ async function loadTeacherData() {
     name: normalize(
       data.schoolYear?.name
     ),
+
+    terms: Array.isArray(
+      data.schoolYear?.terms
+    )
+      ? data.schoolYear.terms
+          .map((term) => ({
+            id: normalize(
+              term.id ||
+                term._id
+            ),
+
+            order: Number(
+              term.order
+            ),
+
+            name: normalize(
+              term.name
+            ),
+
+            start:
+              term.start ||
+              null,
+
+            end:
+              term.end ||
+              null,
+
+            locked:
+              Boolean(
+                term.locked
+              ),
+          }))
+          .sort(
+            (a, b) =>
+              a.order - b.order
+          )
+      : [],
   };
+
 
   // ----------------------------------------------------------
   // Students
   // ----------------------------------------------------------
 
-  students = Array.isArray(data.students)
-    ? data.students
-    : [];
+  students =
+    Array.isArray(data.students)
+      ? data.students
+      : [];
+
 
   // ----------------------------------------------------------
   // Subjects
   // ----------------------------------------------------------
 
-  subjects = Array.isArray(data.subjects)
-    ? data.subjects
-        .map((item) => {
-          if (typeof item === "string") {
-            return normalize(item);
-          }
+  subjects =
+    Array.isArray(data.subjects)
+      ? data.subjects
+          .map((item) => {
+            if (
+              typeof item ===
+              "string"
+            ) {
+              return normalize(
+                item
+              );
+            }
 
-          return normalize(
-            item?.value ||
-            item?.name ||
-            item?.label
-          );
-        })
-        .filter(Boolean)
-    : [];
+            return normalize(
+              item?.value ||
+                item?.name ||
+                item?.label ||
+                item?.subject ||
+                item?.subjectName
+            );
+          })
+          .filter(Boolean)
+      : [];
+
+
+  // ----------------------------------------------------------
+  // Default term
+  // ----------------------------------------------------------
+
+  if (
+    !quarter ||
+    !SCHOOL_YEAR.terms.some(
+      (term) =>
+        String(term.id) ===
+        String(quarter)
+    )
+  ) {
+    const firstUnlocked =
+      SCHOOL_YEAR.terms.find(
+        (term) =>
+          !term.locked
+      );
+
+    quarter =
+      firstUnlocked?.id ||
+      SCHOOL_YEAR.terms[0]?.id ||
+      "";
+  }
+
+
+  // ----------------------------------------------------------
+  // Default subject
+  // ----------------------------------------------------------
+
+  if (
+    !subject ||
+    !subjects.includes(subject)
+  ) {
+    subject =
+      subjects[0] || "";
+  }
+
 
   console.log(
     "Teacher scope:",
@@ -241,22 +508,352 @@ async function loadTeacherData() {
   );
 }
 
+
+// ============================================================
+// LOAD SAVED GRADES
+// ============================================================
+
+async function loadSavedGrades() {
+  const response =
+    await apiFetch(
+      "/api/teacher/grades/grades"
+    );
+
+  const data =
+    response.data ||
+    response;
+
+  const grades =
+    Array.isArray(data.grades)
+      ? data.grades
+      : [];
+
+  gradesStore = {};
+
+
+  for (
+    const grade of grades
+  ) {
+    const termId =
+      normalize(
+        grade.termId
+      );
+
+    const subjectName =
+      normalize(
+        grade.subject
+      );
+
+    if (
+      !termId ||
+      !subjectName
+    ) {
+      continue;
+    }
+
+
+    const key =
+      bucketKey(
+        TEACHER_SCOPE,
+        termId,
+        subjectName
+      );
+
+
+    if (!gradesStore[key]) {
+      gradesStore[key] =
+        createEmptyBucket();
+    }
+
+
+    const bucket =
+      gradesStore[key];
+
+
+    const sid =
+      normalize(
+        grade.studentId
+      );
+
+
+    if (!sid) {
+      continue;
+    }
+
+
+    if (!bucket.scores[sid]) {
+      bucket.scores[sid] = {
+        ww: {},
+        pt: {},
+        exam: {},
+      };
+    }
+
+
+    // --------------------------------------------------------
+    // Written Works
+    // --------------------------------------------------------
+
+    if (
+      Array.isArray(
+        grade.writtenWorks
+      )
+    ) {
+      grade.writtenWorks.forEach(
+        (assessment) => {
+          /*
+           * IMPORTANT:
+           *
+           * Use our custom assessmentId.
+           *
+           * DO NOT use MongoDB _id.
+           */
+          const assessmentId =
+            normalize(
+              assessment.assessmentId
+            );
+
+          if (!assessmentId) {
+            return;
+          }
+
+
+          const existing =
+            bucket.meta.ww.find(
+              (item) =>
+                item.id ===
+                assessmentId
+            );
+
+
+          if (!existing) {
+            bucket.meta.ww.push({
+              id: assessmentId,
+
+              name: normalize(
+                assessment.activity
+              ),
+
+              points: Number(
+                assessment.total
+              ),
+            });
+          }
+
+
+          if (
+            assessment.score !==
+              null &&
+            assessment.score !==
+              undefined &&
+            assessment.score !== ""
+          ) {
+            bucket.scores[sid].ww[
+              assessmentId
+            ] =
+              Number(
+                assessment.score
+              );
+          } else {
+            bucket.scores[sid].ww[
+              assessmentId
+            ] = null;
+          }
+        }
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // Performance Tasks
+    // --------------------------------------------------------
+
+    if (
+      Array.isArray(
+        grade.performanceTasks
+      )
+    ) {
+      grade.performanceTasks.forEach(
+        (assessment) => {
+          const assessmentId =
+            normalize(
+              assessment.assessmentId
+            );
+
+          if (!assessmentId) {
+            return;
+          }
+
+
+          const existing =
+            bucket.meta.pt.find(
+              (item) =>
+                item.id ===
+                assessmentId
+            );
+
+
+          if (!existing) {
+            bucket.meta.pt.push({
+              id: assessmentId,
+
+              name: normalize(
+                assessment.activity
+              ),
+
+              points: Number(
+                assessment.total
+              ),
+            });
+          }
+
+
+          if (
+            assessment.score !==
+              null &&
+            assessment.score !==
+              undefined &&
+            assessment.score !== ""
+          ) {
+            bucket.scores[sid].pt[
+              assessmentId
+            ] =
+              Number(
+                assessment.score
+              );
+          } else {
+            bucket.scores[sid].pt[
+              assessmentId
+            ] = null;
+          }
+        }
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // Term Assessment / Exam
+    // --------------------------------------------------------
+
+    if (
+      grade.termAssessment &&
+      typeof grade.termAssessment ===
+        "object"
+    ) {
+      const assessmentId =
+        normalize(
+          grade.termAssessment
+            .assessmentId
+        );
+
+      if (assessmentId) {
+        const existing =
+          bucket.meta.exam.find(
+            (item) =>
+              item.id ===
+              assessmentId
+          );
+
+
+        if (!existing) {
+          bucket.meta.exam.push({
+            id: assessmentId,
+
+            name:
+              normalize(
+                grade.termAssessment
+                  .activity
+              ) ||
+              "Term Exam",
+
+            points:
+              grade.termAssessment
+                .total === null ||
+              grade.termAssessment
+                .total === undefined
+                ? null
+                : Number(
+                    grade.termAssessment
+                      .total
+                  ),
+          });
+        }
+
+
+        if (
+          grade.termAssessment
+            .score !== null &&
+          grade.termAssessment
+            .score !== undefined &&
+          grade.termAssessment
+            .score !== ""
+        ) {
+          bucket.scores[sid].exam[
+            assessmentId
+          ] =
+            Number(
+              grade.termAssessment
+                .score
+            );
+        } else {
+          bucket.scores[sid].exam[
+            assessmentId
+          ] = null;
+        }
+      }
+    }
+
+
+    bucket.updatedAt =
+      grade.updatedAt ||
+      Date.now();
+  }
+
+
+  /*
+   * Make sure every loaded bucket has
+   * score containers for every student.
+   */
+  Object.values(
+    gradesStore
+  ).forEach((bucket) => {
+    ensureBucketStructure(
+      bucket
+    );
+  });
+
+
+  console.log(
+    "Saved grades loaded:",
+    gradesStore
+  );
+}
+
+
 // ============================================================
 // GRADE STORAGE
 // ============================================================
 
 function bucketKey(
   scope,
-  quarterValue,
+  termId,
   subjectValue
 ) {
   return [
-    scope.className,
-    scope.sectionName,
-    quarterValue,
-    subjectValue,
+    normalize(
+      scope.className
+    ),
+
+    normalize(
+      scope.sectionName
+    ),
+
+    normalize(termId),
+
+    normalize(subjectValue),
   ].join("||");
 }
+
 
 function createEmptyBucket() {
   return {
@@ -272,113 +869,180 @@ function createEmptyBucket() {
   };
 }
 
-function ensureBucket() {
-  const key = bucketKey(
-    TEACHER_SCOPE,
-    quarter,
-    subject
+
+function ensureBucketStructure(
+  bucket
+) {
+  if (!bucket.meta) {
+    bucket.meta = {};
+  }
+
+
+  bucket.meta.ww =
+    Array.isArray(
+      bucket.meta.ww
+    )
+      ? bucket.meta.ww
+      : [];
+
+
+  bucket.meta.pt =
+    Array.isArray(
+      bucket.meta.pt
+    )
+      ? bucket.meta.pt
+      : [];
+
+
+  bucket.meta.exam =
+    Array.isArray(
+      bucket.meta.exam
+    )
+      ? bucket.meta.exam
+      : [];
+
+
+  /*
+   * Only one exam per subject/term.
+   */
+  if (
+    bucket.meta.exam.length >
+    1
+  ) {
+    bucket.meta.exam =
+      bucket.meta.exam.slice(
+        0,
+        1
+      );
+  }
+
+
+  bucket.scores =
+    bucket.scores || {};
+
+
+  students.forEach(
+    (student) => {
+      const sid =
+        normalize(
+          student.studentId
+        );
+
+      if (!sid) {
+        return;
+      }
+
+
+      if (
+        !bucket.scores[sid]
+      ) {
+        bucket.scores[sid] = {
+          ww: {},
+          pt: {},
+          exam: {},
+        };
+      }
+
+
+      bucket.scores[sid].ww =
+        bucket.scores[sid].ww ||
+        {};
+
+      bucket.scores[sid].pt =
+        bucket.scores[sid].pt ||
+        {};
+
+      bucket.scores[sid].exam =
+        bucket.scores[sid].exam ||
+        {};
+    }
   );
+}
+
+
+function ensureBucket() {
+  const key =
+    bucketKey(
+      TEACHER_SCOPE,
+      quarter,
+      subject
+    );
 
   currentKey = key;
+
 
   if (!gradesStore[key]) {
     gradesStore[key] =
       createEmptyBucket();
   }
 
-  const bucket = gradesStore[key];
 
-  bucket.meta = bucket.meta || {};
+  const bucket =
+    gradesStore[key];
 
-  bucket.meta.ww = Array.isArray(
-    bucket.meta.ww
-  )
-    ? bucket.meta.ww
-    : [];
 
-  bucket.meta.pt = Array.isArray(
-    bucket.meta.pt
-  )
-    ? bucket.meta.pt
-    : [];
+  ensureBucketStructure(
+    bucket
+  );
 
-  bucket.meta.exam = Array.isArray(
-    bucket.meta.exam
-  )
-    ? bucket.meta.exam
-    : [];
-
-  if (bucket.meta.exam.length > 1) {
-    bucket.meta.exam =
-      bucket.meta.exam.slice(0, 1);
-  }
-
-  bucket.scores =
-    bucket.scores || {};
-
-  students.forEach((student) => {
-    const sid =
-      student.studentId;
-
-    if (!sid) {
-      return;
-    }
-
-    if (!bucket.scores[sid]) {
-      bucket.scores[sid] = {
-        ww: {},
-        pt: {},
-        exam: {},
-      };
-    }
-
-    bucket.scores[sid].ww =
-      bucket.scores[sid].ww || {};
-
-    bucket.scores[sid].pt =
-      bucket.scores[sid].pt || {};
-
-    bucket.scores[sid].exam =
-      bucket.scores[sid].exam || {};
-  });
 
   return bucket;
 }
+
 
 // ============================================================
 // STATUS
 // ============================================================
 
-function setStatusSaved(isSaved) {
-  const box = $("saveStatus");
+function setStatusSaved(
+  isSaved
+) {
+  const box =
+    $("saveStatus");
 
   if (!box) {
     return;
   }
 
+
   if (isSaved) {
     box.textContent = "Saved";
+
     box.style.background =
       "rgba(25, 135, 84, 0.14)";
-    box.style.color = "#0f5132";
+
+    box.style.color =
+      "#0f5132";
   } else {
-    box.textContent = "Not Saved";
+    box.textContent =
+      "Not Saved";
+
     box.style.background =
       "rgba(255, 193, 7, 0.16)";
-    box.style.color = "#7a5b00";
+
+    box.style.color =
+      "#7a5b00";
   }
 }
 
+
 function setDirty(value) {
-  dirty = Boolean(value);
-  setStatusSaved(!dirty);
+  dirty =
+    Boolean(value);
+
+  setStatusSaved(
+    !dirty
+  );
 }
+
 
 // ============================================================
 // HEADER
 // ============================================================
 
-function scopeLabel(scope) {
+function scopeLabel(
+  scope
+) {
   const parts = [
     scope.className,
     scope.sectionName,
@@ -389,14 +1053,22 @@ function scopeLabel(scope) {
     : "No assigned class";
 }
 
+
 function renderHeader() {
   const scope =
-    scopeLabel(TEACHER_SCOPE);
+    scopeLabel(
+      TEACHER_SCOPE
+    );
+
+  const term =
+    getSelectedTerm();
+
 
   if ($("grTitle")) {
     $("grTitle").textContent =
       "Grades";
   }
+
 
   if ($("tbRole")) {
     $("tbRole").textContent =
@@ -406,13 +1078,81 @@ function renderHeader() {
         : "Teacher";
   }
 
+
   if ($("grScopeLabel")) {
     $("grScopeLabel").textContent =
-      `${scope} • Quarter ${quarter} • ${
-        subject || "No Subject"
+      `${scope} • ${
+        getTermLabel(term) ||
+        "No Term"
+      } • ${
+        subject ||
+        "No Subject"
       }`;
   }
 }
+
+
+// ============================================================
+// TERM SELECT
+// ============================================================
+
+function renderTermOptions() {
+  const select =
+    $("quarterSelect");
+
+  if (!select) {
+    return;
+  }
+
+
+  select.innerHTML = "";
+
+
+  if (!SCHOOL_YEAR.terms.length) {
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value = "";
+
+    option.textContent =
+      "No terms available";
+
+    select.appendChild(
+      option
+    );
+
+    quarter = "";
+
+    return;
+  }
+
+
+  SCHOOL_YEAR.terms.forEach(
+    (term) => {
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        term.id;
+
+      option.textContent =
+        getTermLabel(term);
+
+      select.appendChild(
+        option
+      );
+    }
+  );
+
+
+  select.value =
+    quarter;
+}
+
 
 // ============================================================
 // SUBJECT SELECT
@@ -426,27 +1166,37 @@ function renderSubjectOptions() {
     return;
   }
 
+
   select.innerHTML = "";
+
 
   if (!subjects.length) {
     const option =
-      document.createElement("option");
+      document.createElement(
+        "option"
+      );
 
     option.value = "";
+
     option.textContent =
       "No subjects available";
 
-    select.appendChild(option);
+    select.appendChild(
+      option
+    );
 
     subject = "";
 
     return;
   }
 
+
   subjects.forEach(
     (subjectName) => {
       const option =
-        document.createElement("option");
+        document.createElement(
+          "option"
+        );
 
       option.value =
         subjectName;
@@ -454,16 +1204,28 @@ function renderSubjectOptions() {
       option.textContent =
         subjectName;
 
-      select.appendChild(option);
+      select.appendChild(
+        option
+      );
     }
   );
 
-  subject =
-    subjects[0];
+
+  if (
+    !subject ||
+    !subjects.includes(
+      subject
+    )
+  ) {
+    subject =
+      subjects[0];
+  }
+
 
   select.value =
     subject;
 }
+
 
 // ============================================================
 // ASSESSMENT HELPERS
@@ -479,9 +1241,12 @@ function assessmentPercentage(
 
   return percentage(
     score,
-    Number(assessment.points)
+    Number(
+      assessment.points
+    )
   );
 }
+
 
 function getAssessmentById(
   bucket,
@@ -489,7 +1254,8 @@ function getAssessmentById(
   assessmentId
 ) {
   const assessments =
-    bucket?.meta?.[group] || [];
+    bucket?.meta?.[group] ||
+    [];
 
   return assessments.find(
     (assessment) =>
@@ -497,6 +1263,7 @@ function getAssessmentById(
       assessmentId
   );
 }
+
 
 function getGroupAverage(
   bucket,
@@ -510,10 +1277,14 @@ function getGroupAverage(
       exam: {},
     };
 
+
   const assessments =
-    bucket?.meta?.[group] || [];
+    bucket?.meta?.[group] ||
+    [];
+
 
   const values = [];
+
 
   assessments.forEach(
     (assessment) => {
@@ -522,11 +1293,14 @@ function getGroupAverage(
           assessment.id
         ];
 
+
       if (
-        typeof score !== "number"
+        typeof score !==
+        "number"
       ) {
         return;
       }
+
 
       const percent =
         assessmentPercentage(
@@ -534,45 +1308,68 @@ function getGroupAverage(
           score
         );
 
+
       if (
-        typeof percent === "number"
+        typeof percent ===
+        "number"
       ) {
-        values.push(percent);
+        values.push(
+          percent
+        );
       }
     }
   );
 
-  return average(values);
+
+  return average(
+    values
+  );
 }
+
 
 function getExamPercentage(
   bucket,
   sid
 ) {
   const exams =
-    bucket?.meta?.exam || [];
+    bucket?.meta?.exam ||
+    [];
+
 
   if (!exams.length) {
     return null;
   }
 
-  const exam = exams[0];
+
+  const exam =
+    exams[0];
+
 
   const score =
     bucket?.scores?.[sid]
-      ?.exam?.[exam.id];
+      ?.exam?.[
+        exam.id
+      ];
+
 
   if (
-    typeof score !== "number"
+    typeof score !==
+    "number"
   ) {
     return null;
   }
+
 
   return assessmentPercentage(
     exam,
     score
   );
 }
+
+
+// ============================================================
+// FINAL GRADE
+// ============================================================
 
 function computeFinalForStudent(
   bucket,
@@ -585,6 +1382,7 @@ function computeFinalForStudent(
       "ww"
     );
 
+
   const ptAverage =
     getGroupAverage(
       bucket,
@@ -592,12 +1390,18 @@ function computeFinalForStudent(
       "pt"
     );
 
+
   const examAverage =
     getExamPercentage(
       bucket,
       sid
     );
 
+
+  /*
+   * If absolutely nothing has been
+   * entered, don't display a grade.
+   */
   if (
     wwAverage == null &&
     ptAverage == null &&
@@ -606,6 +1410,16 @@ function computeFinalForStudent(
     return null;
   }
 
+
+  /*
+   * Keep the existing BLIMS behavior:
+   *
+   * WW = 30%
+   * PT = 50%
+   * Exam = 20%
+   *
+   * Missing components contribute 0.
+   */
   const ww =
     wwAverage ?? 0;
 
@@ -615,12 +1429,14 @@ function computeFinalForStudent(
   const exam =
     examAverage ?? 0;
 
+
   return roundOne(
     pt * 0.5 +
-    ww * 0.3 +
-    exam * 0.2
+      ww * 0.3 +
+      exam * 0.2
   );
 }
+
 
 function remark(final) {
   if (final == null) {
@@ -631,6 +1447,108 @@ function remark(final) {
     ? "Passed"
     : "Failed";
 }
+
+
+// ============================================================
+// EDITABILITY / LOCK
+// ============================================================
+
+function applyEditability() {
+  const locked =
+    isCurrentTermLocked();
+
+
+  // ----------------------------------------------------------
+  // Inputs
+  // ----------------------------------------------------------
+
+  document
+    .querySelectorAll(
+      ".gr-input"
+    )
+    .forEach((input) => {
+      input.disabled =
+        locked;
+    });
+
+
+  // ----------------------------------------------------------
+  // Delete buttons
+  // ----------------------------------------------------------
+
+  document
+    .querySelectorAll(
+      ".gr-assessment-delete"
+    )
+    .forEach((button) => {
+      button.disabled =
+        locked;
+    });
+
+
+  // ----------------------------------------------------------
+  // Add buttons
+  // ----------------------------------------------------------
+
+  const addButtons = [
+    $("addWWBtn"),
+    $("addPTBtn"),
+    $("addExamBtn"),
+  ];
+
+
+  addButtons.forEach(
+    (button) => {
+      if (button) {
+        button.disabled =
+          locked;
+      }
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // Save
+  // ----------------------------------------------------------
+
+  const saveButton =
+    $("saveAllBtn");
+
+  if (saveButton) {
+    saveButton.disabled =
+      locked;
+  }
+
+
+  // ----------------------------------------------------------
+  // Status
+  // ----------------------------------------------------------
+
+  const status =
+    $("saveStatus");
+
+  if (status) {
+    if (locked) {
+      status.textContent =
+        `${
+          getTermLabel(
+            getSelectedTerm()
+          )
+        } is Locked`;
+
+      status.style.background =
+        "rgba(108, 117, 125, 0.14)";
+
+      status.style.color =
+        "#495057";
+    } else if (!dirty) {
+      setStatusSaved(
+        true
+      );
+    }
+  }
+}
+
 
 // ============================================================
 // ASSESSMENT LIST
@@ -646,6 +1564,7 @@ function renderAssessmentList(
     return;
   }
 
+
   const ww =
     bucket.meta.ww || [];
 
@@ -655,10 +1574,12 @@ function renderAssessmentList(
   const exam =
     bucket.meta.exam || [];
 
+
   const total =
     ww.length +
     pt.length +
     exam.length;
+
 
   if (!total) {
     container.innerHTML = `
@@ -667,8 +1588,11 @@ function renderAssessmentList(
       </div>
     `;
 
+    applyEditability();
+
     return;
   }
+
 
   const createGroup = (
     title,
@@ -680,10 +1604,12 @@ function renderAssessmentList(
       return "";
     }
 
+
     return `
       <div class="gr-assessment-group">
 
         <div class="gr-assessment-group-title">
+
           <span>
             ${escapeHTML(title)}
           </span>
@@ -691,7 +1617,9 @@ function renderAssessmentList(
           <small>
             ${escapeHTML(weight)}
           </small>
+
         </div>
+
 
         <div class="gr-assessment-items">
 
@@ -721,6 +1649,7 @@ function renderAssessmentList(
 
                   </div>
 
+
                   <button
                     type="button"
                     class="gr-assessment-delete"
@@ -741,9 +1670,11 @@ function renderAssessmentList(
             .join("")}
 
         </div>
+
       </div>
     `;
   };
+
 
   container.innerHTML = `
     ${createGroup(
@@ -767,13 +1698,19 @@ function renderAssessmentList(
       exam
     )}
   `;
+
+
+  applyEditability();
 }
+
 
 // ============================================================
 // TABLE HEADER
 // ============================================================
 
-function buildThead(meta) {
+function buildThead(
+  meta
+) {
   const thead =
     $("gradesThead");
 
@@ -781,19 +1718,30 @@ function buildThead(meta) {
     return;
   }
 
-  const ww = meta.ww || [];
-  const pt = meta.pt || [];
-  const exam = meta.exam || [];
+
+  const ww =
+    meta.ww || [];
+
+  const pt =
+    meta.pt || [];
+
+  const exam =
+    meta.exam || [];
+
 
   const assessmentCount =
     ww.length +
     pt.length +
     exam.length;
 
+
   if (!assessmentCount) {
     thead.innerHTML = `
       <tr>
-        <th style="width:70px">No.</th>
+
+        <th style="width:70px">
+          No.
+        </th>
 
         <th style="min-width:240px">
           Student
@@ -806,22 +1754,32 @@ function buildThead(meta) {
         <th style="width:120px">
           Remarks
         </th>
+
       </tr>
     `;
 
     return;
   }
 
+
   thead.innerHTML = `
     <tr class="group">
 
-      <th rowspan="2" style="width:70px">
+      <th
+        rowspan="2"
+        style="width:70px"
+      >
         No.
       </th>
 
-      <th rowspan="2" style="min-width:240px">
+
+      <th
+        rowspan="2"
+        style="min-width:240px"
+      >
         Student
       </th>
+
 
       ${
         ww.length
@@ -836,6 +1794,7 @@ function buildThead(meta) {
           : ""
       }
 
+
       ${
         pt.length
           ? `
@@ -848,6 +1807,7 @@ function buildThead(meta) {
           `
           : ""
       }
+
 
       ${
         exam.length
@@ -862,27 +1822,43 @@ function buildThead(meta) {
           : ""
       }
 
-      <th rowspan="2" style="width:140px">
+
+      <th
+        rowspan="2"
+        style="width:140px"
+      >
         Final Grade
       </th>
 
-      <th rowspan="2" style="width:120px">
+
+      <th
+        rowspan="2"
+        style="width:120px"
+      >
         Remarks
       </th>
 
     </tr>
 
+
     <tr class="cols">
 
-      ${renderAssessmentHeaders(ww)}
+      ${renderAssessmentHeaders(
+        ww
+      )}
 
-      ${renderAssessmentHeaders(pt)}
+      ${renderAssessmentHeaders(
+        pt
+      )}
 
-      ${renderAssessmentHeaders(exam)}
+      ${renderAssessmentHeaders(
+        exam
+      )}
 
     </tr>
   `;
 }
+
 
 function renderAssessmentHeaders(
   assessments
@@ -912,6 +1888,7 @@ function renderAssessmentHeaders(
     .join("");
 }
 
+
 // ============================================================
 // TABLE BODY
 // ============================================================
@@ -927,12 +1904,18 @@ function renderBody(
     return;
   }
 
+
   tbody.innerHTML = "";
+
 
   if (!students.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="99" class="gr-empty">
+
+        <td
+          colspan="99"
+          class="gr-empty"
+        >
           No students found for
           ${escapeHTML(
             scopeLabel(
@@ -940,18 +1923,23 @@ function renderBody(
             )
           )}.
         </td>
+
       </tr>
     `;
 
-    renderSummary(bucket);
+    renderSummary(
+      bucket
+    );
 
     return;
   }
+
 
   const assessmentCount =
     meta.ww.length +
     meta.pt.length +
     meta.exam.length;
+
 
   students.forEach(
     (student, index) => {
@@ -966,8 +1954,19 @@ function renderBody(
     }
   );
 
-  renderSummary(bucket);
+
+  renderSummary(
+    bucket
+  );
+
+
+  applyEditability();
 }
+
+
+// ============================================================
+// STUDENT ROW
+// ============================================================
 
 function renderStudentRow(
   tbody,
@@ -978,7 +1977,10 @@ function renderStudentRow(
   showInputs
 ) {
   const sid =
-    student.studentId || "";
+    normalize(
+      student.studentId
+    );
+
 
   if (!bucket.scores[sid]) {
     bucket.scores[sid] = {
@@ -988,8 +1990,10 @@ function renderStudentRow(
     };
   }
 
+
   const pack =
     bucket.scores[sid];
+
 
   const final =
     computeFinalForStudent(
@@ -997,10 +2001,16 @@ function renderStudentRow(
       sid
     );
 
-  const tr =
-    document.createElement("tr");
 
-  tr.dataset.sid = sid;
+  const tr =
+    document.createElement(
+      "tr"
+    );
+
+
+  tr.dataset.sid =
+    sid;
+
 
   const assessmentInputs =
     showInputs
@@ -1028,12 +2038,17 @@ function renderStudentRow(
       `
       : "";
 
+
   tr.innerHTML = `
     <td>
-      ${String(index + 1).padStart(2, "0")}
+      ${String(
+        index + 1
+      ).padStart(2, "0")}
     </td>
 
+
     <td>
+
       <div class="gr-student">
 
         <img
@@ -1045,13 +2060,17 @@ function renderStudentRow(
           alt=""
         >
 
+
         <div>
 
           <div class="gr-name">
             ${escapeHTML(
-              fullName(student) || "—"
+              fullName(
+                student
+              ) || "—"
             )}
           </div>
+
 
           <div class="gr-id">
             ${escapeHTML(
@@ -1062,13 +2081,18 @@ function renderStudentRow(
         </div>
 
       </div>
+
     </td>
+
 
     ${assessmentInputs}
 
+
     <td
       class="gr-final"
-      data-final="${escapeHTML(sid)}"
+      data-final="${escapeHTML(
+        sid
+      )}"
     >
       ${
         final == null
@@ -1077,16 +2101,27 @@ function renderStudentRow(
       }
     </td>
 
+
     <td
       class="gr-remark"
-      data-remark="${escapeHTML(sid)}"
+      data-remark="${escapeHTML(
+        sid
+      )}"
     >
       ${remark(final)}
     </td>
   `;
 
-  tbody.appendChild(tr);
+
+  tbody.appendChild(
+    tr
+  );
 }
+
+
+// ============================================================
+// ASSESSMENT INPUTS
+// ============================================================
 
 function renderAssessmentInputs(
   assessments,
@@ -1095,90 +2130,116 @@ function renderAssessmentInputs(
   group
 ) {
   return assessments
-    .map((assessment) => {
-      const value =
-        typeof scores?.[
-          assessment.id
-        ] === "number"
-          ? scores[assessment.id]
-          : "";
+    .map(
+      (assessment) => {
+        const score =
+          scores?.[
+            assessment.id
+          ];
 
-      return `
-        <td>
 
-          <input
-            class="gr-input"
-            type="number"
-            min="0"
-            max="${Number(
-              assessment.points
-            )}"
-            step="0.01"
+        const value =
+          typeof score ===
+          "number"
+            ? score
+            : "";
 
-            data-sid="${escapeHTML(sid)}"
 
-            data-group="${escapeHTML(group)}"
+        return `
+          <td>
 
-            data-col="${escapeHTML(
-              assessment.id
-            )}"
+            <input
+              class="gr-input"
+              type="number"
+              min="0"
+              max="${Number(
+                assessment.points
+              )}"
+              step="0.01"
 
-            value="${value}"
+              data-sid="${escapeHTML(
+                sid
+              )}"
 
-            placeholder="—"
+              data-group="${escapeHTML(
+                group
+              )}"
 
-            title="Maximum: ${Number(
-              assessment.points
-            )}"
-          >
+              data-col="${escapeHTML(
+                assessment.id
+              )}"
 
-        </td>
-      `;
-    })
+              value="${value}"
+
+              placeholder="—"
+
+              title="Maximum: ${Number(
+                assessment.points
+              )}"
+            >
+
+          </td>
+        `;
+      }
+    )
     .join("");
 }
+
 
 // ============================================================
 // SUMMARY
 // ============================================================
 
-function renderSummary(bucket) {
+function renderSummary(
+  bucket
+) {
   const total =
     students.length;
+
 
   if ($("mTotal")) {
     $("mTotal").textContent =
       String(total);
   }
 
+
   const finals =
     students
-      .map((student) =>
-        computeFinalForStudent(
-          bucket,
-          student.studentId
-        )
+      .map(
+        (student) =>
+          computeFinalForStudent(
+            bucket,
+            normalize(
+              student.studentId
+            )
+          )
       )
       .filter(
         (value) =>
-          typeof value === "number"
+          typeof value ===
+          "number"
       );
+
 
   if (!finals.length) {
     if ($("mAvg")) {
-      $("mAvg").textContent = "—";
+      $("mAvg").textContent =
+        "—";
     }
 
     if ($("mHigh")) {
-      $("mHigh").textContent = "—";
+      $("mHigh").textContent =
+        "—";
     }
 
     if ($("mLow")) {
-      $("mLow").textContent = "—";
+      $("mLow").textContent =
+        "—";
     }
 
     return;
   }
+
 
   const avg =
     finals.reduce(
@@ -1187,27 +2248,37 @@ function renderSummary(bucket) {
       0
     ) / finals.length;
 
+
   const high =
-    Math.max(...finals);
+    Math.max(
+      ...finals
+    );
+
 
   const low =
-    Math.min(...finals);
+    Math.min(
+      ...finals
+    );
+
 
   if ($("mAvg")) {
     $("mAvg").textContent =
       `${roundOne(avg)}%`;
   }
 
+
   if ($("mHigh")) {
     $("mHigh").textContent =
       `${high}%`;
   }
+
 
   if ($("mLow")) {
     $("mLow").textContent =
       `${low}%`;
   }
 }
+
 
 // ============================================================
 // COMPUTED CELLS
@@ -1223,26 +2294,31 @@ function updateComputedCells(
       sid
     );
 
+
   document
     .querySelectorAll(
       "#gradesTbody tr"
     )
     .forEach((row) => {
       if (
-        row.dataset.sid !== sid
+        row.dataset.sid !==
+        sid
       ) {
         return;
       }
+
 
       const finalCell =
         row.querySelector(
           ".gr-final"
         );
 
+
       const remarkCell =
         row.querySelector(
           ".gr-remark"
         );
+
 
       if (finalCell) {
         finalCell.textContent =
@@ -1251,6 +2327,7 @@ function updateComputedCells(
             : `${final}%`;
       }
 
+
       if (remarkCell) {
         remarkCell.textContent =
           remark(final);
@@ -1258,19 +2335,25 @@ function updateComputedCells(
     });
 }
 
+
 // ============================================================
 // TABLE INPUT
 // ============================================================
 
-function onTableInput(event) {
+function onTableInput(
+  event
+) {
   const element =
     event.target;
 
+
   if (
-    !(element instanceof HTMLInputElement)
+    !(element instanceof
+      HTMLInputElement)
   ) {
     return;
   }
+
 
   if (
     !element.classList.contains(
@@ -1280,14 +2363,35 @@ function onTableInput(event) {
     return;
   }
 
+
+  /*
+   * Extra frontend protection.
+   *
+   * Backend also enforces this.
+   */
+  if (
+    isCurrentTermLocked()
+  ) {
+    element.blur();
+
+    return;
+  }
+
+
   const sid =
-    element.dataset.sid || "";
+    element.dataset.sid ||
+    "";
+
 
   const group =
-    element.dataset.group || "";
+    element.dataset.group ||
+    "";
+
 
   const assessmentId =
-    element.dataset.col || "";
+    element.dataset.col ||
+    "";
+
 
   if (
     !sid ||
@@ -1297,11 +2401,14 @@ function onTableInput(event) {
     return;
   }
 
+
   const bucket =
     ensureBucket();
 
+
   const pack =
     bucket.scores[sid];
+
 
   const assessment =
     getAssessmentById(
@@ -1310,15 +2417,18 @@ function onTableInput(event) {
       assessmentId
     );
 
+
   if (!assessment) {
     return;
   }
+
 
   const value =
     clampScore(
       element.value,
       assessment.points
     );
+
 
   if (value == null) {
     delete pack[group][
@@ -1335,27 +2445,48 @@ function onTableInput(event) {
       String(value);
   }
 
+
   bucket.updatedAt =
     Date.now();
 
+
   setDirty(true);
+
 
   updateComputedCells(
     bucket,
     sid
   );
 
-  renderSummary(bucket);
+
+  renderSummary(
+    bucket
+  );
 }
+
 
 // ============================================================
 // ADD ASSESSMENT MODAL
 // ============================================================
 
-function openAssessmentModal(kind) {
+function openAssessmentModal(
+  kind
+) {
+  if (
+    isCurrentTermLocked()
+  ) {
+    alert(
+      "This term is locked and cannot be edited."
+    );
+
+    return;
+  }
+
+
   const labels = {
     ww: {
-      title: "Add Written Work",
+      title:
+        "Add Written Work",
 
       description:
         "Add a quiz, written activity, worksheet, or other written assessment.",
@@ -1365,7 +2496,8 @@ function openAssessmentModal(kind) {
     },
 
     pt: {
-      title: "Add Performance",
+      title:
+        "Add Performance",
 
       description:
         "Add a recitation, performance task, project, or other performance assessment.",
@@ -1375,36 +2507,42 @@ function openAssessmentModal(kind) {
     },
 
     exam: {
-      title: "Add Exam",
+      title:
+        "Add Exam",
 
       description:
-        "Add the quarter examination.",
+        "Add the term examination.",
 
       placeholder:
-        "e.g. Quarter 1 Exam",
+        "e.g. Term 1 Exam",
     },
   };
 
+
   const config =
     labels[kind];
+
 
   if (!config) {
     return;
   }
 
+
   const bucket =
     ensureBucket();
+
 
   if (
     kind === "exam" &&
     bucket.meta.exam.length
   ) {
     alert(
-      "This quarter already has an exam."
+      "This term already has an exam."
     );
 
     return;
   }
+
 
   document
     .querySelector(
@@ -1412,11 +2550,16 @@ function openAssessmentModal(kind) {
     )
     ?.remove();
 
+
   const overlay =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   overlay.className =
     "gr-modal-overlay";
+
 
   overlay.innerHTML = `
     <div
@@ -1443,6 +2586,7 @@ function openAssessmentModal(kind) {
 
         </div>
 
+
         <button
           type="button"
           class="gr-modal-close"
@@ -1453,13 +2597,20 @@ function openAssessmentModal(kind) {
 
       </div>
 
-      <form id="assessmentForm" novalidate>
+
+      <form
+        id="assessmentForm"
+        novalidate
+      >
 
         <div class="gr-form-group">
 
-          <label for="assessmentName">
+          <label
+            for="assessmentName"
+          >
             Assessment Name
           </label>
+
 
           <input
             id="assessmentName"
@@ -1473,11 +2624,15 @@ function openAssessmentModal(kind) {
 
         </div>
 
+
         <div class="gr-form-group">
 
-          <label for="assessmentPoints">
+          <label
+            for="assessmentPoints"
+          >
             Total Points
           </label>
+
 
           <input
             id="assessmentPoints"
@@ -1491,6 +2646,7 @@ function openAssessmentModal(kind) {
 
         </div>
 
+
         <div class="gr-modal-actions">
 
           <button
@@ -1500,6 +2656,7 @@ function openAssessmentModal(kind) {
           >
             Cancel
           </button>
+
 
           <button
             type="submit"
@@ -1511,16 +2668,20 @@ function openAssessmentModal(kind) {
         </div>
 
       </form>
+
     </div>
   `;
+
 
   document.body.appendChild(
     overlay
   );
 
+
   const closeModal = () => {
     overlay.remove();
   };
+
 
   $("grModalClose")
     ?.addEventListener(
@@ -1528,22 +2689,26 @@ function openAssessmentModal(kind) {
       closeModal
     );
 
+
   $("grModalCancel")
     ?.addEventListener(
       "click",
       closeModal
     );
 
+
   overlay.addEventListener(
     "click",
     (event) => {
       if (
-        event.target === overlay
+        event.target ===
+        overlay
       ) {
         closeModal();
       }
     }
   );
+
 
   $("assessmentForm")
     ?.addEventListener(
@@ -1551,38 +2716,49 @@ function openAssessmentModal(kind) {
       (event) => {
         event.preventDefault();
 
+
         const name =
           normalize(
-            $("assessmentName")?.value
+            $("assessmentName")
+              ?.value
           );
+
 
         const points =
           Number(
-            $("assessmentPoints")?.value
+            $("assessmentPoints")
+              ?.value
           );
+
 
         if (!name) {
           alert(
             "Please enter an assessment name."
           );
 
-          $("assessmentName")?.focus();
+          $("assessmentName")
+            ?.focus();
 
           return;
         }
 
+
         if (
-          !Number.isFinite(points) ||
+          !Number.isFinite(
+            points
+          ) ||
           points <= 0
         ) {
           alert(
             "Please enter a valid total point value."
           );
 
-          $("assessmentPoints")?.focus();
+          $("assessmentPoints")
+            ?.focus();
 
           return;
         }
+
 
         addAssessment(
           kind,
@@ -1590,12 +2766,16 @@ function openAssessmentModal(kind) {
           points
         );
 
+
         closeModal();
       }
     );
 
-  $("assessmentName")?.focus();
+
+  $("assessmentName")
+    ?.focus();
 }
+
 
 // ============================================================
 // ADD ASSESSMENT
@@ -1606,29 +2786,51 @@ function addAssessment(
   name,
   points
 ) {
-  const bucket =
-    ensureBucket();
-
   if (
-    !["ww", "pt", "exam"].includes(
-      kind
-    )
+    isCurrentTermLocked()
   ) {
     return;
   }
+
+
+  const bucket =
+    ensureBucket();
+
+
+  if (
+    ![
+      "ww",
+      "pt",
+      "exam",
+    ].includes(kind)
+  ) {
+    return;
+  }
+
 
   if (
     kind === "exam" &&
     bucket.meta.exam.length
   ) {
     alert(
-      "Only one exam is allowed per quarter and subject."
+      "Only one exam is allowed per term and subject."
     );
 
     return;
   }
 
-  bucket.meta[kind].push({
+
+  /*
+   * IMPORTANT:
+   *
+   * This ID is generated ONCE.
+   *
+   * It is then sent to MongoDB for
+   * every student.
+   *
+   * This is what fixes the refresh bug.
+   */
+  const assessment = {
     id: makeId(
       kind === "ww"
         ? "WW"
@@ -1637,18 +2839,76 @@ function addAssessment(
         : "EXAM"
     ),
 
-    name: normalize(name),
+    name:
+      normalize(name),
 
-    points: Number(points),
-  });
+    points:
+      Number(points),
+  };
+
+
+  bucket.meta[kind].push(
+    assessment
+  );
+
+
+  /*
+   * Initialize score containers
+   * immediately.
+   *
+   * This means the assessment
+   * can be saved even if all
+   * scores are blank.
+   */
+  students.forEach(
+    (student) => {
+      const sid =
+        normalize(
+          student.studentId
+        );
+
+      if (!sid) {
+        return;
+      }
+
+
+      if (
+        !bucket.scores[sid]
+      ) {
+        bucket.scores[sid] = {
+          ww: {},
+          pt: {},
+          exam: {},
+        };
+      }
+
+
+      bucket.scores[sid][
+        kind
+      ] =
+        bucket.scores[sid][
+          kind
+        ] || {};
+
+
+      bucket.scores[sid][
+        kind
+      ][assessment.id] =
+        null;
+    }
+  );
+
 
   bucket.updatedAt =
     Date.now();
 
+
   setDirty(true);
+
 
   renderCurrentView();
 }
+
 
 // ============================================================
 // DELETE ASSESSMENT
@@ -1658,11 +2918,21 @@ function deleteAssessment(
   kind,
   assessmentId
 ) {
+  if (
+    isCurrentTermLocked()
+  ) {
+    return;
+  }
+
+
   const bucket =
     ensureBucket();
 
+
   const assessments =
-    bucket.meta[kind] || [];
+    bucket.meta[kind] ||
+    [];
+
 
   const assessment =
     assessments.find(
@@ -1671,18 +2941,22 @@ function deleteAssessment(
         assessmentId
     );
 
+
   if (!assessment) {
     return;
   }
+
 
   const confirmed =
     confirm(
       `Remove "${assessment.name}"?\n\nAll scores for this assessment will also be removed.`
     );
 
+
   if (!confirmed) {
     return;
   }
+
 
   bucket.meta[kind] =
     assessments.filter(
@@ -1691,199 +2965,372 @@ function deleteAssessment(
         assessmentId
     );
 
+
   Object.keys(
     bucket.scores || {}
   ).forEach((sid) => {
     if (
-      bucket.scores[sid]?.[kind]
-    ) {
-      delete bucket.scores[sid][
+      bucket.scores[sid]?.[
         kind
-      ][assessmentId];
+      ]
+    ) {
+      delete bucket.scores[
+        sid
+      ][kind][
+        assessmentId
+      ];
     }
   });
+
 
   bucket.updatedAt =
     Date.now();
 
+
   setDirty(true);
+
 
   renderCurrentView();
 }
+
 
 // ============================================================
 // SAVE ALL GRADES
 // ============================================================
 
 async function saveAll() {
+  if (
+    isCurrentTermLocked()
+  ) {
+    alert(
+      "This term is locked and cannot be edited."
+    );
+
+    return;
+  }
+
+
   try {
     const bucket =
       ensureBucket();
 
-    const payloadStudents =
-      students.map((student) => {
-        const sid =
-          student.studentId;
 
-        const pack =
-          bucket.scores[sid] || {
-            ww: {},
-            pt: {},
-            exam: {},
-          };
+    const saveButton =
+      $("saveAllBtn");
 
-        const writtenWorks =
-          bucket.meta.ww.map(
-            (assessment) => {
-              const score =
-                pack.ww[
-                  assessment.id
-                ];
 
-              return {
-                activity:
-                  assessment.name,
+    if (saveButton) {
+      saveButton.disabled =
+        true;
 
-                score:
-                  typeof score ===
-                  "number"
-                    ? score
-                    : 0,
+      saveButton.textContent =
+        "Saving...";
+    }
 
-                total:
-                  Number(
-                    assessment.points
-                  ),
-              };
-            }
-          );
 
-        const performanceTasks =
-          bucket.meta.pt.map(
-            (assessment) => {
-              const score =
-                pack.pt[
-                  assessment.id
-                ];
-
-              return {
-                activity:
-                  assessment.name,
-
-                score:
-                  typeof score ===
-                  "number"
-                    ? score
-                    : 0,
-
-                total:
-                  Number(
-                    assessment.points
-                  ),
-              };
-            }
-          );
-
-        let quarterlyAssessment = {
-          score: null,
-          total: null,
-        };
-
-        if (bucket.meta.exam.length) {
-          const exam =
-            bucket.meta.exam[0];
-
-          const score =
-            pack.exam[
-              exam.id
-            ];
-
-          quarterlyAssessment = {
-            score:
-              typeof score ===
-              "number"
-                ? score
-                : null,
-
-            total:
-              Number(
-                exam.points
-              ),
-          };
-        }
-
-        const final =
-          computeFinalForStudent(
-            bucket,
-            sid
-          );
-
-        return {
-          studentId: sid,
-
-          subject,
-
-          quarter,
-
-          writtenWorks,
-
-          performanceTasks,
-
-          quarterlyAssessment,
-
-          initialGrade:
-            final,
-
-          quarterlyGrade:
-            final,
-        };
-      });
-
+    /*
+     * We save each student.
+     *
+     * Assessment definitions are included
+     * even if that student's score is blank.
+     */
     for (
-      const grade of payloadStudents
+      const student of students
     ) {
-      const hasData =
-        grade.writtenWorks.length ||
-        grade.performanceTasks.length ||
-        grade.quarterlyAssessment
-          .score !== null;
+      const sid =
+        normalize(
+          student.studentId
+        );
 
-      if (!hasData) {
+
+      if (!sid) {
         continue;
       }
+
+
+      const pack =
+        bucket.scores[sid] ||
+        {
+          ww: {},
+          pt: {},
+          exam: {},
+        };
+
+
+      // ------------------------------------------------------
+      // Written Works
+      // ------------------------------------------------------
+
+      const writtenWorks =
+        bucket.meta.ww.map(
+          (assessment) => {
+            const score =
+              pack.ww?.[
+                assessment.id
+              ];
+
+
+            return {
+              /*
+               * CRITICAL:
+               * Persist our own assessment ID.
+               */
+              assessmentId:
+                assessment.id,
+
+              activity:
+                assessment.name,
+
+              score:
+                typeof score ===
+                "number"
+                  ? score
+                  : null,
+
+              total:
+                Number(
+                  assessment.points
+                ),
+            };
+          }
+        );
+
+
+      // ------------------------------------------------------
+      // Performance Tasks
+      // ------------------------------------------------------
+
+      const performanceTasks =
+        bucket.meta.pt.map(
+          (assessment) => {
+            const score =
+              pack.pt?.[
+                assessment.id
+              ];
+
+
+            return {
+              /*
+               * CRITICAL:
+               * Persist our own assessment ID.
+               */
+              assessmentId:
+                assessment.id,
+
+              activity:
+                assessment.name,
+
+              score:
+                typeof score ===
+                "number"
+                  ? score
+                  : null,
+
+              total:
+                Number(
+                  assessment.points
+                ),
+            };
+          }
+        );
+
+
+      // ------------------------------------------------------
+      // Term Assessment
+      // ------------------------------------------------------
+
+      let termAssessment =
+        null;
+
+
+      if (
+        bucket.meta.exam.length
+      ) {
+        const exam =
+          bucket.meta.exam[0];
+
+
+        const score =
+          pack.exam?.[
+            exam.id
+          ];
+
+
+        termAssessment = {
+          /*
+           * CRITICAL:
+           * Persist exam ID AND name.
+           */
+          assessmentId:
+            exam.id,
+
+          activity:
+            exam.name,
+
+          score:
+            typeof score ===
+            "number"
+              ? score
+              : null,
+
+          total:
+            exam.points ===
+              null ||
+            exam.points ===
+              undefined
+              ? null
+              : Number(
+                  exam.points
+                ),
+        };
+      }
+
+
+      // ------------------------------------------------------
+      // Final Grade
+      // ------------------------------------------------------
+
+      const final =
+        computeFinalForStudent(
+          bucket,
+          sid
+        );
+
+
+      /*
+       * Do NOT skip a student just because
+       * their scores are blank.
+       *
+       * If an assessment exists, the
+       * assessment definition must persist.
+       */
+      const hasAssessments =
+        writtenWorks.length >
+          0 ||
+        performanceTasks.length >
+          0 ||
+        termAssessment !==
+          null;
+
+
+      const hasScores =
+        writtenWorks.some(
+          (item) =>
+            item.score !==
+              null &&
+            item.score !==
+              undefined
+        ) ||
+        performanceTasks.some(
+          (item) =>
+            item.score !==
+              null &&
+            item.score !==
+              undefined
+        ) ||
+        (
+          termAssessment &&
+          termAssessment.score !==
+            null &&
+          termAssessment.score !==
+            undefined
+        );
+
+
+      if (
+        !hasAssessments &&
+        !hasScores
+      ) {
+        continue;
+      }
+
 
       await apiFetch(
         "/api/teacher/grades/save",
         {
           method: "POST",
 
-          body: JSON.stringify(
-            grade
-          ),
+          body:
+            JSON.stringify({
+              studentId:
+                sid,
+
+              subject:
+                subject,
+
+              termId:
+                quarter,
+
+              writtenWorks:
+                writtenWorks,
+
+              performanceTasks:
+                performanceTasks,
+
+              termAssessment:
+                termAssessment,
+
+              initialGrade:
+                final,
+
+              termGrade:
+                final,
+            }),
         }
       );
     }
 
+
+    /*
+     * Reload directly from MongoDB.
+     *
+     * This is important because it verifies
+     * the saved data can be reconstructed.
+     */
+    await loadSavedGrades();
+
+
     setDirty(false);
+
+
+    renderCurrentView();
+
+
+    setDirty(false);
+
 
     alert(
       "Grades saved successfully."
     );
-
   } catch (error) {
     console.error(
       "saveAll error:",
       error
     );
 
+
     setDirty(true);
+
 
     alert(
       error.message ||
         "Failed to save grades."
     );
+  } finally {
+    applyEditability();
+
+
+    const saveButton =
+      $("saveAllBtn");
+
+
+    if (saveButton) {
+      saveButton.textContent =
+        "💾 Save All Grades";
+    }
   }
 }
+
 
 // ============================================================
 // RENDER CURRENT VIEW
@@ -1893,21 +3340,29 @@ function renderCurrentView() {
   const bucket =
     ensureBucket();
 
+
   renderHeader();
+
 
   renderAssessmentList(
     bucket
   );
 
+
   buildThead(
     bucket.meta
   );
+
 
   renderBody(
     bucket.meta,
     bucket
   );
+
+
+  applyEditability();
 }
+
 
 // ============================================================
 // EVENTS
@@ -1915,22 +3370,45 @@ function renderCurrentView() {
 
 function bindEvents() {
   // ----------------------------------------------------------
-  // Quarter
+  // Term
   // ----------------------------------------------------------
 
   $("quarterSelect")
     ?.addEventListener(
       "change",
       () => {
+        /*
+         * Do not silently destroy unsaved changes.
+         */
+        if (dirty) {
+          const proceed =
+            confirm(
+              "You have unsaved changes. Switch terms anyway?"
+            );
+
+
+          if (!proceed) {
+            $("quarterSelect")
+              .value =
+              quarter;
+
+            return;
+          }
+        }
+
+
         quarter =
           $("quarterSelect")
-            .value || "1";
+            .value || "";
 
-        renderCurrentView();
 
         setDirty(false);
+
+
+        renderCurrentView();
       }
     );
+
 
   // ----------------------------------------------------------
   // Subject
@@ -1940,15 +3418,35 @@ function bindEvents() {
     ?.addEventListener(
       "change",
       () => {
+        if (dirty) {
+          const proceed =
+            confirm(
+              "You have unsaved changes. Switch subjects anyway?"
+            );
+
+
+          if (!proceed) {
+            $("subjectSelect")
+              .value =
+              subject;
+
+            return;
+          }
+        }
+
+
         subject =
           $("subjectSelect")
             .value || "";
 
-        renderCurrentView();
 
         setDirty(false);
+
+
+        renderCurrentView();
       }
     );
+
 
   // ----------------------------------------------------------
   // Grade inputs
@@ -1959,6 +3457,7 @@ function bindEvents() {
       "input",
       onTableInput
     );
+
 
   // ----------------------------------------------------------
   // Add Written Work
@@ -1973,6 +3472,7 @@ function bindEvents() {
         )
     );
 
+
   // ----------------------------------------------------------
   // Add Performance
   // ----------------------------------------------------------
@@ -1985,6 +3485,7 @@ function bindEvents() {
           "pt"
         )
     );
+
 
   // ----------------------------------------------------------
   // Add Exam
@@ -1999,6 +3500,7 @@ function bindEvents() {
         )
     );
 
+
   // ----------------------------------------------------------
   // Delete assessment
   // ----------------------------------------------------------
@@ -2012,16 +3514,22 @@ function bindEvents() {
             "[data-delete-assessment]"
           );
 
+
         if (!button) {
           return;
         }
 
+
         deleteAssessment(
-          button.dataset.deleteGroup,
-          button.dataset.deleteAssessment
+          button.dataset
+            .deleteGroup,
+
+          button.dataset
+            .deleteAssessment
         );
       }
     );
+
 
   // ----------------------------------------------------------
   // Save
@@ -2034,6 +3542,7 @@ function bindEvents() {
     );
 }
 
+
 // ============================================================
 // INITIALIZE
 // ============================================================
@@ -2044,29 +3553,40 @@ document.addEventListener(
     try {
       await loadTeacherData();
 
-      quarter = "1";
 
-      const quarterSelect =
-        $("quarterSelect");
+      /*
+       * IMPORTANT:
+       *
+       * We dynamically populate the existing
+       * #quarterSelect from MongoDB terms.
+       *
+       * The hardcoded HTML options are replaced.
+       */
+      renderTermOptions();
 
-      if (quarterSelect) {
-        quarterSelect.value =
-          quarter;
-      }
 
       renderSubjectOptions();
 
+
+      /*
+       * Load existing grades BEFORE rendering.
+       */
+      await loadSavedGrades();
+
+
       renderCurrentView();
+
 
       setDirty(false);
 
-      bindEvents();
 
+      bindEvents();
     } catch (error) {
       console.error(
         "Teacher grades initialization error:",
         error
       );
+
 
       alert(
         error.message ||

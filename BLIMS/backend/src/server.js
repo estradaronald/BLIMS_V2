@@ -33,6 +33,9 @@ const adminSubjectsRoutes = require("./routes/admin-subjects.routes");
 const adminSchoolYearsRoutes = require("./routes/admin.school-years.routes");
 const adminClassScheduleRoutes = require("./routes/admin.class-schedule.routes");
 
+// Admin account management
+const adminAccountsRoutes = require("./routes/admin.routes");
+
 // Combined admin announcements + events
 const adminAnnouncementsRoutes = require("./routes/announcement.routes");
 
@@ -216,11 +219,13 @@ app.get(
   }
 );
 
+// Protect ALL admin routes
 app.use(
   "/api/admin",
   csrfProtect
 );
 
+// Protect password-change route
 app.use(
   "/api/auth/change-password",
   csrfProtect
@@ -286,41 +291,58 @@ app.use(
 // ADMIN ROUTES
 // ==============================
 
+// Admin account management
+//
+// POST /api/admin/create
+//
+app.use(
+  "/api/admin",
+  adminAccountsRoutes
+);
+
+// Teachers
 app.use(
   "/api/admin",
   adminTeachersRoutes
 );
 
+// Students
 app.use(
   "/api/admin",
   adminStudentsRoutes
 );
 
+// Dashboard
 app.use(
   "/api/admin",
   adminDashboardRoutes
 );
 
+// Audit
 app.use(
   "/api/admin",
   adminAuditRoutes
 );
 
+// Grade levels
 app.use(
   "/api/admin",
   adminGradeLevelsRoutes
 );
 
+// Subjects
 app.use(
   "/api/admin",
   adminSubjectsRoutes
 );
 
+// School years
 app.use(
   "/api/admin",
   adminSchoolYearsRoutes
 );
 
+// Class schedules
 app.use(
   "/api/admin",
   adminClassScheduleRoutes
@@ -446,8 +468,8 @@ app.use(
 //
 // Routes:
 //
-// GET /api/student/announcements
-// GET /api/student/announcements/:id
+// GET    /api/student/announcements
+// GET    /api/student/announcements/:id
 //
 // ==================================================
 
@@ -466,8 +488,8 @@ app.use(
 //
 // Routes:
 //
-// GET /api/student/assignments
-// GET /api/student/assignments/:id
+// GET    /api/student/assignments
+// GET    /api/student/assignments/:id
 //
 // ==================================================
 

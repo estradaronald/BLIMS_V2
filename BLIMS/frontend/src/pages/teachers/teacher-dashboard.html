@@ -1,28 +1,53 @@
 <!-- frontend/src/pages/teachers/teacher-dashboard.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Teacher - Dashboard</title>
 
-
-  <!-- Plus Jakarta Sans -->
+  <!-- =====================================================
+       FONT
+  ====================================================== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- same pattern as admin -->
- <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-<link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  />
 
-  <!-- teacher dashboard layout -->
-  <link rel="stylesheet" href="../../styles/teacher/teacher-dashboard.css" />
-  <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  <!-- =====================================================
+       TEACHER STYLES
+       No Admin CSS dependency
+  ====================================================== -->
+
+  <!-- Teacher Sidebar -->
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-sidebar.css"
+  />
+
+  <!-- Teacher Dashboard -->
+  <link
+    rel="stylesheet"
+    href="../../styles/teacher/teacher-dashboard.css"
+  />
+
+  <!-- Shared Page Animations -->
+  <link
+    rel="stylesheet"
+    href="../../shared/css/page-animations.css"
+  />
 </head>
 
 <body data-page="teacher-dashboard">
-  <!-- ✅ Floating collapse button (same UI as admin) -->
+
+  <!-- =====================================================
+       SIDEBAR FLOAT TOGGLE
+  ====================================================== -->
   <button
     class="sidebar-float-toggle"
     id="sidebarFloatToggle"
@@ -32,344 +57,905 @@
     ←
   </button>
 
+  <!-- =====================================================
+       APP
+  ====================================================== -->
   <div class="app">
+
+    <!-- ===================================================
+         TEACHER SIDEBAR
+         Loaded by teacher-sidebar.js
+    ==================================================== -->
     <div id="sidebar-mount"></div>
 
+    <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
     <main class="content page-animate">
-      <!-- top bar (same markup/classes as admin) -->
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
       <header class="topbar reveal-soft">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
+          <!-- Notifications -->
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            🔔
+          </button>
+
+          <!-- User -->
           <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar">
-            <div class="tb-meta">
-              <div class="tb-name">Giselle Meneses</div>
-              <div class="tb-role">Class 1 - A Teacher</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="Teacher avatar"
+            />
+
+            <div class="tb-meta">
+
+              <div class="tb-name">
+                Bruan, Alvin
+              </div>
+
+              <div class="tb-role">
+                 Faculty
+              </div>
+
             </div>
+
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+            >
+              ▾
+            </button>
+
+            <!-- User Menu -->
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
+            </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- TEACHER DASH GRID -->
+      <!-- =================================================
+           TEACHER DASHBOARD GRID
+      ================================================== -->
       <section class="t-dash">
-        <!-- HERO -->
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
         <div class="card t-hero reveal-scale">
+
           <div class="t-hero-left reveal-item">
-            <h2>Welcome back, Ms. Giselle!</h2>
+
+            <h2>
+              Welcome back  Bruan, Alvin 
+            </h2>
 
             <div class="t-hero-meta">
-              <div><b>Class :</b> Class 1 - A</div>
-              <div><b>Today :</b> Monday, September 9</div>
+
+              <div>
+                <b>Class :</b>
+                <span id="teacherClassSection">Loading...</span>
+              </div>
+
+              <div>
+                <b>Today :</b>
+                Monday, September 9
+              </div>
+
             </div>
+
           </div>
 
-          <div class="t-hero-right reveal-item" aria-hidden="true">
-            <div class="t-hero-illus"></div>
-              <img src="../../assets/images/hero-img.png" alt="Teacher illustration" />
+          <div
+            class="t-hero-right reveal-item"
+            aria-hidden="true"
+          >
+
+            <div class="t-hero-illus">
+
+              <img
+                src="../../assets/images/hero-img.png"
+                alt="Teacher illustration"
+              />
+
+            </div>
+
           </div>
+
         </div>
 
-        <!-- QUICK ACTIONS -->
+        <!-- =================================================
+             QUICK ACTIONS
+        ================================================== -->
         <div class="card t-quick reveal-scale">
-            <div class="t-quick-title reveal-item">Quick Actions</div>
 
-            <div class="t-quick-actions">
-                <button class="t-qa t-qa-green reveal-item" id="qaAttendance" type="button">
-                <span class="t-qa-ico">✅</span>
-                <span class="t-qa-text">Take Attendance</span>
-                </button>
+          <div class="t-quick-title reveal-item">
+            Quick Actions
+          </div>
 
-                <button class="t-qa t-qa-blue reveal-item" id="qaAssessment" type="button">
-                <span class="t-qa-ico">➕</span>
-                <span class="t-qa-text">Add Assignment</span>
-                </button>
+          <div class="t-quick-actions">
 
-                <button class="t-qa t-qa-purple reveal-item" id="qaAnnouncements" type="button">
-                <span class="t-qa-ico">📣</span>
-                <span class="t-qa-text">Post Announcement</span>
-                </button>
+            <!-- Attendance -->
+            <button
+              class="t-qa t-qa-green reveal-item"
+              id="qaAttendance"
+              type="button"
+            >
 
-                <button class="t-qa t-qa-pink reveal-item" id="qaGrades" type="button">
-                <span class="t-qa-ico">📝</span>
-                <span class="t-qa-text">Enter Grades</span>
-                </button>
-            </div>
+              <span class="t-qa-ico">
+                ✅
+              </span>
+
+              <span class="t-qa-text">
+                Take Attendance
+              </span>
+
+            </button>
+
+            <!-- Assignment -->
+            <button
+              class="t-qa t-qa-blue reveal-item"
+              id="qaAssessment"
+              type="button"
+            >
+
+              <span class="t-qa-ico">
+                ➕
+              </span>
+
+              <span class="t-qa-text">
+                Add Assignment
+              </span>
+
+            </button>
+
+            <!-- Announcement -->
+            <button
+              class="t-qa t-qa-purple reveal-item"
+              id="qaAnnouncements"
+              type="button"
+            >
+
+              <span class="t-qa-ico">
+                📣
+              </span>
+
+              <span class="t-qa-text">
+                Post Announcement
+              </span>
+
+            </button>
+
+            <!-- Grades -->
+            <button
+              class="t-qa t-qa-pink reveal-item"
+              id="qaGrades"
+              type="button"
+            >
+
+              <span class="t-qa-ico">
+                📝
+              </span>
+
+              <span class="t-qa-text">
+                Enter Grades
+              </span>
+
+            </button>
+
+          </div>
+
         </div>
 
-        <!-- STATS -->
+        <!-- =================================================
+             STATS
+        ================================================== -->
         <div class="t-stats">
+
+          <!-- Total Learners -->
           <div class="t-stat card reveal-scale">
-            <div class="t-stat-ico reveal-item">👥</div>
-            <div class="t-stat-mid reveal-item">
-              <div class="t-stat-label">Total Learners</div>
-              <div class="t-stat-value">45</div>
+
+            <div class="t-stat-ico reveal-item">
+              👥
             </div>
+
+            <div class="t-stat-mid reveal-item">
+
+              <div class="t-stat-label">
+                Total Learners
+              </div>
+
+              <div class="t-stat-value">
+                45
+              </div>
+
+            </div>
+
           </div>
 
+          <!-- Attendance -->
           <div class="t-stat card reveal-scale">
-            <div class="t-stat-ico t-ico-green reveal-item">✅</div>
-            <div class="t-stat-mid reveal-item">
-              <div class="t-stat-label">Attendance Rate</div>
-              <div class="t-stat-value">40</div>
+
+            <div class="t-stat-ico t-ico-green reveal-item">
+              ✅
             </div>
+
+            <div class="t-stat-mid reveal-item">
+
+              <div class="t-stat-label">
+                Attendance Rate
+              </div>
+
+              <div class="t-stat-value">
+                40
+              </div>
+
+            </div>
+
           </div>
 
+          <!-- Announcements -->
           <div class="t-stat card reveal-scale">
-            <div class="t-stat-ico t-ico-pink reveal-item">📣</div>
-            <div class="t-stat-mid reveal-item">
-              <div class="t-stat-label">Announcements</div>
-              <div class="t-stat-value">5</div>
+
+            <div class="t-stat-ico t-ico-pink reveal-item">
+              📣
             </div>
+
+            <div class="t-stat-mid reveal-item">
+
+              <div class="t-stat-label">
+                Announcements
+              </div>
+
+              <div class="t-stat-value">
+                5
+              </div>
+
+            </div>
+
           </div>
+
         </div>
 
-        <!-- TODAY'S SCHEDULE -->
+        <!-- =================================================
+             TODAY'S SCHEDULE
+        ================================================== -->
         <div class="card t-panel t-schedule reveal-scale">
+
           <div class="t-panel-head reveal-item">
+
             <div class="t-panel-title">
-              <span class="t-mini">📅</span>
+
+              <span class="t-mini">
+                📅
+              </span>
+
               Today's Schedule
+
             </div>
+
           </div>
 
           <div class="t-sched">
+
             <div class="t-sched-row reveal-item">
+
               <div class="t-sched-main">
-                <div class="t-sched-title">Mathematics</div>
-                <div class="t-sched-sub">8:00am - 9:00am</div>
+
+                <div class="t-sched-title">
+                  Mathematics
+                </div>
+
+                <div class="t-sched-sub">
+                  8:00am - 9:00am
+                </div>
+
               </div>
-              <span class="t-badge t-badge-blue">Current</span>
+
+              <span class="t-badge t-badge-blue">
+                Current
+              </span>
+
             </div>
 
             <div class="t-sched-row reveal-item">
+
               <div class="t-sched-main">
-                <div class="t-sched-title">Science</div>
-                <div class="t-sched-sub">9:00am - 10:00am</div>
+
+                <div class="t-sched-title">
+                  Science
+                </div>
+
+                <div class="t-sched-sub">
+                  9:00am - 10:00am
+                </div>
+
               </div>
-              <span class="t-badge t-badge-gray">Next</span>
+
+              <span class="t-badge t-badge-gray">
+                Next
+              </span>
+
             </div>
 
             <div class="t-sched-row reveal-item">
+
               <div class="t-sched-main">
-                <div class="t-sched-title">Science</div>
-                <div class="t-sched-sub">9:00am - 10:00am</div>
+
+                <div class="t-sched-title">
+                  Science
+                </div>
+
+                <div class="t-sched-sub">
+                  9:00am - 10:00am
+                </div>
+
               </div>
-              <span class="t-badge t-badge-gray">Next</span>
+
+              <span class="t-badge t-badge-gray">
+                Next
+              </span>
+
             </div>
 
             <div class="t-sched-row reveal-item">
+
               <div class="t-sched-main">
-                <div class="t-sched-title">Science</div>
-                <div class="t-sched-sub">9:00am - 10:00am</div>
+
+                <div class="t-sched-title">
+                  Science
+                </div>
+
+                <div class="t-sched-sub">
+                  9:00am - 10:00am
+                </div>
+
               </div>
-              <span class="t-badge t-badge-gray">Next</span>
-            </div>
-            
-            <div class="t-sched-row reveal-item">
-              <div class="t-sched-main">
-                <div class="t-sched-title">Science</div>
-                <div class="t-sched-sub">9:00am - 10:00am</div>
-              </div>
-              <span class="t-badge t-badge-gray">Next</span>
+
+              <span class="t-badge t-badge-gray">
+                Next
+              </span>
+
             </div>
 
             <div class="t-sched-row reveal-item">
+
               <div class="t-sched-main">
-                <div class="t-sched-title">History</div>
-                <div class="t-sched-sub">10:00am - 11:00am</div>
+
+                <div class="t-sched-title">
+                  Science
+                </div>
+
+                <div class="t-sched-sub">
+                  9:00am - 10:00am
+                </div>
+
               </div>
-              <span class="t-badge t-badge-gray">Next</span>
+
+              <span class="t-badge t-badge-gray">
+                Next
+              </span>
+
             </div>
+
+            <div class="t-sched-row reveal-item">
+
+              <div class="t-sched-main">
+
+                <div class="t-sched-title">
+                  History
+                </div>
+
+                <div class="t-sched-sub">
+                  10:00am - 11:00am
+                </div>
+
+              </div>
+
+              <span class="t-badge t-badge-gray">
+                Next
+              </span>
+
+            </div>
+
           </div>
+
         </div>
 
-        <!-- RECENT ACTIVITY -->
+        <!-- =================================================
+             RECENT ACTIVITY
+        ================================================== -->
         <div class="card t-panel t-activity-panel reveal-scale">
+
           <div class="t-panel-head reveal-item">
+
             <div class="t-panel-title">
-              <span class="t-mini">🔔</span>
+
+              <span class="t-mini">
+                🔔
+              </span>
+
               Recent Activity
+
             </div>
+
           </div>
 
           <div class="t-activity">
+
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Science Class 1 - A</div>
-                <div class="t-act-sub">1 minute ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Science Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 minute ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
 
             <div class="t-act-row reveal-item">
-              <div class="t-act-ico">✅</div>
-              <div class="t-act-body">
-                <div class="t-act-title">Attendance for Mathematics Class 1 - A</div>
-                <div class="t-act-sub">1 hour ago</div>
+
+              <div class="t-act-ico">
+                ✅
               </div>
+
+              <div class="t-act-body">
+
+                <div class="t-act-title">
+                  Attendance for Mathematics Class 1 - A
+                </div>
+
+                <div class="t-act-sub">
+                  1 hour ago
+                </div>
+
+              </div>
+
             </div>
+
           </div>
+
         </div>
 
-        <!-- SCHEDULED ASSESSMENTS -->
+        <!-- =================================================
+             SCHEDULED ASSESSMENTS
+        ================================================== -->
         <div class="card t-panel t-assessments reveal-scale">
+
           <div class="t-panel-head reveal-item">
+
             <div class="t-panel-title">
-              <span class="t-mini">🗂️</span>
+
+              <span class="t-mini">
+                🗂️
+              </span>
+
               Scheduled Assessments
+
             </div>
+
           </div>
 
           <div class="t-list">
+
             <div class="t-list-row reveal-item">
+
               <div>
-                <div class="t-list-title">Math Activity</div>
-                <div class="t-list-sub">Feb 1</div>
+
+                <div class="t-list-title">
+                  Math Activity
+                </div>
+
+                <div class="t-list-sub">
+                  Feb 1
+                </div>
+
               </div>
-              <span class="t-badge t-badge-blue">Scheduled</span>
-              <button class="t-ghost" type="button">Edit</button>
+
+              <span class="t-badge t-badge-blue">
+                Scheduled
+              </span>
+
+              <button
+                class="t-ghost"
+                type="button"
+              >
+                Edit
+              </button>
+
             </div>
 
             <div class="t-list-row reveal-item">
+
               <div>
-                <div class="t-list-title">Science Quiz - Biology</div>
-                <div class="t-list-sub">Jan 30</div>
+
+                <div class="t-list-title">
+                  Science Quiz - Biology
+                </div>
+
+                <div class="t-list-sub">
+                  Jan 30
+                </div>
+
               </div>
-              <span class="t-badge t-badge-green">Published</span>
-              <button class="t-ghost" type="button">View</button>
+
+              <span class="t-badge t-badge-green">
+                Published
+              </span>
+
+              <button
+                class="t-ghost"
+                type="button"
+              >
+                View
+              </button>
+
             </div>
 
             <div class="t-list-row reveal-item">
+
               <div>
-                <div class="t-list-title">Science Quiz - Biology</div>
-                <div class="t-list-sub">Jan 30</div>
+
+                <div class="t-list-title">
+                  Science Quiz - Biology
+                </div>
+
+                <div class="t-list-sub">
+                  Jan 30
+                </div>
+
               </div>
-              <span class="t-badge t-badge-orange">Draft</span>
-              <button class="t-ghost" type="button">Publish</button>
+
+              <span class="t-badge t-badge-orange">
+                Draft
+              </span>
+
+              <button
+                class="t-ghost"
+                type="button"
+              >
+                Publish
+              </button>
+
             </div>
+
           </div>
+
         </div>
 
-        <!-- ANNOUNCEMENTS -->
+        <!-- =================================================
+             ANNOUNCEMENTS
+        ================================================== -->
         <div class="card t-panel t-announcements reveal-scale">
+
           <div class="t-panel-head reveal-item">
+
             <div class="t-panel-title">
-              <span class="t-mini">📣</span>
+
+              <span class="t-mini">
+                📣
+              </span>
+
               Announcements
+
             </div>
-            <a class="t-view" href="./teacher-announcements.html">View All</a>
+
+            <a
+              class="t-view"
+              href="./teacher-announcements.html"
+            >
+              View All
+            </a>
+
           </div>
 
           <div class="t-ann">
+
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Faculty Meeting</div>
-              <div class="t-ann-meta">
-                <span>Date: Wed, Feb 14</span>
-                <span>Time: 12:00pm - 1:00pm</span>
+
+              <div class="t-ann-title">
+                Faculty Meeting
               </div>
-              <div class="t-ann-meta">Venue: AVR Room</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Wed, Feb 14
+                </span>
+
+                <span>
+                  Time: 12:00pm - 1:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: AVR Room
+              </div>
+
             </div>
 
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Math Competition</div>
-              <div class="t-ann-meta">
-                <span>Date: Thu, Feb 15</span>
-                <span>Time: 8:00am - 12:00pm</span>
+
+              <div class="t-ann-title">
+                Math Competition
               </div>
-              <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Thu, Feb 15
+                </span>
+
+                <span>
+                  Time: 8:00am - 12:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: Bolosan Elementary School
+              </div>
+
             </div>
 
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Math Competition</div>
-              <div class="t-ann-meta">
-                <span>Date: Thu, Feb 15</span>
-                <span>Time: 8:00am - 12:00pm</span>
+
+              <div class="t-ann-title">
+                Math Competition
               </div>
-              <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Thu, Feb 15
+                </span>
+
+                <span>
+                  Time: 8:00am - 12:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: Bolosan Elementary School
+              </div>
+
             </div>
 
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Math Competition</div>
-              <div class="t-ann-meta">
-                <span>Date: Thu, Feb 15</span>
-                <span>Time: 8:00am - 12:00pm</span>
+
+              <div class="t-ann-title">
+                Math Competition
               </div>
-              <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Thu, Feb 15
+                </span>
+
+                <span>
+                  Time: 8:00am - 12:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: Bolosan Elementary School
+              </div>
+
             </div>
 
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Math Competition</div>
-              <div class="t-ann-meta">
-                <span>Date: Thu, Feb 15</span>
-                <span>Time: 8:00am - 12:00pm</span>
+
+              <div class="t-ann-title">
+                Math Competition
               </div>
-              <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Thu, Feb 15
+                </span>
+
+                <span>
+                  Time: 8:00am - 12:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: Bolosan Elementary School
+              </div>
+
             </div>
 
             <div class="t-ann-item reveal-item">
-              <div class="t-ann-title">Math Competition</div>
-              <div class="t-ann-meta">
-                <span>Date: Thu, Feb 15</span>
-                <span>Time: 8:00am - 12:00pm</span>
+
+              <div class="t-ann-title">
+                Math Competition
               </div>
-              <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+
+              <div class="t-ann-meta">
+
+                <span>
+                  Date: Thu, Feb 15
+                </span>
+
+                <span>
+                  Time: 8:00am - 12:00pm
+                </span>
+
+              </div>
+
+              <div class="t-ann-meta">
+                Venue: Bolosan Elementary School
+              </div>
+
             </div>
+
           </div>
+
         </div>
+
       </section>
+
     </main>
+
   </div>
 
-  <!-- ✅ Teacher scripts only -->
+  <!-- =====================================================
+       TEACHER SCRIPTS
+  ====================================================== -->
   <script src="../../shared/js/page-animations.js"></script>
   <script src="../../js/teacher/teacher-sidebar.js"></script>
   <script src="../../js/teacher/teacher-dashboard.js"></script>
+
 </body>
 </html>

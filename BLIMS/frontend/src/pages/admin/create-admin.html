@@ -1,0 +1,446 @@
+<!-- frontend/src/pages/admin/create-admin.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Admin | BLIMS</title>
+
+    <link rel="stylesheet" href="../../styles/admin/create-admin.css">
+</head>
+
+<body>
+
+    <main class="create-admin-page">
+
+        <section class="create-admin-card">
+
+            <!-- Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Create Admin Account</h1>
+                    <p>Create a new administrator account for BLIMS.</p>
+                </div>
+            </div>
+
+
+            <!-- Form -->
+            <form id="createAdminForm" novalidate>
+
+                <!-- =========================
+                     PERSONAL INFORMATION
+                ========================== -->
+
+                <div class="form-section">
+
+                    <div class="section-heading">
+                        <h2>Personal Information</h2>
+                        <p>Enter the administrator's personal information.</p>
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- First Name -->
+                        <div class="form-group">
+                            <label for="firstName">
+                                First Name
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="firstName"
+                                name="firstName"
+                                placeholder="Enter first name"
+                                autocomplete="given-name"
+                            >
+
+                            <small class="error-message" id="firstNameError"></small>
+                        </div>
+
+
+                        <!-- Middle Name -->
+                        <div class="form-group">
+                            <label for="middleName">
+                                Middle Name
+                                <span class="optional">(Optional)</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="middleName"
+                                name="middleName"
+                                placeholder="Enter middle name"
+                                autocomplete="additional-name"
+                            >
+
+                            <small class="error-message" id="middleNameError"></small>
+                        </div>
+
+
+                        <!-- Last Name -->
+                        <div class="form-group">
+                            <label for="lastName">
+                                Last Name
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="lastName"
+                                name="lastName"
+                                placeholder="Enter last name"
+                                autocomplete="family-name"
+                            >
+
+                            <small class="error-message" id="lastNameError"></small>
+                        </div>
+
+
+                        <!-- Suffix -->
+                        <div class="form-group">
+                            <label for="suffix">
+                                Suffix
+                                <span class="optional">(Optional)</span>
+                            </label>
+
+                            <select id="suffix" name="suffix">
+                                <option value="">None</option>
+                                <option value="Jr.">Jr.</option>
+                                <option value="Sr.">Sr.</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                            </select>
+
+                            <small class="error-message" id="suffixError"></small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     CONTACT INFORMATION
+                ========================== -->
+
+                <div class="form-section">
+
+                    <div class="section-heading">
+                        <h2>Contact Information</h2>
+                        <p>Email and phone number are used as profile information.</p>
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Email -->
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email
+                                <span class="optional">(Optional)</span>
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="example@email.com"
+                                autocomplete="email"
+                            >
+
+                            <small class="error-message" id="emailError"></small>
+
+                        </div>
+
+
+                        <!-- Phone -->
+                        <div class="form-group">
+
+                            <label for="phoneNumber">
+                                Phone Number
+                                <span class="optional">(Optional)</span>
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                placeholder="09XXXXXXXXX"
+                                maxlength="11"
+                                autocomplete="tel"
+                            >
+
+                            <small class="error-message" id="phoneNumberError"></small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     LOGIN CREDENTIALS
+                ========================== -->
+
+                <div class="form-section">
+
+                    <div class="section-heading">
+                        <h2>Login Credentials</h2>
+                        <p>These credentials will be used to access the BLIMS admin dashboard.</p>
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Username -->
+                        <div class="form-group full-width">
+
+                            <label for="username">
+                                Username
+                                <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter username"
+                                autocomplete="username"
+                            >
+
+                            <small class="input-hint">
+                                Username must be unique.
+                            </small>
+
+                            <small class="error-message" id="usernameError"></small>
+
+                        </div>
+
+
+                        <!-- Password -->
+                        <div class="form-group">
+
+                            <label for="password">
+                                Password
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-target="password"
+                                    aria-label="Show password"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="input-hint">
+                                Use at least 8 characters.
+                            </small>
+
+                            <small class="error-message" id="passwordError"></small>
+
+                        </div>
+
+
+                        <!-- Confirm Password -->
+                        <div class="form-group">
+
+                            <label for="confirmPassword">
+                                Confirm Password
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-target="confirmPassword"
+                                    aria-label="Show password"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="error-message" id="confirmPasswordError"></small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     SECONDARY SECURITY
+                ========================== -->
+
+                <div class="form-section security-section">
+
+                    <div class="section-heading">
+
+                        <h2>Secondary Security</h2>
+
+                        <p>
+                            The secondary PIN provides an additional security
+                            check for sensitive administrator actions.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <!-- Secondary PIN -->
+                        <div class="form-group">
+
+                            <label for="secondaryPin">
+                                Secondary PIN
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input
+                                    type="password"
+                                    id="secondaryPin"
+                                    name="secondaryPin"
+                                    placeholder="Enter 6-digit PIN"
+                                    inputmode="numeric"
+                                    maxlength="6"
+                                    autocomplete="off"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-target="secondaryPin"
+                                    aria-label="Show PIN"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="input-hint">
+                                Use exactly 6 numbers.
+                            </small>
+
+                            <small class="error-message" id="secondaryPinError"></small>
+
+                        </div>
+
+
+                        <!-- Confirm PIN -->
+                        <div class="form-group">
+
+                            <label for="confirmSecondaryPin">
+                                Confirm Secondary PIN
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input
+                                    type="password"
+                                    id="confirmSecondaryPin"
+                                    name="confirmSecondaryPin"
+                                    placeholder="Confirm PIN"
+                                    inputmode="numeric"
+                                    maxlength="6"
+                                    autocomplete="off"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    data-target="confirmSecondaryPin"
+                                    aria-label="Show PIN"
+                                >
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="error-message" id="confirmSecondaryPinError"></small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     FORM ACTIONS
+                ========================== -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="cancelButton"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Create Admin
+                    </button>
+
+                </div>
+
+
+                <!-- Status -->
+                <div
+                    id="formMessage"
+                    class="form-message"
+                    role="alert"
+                    aria-live="polite"
+                ></div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <script src="../../js/admin/create-admin.js"></script>
+
+</body>
+</html>

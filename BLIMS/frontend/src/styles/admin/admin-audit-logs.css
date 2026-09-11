@@ -1,97 +1,852 @@
+/* =========================================================
+   frontend/src/styles/admin/admin-audit-logs.css
+========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================================================
+   PAGE WRAPPER
+========================================================= */
+
 .audit-wrap {
   padding: 14px 18px 22px;
+  box-sizing: border-box;
 }
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
 
 .audit-card {
-  padding: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.audit-head {
+/* =========================================================
+   PAGE TITLE
+========================================================= */
+
+.audit-page-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 14px;
+
+  margin-bottom: 20px;
 }
 
-.audit-title {
-  display: inline-flex;
+.audit-title-icon {
+  width: 46px;
+  height: 46px;
+
+  border-radius: 14px;
+
+  background: #f1edff;
+
+  display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 18px;
+  justify-content: center;
+
+  font-size: 22px;
+
+  flex: 0 0 46px;
 }
+
+.audit-page-title h1 {
+  margin: 0;
+
+  font-size: 28px;
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  color: #0b2c4a;
+}
+
+.audit-page-title p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  color: #64748b;
+}
+
+/* =========================================================
+   FILTER CONTROLS
+========================================================= */
 
 .audit-controls {
   display: flex;
+
   align-items: center;
-  gap: 8px;
+
+  gap: 10px;
+
   flex-wrap: wrap;
-  justify-content: flex-end;
+
+  width: 100%;
+
+  margin-bottom: 18px;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.audit-search {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  width: min(380px, 100%);
+
+  height: 42px;
+
+  padding: 0 13px;
+
+  box-sizing: border-box;
+
+  background: #fff;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
+
+  border-radius: 11px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.audit-search:focus-within {
+  border-color: rgba(11, 77, 122, 0.35);
+
+  box-shadow:
+    0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+.audit-search-icon {
+  font-size: 15px;
+
+  opacity: 0.75;
 }
 
 .audit-input {
-  width: min(380px, 70vw);
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  padding: 0 12px;
-  font: inherit;
+  width: 100%;
+
+  height: 100%;
+
+  border: none;
+
   outline: none;
-  background: #fff;
+
+  padding: 0;
+
+  background: transparent;
+
+  font: inherit;
+
+  font-size: 13px;
+
+  color: #0b2c4a;
 }
+
+.audit-input::placeholder {
+  color: #94a3b8;
+}
+
+/* =========================================================
+   SELECT
+========================================================= */
 
 .audit-select {
-  height: 38px;
-  border-radius: 10px;
+  height: 42px;
+
+  min-width: 150px;
+
+  padding: 0 38px 0 12px;
+
+  border-radius: 11px;
+
   border: 1px solid rgba(15, 23, 42, 0.12);
-  padding: 0 10px;
-  font: inherit;
+
   background: #fff;
+
+  color: #0b2c4a;
+
+  font: inherit;
+
+  font-size: 13px;
+
   outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+
+  background-position: right 12px center;
+
+  background-size: 13px;
 }
 
-.audit-btn {
-  height: 38px;
-  border-radius: 10px;
-  border: 0;
-  padding: 0 12px;
+.audit-select:focus {
+  border-color: rgba(11, 77, 122, 0.35);
+
+  box-shadow:
+    0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+/* =========================================================
+   DATE INPUT
+========================================================= */
+
+.audit-date {
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  min-width: 155px;
+
+  padding: 0 11px;
+
+  box-sizing: border-box;
+
+  background: #fff;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
+
+  border-radius: 11px;
+}
+
+.audit-date span {
+  font-size: 14px;
+
+  opacity: 0.75;
+}
+
+.audit-date input {
+  width: 100%;
+
+  height: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #0b2c4a;
+
   font: inherit;
-  font-weight: 700;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.audit-btn {
+  height: 42px;
+
+  border-radius: 11px;
+
+  border: 0;
+
+  padding: 0 18px;
+
+  font: inherit;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
   cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.audit-btn:hover {
+  transform: translateY(-1px);
+}
+
+.audit-btn.primary {
+  background: #0b4d7a;
+
+  color: #fff;
+
+  box-shadow:
+    0 8px 18px rgba(11, 77, 122, 0.18);
+}
+
+.audit-btn.primary:hover {
+  background: #0a4268;
 }
 
 .audit-btn.ghost {
-  background: transparent;
-  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #fff;
+
+  color: #0b2c4a;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
 }
 
-.audit-table-wrap {
-  margin-top: 6px;
+.audit-btn.ghost:hover {
+  background: #f8fafc;
 }
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+.audit-table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+
+  margin-top: 4px;
+
+  border-radius: 14px;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.audit-table {
+  width: 100%;
+
+  min-width: 1050px;
+
+  border-collapse: separate;
+
+  border-spacing: 0;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.audit-table thead th {
+  background: #0b4d7a;
+
+  color: #fff;
+
+  text-align: left;
+
+  padding: 13px 14px;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+
+  border: none;
+}
+
+.audit-table thead th:first-child {
+  border-top-left-radius: 13px;
+
+  border-bottom-left-radius: 13px;
+}
+
+.audit-table thead th:last-child {
+  border-top-right-radius: 13px;
+
+  border-bottom-right-radius: 13px;
+}
+
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
+.audit-table tbody td {
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #edf2f7;
+
+  color: #0b2c4a;
+
+  vertical-align: middle;
+
+  background: #fff;
+}
+
+.audit-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.audit-table tbody tr:hover td {
+  background: #fafcff;
+}
+
+/* =========================================================
+   NUMBER
+========================================================= */
+
+.audit-number {
+  width: 45px;
+
+  color: #64748b;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.audit-date-cell {
+  white-space: nowrap;
+
+  color: #334155;
+}
+
+/* =========================================================
+   ROLE
+========================================================= */
+
+.audit-role {
+  font-weight: 600;
+
+  text-transform: lowercase;
+}
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+.audit-action {
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.audit-message {
+  max-width: 260px;
+
+  line-height: 1.4;
+}
+
+/* =========================================================
+   IP
+========================================================= */
+
+.audit-ip {
+  white-space: nowrap;
+
+  color: #475569;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+}
+
+/* =========================================================
+   OUTCOME BADGES
+========================================================= */
+
+.audit-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 70px;
+
+  height: 30px;
+
+  padding: 0 11px;
+
+  box-sizing: border-box;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+/* SUCCESS */
+
+.audit-badge.success {
+  background: #dcfce7;
+
+  color: #15803d;
+}
+
+/* FAIL */
+
+.audit-badge.fail {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+/* INFO */
+
+.audit-badge.info {
+  background: #e0f2fe;
+
+  color: #0369a1;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.audit-empty {
+  padding: 30px 14px !important;
+
+  text-align: center;
+
+  color: #64748b !important;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 .audit-foot {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
+
+  gap: 14px;
+
+  margin-top: 12px;
+
+  padding-top: 14px;
+
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+/* =========================================================
+   META
+========================================================= */
+
 .audit-meta {
   font-size: 13px;
-  opacity: 0.85;
+
+  color: #64748b;
+
+  white-space: nowrap;
 }
+
+/* =========================================================
+   PAGER
+========================================================= */
 
 .audit-pager {
   display: flex;
+
   align-items: center;
-  gap: 10px;
+
+  gap: 6px;
 }
 
-.audit-page {
-  font-weight: 800;
+/* =========================================================
+   PREV / NEXT
+========================================================= */
+
+.audit-page-btn {
+  width: 40px;
+
+  height: 40px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: #f1f5f9;
+
+  color: #0b2c4a;
+
+  font-size: 23px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.audit-page-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+
+  transform: translateY(-1px);
+}
+
+.audit-page-btn:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   PAGE NUMBERS
+========================================================= */
+
+.audit-page-numbers {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.audit-page-number {
+  width: 38px;
+
+  height: 38px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: #0b2c4a;
+
   font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.audit-page-number:hover {
+  background: #f1f5f9;
+}
+
+.audit-page-number.active {
+  background: #0b4d7a;
+
+  color: #fff;
+
+  box-shadow:
+    0 6px 14px rgba(11, 77, 122, 0.18);
+}
+
+.audit-page-dots {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 28px;
+
+  height: 38px;
+
+  color: #64748b;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   LIMIT SELECTOR
+========================================================= */
+
+.audit-limit {
+  height: 40px;
+
+  min-width: 110px;
+
+  margin-left: 8px;
+
+  padding: 0 30px 0 11px;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
+
+  border-radius: 11px;
+
+  background: #fff;
+
+  color: #0b2c4a;
+
+  font: inherit;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+
+  background-position: right 9px center;
+
+  background-size: 12px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .audit-controls {
+    justify-content: flex-start;
+  }
+
+  .audit-search {
+    width: 100%;
+
+    max-width: 100%;
+  }
+
+}
+
+@media (max-width: 900px) {
+
+  .audit-wrap {
+    padding: 10px;
+  }
+
+  .audit-card {
+    padding: 14px;
+  }
+
+  .audit-page-title h1 {
+    font-size: 24px;
+  }
+
+  .audit-controls {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    width: 100%;
+  }
+
+  .audit-search {
+    width: 100%;
+
+    grid-column: 1 / -1;
+  }
+
+  .audit-select,
+  .audit-date,
+  .audit-btn {
+    width: 100%;
+  }
+
+  .audit-foot {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .audit-meta {
+    text-align: center;
+  }
+
+  .audit-pager {
+    justify-content: center;
+
+    flex-wrap: wrap;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .audit-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-search {
+    grid-column: auto;
+  }
+
+  .audit-page-title {
+    align-items: flex-start;
+  }
+
+  .audit-title-icon {
+    width: 40px;
+    height: 40px;
+
+    flex-basis: 40px;
+
+    font-size: 18px;
+  }
+
+  .audit-page-title h1 {
+    font-size: 22px;
+  }
+
+  .audit-page-title p {
+    font-size: 12px;
+  }
+
+  .audit-pager {
+    gap: 4px;
+  }
+
+  .audit-page-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .audit-page-number {
+    width: 34px;
+    height: 34px;
+  }
+
+  .audit-limit {
+    margin-left: 4px;
+  }
+
 }

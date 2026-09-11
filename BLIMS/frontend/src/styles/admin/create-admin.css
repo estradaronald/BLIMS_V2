@@ -1,0 +1,342 @@
+/* frontend/src/css/admin/create-admin.css */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+
+/* =========================
+   PAGE
+========================= */
+
+.create-admin-page {
+    min-height: 100vh;
+    padding: 40px 24px;
+}
+
+.create-admin-card {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.page-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   FORM SECTION
+========================= */
+
+.form-section {
+    padding: 26px 0;
+    border-top: 1px solid #e5e7eb;
+}
+
+.form-section:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.section-heading {
+    margin-bottom: 20px;
+}
+
+.section-heading h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.section-heading p {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+/* =========================
+   FORM GRID
+========================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================
+   FORM GROUP
+========================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.required {
+    color: #dc2626;
+}
+
+.optional {
+    font-size: 12px;
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    height: 44px;
+    padding: 0 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #9ca3af;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================
+   PASSWORD
+========================= */
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.password-wrapper input {
+    padding-right: 70px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    border: none;
+    background: transparent;
+
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   HINTS
+========================= */
+
+.input-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
+/* =========================
+   ERRORS
+========================= */
+
+.error-message {
+    min-height: 17px;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #dc2626;
+}
+
+.form-group.has-error input,
+.form-group.has-error select {
+    border-color: #dc2626;
+}
+
+.form-group.has-error input:focus,
+.form-group.has-error select:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+}
+
+
+/* =========================
+   SECURITY SECTION
+========================= */
+
+.security-section {
+    background: #fafafa;
+    padding: 26px 20px;
+    border-radius: 10px;
+    border-top: none;
+    margin-top: 10px;
+}
+
+
+/* =========================
+   FORM ACTIONS
+========================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding-top: 26px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+    min-width: 130px;
+    height: 44px;
+
+    padding: 0 20px;
+
+    border-radius: 8px;
+    border: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+.form-message {
+    display: none;
+
+    margin-top: 18px;
+    padding: 12px 14px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+}
+
+.form-message.success {
+    display: block;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.form-message.error {
+    display: block;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    .create-admin-page {
+        padding: 20px 12px;
+    }
+
+    .create-admin-card {
+        padding: 22px 18px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+}

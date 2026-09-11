@@ -1,5 +1,83 @@
 const mongoose = require("mongoose");
 
+
+/* =========================================================
+   ASSESSMENT SUBDOCUMENT
+========================================================= */
+
+const AssessmentSchema = new mongoose.Schema(
+  {
+    assessmentId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    activity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    score: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+
+    total: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+  },
+  {
+    _id: true,
+  }
+);
+
+
+/* =========================================================
+   TERM ASSESSMENT
+   Only one exam is allowed per term/subject.
+========================================================= */
+
+const TermAssessmentSchema = new mongoose.Schema(
+  {
+    assessmentId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    activity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    score: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+
+    total: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+  },
+  {
+    _id: true,
+  }
+);
+
+
+/* =========================================================
+   GRADE SCHEMA
+========================================================= */
+
 const gradeSchema = new mongoose.Schema(
   {
     studentId: {
@@ -38,69 +116,24 @@ const gradeSchema = new mongoose.Schema(
       trim: true,
     },
 
-    gradingPeriod: {
-      type: String,
-      enum: ["1st", "2nd", "3rd", "4th"],
+    termId: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
 
     writtenWorks: {
-      type: [
-        {
-          activity: {
-            type: String,
-            required: true,
-            trim: true,
-          },
-          score: {
-            type: Number,
-            required: true,
-            min: 0,
-          },
-          total: {
-            type: Number,
-            required: true,
-            min: 1,
-          },
-        },
-      ],
+      type: [AssessmentSchema],
       default: [],
     },
 
     performanceTasks: {
-      type: [
-        {
-          activity: {
-            type: String,
-            required: true,
-            trim: true,
-          },
-          score: {
-            type: Number,
-            required: true,
-            min: 0,
-          },
-          total: {
-            type: Number,
-            required: true,
-            min: 1,
-          },
-        },
-      ],
+      type: [AssessmentSchema],
       default: [],
     },
 
-    quarterlyAssessment: {
-      score: {
-        type: Number,
-        min: 0,
-        default: null,
-      },
-      total: {
-        type: Number,
-        min: 1,
-        default: null,
-      },
+    termAssessment: {
+      type: TermAssessmentSchema,
+      default: null,
     },
 
     initialGrade: {
@@ -110,7 +143,7 @@ const gradeSchema = new mongoose.Schema(
       default: null,
     },
 
-    quarterlyGrade: {
+    termGrade: {
       type: Number,
       min: 0,
       max: 100,
@@ -123,16 +156,22 @@ const gradeSchema = new mongoose.Schema(
       default: null,
     },
   },
+
   {
     timestamps: true,
   }
 );
 
+
+/* =========================================================
+   UNIQUE GRADE RECORD
+========================================================= */
+
 gradeSchema.index(
   {
     studentId: 1,
     subject: 1,
-    gradingPeriod: 1,
+    termId: 1,
     schoolYearId: 1,
   },
   {
@@ -140,4 +179,8 @@ gradeSchema.index(
   }
 );
 
-module.exports = mongoose.model("Grade", gradeSchema);
+
+module.exports = mongoose.model(
+  "Grade",
+  gradeSchema
+);

@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Admin - Audit Logs</title>
 
   <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  >
 
   <!-- Shared styles -->
   <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
@@ -17,106 +21,428 @@
   <!-- Page styles -->
   <link rel="stylesheet" href="../../styles/admin/admin-audit-logs.css" />
 
-  <!-- ✅ Page-header spacing rule -->
   <style>
-    .topbar { margin-bottom: 4px; }
-    .ms-page { padding: 0; }
+    .topbar {
+      margin-bottom: 4px;
+    }
+
+    .ms-page {
+      padding: 0;
+    }
   </style>
 </head>
 
 <body data-page="audit-logs">
-  <!-- Sidebar Floating Toggle -->
-  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+
+  <!-- =====================================================
+       SIDEBAR FLOATING TOGGLE
+  ====================================================== -->
+
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >
     ←
   </button>
 
   <div class="app">
+
     <div id="sidebar-mount"></div>
 
     <main class="content ms-page">
-      <!-- Topbar (copied UI) -->
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
       <header class="topbar">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
+
+          <button
+            class="tb-icon"
+            type="button"
+            title="Notifications"
+          >
+            🔔
+          </button>
 
           <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar">
-            <div class="tb-meta">
-              <div class="tb-name" id="tbName">Admin</div>
-              <div class="tb-role">School Admin</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="avatar"
+            >
+
+            <div class="tb-meta">
+
+              <div
+                class="tb-name"
+                id="tbName"
+              >
+                Estrada, Ronald B.
+              </div>
+
+              <div class="tb-role">
+                Admin
+              </div>
+
             </div>
+
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+            >
+              ▾
+            </button>
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+            </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- Page body -->
+
+      <!-- =================================================
+           AUDIT LOG PAGE
+      ================================================== -->
+
       <section class="audit-wrap">
+
         <div class="card audit-card">
-          <div class="audit-head">
-            <div class="audit-title">
-              <span class="mini-ico">🧾</span>
-              <span>Audit Logs</span>
+
+          <!-- =================================================
+               PAGE TITLE
+          ================================================== -->
+
+          <div class="audit-page-title">
+
+            <div class="audit-title-icon">
+              🧾
             </div>
 
-            <div class="audit-controls">
-              <input id="qInput" class="audit-input" type="search" placeholder="Search username, action, message, IP..." />
-              <select id="actionSelect" class="audit-select">
-                <option value="">All Actions</option>
-                <option value="AUTH_LOGIN_SUCCESS">AUTH_LOGIN_SUCCESS</option>
-                <option value="AUTH_LOGIN_FAIL">AUTH_LOGIN_FAIL</option>
-                <option value="AUTH_LOGOUT">AUTH_LOGOUT</option>
-                <option value="AUTH_PASSWORD_CHANGED">AUTH_PASSWORD_CHANGED</option>
-              </select>
-              <select id="outcomeSelect" class="audit-select">
-                <option value="">All Outcomes</option>
-                <option value="SUCCESS">SUCCESS</option>
-                <option value="FAIL">FAIL</option>
-                <option value="INFO">INFO</option>
-              </select>
+            <div>
 
-              <button id="applyBtn" class="audit-btn" type="button">Apply</button>
-              <button id="clearBtn" class="audit-btn ghost" type="button">Clear</button>
+              <h1>
+                Audit Logs
+              </h1>
+
+              <p>
+                Track important activities, user actions, and system events for security and monitoring purposes.
+              </p>
+
             </div>
+
           </div>
+
+
+          <!-- =================================================
+               FILTER BAR
+          ================================================== -->
+
+          <div class="audit-controls">
+
+            <!-- Search -->
+
+            <div class="audit-search">
+
+              <span class="audit-search-icon">
+                🔍
+              </span>
+
+              <input
+                id="qInput"
+                class="audit-input"
+                type="search"
+                placeholder="Search username, action, message, IP..."
+              >
+
+            </div>
+
+
+            <!-- Action -->
+
+            <select
+              id="actionSelect"
+              class="audit-select"
+            >
+
+              <option value="">
+                All Actions
+              </option>
+
+              <option value="AUTH_LOGIN_SUCCESS">
+                AUTH_LOGIN_SUCCESS
+              </option>
+
+              <option value="AUTH_LOGIN_FAIL">
+                AUTH_LOGIN_FAIL
+              </option>
+
+              <option value="AUTH_LOGOUT">
+                AUTH_LOGOUT
+              </option>
+
+              <option value="AUTH_PASSWORD_CHANGED">
+                AUTH_PASSWORD_CHANGED
+              </option>
+
+              <option value="AUTH_MFA_OTP_SENT">
+                AUTH_MFA_OTP_SENT
+              </option>
+
+              <option value="AUTH_MFA_VERIFY_SUCCESS">
+                AUTH_MFA_VERIFY_SUCCESS
+              </option>
+
+            </select>
+
+
+            <!-- Outcome -->
+
+            <select
+              id="outcomeSelect"
+              class="audit-select"
+            >
+
+              <option value="">
+                All Outcomes
+              </option>
+
+              <option value="SUCCESS">
+                SUCCESS
+              </option>
+
+              <option value="FAIL">
+                FAIL
+              </option>
+
+              <option value="INFO">
+                INFO
+              </option>
+
+            </select>
+
+
+            <!-- Start Date -->
+
+            <div class="audit-date">
+
+              <span>
+                📅
+              </span>
+
+              <input
+                id="startDate"
+                type="date"
+                aria-label="Start Date"
+              >
+
+            </div>
+
+
+            <!-- End Date -->
+
+            <div class="audit-date">
+
+              <span>
+                📅
+              </span>
+
+              <input
+                id="endDate"
+                type="date"
+                aria-label="End Date"
+              >
+
+            </div>
+
+
+            <!-- Apply -->
+
+            <button
+              id="applyBtn"
+              class="audit-btn primary"
+              type="button"
+            >
+              Apply
+            </button>
+
+
+            <!-- Clear -->
+
+            <button
+              id="clearBtn"
+              class="audit-btn ghost"
+              type="button"
+            >
+              Clear
+            </button>
+
+          </div>
+
+
+          <!-- =================================================
+               TABLE
+          ================================================== -->
 
           <div class="table-wrap audit-table-wrap">
-            <table class="table">
+
+            <table class="table audit-table">
+
               <thead>
+
                 <tr>
-                  <th style="width: 170px;">DATE</th>
-                  <th style="width: 140px;">USER</th>
-                  <th style="width: 120px;">ROLE</th>
-                  <th style="width: 220px;">ACTION</th>
-                  <th style="width: 110px;">OUTCOME</th>
-                  <th>MESSAGE</th>
-                  <th style="width: 150px;">IP</th>
+
+                  <th class="audit-number">
+                    #
+                  </th>
+
+                  <th>
+                    Date & Time
+                  </th>
+
+                  <th>
+                    User
+                  </th>
+
+                  <th>
+                    Role
+                  </th>
+
+                  <th>
+                    Action
+                  </th>
+
+                  <th>
+                    Outcome
+                  </th>
+
+                  <th>
+                    Message
+                  </th>
+
+                  <th>
+                    IP Address
+                  </th>
+
                 </tr>
+
               </thead>
+
               <tbody id="auditBody"></tbody>
+
             </table>
+
           </div>
+
+
+          <!-- =================================================
+               FOOTER / PAGINATION
+          ================================================== -->
 
           <div class="audit-foot">
-            <div class="audit-meta" id="auditMeta">Loading…</div>
-            <div class="audit-pager">
-              <button id="prevBtn" class="audit-btn ghost" type="button">Prev</button>
-              <div class="audit-page" id="pageLabel">Page 1</div>
-              <button id="nextBtn" class="audit-btn ghost" type="button">Next</button>
+
+            <div
+              class="audit-meta"
+              id="auditMeta"
+            >
+              Loading…
             </div>
+
+
+            <div class="audit-pager">
+
+              <button
+                id="prevBtn"
+                class="audit-page-btn"
+                type="button"
+                aria-label="Previous page"
+              >
+                ‹
+              </button>
+
+
+              <div
+                class="audit-page-numbers"
+                id="pageNumbers"
+              ></div>
+
+
+              <button
+                id="nextBtn"
+                class="audit-page-btn"
+                type="button"
+                aria-label="Next page"
+              >
+                ›
+              </button>
+
+
+              <select
+                id="limitSelect"
+                class="audit-limit"
+                aria-label="Logs per page"
+              >
+                <option value="10">
+                  10 / page
+                </option>
+
+                <option value="25">
+                  25 / page
+                </option>
+
+                <option value="50">
+                  50 / page
+                </option>
+              </select>
+
+            </div>
+
           </div>
+
         </div>
+
       </section>
+
     </main>
+
   </div>
 
+
+  <!-- =====================================================
+       SCRIPTS
+  ====================================================== -->
+
   <script src="../../js/auth/admin-guard.js"></script>
+
   <script src="../../js/admin/sidebar.js"></script>
+
   <script src="../../js/admin/admin-audit-logs.js"></script>
+
 </body>
 </html>

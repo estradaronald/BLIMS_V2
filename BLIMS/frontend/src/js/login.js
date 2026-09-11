@@ -1,9 +1,12 @@
-// frontend/src/js/auth/login.js
 (function () {
   if (window.__loginInit) return;
   window.__loginInit = true;
 
   const $ = (id) => document.getElementById(id);
+
+  // =========================
+  // LOGIN
+  // =========================
 
   const loginForm = $("loginForm");
   const usernameEl = $("username");
@@ -11,17 +14,33 @@
   const loginBtn = $("loginBtn");
   const loginMsg = $("loginMsg");
 
+  // =========================
+  // VIEWS
+  // =========================
+
   const viewLogin = $("viewLogin");
   const viewForgot = $("viewForgot");
   const viewMFA = $("viewMFA");
+
+  // =========================
+  // NAVIGATION
+  // =========================
 
   const forgotLink = $("forgotLink");
   const backToLogin = $("backToLogin");
   const backToLoginFromMFA = $("backToLoginFromMFA");
 
+  // =========================
+  // PASSWORD TOGGLE
+  // =========================
+
   const togglePasswordBtn = $("togglePassword");
   const eyeIcon = $("eyeIcon");
   const eyeOffIcon = $("eyeOffIcon");
+
+  // =========================
+  // CAPTCHA
+  // =========================
 
   const capA = $("capA");
   const capB = $("capB");
@@ -29,310 +48,957 @@
   const capRefresh = $("capRefresh");
   const capMsg = $("capMsg");
 
+  // =========================
+  // SECONDARY PIN
+  // =========================
+
   const mfaForm = $("mfaForm");
   const mfaCodeEl = $("mfaCode");
   const mfaBtn = $("mfaBtn");
   const mfaMsg = $("mfaMsg");
-  const mfaResendBtn = $("mfaResend");
+
+  // =========================
+  // API ENDPOINTS
+  // =========================
 
   const LOGIN_ENDPOINT = "/api/auth/login";
-  const MFA_VERIFY_ENDPOINT = "/api/auth/mfa/verify";
-  const CSRF_ENDPOINT = "/api/auth/csrf"; 
-  const CHANGE_PASSWORD_PAGE = "/change-password.html";
+  const SECONDARY_VERIFY_ENDPOINT =
+    "/api/auth/secondary/verify";
+
+  const CSRF_ENDPOINT = "/api/auth/csrf";
+
+  const CHANGE_PASSWORD_PAGE =
+    "/change-password.html";
+
+  // =========================
+  // DASHBOARDS
+  // =========================
 
   const DASH_BY_ROLE = {
     admin: "/src/pages/admin/dashboard.html",
-    teacher: "/src/pages/teachers/teacher-dashboard.html",
-    student: "/src/pages/students/student-dashboard.html",
+
+    teacher:
+      "/src/pages/teachers/teacher-dashboard.html",
+
+    student:
+      "/src/pages/students/student-dashboard.html",
   };
-  const DEFAULT_REDIRECT = "/src/pages/admin/dashboard.html";
 
-  let pendingMfaUserId = null;
-  let pendingMfaUsername = null;
+  const DEFAULT_REDIRECT =
+    "/src/pages/admin/dashboard.html";
 
-  // ✅ CSRF token stored in memory
+  // =========================
+  // STATE
+  // =========================
+
   let csrfToken = "";
+  let captchaAnswer = null;
 
-  function setMsg(text, isError = true) {
-    if (!loginMsg) return;
-    loginMsg.textContent = text || "";
-    loginMsg.style.color = isError ? "#c00" : "#0a7a2f";
-  }
-  function setCapMsg(text, isError = true) {
-    if (!capMsg) return;
-    capMsg.textContent = text || "";
-    capMsg.style.color = isError ? "#c00" : "#0a7a2f";
-  }
-  function setMfaMsg(text, isError = true) {
-    if (!mfaMsg) return;
-    mfaMsg.textContent = text || "";
-    mfaMsg.style.color = isError ? "#c00" : "#0a7a2f";
-  }
 
-  function setLoading(isLoading) {
-    if (!loginBtn) return;
-    loginBtn.disabled = isLoading;
-    loginBtn.textContent = isLoading ? "Signing in..." : "Sign In";
-  }
+  // =========================
+  // VIEW MANAGEMENT
+  // =========================
 
-  function setMfaLoading(isLoading) {
-    if (!mfaBtn) return;
-    mfaBtn.disabled = isLoading;
-    mfaBtn.textContent = isLoading ? "Verifying..." : "Verify Code";
-  }
+  function showView(view) {
 
-  function showView(which) {
-    if (viewLogin) viewLogin.style.display = which === "login" ? "block" : "none";
-    if (viewForgot) viewForgot.style.display = which === "forgot" ? "block" : "none";
-    if (viewMFA) viewMFA.style.display = which === "mfa" ? "block" : "none";
-    setMsg("");
-    setCapMsg("");
-    setMfaMsg("");
-  }
+    const views = [
+      viewLogin,
+      viewForgot,
+      viewMFA,
+    ];
 
-  function pickRedirectByRole(role) {
-    if (!role) return DEFAULT_REDIRECT;
-    return DASH_BY_ROLE[role] || DEFAULT_REDIRECT;
+    views.forEach((element) => {
+
+      if (!element) return;
+
+      element.classList.remove("is-active");
+
+    });
+
+
+    if (view === "login" && viewLogin) {
+      viewLogin.classList.add("is-active");
+    }
+
+    if (view === "forgot" && viewForgot) {
+      viewForgot.classList.add("is-active");
+    }
+
+    if (view === "secondary" && viewMFA) {
+      viewMFA.classList.add("is-active");
+    }
   }
 
+
+  // =========================
+  // MESSAGE HELPERS
+  // =========================
+
+  function clearMessage(element) {
+
+    if (!element) return;
+
+    element.textContent = "";
+
+    element.classList.remove(
+      "error",
+      "success"
+    );
+  }
+
+
+  function showError(element, message) {
+
+    if (!element) return;
+
+    element.textContent = message;
+
+    element.classList.remove("success");
+
+    element.classList.add("error");
+  }
+
+
+  function showSuccess(element, message) {
+
+    if (!element) return;
+
+    element.textContent = message;
+
+    element.classList.remove("error");
+
+    element.classList.add("success");
+  }
+
+
+  // =========================
+  // RESPONSE
+  // =========================
+
+  async function parseResponse(response) {
+
+    let payload = {};
+
+    try {
+      payload = await response.json();
+    } catch {
+      payload = {};
+    }
+
+    return {
+      ok: response.ok,
+      status: response.status,
+      data: payload,
+    };
+  }
+
+
+  // =========================
+  // CSRF
+  // =========================
+
+  async function loadCsrfToken() {
+
+    try {
+
+      const response = await fetch(
+        CSRF_ENDPOINT,
+        {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        }
+      );
+
+
+      const result =
+        await parseResponse(response);
+
+
+      if (
+        result.ok &&
+        result.data?.csrfToken
+      ) {
+
+        csrfToken =
+          result.data.csrfToken;
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Unable to load CSRF token:",
+        error
+      );
+    }
+  }
+
+
+  async function ensureCsrfToken() {
+
+    if (csrfToken) {
+      return csrfToken;
+    }
+
+    await loadCsrfToken();
+
+    return csrfToken;
+  }
+
+
+  // =========================
   // CAPTCHA
-  let currentA = 0;
-  let currentB = 0;
+  // =========================
 
-  function randInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  function generateCaptcha() {
+
+    if (!capA || !capB) {
+      return;
+    }
+
+
+    const a =
+      Math.floor(Math.random() * 9) + 1;
+
+    const b =
+      Math.floor(Math.random() * 9) + 1;
+
+
+    captchaAnswer = a + b;
+
+
+    capA.textContent = a;
+    capB.textContent = b;
+
+
+    if (capAns) {
+      capAns.value = "";
+    }
+
+
+    clearMessage(capMsg);
   }
 
-  function newCaptcha() {
-    currentA = randInt(1, 9);
-    currentB = randInt(1, 9);
-    if (capA) capA.textContent = String(currentA);
-    if (capB) capB.textContent = String(currentB);
-    if (capAns) capAns.value = "";
-    setCapMsg("");
-  }
 
-  function captchaOK() {
-    const ans = (capAns?.value || "").trim();
-    if (!ans) {
-      setCapMsg("Please answer the math CAPTCHA.", true);
+  function validateCaptcha() {
+
+    if (
+      !capAns ||
+      captchaAnswer === null
+    ) {
+      return true;
+    }
+
+
+    const answer =
+      Number(capAns.value.trim());
+
+
+    if (!Number.isInteger(answer)) {
+
+      showError(
+        capMsg,
+        "Please solve the CAPTCHA."
+      );
+
       return false;
     }
-    const n = Number(ans);
-    if (!Number.isFinite(n)) {
-      setCapMsg("CAPTCHA must be a number.", true);
+
+
+    if (answer !== captchaAnswer) {
+
+      showError(
+        capMsg,
+        "Incorrect CAPTCHA answer."
+      );
+
+      generateCaptcha();
+
       return false;
     }
-    if (n !== currentA + currentB) {
-      setCapMsg("Wrong CAPTCHA. Please try again.", true);
-      newCaptcha();
-      return false;
-    }
-    setCapMsg("CAPTCHA OK.", false);
+
+
+    clearMessage(capMsg);
+
     return true;
   }
 
-  function initPasswordToggle() {
-    if (!togglePasswordBtn || !passwordEl) return;
-    togglePasswordBtn.addEventListener("click", () => {
-      const isHidden = passwordEl.type === "password";
-      passwordEl.type = isHidden ? "text" : "password";
-      if (eyeIcon) eyeIcon.style.display = isHidden ? "none" : "inline";
-      if (eyeOffIcon) eyeOffIcon.style.display = isHidden ? "inline" : "none";
-    });
-  }
 
-  // ✅ Fetch CSRF token once per page load
-  async function fetchCsrf() {
-    try {
-      const res = await fetch(CSRF_ENDPOINT, { credentials: "include" });
-      const ct = res.headers.get("content-type") || "";
-      if (!res.ok || !ct.includes("application/json")) return;
+  // =========================
+  // PASSWORD TOGGLE
+  // =========================
 
-      const payload = await res.json();
-      if (payload?.ok && typeof payload.csrfToken === "string") {
-        csrfToken = payload.csrfToken;
-      }
-    } catch {
-      // ignore
-    }
-  }
+  function setupPasswordToggle() {
 
-  async function postJSON(url, data) {
-    const headers = { "Content-Type": "application/json" };
-    // ✅ attach CSRF token if we have it
-    if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      credentials: "include",
-      body: JSON.stringify(data),
-    });
-
-    let payload = null;
-    const ct = res.headers.get("content-type") || "";
-    if (ct.includes("application/json")) payload = await res.json();
-    else payload = { ok: false, message: (await res.text()).slice(0, 200) };
-
-    return { res, payload };
-  }
-
-  async function handleLoginSubmit(e) {
-    e.preventDefault();
-
-    setMsg("");
-    setCapMsg("");
-
-    const username = (usernameEl?.value || "").trim();
-    const password = (passwordEl?.value || "").trim();
-
-    if (!username || !password) {
-      setMsg("Please enter your username and password.", true);
+    if (
+      !togglePasswordBtn ||
+      !passwordEl
+    ) {
       return;
     }
 
-    if (!captchaOK()) return;
 
-    setLoading(true);
+    togglePasswordBtn.addEventListener(
+      "click",
+      function () {
+
+        const isPassword =
+          passwordEl.type === "password";
+
+
+        passwordEl.type =
+          isPassword
+            ? "text"
+            : "password";
+
+
+        if (eyeIcon) {
+
+          eyeIcon.style.display =
+            isPassword
+              ? "none"
+              : "";
+        }
+
+
+        if (eyeOffIcon) {
+
+          eyeOffIcon.style.display =
+            isPassword
+              ? ""
+              : "none";
+        }
+
+
+        togglePasswordBtn.setAttribute(
+          "aria-label",
+          isPassword
+            ? "Hide password"
+            : "Show password"
+        );
+      }
+    );
+  }
+
+
+  // =========================
+  // REDIRECT
+  // =========================
+
+  function getDashboard(role) {
+
+    return (
+      DASH_BY_ROLE[role] ||
+      DEFAULT_REDIRECT
+    );
+  }
+
+
+  function redirectAfterLogin(payload) {
+
+    if (payload?.mustChangePassword) {
+
+      window.location.href =
+        CHANGE_PASSWORD_PAGE;
+
+      return;
+    }
+
+
+    window.location.href =
+      getDashboard(payload?.role);
+  }
+
+
+  // =========================
+  // LOGIN SUBMIT
+  // =========================
+
+  async function handleLoginSubmit(event) {
+
+    event.preventDefault();
+
+    clearMessage(loginMsg);
+
+
+    if (
+      !usernameEl ||
+      !passwordEl
+    ) {
+      return;
+    }
+
+
+    const username =
+      usernameEl.value.trim();
+
+    const password =
+      passwordEl.value;
+
+
+    if (!username) {
+
+      showError(
+        loginMsg,
+        "Please enter your username."
+      );
+
+      usernameEl.focus();
+
+      return;
+    }
+
+
+    if (!password) {
+
+      showError(
+        loginMsg,
+        "Please enter your password."
+      );
+
+      passwordEl.focus();
+
+      return;
+    }
+
+
+    if (!validateCaptcha()) {
+      return;
+    }
+
+
+    const originalText =
+      loginBtn
+        ? loginBtn.textContent
+        : "Sign In";
+
+
+    if (loginBtn) {
+
+      loginBtn.disabled = true;
+
+      loginBtn.textContent =
+        "Signing In...";
+    }
+
 
     try {
-      const { res, payload } = await postJSON(LOGIN_ENDPOINT, { username, password });
 
-      if (!res.ok || !payload?.ok) {
-        const msg =
+      const token =
+        await ensureCsrfToken();
+
+
+      const headers = {
+        "Content-Type":
+          "application/json",
+      };
+
+
+      if (token) {
+
+        headers["X-CSRF-Token"] =
+          token;
+      }
+
+
+      const response =
+        await fetch(
+          LOGIN_ENDPOINT,
+          {
+            method: "POST",
+
+            credentials: "include",
+
+            headers,
+
+            body: JSON.stringify({
+              username,
+              password,
+            }),
+          }
+        );
+
+
+      const result =
+        await parseResponse(response);
+
+      const payload =
+        result.data;
+
+
+      // =========================
+      // LOGIN FAILED
+      // =========================
+
+      if (
+        !result.ok ||
+        payload?.ok === false
+      ) {
+
+        showError(
+          loginMsg,
           payload?.message ||
-          (res.status === 401 ? "Invalid username or password." : "Login failed.");
-        setMsg(msg, true);
+            "Invalid username or password."
+        );
+
+        generateCaptcha();
+
         return;
       }
 
-      if (payload.mfaRequired) {
-        pendingMfaUserId = payload.userId || null;
-        pendingMfaUsername = username;
 
-        if (!pendingMfaUserId) {
-          setMsg("MFA error: missing userId.", true);
+      // =========================
+      // ADMIN PIN REQUIRED
+      // =========================
+
+      if (
+        payload.secondaryRequired
+      ) {
+
+        clearMessage(loginMsg);
+
+
+        if (mfaMsg) {
+
+          mfaMsg.textContent =
+            "Enter your 6-digit Secondary PIN to continue.";
+        }
+
+
+        if (mfaCodeEl) {
+
+          mfaCodeEl.value = "";
+        }
+
+
+        showView("secondary");
+
+
+        setTimeout(() => {
+
+          if (mfaCodeEl) {
+            mfaCodeEl.focus();
+          }
+
+        }, 50);
+
+
+        return;
+      }
+
+
+      // =========================
+      // TEACHER / STUDENT
+      // =========================
+
+      if (payload.role) {
+
+        redirectAfterLogin(
+          payload
+        );
+
+        return;
+      }
+
+
+      showError(
+        loginMsg,
+        "Login succeeded, but no user role was returned."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Login error:",
+        error
+      );
+
+
+      showError(
+        loginMsg,
+        "Unable to connect to the server. Please try again."
+      );
+
+    } finally {
+
+      if (loginBtn) {
+
+        loginBtn.disabled = false;
+
+        loginBtn.textContent =
+          originalText;
+      }
+    }
+  }
+
+
+  // =========================
+  // SECONDARY PIN
+  // =========================
+
+  async function handleSecondarySubmit(event) {
+
+    event.preventDefault();
+
+    clearMessage(mfaMsg);
+
+
+    if (!mfaCodeEl) {
+      return;
+    }
+
+
+    const pin =
+      mfaCodeEl.value.trim();
+
+
+    // Exactly 6 digits
+
+    if (!/^\d{6}$/.test(pin)) {
+
+      showError(
+        mfaMsg,
+        "Secondary PIN must be exactly 6 digits."
+      );
+
+      mfaCodeEl.focus();
+
+      return;
+    }
+
+
+    const originalText =
+      mfaBtn
+        ? mfaBtn.textContent
+        : "Verify PIN";
+
+
+    if (mfaBtn) {
+
+      mfaBtn.disabled = true;
+
+      mfaBtn.textContent =
+        "Verifying...";
+    }
+
+
+    try {
+
+      const token =
+        await ensureCsrfToken();
+
+
+      const headers = {
+        "Content-Type":
+          "application/json",
+      };
+
+
+      if (token) {
+
+        headers["X-CSRF-Token"] =
+          token;
+      }
+
+
+      const response =
+        await fetch(
+          SECONDARY_VERIFY_ENDPOINT,
+          {
+            method: "POST",
+
+            credentials: "include",
+
+            headers,
+
+            body: JSON.stringify({
+              pin,
+            }),
+          }
+        );
+
+
+      const result =
+        await parseResponse(response);
+
+      const payload =
+        result.data;
+
+
+      // =========================
+      // PIN FAILED
+      // =========================
+
+      if (
+        !result.ok ||
+        payload?.ok === false
+      ) {
+
+        showError(
+          mfaMsg,
+          payload?.message ||
+            "Invalid Secondary PIN."
+        );
+
+
+        mfaCodeEl.value = "";
+
+        mfaCodeEl.focus();
+
+        return;
+      }
+
+
+      // =========================
+      // VERIFY ROLE
+      // =========================
+
+      if (
+        payload.role !== "admin"
+      ) {
+
+        showError(
+          mfaMsg,
+          "Unexpected account role. Please sign in again."
+        );
+
+        return;
+      }
+
+
+      // =========================
+      // ADMIN AUTHENTICATED
+      // =========================
+
+      redirectAfterLogin(
+        payload
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Secondary PIN verification error:",
+        error
+      );
+
+
+      showError(
+        mfaMsg,
+        "Unable to connect to the server. Please try again."
+      );
+
+    } finally {
+
+      if (mfaBtn) {
+
+        mfaBtn.disabled = false;
+
+        mfaBtn.textContent =
+          originalText;
+      }
+    }
+  }
+
+
+  // =========================
+  // NAVIGATION
+  // =========================
+
+  function setupNavigation() {
+
+    // Forgot Password
+
+    if (forgotLink) {
+
+      forgotLink.addEventListener(
+        "click",
+        function () {
+
+          clearMessage(loginMsg);
+
+          clearMessage(mfaMsg);
+
+          showView("forgot");
+        }
+      );
+    }
+
+
+    // Back from Forgot Password
+
+    if (backToLogin) {
+
+      backToLogin.addEventListener(
+        "click",
+        function () {
+
+          clearMessage(loginMsg);
+
+          showView("login");
+
+
+          if (usernameEl) {
+            usernameEl.focus();
+          }
+        }
+      );
+    }
+
+
+    // Back from Secondary PIN
+
+    if (
+      backToLoginFromMFA
+    ) {
+
+      backToLoginFromMFA.addEventListener(
+        "click",
+        function () {
+
+          clearMessage(mfaMsg);
+
+
+          if (mfaCodeEl) {
+            mfaCodeEl.value = "";
+          }
+
+
+          showView("login");
+
+
+          if (passwordEl) {
+            passwordEl.focus();
+          }
+        }
+      );
+    }
+  }
+
+
+  // =========================
+  // PIN INPUT
+  // =========================
+
+  function setupPinInput() {
+
+    if (!mfaCodeEl) {
+      return;
+    }
+
+
+    mfaCodeEl.addEventListener(
+      "input",
+      function () {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
+      }
+    );
+
+
+    mfaCodeEl.addEventListener(
+      "keydown",
+      function (event) {
+
+        const allowedKeys = [
+          "Backspace",
+          "Delete",
+          "ArrowLeft",
+          "ArrowRight",
+          "Tab",
+          "Home",
+          "End",
+        ];
+
+
+        if (
+          allowedKeys.includes(
+            event.key
+          ) ||
+          event.ctrlKey ||
+          event.metaKey
+        ) {
           return;
         }
 
-        setMfaMsg("We sent a 6-digit code to your admin email.", false);
-        if (mfaCodeEl) mfaCodeEl.value = "";
-        showView("mfa");
-        return;
-      }
 
-      if (payload.mustChangePassword) {
-        window.location.replace(CHANGE_PASSWORD_PAGE);
-        return;
-      }
+        if (
+          !/^\d$/.test(
+            event.key
+          )
+        ) {
 
-      const redirect = pickRedirectByRole(payload.role);
-      window.location.replace(redirect);
-    } catch (err) {
-      console.error(err);
-      setMsg("Network error. Check if the server is running.", true);
-    } finally {
-      setLoading(false);
+          event.preventDefault();
+        }
+      }
+    );
+  }
+
+
+  // =========================
+  // EVENTS
+  // =========================
+
+  function setupEventListeners() {
+
+    if (loginForm) {
+
+      loginForm.addEventListener(
+        "submit",
+        handleLoginSubmit
+      );
+    }
+
+
+    if (mfaForm) {
+
+      mfaForm.addEventListener(
+        "submit",
+        handleSecondarySubmit
+      );
+    }
+
+
+    if (capRefresh) {
+
+      capRefresh.addEventListener(
+        "click",
+        generateCaptcha
+      );
     }
   }
 
-  async function handleMfaSubmit(e) {
-    e.preventDefault();
-    setMfaMsg("");
 
-    const otp = (mfaCodeEl?.value || "").trim();
+  // =========================
+  // INITIALIZATION
+  // =========================
 
-    if (!pendingMfaUserId) {
-      setMfaMsg("Session expired. Please login again.", true);
-      showView("login");
-      return;
-    }
+  async function init() {
 
-    if (!otp || otp.length < 6) {
-      setMfaMsg("Please enter the 6-digit code.", true);
-      return;
-    }
+    // IMPORTANT:
+    // Use the existing CSS .is-active class.
 
-    setMfaLoading(true);
-
-    try {
-      const { res, payload } = await postJSON(MFA_VERIFY_ENDPOINT, {
-        userId: pendingMfaUserId,
-        otp,
-      });
-
-      if (!res.ok || !payload?.ok) {
-        setMfaMsg(payload?.message || "Invalid code.", true);
-        return;
-      }
-
-      if (payload.mustChangePassword) {
-        window.location.replace(CHANGE_PASSWORD_PAGE);
-        return;
-      }
-
-      const redirect = pickRedirectByRole(payload.role);
-      window.location.replace(redirect);
-    } catch (err) {
-      console.error(err);
-      setMfaMsg("Network error. Please try again.", true);
-    } finally {
-      setMfaLoading(false);
-    }
-  }
-
-  function handleMfaResend() {
-    if (!pendingMfaUsername) {
-      setMfaMsg("Please login again to resend.", true);
-      showView("login");
-      return;
-    }
-    setMfaMsg("To resend, please sign in again.", false);
     showView("login");
+
+
+    generateCaptcha();
+
+
+    setupPasswordToggle();
+
+    setupNavigation();
+
+    setupPinInput();
+
+    setupEventListeners();
+
+
+    await loadCsrfToken();
   }
 
-  function init() {
-    showView("login");
-    newCaptcha();
-    if (capRefresh) capRefresh.addEventListener("click", newCaptcha);
 
-    // ✅ CSRF token fetch (non-blocking)
-    fetchCsrf();
+  init();
 
-    initPasswordToggle();
-
-    if (forgotLink) {
-      forgotLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        showView("forgot");
-      });
-    }
-
-    if (backToLogin) {
-      backToLogin.addEventListener("click", (e) => {
-        e.preventDefault();
-        showView("login");
-      });
-    }
-
-    if (backToLoginFromMFA) {
-      backToLoginFromMFA.addEventListener("click", (e) => {
-        e.preventDefault();
-        pendingMfaUserId = null;
-        pendingMfaUsername = null;
-        showView("login");
-      });
-    }
-
-    if (loginForm) loginForm.addEventListener("submit", handleLoginSubmit);
-    if (mfaForm) mfaForm.addEventListener("submit", handleMfaSubmit);
-    if (mfaResendBtn) mfaResendBtn.addEventListener("click", handleMfaResend);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
 })();
