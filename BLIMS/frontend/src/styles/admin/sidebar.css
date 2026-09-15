@@ -1,154 +1,422 @@
 /* frontend/src/styles/sidebar.css */
 
+
+/* =========================================================
+   ROOT VARIABLES
+========================================================= */
+
 :root {
   --navy: #0b4d7a;
   --navy-2: #083e63;
   --white: #ffffff;
+
   --sbText: rgba(255, 255, 255, 0.92);
   --sbDim: rgba(255, 255, 255, 0.70);
 }
 
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
 .sidebar {
   width: 260px;
   min-width: 260px;
+
   height: calc(100vh - 28px);
-  background: linear-gradient(180deg, var(--navy), var(--navy-2));
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--navy),
+      var(--navy-2)
+    );
+
   border-radius: 14px;
+
   margin: 14px 0 14px 14px;
+
   position: sticky;
   top: 14px;
+
   overflow: hidden;
+
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
 
-/* =========================
-   TOP SECTION
-========================= */
+/* =========================================================
+   SCHOOL HEADER
+========================================================= */
 
 .sb-top {
   padding: 18px 16px 10px;
+
   display: flex;
   flex-direction: column;
+
   align-items: center;
+
   gap: 10px;
 }
+
+
+/* =========================================================
+   SCHOOL LOGO WRAPPER
+========================================================= */
 
 .sb-logo-wrap {
   width: 78px;
   height: 78px;
+
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
   display: flex;
+
   align-items: center;
   justify-content: center;
 }
 
+
+/* =========================================================
+   SCHOOL LOGO
+========================================================= */
+
 .sb-logo {
   width: 66px;
   height: 66px;
+
   object-fit: contain;
+
   border-radius: 50%;
 }
 
+
+/* =========================================================
+   SCHOOL INFORMATION
+========================================================= */
+
 .sb-school {
   text-align: center;
+
   padding: 0 10px;
 }
 
+
 .sb-school-name {
   color: var(--sbText);
+
   font-weight: 900;
+
   font-size: 14px;
+
   line-height: 1.2;
 }
 
+
 .sb-school-sub {
   color: var(--sbDim);
+
   font-size: 12px;
+
   margin-top: 2px;
 }
 
 
-/* =========================
-   NAV SECTION
-========================= */
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
 .sb-nav {
   padding: 10px 14px 14px;
+
   display: flex;
   flex-direction: column;
+
   gap: 6px;
+
   margin-top: 8px;
 
   flex: 1 1 auto;
+
   overflow-y: auto;
   overflow-x: hidden;
+
   scroll-behavior: smooth;
 }
 
 
-/* =========================
-   NAV CATEGORY HEADINGS
-========================= */
+/* =========================================================
+   SECTION LABELS
+========================================================= */
+
+/*
+ * Simple category headings.
+ *
+ * Used for:
+ *   OVERVIEW
+ *   COMMUNICATION
+ *   SYSTEM
+ *
+ * Dropdown categories such as USER MANAGEMENT,
+ * ACADEMIC SETUP, and RECORDS use .sb-group-title
+ * instead.
+ */
 
 .sb-section-title {
   color: var(--white);
+
   font-size: 10px;
+
   font-weight: 800;
-  letter-spacing: 0.8px;
+
+  letter-spacing: 0.9px;
+
   line-height: 1;
-  padding: 8px 14px 2px;
+
+  /*
+   * Small left padding keeps the heading aligned
+   * with the dropdown category titles.
+   */
+  padding:
+    10px 4px 3px;
+
   user-select: none;
 }
 
 
-/* Don't add extra space above the first heading */
+/*
+ * First section gets less top spacing because
+ * it sits directly underneath the school header.
+ */
 
 .sb-section-title:first-child {
   padding-top: 2px;
 }
 
 
-/* =========================
+/* =========================================================
+   NAVIGATION DIVIDERS
+========================================================= */
+
+.sb-divider {
+  height: 1px;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
+  margin:
+    4px 14px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
    CUSTOM SCROLLBAR
-========================= */
+========================================================= */
 
 .sb-nav::-webkit-scrollbar {
   width: 8px;
 }
 
+
 .sb-nav::-webkit-scrollbar-track {
   background: transparent;
 }
 
+
 .sb-nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+  background:
+    rgba(255, 255, 255, 0.18);
+
   border-radius: 999px;
 }
 
+
 .sb-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.30);
+  background:
+    rgba(255, 255, 255, 0.30);
 }
 
 
-/* =========================
-   NAV ITEMS
-========================= */
+/* =========================================================
+   DROPDOWN GROUP
+========================================================= */
+
+.sb-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+
+/* =========================================================
+   DROPDOWN HEADER
+========================================================= */
+
+/*
+ * The dropdown heading itself is the clickable
+ * navigation category.
+ *
+ * There is intentionally NO icon here.
+ */
+
+.sb-group-toggle {
+  width: 100%;
+
+  min-height: 42px;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: var(--white);
+
+  /*
+   * Matches the left alignment of OVERVIEW,
+   * COMMUNICATION, and SYSTEM.
+   */
+  padding:
+    4px 4px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  text-align: left;
+
+  border-radius: 10px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================================
+   DROPDOWN TITLE
+========================================================= */
+
+.sb-group-title {
+  color: var(--white);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.9px;
+
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DROPDOWN CHEVRON
+========================================================= */
+
+.sb-chevron {
+  font-size: 15px;
+
+  line-height: 1;
+
+  opacity: 0.9;
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+/* =========================================================
+   DROPDOWN HOVER
+========================================================= */
+
+.sb-group-toggle:hover {
+  background:
+    rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   DROPDOWN FOCUS
+========================================================= */
+
+.sb-group-toggle:focus-visible {
+  outline:
+    2px solid
+    rgba(255, 255, 255, 0.65);
+
+  outline-offset: -2px;
+}
+
+
+/* =========================================================
+   OPEN GROUP
+========================================================= */
+
+.sb-group.is-open
+  .sb-chevron {
+  transform:
+    rotate(180deg);
+}
+
+
+/* =========================================================
+   SUBMENU
+========================================================= */
+
+.sb-submenu {
+  display: none;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  /*
+   * Submenu items are visibly indented underneath
+   * their dropdown category.
+   */
+  padding-left: 10px;
+}
+
+
+.sb-group.is-open
+  .sb-submenu {
+  display: flex;
+}
+
+
+/* =========================================================
+   NAVIGATION ITEMS
+========================================================= */
 
 .sb-item {
   display: flex;
+
   align-items: center;
+
   gap: 12px;
 
-  padding: 10px 14px;
+  padding:
+    10px 14px;
 
   border-radius: 12px;
 
@@ -157,10 +425,14 @@
   color: var(--sbText);
 
   font-weight: 900;
+
   letter-spacing: 0.3px;
+
   font-size: 12px;
 
-  height: 48px;
+  min-height: 48px;
+
+  box-sizing: border-box;
 
   transition:
     background 0.2s ease,
@@ -168,9 +440,9 @@
 }
 
 
-/* =========================
-   ICON CONTAINER
-========================= */
+/* =========================================================
+   NAVIGATION ICON CONTAINER
+========================================================= */
 
 .sb-ico {
   width: 40px;
@@ -179,195 +451,452 @@
   border-radius: 12px;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
-  background: rgba(255, 255, 255, 0.12);
+  background:
+    rgba(255, 255, 255, 0.12);
 
   flex: 0 0 40px;
 
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease;
 }
 
 
-/* =========================
-   SVG ICONS
-========================= */
+/* =========================================================
+   NAVIGATION SVG ICONS
+========================================================= */
 
 .sb-ico img {
   width: 18px;
   height: 18px;
 
   object-fit: contain;
+
   display: block;
 
-  /*
-    Lucide SVGs are black.
-    Convert them to white for
-    the normal blue sidebar.
-  */
-  filter: brightness(0) invert(1);
+  filter:
+    brightness(0)
+    invert(1);
 
-  transition: filter 0.2s ease;
+  transition:
+    filter 0.2s ease;
 }
 
 
-/* =========================
-   HOVER
-========================= */
+/* =========================================================
+   NAVIGATION ITEM HOVER
+========================================================= */
 
 .sb-item:hover {
-  background: rgba(255, 255, 255, 0.10);
+  background:
+    rgba(255, 255, 255, 0.10);
 }
 
 
-/* =========================
-   ACTIVE ITEM
-========================= */
+/* =========================================================
+   ACTIVE NAVIGATION ITEM
+========================================================= */
 
 .sb-item.active {
   background: var(--white);
+
   color: var(--navy);
 }
+
 
 .sb-item.active .sb-ico {
   background: var(--navy);
 }
 
+
 .sb-item.active .sb-ico img {
-  filter: brightness(0) invert(1);
+  filter:
+    brightness(0)
+    invert(1);
 }
 
 
-/* =========================
-   COLLAPSED MODE
-========================= */
+/* =========================================================
+   SIDEBAR COLLAPSED MODE
+========================================================= */
 
 .sidebar.is-collapsed {
   width: 86px;
+
   min-width: 86px;
 }
 
-.sidebar.is-collapsed .sb-school,
-.sidebar.is-collapsed .sb-text,
-.sidebar.is-collapsed .sb-section-title {
+
+/* =========================================================
+   COLLAPSED SCHOOL INFORMATION
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-school {
   display: none;
 }
 
-.sidebar.is-collapsed .sb-top {
-  padding: 18px 10px 8px;
+
+/* =========================================================
+   COLLAPSED SECTION LABELS
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-section-title {
+  display: none;
 }
 
-.sidebar.is-collapsed .sb-logo-wrap {
+
+/* =========================================================
+   COLLAPSED DROPDOWN HEADERS
+========================================================= */
+
+/*
+ * Dropdown category names disappear when collapsed.
+ * Their submenu items remain visible as icons.
+ */
+
+.sidebar.is-collapsed
+  .sb-group-toggle {
+  display: none;
+}
+
+
+/* =========================================================
+   COLLAPSED SUBMENUS
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-submenu {
+  display: flex;
+
+  padding-left: 0;
+}
+
+
+/* =========================================================
+   COLLAPSED SCHOOL HEADER
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-top {
+  padding:
+    18px 10px 8px;
+}
+
+
+/* =========================================================
+   COLLAPSED LOGO WRAPPER
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-logo-wrap {
   width: 62px;
   height: 62px;
 }
 
-.sidebar.is-collapsed .sb-logo {
+
+/* =========================================================
+   COLLAPSED LOGO
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-logo {
   width: 52px;
   height: 52px;
 }
 
-.sidebar.is-collapsed .sb-nav {
-  padding: 10px 10px;
+
+/* =========================================================
+   COLLAPSED NAVIGATION CONTAINER
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-nav {
+  padding:
+    10px 10px;
+
   gap: 12px;
 }
 
 
-/* Center collapsed navigation */
+/* =========================================================
+   COLLAPSED NAVIGATION ITEMS
+========================================================= */
 
-.sidebar.is-collapsed .sb-item {
+.sidebar.is-collapsed
+  .sb-item {
   justify-content: center;
+
   padding: 4px;
+
   gap: 0;
+
   width: 100%;
 }
 
-.sidebar.is-collapsed .sb-ico {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  background: rgba(255, 255, 255, 0.14);
+
+/* =========================================================
+   HIDE TEXT WHEN COLLAPSED
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-text {
+  display: none;
 }
 
 
-/* Collapsed active item */
+/* =========================================================
+   COLLAPSED ICON CONTAINER
+========================================================= */
 
-.sidebar.is-collapsed .sb-item.active {
+.sidebar.is-collapsed
+  .sb-ico {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  background:
+    rgba(255, 255, 255, 0.14);
+}
+
+
+/* =========================================================
+   COLLAPSED DIVIDERS
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-divider {
+  margin:
+    4px 8px;
+
+  background:
+    rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   COLLAPSED ACTIVE ITEM
+========================================================= */
+
+.sidebar.is-collapsed
+  .sb-item.active {
   background: var(--white);
 }
 
-.sidebar.is-collapsed .sb-item.active .sb-ico {
+
+.sidebar.is-collapsed
+  .sb-item.active
+  .sb-ico {
   background: var(--navy);
 }
 
-.sidebar.is-collapsed .sb-item.active .sb-ico img {
-  filter: brightness(0) invert(1);
+
+.sidebar.is-collapsed
+  .sb-item.active
+  .sb-ico img {
+  filter:
+    brightness(0)
+    invert(1);
 }
 
 
-/* =========================
-   HTML-LEVEL COLLAPSED
-========================= */
+/* =========================================================
+   HTML-LEVEL COLLAPSED STATE
+========================================================= */
 
-html.sb-collapsed .sidebar {
+html.sb-collapsed
+  .sidebar {
   width: 86px;
+
   min-width: 86px;
 }
 
-html.sb-collapsed .sidebar .sb-school,
-html.sb-collapsed .sidebar .sb-text,
-html.sb-collapsed .sidebar .sb-section-title {
+
+/* =========================================================
+   HTML COLLAPSED SCHOOL INFORMATION
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-school {
   display: none;
 }
 
-html.sb-collapsed .sidebar .sb-top {
-  padding: 18px 10px 8px;
+
+/* =========================================================
+   HTML COLLAPSED SECTION LABELS
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-section-title {
+  display: none;
 }
 
-html.sb-collapsed .sidebar .sb-logo-wrap {
+
+/* =========================================================
+   HTML COLLAPSED DROPDOWN HEADERS
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-group-toggle {
+  display: none;
+}
+
+
+/* =========================================================
+   HTML COLLAPSED SUBMENUS
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-submenu {
+  display: flex;
+
+  padding-left: 0;
+}
+
+
+/* =========================================================
+   HTML COLLAPSED SCHOOL HEADER
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-top {
+  padding:
+    18px 10px 8px;
+}
+
+
+/* =========================================================
+   HTML COLLAPSED LOGO WRAPPER
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-logo-wrap {
   width: 62px;
   height: 62px;
 }
 
-html.sb-collapsed .sidebar .sb-logo {
+
+/* =========================================================
+   HTML COLLAPSED LOGO
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-logo {
   width: 52px;
   height: 52px;
 }
 
-html.sb-collapsed .sidebar .sb-nav {
-  padding: 10px 10px;
+
+/* =========================================================
+   HTML COLLAPSED NAVIGATION
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-nav {
+  padding:
+    10px 10px;
+
   gap: 12px;
 }
 
 
-/* Center collapsed navigation */
+/* =========================================================
+   HTML COLLAPSED DIVIDERS
+========================================================= */
 
-html.sb-collapsed .sidebar .sb-item {
+html.sb-collapsed
+  .sidebar
+  .sb-divider {
+  margin:
+    4px 8px;
+
+  background:
+    rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   HTML COLLAPSED NAVIGATION ITEMS
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-item {
   justify-content: center;
+
   padding: 4px;
+
   gap: 0;
+
   width: 100%;
 }
 
-html.sb-collapsed .sidebar .sb-ico {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  background: rgba(255, 255, 255, 0.14);
+
+/* =========================================================
+   HTML COLLAPSED NAVIGATION TEXT
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-text {
+  display: none;
 }
 
 
-/* HTML collapsed active item */
+/* =========================================================
+   HTML COLLAPSED ICON CONTAINER
+========================================================= */
 
-html.sb-collapsed .sidebar .sb-item.active {
+html.sb-collapsed
+  .sidebar
+  .sb-ico {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  background:
+    rgba(255, 255, 255, 0.14);
+}
+
+
+/* =========================================================
+   HTML COLLAPSED ACTIVE ITEM
+========================================================= */
+
+html.sb-collapsed
+  .sidebar
+  .sb-item.active {
   background: var(--white);
 }
 
-html.sb-collapsed .sidebar .sb-item.active .sb-ico {
+
+html.sb-collapsed
+  .sidebar
+  .sb-item.active
+  .sb-ico {
   background: var(--navy);
 }
 
-html.sb-collapsed .sidebar .sb-item.active .sb-ico img {
-  filter: brightness(0) invert(1);
+
+html.sb-collapsed
+  .sidebar
+  .sb-item.active
+  .sb-ico img {
+  filter:
+    brightness(0)
+    invert(1);
 }

@@ -60,6 +60,15 @@ const teacherAnnouncementsRoutes = require("./routes/teacher.announcements.route
 // Student schedule
 const studentScheduleRoutes = require("./routes/student.schedule.routes");
 
+// Student subjects
+const studentSubjectsRoutes = require("./routes/student.subjects.routes");
+
+// Student attendance
+const studentAttendanceRoutes = require("./routes/student.attendance.routes");
+
+// Student grades
+const studentGradesRoutes = require("./routes/student.grades.routes");
+
 // Student announcements
 const studentAnnouncementsRoutes = require("./routes/student.announcements.routes");
 
@@ -295,54 +304,63 @@ app.use(
 //
 // POST /api/admin/create
 //
+
 app.use(
   "/api/admin",
   adminAccountsRoutes
 );
 
 // Teachers
+
 app.use(
   "/api/admin",
   adminTeachersRoutes
 );
 
 // Students
+
 app.use(
   "/api/admin",
   adminStudentsRoutes
 );
 
 // Dashboard
+
 app.use(
   "/api/admin",
   adminDashboardRoutes
 );
 
 // Audit
+
 app.use(
   "/api/admin",
   adminAuditRoutes
 );
 
 // Grade levels
+
 app.use(
   "/api/admin",
   adminGradeLevelsRoutes
 );
 
 // Subjects
+
 app.use(
   "/api/admin",
   adminSubjectsRoutes
 );
 
 // School years
+
 app.use(
   "/api/admin",
   adminSchoolYearsRoutes
 );
 
 // Class schedules
+
 app.use(
   "/api/admin",
   adminClassScheduleRoutes
@@ -442,20 +460,56 @@ app.use(
 // STUDENT ROUTES
 // ==============================
 
-// Student schedule
+// ==================================================
+// STUDENT SCHEDULE
+// ==================================================
 //
-// Frontend:
-// student-schedule.js
+// GET /api/student/my-schedule
 //
-// API base:
-// /api/student
-//
-// Example:
-// GET /api/student/schedule
+// ==================================================
 
 app.use(
   "/api/student",
   studentScheduleRoutes
+);
+
+// ==================================================
+// STUDENT SUBJECTS
+// ==================================================
+//
+// GET /api/student/subjects
+//
+// ==================================================
+
+app.use(
+  "/api/student",
+  studentSubjectsRoutes
+);
+
+// ==================================================
+// STUDENT ATTENDANCE
+// ==================================================
+//
+// GET /api/student/attendance
+//
+// ==================================================
+
+app.use(
+  "/api/student",
+  studentAttendanceRoutes
+);
+
+// ==================================================
+// STUDENT GRADES
+// ==================================================
+//
+// GET /api/student/grades
+//
+// ==================================================
+
+app.use(
+  "/api/student",
+  studentGradesRoutes
 );
 
 // ==================================================

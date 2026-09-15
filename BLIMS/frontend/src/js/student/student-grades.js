@@ -6,168 +6,569 @@ document.addEventListener("DOMContentLoaded", () => {
   initGrades();
 });
 
-function $(id){ return document.getElementById(id); }
+function $(id) {
+  return document.getElementById(id);
+}
 
-/* ===============================
+/* =========================================================
    TOPBAR
-================================= */
-function initTopbarMenu(){
-  const btn=$("userMenuBtn"), menu=$("userMenu"), box=$("userbox");
-  if(!btn||!menu||!box) return;
+========================================================= */
 
-  btn.addEventListener("click",e=>{
-    e.stopPropagation();
+function initTopbarMenu() {
+  const btn = $("userMenuBtn");
+  const menu = $("userMenu");
+  const box = $("userbox");
+
+  if (!btn || !menu || !box) return;
+
+  btn.addEventListener("click", (event) => {
+    event.stopPropagation();
     menu.classList.toggle("open");
   });
 
-  document.addEventListener("click",e=>{
-    if(!box.contains(e.target)) menu.classList.remove("open");
+  document.addEventListener("click", (event) => {
+    if (!box.contains(event.target)) {
+      menu.classList.remove("open");
+    }
   });
 }
 
-function initLogout(){
-  const btn=$("topbarLogout");
-  if(!btn) return;
-  btn.addEventListener("click",()=>{
-    window.location.href="../../login.html";
+function initLogout() {
+  const btn = $("topbarLogout");
+
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    window.location.href = "../../login.html";
   });
 }
 
-/* ===============================
+/* =========================================================
    GRADES
-================================= */
-function initGrades(){
+========================================================= */
 
-  const LS_ACTIVE_CLASS="blims_active_student_class_v1";
-  const LS_SCHOOL_YEARS="blims_school_years_v1";
-  const LS_GRADES="blims_student_grades_v1";
+function initGrades() {
+  const tbody = $("gradesTbody");
+  const empty = $("gradesEmpty");
 
-  const tbody=$("gradesTbody");
-  const empty=$("gradesEmpty");
-  const sySelect=$("sySelect");
-  const gradeSectionEl=$("gradesGradeSection");
-  const syLabelEl=$("gradesSYLabel");
-  const finalAverageEl=$("finalAverage");
-  const promotionStatusEl=$("promotionStatus");
+  const gradeSectionEl = $("gradesGradeSection");
+  const finalAverageEl = $("finalAverage");
+  const promotionStatusEl = $("promotionStatus");
 
-  const tabs=document.querySelectorAll(".grades-tab");
+  const tabsContainer = $("gradesTabs");
 
-  const state={
-    quarter:"q1",
-    sy:""
+  if (
+    !tbody ||
+    !empty ||
+    !gradeSectionEl ||
+    !finalAverageEl ||
+    !promotionStatusEl ||
+    !tabsContainer
+  ) {
+    console.error(
+      "Student Grades: Required HTML elements are missing."
+    );
+    return;
+  }
+
+  const state = {
+    selectedTermId: "",
+    terms: [],
+    grades: [],
+    student: null,
   };
 
-  function readJSON(k,f){
-    try{
-      const r=localStorage.getItem(k);
-      return r?JSON.parse(r):f;
-    }catch{return f;}
+  /* =======================================================
+     HELPERS
+  ======================================================= */
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  function getActiveClass(){
-    const r=readJSON(LS_ACTIVE_CLASS,null);
-    if(r&&r.grade&&r.section) return r;
-    return {grade:"Grade 6",section:"A"};
+  function normalize(value) {
+    return String(value ?? "")
+      .trim()
+      .toLowerCase();
   }
 
-  function getActiveSY(){
-    const s=readJSON(LS_SCHOOL_YEARS,null);
-    if(!s||!Array.isArray(s.items)) return "";
-    const a=s.items.find(x=>x.id===s.activeId);
-    return a?String(a.name||""):"";
+  function getNumericGrade(value) {
+    if (value === null || value === undefined || value === "") {
+      return null;
+    }
+
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : null;
   }
 
-  function seedIfEmpty(cls,sy){
-    const existing=readJSON(LS_GRADES,null);
-    if(Array.isArray(existing)&&existing.length) return;
+  function getRemark(grade) {
+    const numericGrade = getNumericGrade(grade);
 
-    const demo=[
-      {subject:"English",q1:88,q2:90,q3:91,q4:89,grade:cls.grade,section:cls.section,schoolYear:sy},
-      {subject:"Mathematics",q1:85,q2:87,q3:89,q4:90,grade:cls.grade,section:cls.section,schoolYear:sy},
-      {subject:"Science",q1:90,q2:92,q3:93,q4:94,grade:cls.grade,section:cls.section,schoolYear:sy},
-      {subject:"Filipino",q1:87,q2:88,q3:90,q4:91,grade:cls.grade,section:cls.section,schoolYear:sy},
-    ];
+    if (numericGrade === null) {
+      return "—";
+    }
 
-    localStorage.setItem(LS_GRADES,JSON.stringify(demo));
+    return numericGrade >= 75
+      ? "Passed"
+      : "Needs Improvement";
   }
 
-  function computeFinal(row){
-    const avg=(row.q1+row.q2+row.q3+row.q4)/4;
-    return Math.round(avg);
-  }
+  /* =======================================================
+     FETCH BACKEND DATA
+  ======================================================= */
 
-  function render(){
+  async function fetchGrades() {
+    try {
+      setLoadingState();
 
-    const cls=getActiveClass();
-    const sy=getActiveSY();
-    state.sy=sy;
+      const response = await fetch(
+        "/api/student/grades",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
 
-    if(gradeSectionEl)
-      gradeSectionEl.textContent=`${cls.grade} - Section ${cls.section}`;
+      let result = null;
 
-    if(syLabelEl)
-      syLabelEl.textContent=sy?`SY ${sy}`:"SY —";
+      try {
+        result = await response.json();
+      } catch {
+        result = null;
+      }
 
-    sySelect.innerHTML=sy?`<option>${sy}</option>`:`<option>SY —</option>`;
-    sySelect.disabled=true;
+      if (!response.ok || !result?.ok) {
+        throw new Error(
+          result?.message ||
+            "Failed to load student grades."
+        );
+      }
 
-    if(sy) seedIfEmpty(cls,sy);
+      const data = result.data || {};
 
-    const all=readJSON(LS_GRADES,[]);
-    let list=Array.isArray(all)?all:[];
-    list=list.filter(x=>x.grade===cls.grade && x.section===cls.section && (!x.schoolYear||x.schoolYear===sy));
+      state.student = data.student || null;
 
-    tbody.innerHTML="";
+      state.terms = Array.isArray(data.terms)
+        ? data.terms
+            .map((term) => ({
+              id: String(term?._id || term?.id || ""),
+              name: String(term?.name || "").trim(),
+              order: Number(term?.order || 0),
+              locked: !!term?.locked,
+            }))
+            .filter((term) => term.id && term.name)
+            .sort((a, b) => a.order - b.order)
+        : [];
 
-    if(!list.length){
+      state.grades = Array.isArray(data.grades)
+        ? data.grades.map((grade) => ({
+            id: String(grade?.id || ""),
+            subject: String(
+              grade?.subject || ""
+            ).trim(),
+
+            termId: String(
+              grade?.termId || ""
+            ),
+
+            termName: String(
+              grade?.termName || ""
+            ).trim(),
+
+            termOrder: Number(
+              grade?.termOrder || 0
+            ),
+
+            locked: !!grade?.locked,
+
+            initialGrade:
+              grade?.initialGrade ??
+              null,
+
+            termGrade:
+              grade?.termGrade ??
+              null,
+          }))
+        : [];
+
+      updateStudentInfo();
+      buildTermTabs();
+
+      /*
+       * Select the first available term.
+       */
+      if (state.terms.length) {
+        const firstTerm = state.terms[0];
+
+        state.selectedTermId = firstTerm.id;
+      } else {
+        state.selectedTermId = "";
+      }
+
+      updateActiveTab();
+      render();
+
+    } catch (error) {
+      console.error(
+        "❌ Failed to fetch student grades:",
+        error
+      );
+
+      state.student = null;
+      state.terms = [];
+      state.grades = [];
+      state.selectedTermId = "";
+
+      tabsContainer.innerHTML = "";
+
+      gradeSectionEl.textContent = "Grade —";
+
+      tbody.innerHTML = "";
+
+      empty.textContent =
+        "Unable to load grades.";
+
       empty.classList.remove("hidden");
-      finalAverageEl.textContent="—";
-      promotionStatusEl.textContent="—";
+
+      finalAverageEl.textContent = "—";
+      promotionStatusEl.textContent = "—";
+    }
+  }
+
+  /* =======================================================
+     LOADING STATE
+  ======================================================= */
+
+  function setLoadingState() {
+    tbody.innerHTML = "";
+
+    empty.textContent =
+      "Loading grades...";
+
+    empty.classList.remove("hidden");
+
+    finalAverageEl.textContent = "—";
+    promotionStatusEl.textContent = "—";
+  }
+
+  /* =======================================================
+     STUDENT INFORMATION
+  ======================================================= */
+
+  function updateStudentInfo() {
+    if (!state.student) {
+      gradeSectionEl.textContent = "Grade —";
       return;
     }
 
-    empty.classList.add("hidden");
+    const grade = String(
+      state.student.grade || ""
+    ).trim();
 
-    let finalTotal=0;
+    const section = String(
+      state.student.section || ""
+    ).trim();
 
-    list.forEach(row=>{
-      const final=computeFinal(row);
-      finalTotal+=final;
-
-      let gradeVal;
-
-      if(state.quarter==="final"){
-        gradeVal=final;
-      }else{
-        gradeVal=row[state.quarter] ?? "—";
-      }
-
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td>${row.subject}</td>
-        <td style="text-align:right;">${gradeVal}</td>
-        <td>${gradeVal>=75?"Passed":"Needs Improvement"}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    const overall=Math.round(finalTotal/list.length);
-    finalAverageEl.textContent=overall;
-    promotionStatusEl.textContent=overall>=75?"Promoted":"For Review";
+    if (grade && section) {
+      gradeSectionEl.textContent =
+        `${grade} - Section ${section}`;
+    } else if (grade) {
+      gradeSectionEl.textContent = grade;
+    } else {
+      gradeSectionEl.textContent = "Grade —";
+    }
   }
 
-  tabs.forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      tabs.forEach(t=>{
-        t.classList.remove("active");
-        t.setAttribute("aria-selected","false");
-      });
-      btn.classList.add("active");
-      btn.setAttribute("aria-selected","true");
-      state.quarter=btn.dataset.q;
-      render();
-    });
-  });
+  /* =======================================================
+     TERM TABS
+  ======================================================= */
 
-  render();
+  function buildTermTabs() {
+    tabsContainer.innerHTML = "";
+
+    if (!state.terms.length) {
+      return;
+    }
+
+    state.terms.forEach((term) => {
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+      button.className = "grades-tab";
+
+      button.setAttribute(
+        "role",
+        "tab"
+      );
+
+      button.setAttribute(
+        "aria-selected",
+        "false"
+      );
+
+      button.dataset.termId = term.id;
+
+      button.textContent = term.name;
+
+      /*
+       * Locked terms are still visible.
+       *
+       * They are not disabled because the student
+       * should still be able to see the term tab.
+       *
+       * Whether grades exist is determined by the
+       * backend data.
+       */
+      if (term.locked) {
+        button.classList.add("locked");
+      }
+
+      button.addEventListener(
+        "click",
+        () => {
+          state.selectedTermId = term.id;
+
+          updateActiveTab();
+          render();
+        }
+      );
+
+      tabsContainer.appendChild(button);
+    });
+  }
+
+  function updateActiveTab() {
+    const buttons =
+      tabsContainer.querySelectorAll(
+        ".grades-tab"
+      );
+
+    buttons.forEach((button) => {
+      const isActive =
+        button.dataset.termId ===
+        state.selectedTermId;
+
+      button.classList.toggle(
+        "active",
+        isActive
+      );
+
+      button.setAttribute(
+        "aria-selected",
+        isActive
+          ? "true"
+          : "false"
+      );
+    });
+  }
+
+  /* =======================================================
+     GET CURRENT TERM GRADES
+  ======================================================= */
+
+  function getCurrentTermGrades() {
+    if (!state.selectedTermId) {
+      return [];
+    }
+
+    return state.grades.filter(
+      (grade) =>
+        String(grade.termId) ===
+        String(state.selectedTermId)
+    );
+  }
+
+  /* =======================================================
+     FINAL AVERAGE
+  ======================================================= */
+
+  function calculateFinalAverage() {
+    /*
+     * Group grades by subject.
+     *
+     * Each subject can have multiple term grades.
+     */
+
+    const subjectMap = new Map();
+
+    state.grades.forEach((grade) => {
+      const subject = String(
+        grade.subject || ""
+      ).trim();
+
+      const termGrade =
+        getNumericGrade(
+          grade.termGrade
+        );
+
+      if (!subject || termGrade === null) {
+        return;
+      }
+
+      const key = normalize(subject);
+
+      if (!subjectMap.has(key)) {
+        subjectMap.set(key, []);
+      }
+
+      subjectMap
+        .get(key)
+        .push(termGrade);
+    });
+
+    if (!subjectMap.size) {
+      return null;
+    }
+
+    const subjectAverages = [];
+
+    subjectMap.forEach((grades) => {
+      if (!grades.length) return;
+
+      const total = grades.reduce(
+        (sum, grade) =>
+          sum + grade,
+        0
+      );
+
+      const average =
+        total / grades.length;
+
+      subjectAverages.push(
+        average
+      );
+    });
+
+    if (!subjectAverages.length) {
+      return null;
+    }
+
+    const total =
+      subjectAverages.reduce(
+        (sum, average) =>
+          sum + average,
+        0
+      );
+
+    return Math.round(
+      total / subjectAverages.length
+    );
+  }
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
+  function render() {
+    tbody.innerHTML = "";
+
+    /*
+     * No terms configured.
+     */
+    if (!state.terms.length) {
+      empty.textContent =
+        "No grading terms available yet.";
+
+      empty.classList.remove("hidden");
+
+      finalAverageEl.textContent = "—";
+      promotionStatusEl.textContent = "—";
+
+      return;
+    }
+
+    const currentTermGrades =
+      getCurrentTermGrades();
+
+    /*
+     * No grades for selected term.
+     */
+    if (!currentTermGrades.length) {
+      empty.textContent =
+        "No grades available for this term.";
+
+      empty.classList.remove("hidden");
+    } else {
+      empty.classList.add("hidden");
+
+      currentTermGrades.forEach(
+        (grade) => {
+          const tr =
+            document.createElement("tr");
+
+          const termGrade =
+            getNumericGrade(
+              grade.termGrade
+            );
+
+          const displayGrade =
+            termGrade === null
+              ? "—"
+              : termGrade;
+
+          const remark =
+            getRemark(termGrade);
+
+          tr.innerHTML = `
+            <td>
+              ${escapeHtml(
+                grade.subject
+              )}
+            </td>
+
+            <td style="text-align:right;">
+              ${escapeHtml(
+                displayGrade
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                remark
+              )}
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        }
+      );
+    }
+
+    /*
+     * Final average is based on all available
+     * term grades across the school year.
+     */
+    const finalAverage =
+      calculateFinalAverage();
+
+    if (finalAverage === null) {
+      finalAverageEl.textContent = "—";
+      promotionStatusEl.textContent = "—";
+      return;
+    }
+
+    finalAverageEl.textContent =
+      finalAverage;
+
+    promotionStatusEl.textContent =
+      finalAverage >= 75
+        ? "Promoted"
+        : "For Review";
+  }
+
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
+
+  fetchGrades();
 }

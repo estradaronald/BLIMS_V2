@@ -8,7 +8,11 @@
 
   <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
 
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
@@ -61,14 +65,6 @@
       <header class="topbar">
 
         <div class="topbar-right">
-
-          <button
-            class="tb-icon"
-            type="button"
-            title="Notifications"
-          >
-            🔔
-          </button>
 
           <div class="tb-user" id="userbox">
 
@@ -130,20 +126,37 @@
 
       <section class="teachers-wrap">
 
+        <!-- =========================
+             PAGE HEADER
+        ========================== -->
+
         <div class="teachers-page-head">
 
           <h2 class="teachers-title">
-            Students
+            Learners
           </h2>
 
-          <button
-            id="addNewBtn"
-            class="t-add-btn"
-            type="button"
-          >
-            Add New
-            <span class="t-plus">＋</span>
-          </button>
+          <div class="students-head-actions">
+
+            <button
+              id="bulkCreateBtn"
+              class="t-bulk-btn"
+              type="button"
+            >
+              Bulk Create
+              <span class="t-plus">＋</span>
+            </button>
+
+            <button
+              id="addNewBtn"
+              class="t-add-btn"
+              type="button"
+            >
+              Add New
+              <span class="t-plus">＋</span>
+            </button>
+
+          </div>
 
         </div>
 
@@ -162,7 +175,7 @@
             <div class="t-card-head">
 
               <div class="t-subtitle">
-                All Students List
+                All Learners List
               </div>
 
               <div class="t-tools">
@@ -277,17 +290,9 @@
 
           <div class="t-form-grid">
 
-
-            <!-- =========================
-                 LEFT COLUMN
-            ========================== -->
+            <!-- LEFT COLUMN -->
 
             <div class="t-form-left t-left-col">
-
-
-              <!-- =========================
-                   BASIC INFORMATION
-              ========================== -->
 
               <div class="card t-form-card t-basic-card">
 
@@ -295,13 +300,9 @@
                   Basic Information
                 </div>
 
-
                 <div class="t-form-bd">
 
                   <div class="t-basic-left">
-
-
-                    <!-- First Name / Last Name -->
 
                     <div class="t-row2">
 
@@ -317,7 +318,6 @@
                         />
 
                       </div>
-
 
                       <div class="t-field">
 
@@ -335,8 +335,6 @@
                     </div>
 
 
-                    <!-- Middle Name / Suffix -->
-
                     <div class="t-row2">
 
                       <div class="t-field">
@@ -351,7 +349,6 @@
                         />
 
                       </div>
-
 
                       <div class="t-field">
 
@@ -399,8 +396,6 @@
                     </div>
 
 
-                    <!-- Date of Birth / Gender -->
-
                     <div class="t-row2">
 
                       <div class="t-field">
@@ -415,7 +410,6 @@
                         />
 
                       </div>
-
 
                       <div class="t-field">
 
@@ -440,7 +434,6 @@
 
                           </label>
 
-
                           <label class="t-radio">
 
                             <input
@@ -461,8 +454,6 @@
 
                     </div>
 
-
-                    <!-- LRN -->
 
                     <div class="t-row2">
 
@@ -489,19 +480,11 @@
               </div>
 
             </div>
-            <!-- /LEFT COLUMN -->
 
 
-            <!-- =========================
-                 RIGHT COLUMN
-            ========================== -->
+            <!-- RIGHT COLUMN -->
 
             <div class="t-form-right t-right-col">
-
-
-              <!-- =========================
-                   CONTACT & ADDRESS
-              ========================== -->
 
               <div class="card t-form-card">
 
@@ -509,11 +492,7 @@
                   Contact &amp; Address
                 </div>
 
-
                 <div class="t-form-bd">
-
-
-                  <!-- Phone / Email -->
 
                   <div class="t-row2">
 
@@ -557,8 +536,6 @@
                   </div>
 
 
-                  <!-- Street -->
-
                   <div class="t-field">
 
                     <label>
@@ -572,8 +549,6 @@
 
                   </div>
 
-
-                  <!-- Province / City -->
 
                   <div class="t-row2">
 
@@ -607,8 +582,6 @@
 
                   </div>
 
-
-                  <!-- Barangay / Postal -->
 
                   <div class="t-row2">
 
@@ -647,23 +620,15 @@
               </div>
 
 
-              <!-- =========================
-                   LOGIN / ACCOUNT DETAILS
-              ========================== -->
-
               <div class="card t-form-card">
 
                 <div class="t-form-hd">
                   Account Setting
                 </div>
 
-
                 <div class="t-form-bd">
 
                   <div class="t-row2">
-
-
-                    <!-- Student ID -->
 
                     <div class="t-field">
 
@@ -680,8 +645,6 @@
 
                     </div>
 
-
-                    <!-- Temporary Password -->
 
                     <div class="t-field">
 
@@ -711,19 +674,11 @@
               </div>
 
 
-              <!-- =========================
-                   FORM ERROR
-              ========================== -->
-
               <div
                 id="formError"
                 class="t-error hidden"
               ></div>
 
-
-              <!-- =========================
-                   FORM ACTIONS
-              ========================== -->
 
               <div
                 class="t-form-actions t-form-actions-bottom"
@@ -737,7 +692,6 @@
                   Cancel
                 </button>
 
-
                 <button
                   id="resetBtn"
                   class="t-ghost"
@@ -745,7 +699,6 @@
                 >
                   Reset
                 </button>
-
 
                 <button
                   id="saveBtn"
@@ -758,7 +711,273 @@
               </div>
 
             </div>
-            <!-- /RIGHT COLUMN -->
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             BULK CREATE VIEW
+        ========================== -->
+
+        <section
+          id="bulkCreateView"
+          class="t-view hidden"
+        >
+
+          <div class="card bulk-create-card">
+
+            <!-- HEADER -->
+
+            <div class="bulk-create-header">
+
+              <div>
+
+                <div class="bulk-create-title">
+                  Bulk Create Learners
+                </div>
+
+                <div class="bulk-create-subtitle">
+                  Create multiple learner accounts at once.
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- IMPORT TOOLS -->
+
+            <div class="bulk-import-tools">
+
+              <div class="bulk-import-left">
+
+                <button
+                  id="bulkUploadBtn"
+                  class="bulk-tool-btn bulk-upload-btn"
+                  type="button"
+                >
+                  <span>↑</span>
+                  Upload Excel
+                </button>
+
+                <button
+                  id="bulkDownloadTemplateBtn"
+                  class="bulk-tool-btn"
+                  type="button"
+                >
+                  <span>↓</span>
+                  Download Template
+                </button>
+
+                <input
+                  id="bulkExcelInput"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  hidden
+                />
+
+              </div>
+
+              <div class="bulk-import-note">
+                Excel columns: First Name, Last Name, LRN, Grade Level, Section
+              </div>
+
+            </div>
+
+
+            <!-- IMPORT STATUS -->
+
+            <div
+              id="bulkImportStatus"
+              class="bulk-import-status hidden"
+            ></div>
+
+
+            <!-- ERROR -->
+
+            <div
+              id="bulkCreateError"
+              class="bulk-error hidden"
+            ></div>
+
+
+            <!-- MANUAL ENTRY LABEL -->
+
+            <div class="bulk-entry-label">
+              Learner Information
+            </div>
+
+            <div class="bulk-entry-note">
+              Grade Level and Section are optional.
+            </div>
+
+
+            <!-- LEARNER ROWS -->
+
+            <div
+              id="bulkLearnersContainer"
+              class="bulk-learners-container"
+            ></div>
+
+
+            <!-- ADD ANOTHER -->
+
+            <button
+              id="addBulkLearnerBtn"
+              class="bulk-add-row-btn"
+              type="button"
+            >
+              <span>＋</span>
+              Add Another Learner
+            </button>
+
+
+            <!-- ACTIONS -->
+
+            <div class="bulk-create-actions">
+
+              <button
+                id="bulkCancelBtn"
+                class="t-ghost"
+                type="button"
+              >
+                Cancel
+              </button>
+
+              <button
+                id="bulkCreateSubmitBtn"
+                class="t-save"
+                type="button"
+              >
+                Create Learners
+              </button>
+
+            </div>
+
+
+            <!-- =========================
+                 CREATED ACCOUNTS RESULT
+            ========================== -->
+
+            <section
+              id="bulkCreatedAccounts"
+              class="bulk-created-accounts hidden"
+            >
+
+              <div class="bulk-success-banner">
+
+                <div class="bulk-success-icon">
+                  ✓
+                </div>
+
+                <div>
+
+                  <div class="bulk-success-title">
+                    Learners Created Successfully
+                  </div>
+
+                  <div
+                    id="bulkSuccessMessage"
+                    class="bulk-success-subtitle"
+                  >
+                    The learner accounts have been created successfully.
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="bulk-results-head">
+
+                <div>
+
+                  <div class="bulk-results-title">
+                    Created Accounts
+                  </div>
+
+                  <div class="bulk-results-note">
+                    Keep these credentials secure. Temporary passwords should
+                    be provided to the corresponding learners.
+                  </div>
+
+                </div>
+
+                <button
+                  id="bulkDownloadAccountsBtn"
+                  class="bulk-download-accounts-btn"
+                  type="button"
+                >
+                  <span>↓</span>
+                  Download Created Accounts
+                </button>
+
+              </div>
+
+
+              <div class="bulk-results-table-wrap">
+
+                <table class="bulk-results-table">
+
+                  <thead>
+
+                    <tr>
+
+                      <th>
+                        No.
+                      </th>
+
+                      <th>
+                        Learner
+                      </th>
+
+                      <th>
+                        LRN
+                      </th>
+
+                      <th>
+                        Grade Level
+                      </th>
+
+                      <th>
+                        Section
+                      </th>
+
+                      <th>
+                        Student ID
+                      </th>
+
+                      <th>
+                        Temporary Password
+                      </th>
+
+                    </tr>
+
+                  </thead>
+
+                  <tbody id="bulkCreatedAccountsTbody">
+                  </tbody>
+
+                </table>
+
+              </div>
+
+
+              <div class="bulk-result-actions">
+
+                <button
+                  id="bulkDoneBtn"
+                  class="t-save"
+                  type="button"
+                >
+                  Done
+                </button>
+
+              </div>
+
+            </section>
 
           </div>
 
@@ -795,11 +1014,6 @@
       aria-labelledby="studentModalTitle"
     >
 
-
-      <!-- =========================
-           MODAL HEADER
-      ========================== -->
-
       <div class="tmodal-head">
 
         <div class="tmodal-head-left">
@@ -812,7 +1026,6 @@
             >
               Student Profile
             </div>
-
 
             <div class="tmodal-sub">
 
@@ -851,10 +1064,6 @@
       </div>
 
 
-      <!-- =========================
-           MODAL TABS
-      ========================== -->
-
       <div class="tmodal-tabs">
 
         <button
@@ -886,16 +1095,7 @@
       </div>
 
 
-      <!-- =========================
-           MODAL BODY
-      ========================== -->
-
       <div class="tmodal-body">
-
-
-        <!-- =========================
-             BASIC INFO
-        ========================== -->
 
         <div
           class="tmodal-panel"
@@ -903,7 +1103,6 @@
         >
 
           <div class="tmodal-grid">
-
 
             <div class="tmodal-field">
 
@@ -979,17 +1178,12 @@
         </div>
 
 
-        <!-- =========================
-             CONTACT & ADDRESS
-        ========================== -->
-
         <div
           class="tmodal-panel hidden"
           data-panel="address"
         >
 
           <div class="tmodal-grid">
-
 
             <div class="tmodal-field">
 
@@ -1093,17 +1287,12 @@
         </div>
 
 
-        <!-- =========================
-             ACCOUNT
-        ========================== -->
-
         <div
           class="tmodal-panel hidden"
           data-panel="account"
         >
 
           <div class="tmodal-grid">
-
 
             <div class="tmodal-field">
 
@@ -1139,10 +1328,6 @@
 
       </div>
 
-
-      <!-- =========================
-           MODAL FOOTER
-      ========================== -->
 
       <div class="tmodal-foot">
 
@@ -1186,6 +1371,11 @@
   <!-- =========================
        JAVASCRIPT
   ========================== -->
+
+  <!-- SheetJS for Excel import/export -->
+  <script
+    src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+  ></script>
 
   <script src="../../js/auth/admin-guard.js"></script>
   <script src="../../js/admin/sidebar.js"></script>

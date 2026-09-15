@@ -3,134 +3,332 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
   <title>Student - Grades</title>
 
   <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
 
-  <!-- ✅ same baseline styles -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
 
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  />
 
-  <!-- Keeps same header/card feel across pages -->
-  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+  <!-- Baseline styles -->
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/sidebar.css"
+  />
 
-  <!-- Student Grades styles -->
-  <link rel="stylesheet" href="../../styles/student/student-grades.css" />
+  <link
+    rel="stylesheet"
+    href="../../styles/admin/admin-dashboard.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="../../styles/admin-announcements.css"
+  />
+
+  <!-- Student Grades -->
+  <link
+    rel="stylesheet"
+    href="../../styles/student/student-grades.css"
+  />
 </head>
 
 <body data-page="grades">
-  <!-- floating toggle -->
-  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">
+
+  <!-- Floating sidebar toggle -->
+  <button
+    class="sidebar-float-toggle"
+    id="sidebarFloatToggle"
+    type="button"
+    aria-label="Toggle sidebar"
+  >
     ←
   </button>
 
   <div class="app">
+
+    <!-- Sidebar -->
     <div id="sidebar-mount"></div>
 
     <main class="content">
-      <!-- TOP BAR -->
+
+      <!-- =================================================
+           TOP BAR
+      ================================================== -->
+
       <header class="topbar">
+
         <div class="topbar-right">
-          <button class="tb-icon" type="button" title="Notifications">🔔</button>
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
+          <div
+            class="tb-user"
+            id="userbox"
+          >
+
+            <img
+              class="tb-avatar"
+              src="../../assets/images/bg.jpg"
+              alt="avatar"
+            />
+
             <div class="tb-meta">
-              <div class="tb-name">Student</div>
-              <div class="tb-role">Grades</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
+              <div class="tb-name">
+                Student
+              </div>
+
+              <div class="tb-role">
+                Grades
+              </div>
+
             </div>
+
+            <button
+              class="tb-drop"
+              id="userMenuBtn"
+              type="button"
+              aria-label="Open user menu"
+            >
+              ▾
+            </button>
+
+            <div
+              class="tb-menu"
+              id="userMenu"
+            >
+
+              <button
+                class="tb-item"
+                type="button"
+              >
+                Settings
+              </button>
+
+              <button
+                class="tb-item danger"
+                type="button"
+                id="topbarLogout"
+              >
+                Logout
+              </button>
+
+            </div>
+
           </div>
+
         </div>
+
       </header>
 
-      <!-- ✅ PAGE HEADER RULE -->
+
+      <!-- =================================================
+           PAGE
+      ================================================== -->
+
       <section class="teachers-wrap">
+
+        <!-- Page heading -->
         <div class="teachers-page-head">
-          <h2 class="teachers-title">Grades</h2>
+
+          <h2 class="teachers-title">
+            Grades
+          </h2>
+
         </div>
 
-        <!-- MAIN CARD -->
+
+        <!-- =================================================
+             MAIN CARD
+        ================================================== -->
+
         <div class="card t-card grades-card">
+
+          <!-- =================================================
+               CARD HEADER
+          ================================================== -->
+
           <div class="t-card-head grades-head">
+
             <div class="grades-left">
-              <div class="t-subtitle">Academic Performance</div>
+
+              <div class="t-subtitle">
+                Academic Performance
+              </div>
 
               <div class="grades-sub">
-                <span id="gradesGradeSection">Grade 6 - Section A</span>
-                <span class="grades-dot">•</span>
-                <span id="gradesSYLabel">SY —</span>
+
+                <!-- Backend fills this -->
+                <span id="gradesGradeSection">
+                  Grade —
+                </span>
+
               </div>
+
             </div>
+
+
+            <!-- =================================================
+                 TERM TABS
+            ================================================== -->
 
             <div class="grades-actions">
-              <!-- School year dropdown (admin-controlled) -->
-              <select id="sySelect" class="t-filter grades-sy" aria-label="Select school year" disabled>
-                <option value="">SY —</option>
-              </select>
 
-              <!-- Quarter tabs -->
-              <div class="grades-tabs" role="tablist" aria-label="Quarter tabs">
-                <button class="grades-tab active" id="tabQ1" type="button" role="tab" aria-selected="true" data-q="q1">Q1</button>
-                <button class="grades-tab" id="tabQ2" type="button" role="tab" aria-selected="false" data-q="q2">Q2</button>
-                <button class="grades-tab" id="tabQ3" type="button" role="tab" aria-selected="false" data-q="q3">Q3</button>
-                <button class="grades-tab" id="tabQ4" type="button" role="tab" aria-selected="false" data-q="q4">Q4</button>
-                <button class="grades-tab" id="tabFinal" type="button" role="tab" aria-selected="false" data-q="final">Final</button>
+              <div
+                class="grades-tabs"
+                id="gradesTabs"
+                role="tablist"
+                aria-label="Grade terms"
+              >
+                <!-- JS fills terms dynamically -->
               </div>
+
             </div>
+
           </div>
 
-          <!-- Summary strip -->
+
+          <!-- =================================================
+               SUMMARY
+          ================================================== -->
+
           <div class="grades-summary">
-            <div class="grades-sum-card">
-              <div class="grades-sum-k">Final Average</div>
-              <div class="grades-sum-v" id="finalAverage">—</div>
-            </div>
 
             <div class="grades-sum-card">
-              <div class="grades-sum-k">Promotion Status</div>
-              <div class="grades-sum-v" id="promotionStatus">—</div>
+
+              <div class="grades-sum-k">
+                Final Average
+              </div>
+
+              <div
+                class="grades-sum-v"
+                id="finalAverage"
+              >
+                —
+              </div>
+
             </div>
+
+
+            <div class="grades-sum-card">
+
+              <div class="grades-sum-k">
+                Promotion Status
+              </div>
+
+              <div
+                class="grades-sum-v"
+                id="promotionStatus"
+              >
+                —
+              </div>
+
+            </div>
+
           </div>
 
-          <!-- Table -->
+
+          <!-- =================================================
+               GRADES TABLE
+          ================================================== -->
+
           <div class="grades-body">
-            <div class="grades-table-wrap" id="gradesTableWrap">
+
+            <div
+              class="grades-table-wrap"
+              id="gradesTableWrap"
+            >
+
               <table class="grades-table">
+
                 <thead>
+
                   <tr>
-                    <th style="width: 55%;">Subject</th>
-                    <th style="width: 20%; text-align:right;">Grade</th>
-                    <th style="width: 25%;">Remarks</th>
+
+                    <th style="width: 55%;">
+                      Subject
+                    </th>
+
+                    <th
+                      style="
+                        width: 20%;
+                        text-align: right;
+                      "
+                    >
+                      Grade
+                    </th>
+
+                    <th style="width: 25%;">
+                      Remarks
+                    </th>
+
                   </tr>
+
                 </thead>
+
                 <tbody id="gradesTbody">
                   <!-- JS fills -->
                 </tbody>
+
               </table>
+
             </div>
 
-            <!-- Empty -->
-            <div id="gradesEmpty" class="grades-empty hidden">
+
+            <!-- =================================================
+                 EMPTY / LOADING STATE
+            ================================================== -->
+
+            <div
+              id="gradesEmpty"
+              class="grades-empty hidden"
+            >
               No grades available yet.
             </div>
+
           </div>
+
         </div>
+
       </section>
+
     </main>
+
   </div>
 
-  <script src="../../js/student/student-sidebar.js"></script>
-  <script src="../../js/student/student-grades.js"></script>
+
+  <!-- =====================================================
+       STUDENT SIDEBAR
+  ====================================================== -->
+
+  <script
+    src="../../js/student/student-sidebar.js"
+  ></script>
+
+
+  <!-- =====================================================
+       STUDENT GRADES
+  ====================================================== -->
+
+  <script
+    src="../../js/student/student-grades.js"
+  ></script>
+
 </body>
 </html>

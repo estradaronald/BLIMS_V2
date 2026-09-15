@@ -1,5 +1,3 @@
-// frontend/src/js/student/student-subjects.js
-
 document.addEventListener("DOMContentLoaded", () => {
   initTopbarMenu();
   initLogout();
@@ -10,13 +8,15 @@ function $(id) {
   return document.getElementById(id);
 }
 
-/* ===============================
-   TOPBAR
-================================= */
+// ==========================================
+// TOPBAR MENU
+// ==========================================
+
 function initTopbarMenu() {
   const userMenuBtn = $("userMenuBtn");
   const userMenu = $("userMenu");
   const userbox = $("userbox");
+
   if (!userMenuBtn || !userMenu || !userbox) return;
 
   userMenuBtn.addEventListener("click", (ev) => {
@@ -25,64 +25,63 @@ function initTopbarMenu() {
   });
 
   document.addEventListener("click", (ev) => {
-    if (!userbox.contains(ev.target)) userMenu.classList.remove("open");
+    if (!userbox.contains(ev.target)) {
+      userMenu.classList.remove("open");
+    }
   });
 }
 
+// ==========================================
+// LOGOUT
+// ==========================================
+
 function initLogout() {
   const btn = $("topbarLogout");
+
   if (!btn) return;
+
   btn.addEventListener("click", () => {
     window.location.href = "../../login.html";
   });
 }
 
-/* ===============================
-   SUBJECTS (Student)
-   - Reads Admin Subjects store:
-     LS: blims_subjects_v1
-     shape: { gradeSubjects: { "Grade 6": ["Math","English"] } }
-   - Shows Active SY from Admin SY timeline:
-     LS: blims_school_years_v1
-================================= */
+// ==========================================
+// STUDENT SUBJECTS
+// ==========================================
+
 function initSubjects() {
   const subjList = $("subjList");
   const subjEmpty = $("subjEmpty");
-  const sySelect = $("sySelect");
+
   const tabCurrent = $("tabCurrent");
   const tabArchive = $("tabArchive");
+
   const subjSearch = $("subjSearch");
 
-  const gradeSectionEl = $("subjGradeSection");
-  const syLabelEl = $("subjSYLabel");
+  const gradeEl = $("subjGrade");
 
-  if (!subjList || !subjEmpty || !sySelect || !tabCurrent || !tabArchive) return;
-
-  // Student context (prototype)
-  const LS_ACTIVE_CLASS = "blims_active_student_class_v1";
-
-  // Admin stores
-  const LS_SCHOOL_YEARS = "blims_school_years_v1";
-  const LS_SUBJECTS_STORE = "blims_subjects_v1";
-  const LS_SCHEDULE = "blims_class_schedule_v1";
-
-  const state = {
-    mode: "current", // current | archive
-    q: "",
-    sy: "",
-  };
-
-  function readJSON(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+  if (
+    !subjList ||
+    !subjEmpty ||
+    !tabCurrent ||
+    !tabArchive
+  ) {
+    return;
   }
 
-  function escapeHtml(s) {
-    return String(s ?? "")
+  const state = {
+    mode: "current",
+    q: "",
+    grade: "",
+    subjects: [],
+  };
+
+  // ==========================================
+  // HELPERS
+  // ==========================================
+
+  function escapeHtml(value) {
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -90,202 +89,276 @@ function initSubjects() {
       .replaceAll("'", "&#039;");
   }
 
-  function norm(s) {
-    return String(s || "").trim().toLowerCase();
+  function norm(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
   }
 
-  function getActiveClass() {
+  // ==========================================
+  // FETCH SUBJECTS
+  // ==========================================
+
+  async function fetchSubjects() {
     try {
-      const raw = localStorage.getItem(LS_ACTIVE_CLASS);
-      if (raw) {
-        const v = JSON.parse(raw);
-        if (v && v.grade != null && v.section != null) {
-          return { grade: String(v.grade), section: String(v.section) };
+      subjList.innerHTML = "";
+
+      subjEmpty.textContent =
+        "Loading subjects...";
+
+      subjEmpty.classList.remove("hidden");
+
+      const response = await fetch(
+        "/api/student/subjects",
+        {
+          method: "GET",
+
+          credentials: "include",
+
+          headers: {
+            Accept: "application/json",
+          },
         }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(
+          result.message ||
+            "Failed to load student subjects."
+        );
       }
-    } catch {}
-    return { grade: "Grade 6", section: "A" }; // fallback demo
-  }
 
-  function getAdminActiveSY() {
-    const store = readJSON(LS_SCHOOL_YEARS, null);
-    if (!store || !Array.isArray(store.items)) return "";
-    const active = store.items.find((x) => x && x.id === store.activeId);
-    return active ? String(active.name || "").trim() : "";
-  }
+      const data = result.data || {};
 
-  // Requirement: if account is new, SY dropdown should only show active SY
-  function buildSYFromAdmin() {
-    const adminSY = getAdminActiveSY();
+      // ==========================================
+      // GRADE
+      // ==========================================
 
-    if (!adminSY) {
-      sySelect.innerHTML = `<option value="">SY —</option>`;
-      sySelect.disabled = true;
-      state.sy = "";
-      return;
+      state.grade = String(
+        data.grade || ""
+      ).trim();
+
+      // ==========================================
+      // SUBJECTS
+      // ==========================================
+
+      state.subjects = Array.isArray(
+        data.subjects
+      )
+        ? data.subjects
+            .map((subject) =>
+              String(subject || "").trim()
+            )
+            .filter(Boolean)
+        : [];
+
+      render();
+
+    } catch (error) {
+
+      console.error(
+        "❌ Failed to fetch student subjects:",
+        error
+      );
+
+      state.grade = "";
+      state.subjects = [];
+
+      subjList.innerHTML = "";
+
+      subjEmpty.textContent =
+        "Unable to load subjects.";
+
+      subjEmpty.classList.remove("hidden");
     }
-
-    state.sy = adminSY;
-    sySelect.innerHTML = `<option value="${escapeHtml(adminSY)}">SY ${escapeHtml(adminSY)}</option>`;
-    sySelect.value = adminSY;
-
-    // ✅ New-account behavior: only active SY, no extra options
-    sySelect.disabled = true;
   }
 
-  // ✅ Read subjects exactly how Admin saves them
-  // Admin shape: { gradeSubjects: { "Grade 6": ["Math", ...] } }
-  function readAdminSubjectsForGrade(grade) {
-    const store = readJSON(LS_SUBJECTS_STORE, null);
-    if (!store || typeof store !== "object") return [];
-
-    const gs = store.gradeSubjects;
-    if (!gs || typeof gs !== "object") return [];
-
-    const raw = gs[grade];
-    if (!Array.isArray(raw)) return [];
-
-    // normalize to { subject }
-    return raw
-      .map((s) => (typeof s === "string" ? String(s).trim() : ""))
-      .filter(Boolean)
-      .map((name) => ({ subject: name }));
-  }
-
-  // Optional: teacher lookup from schedule rows
-  function buildTeacherMapFromSchedule(cls) {
-    const rows = readJSON(LS_SCHEDULE, []);
-    const list = Array.isArray(rows) ? rows : [];
-
-    const relevant = list.filter(
-      (x) =>
-        x &&
-        String(x.grade || "") === String(cls.grade) &&
-        String(x.section || "") === String(cls.section)
-    );
-
-    // subject -> teacher -> count
-    const counts = new Map();
-
-    for (const r of relevant) {
-      const subj = String(r.subject || "").trim();
-      const tch = String(r.teacher || "").trim();
-      if (!subj) continue;
-      if (!counts.has(subj)) counts.set(subj, new Map());
-      const m = counts.get(subj);
-      if (!tch) continue;
-      m.set(tch, (m.get(tch) || 0) + 1);
-    }
-
-    const best = new Map();
-    for (const [subj, m] of counts.entries()) {
-      let topTeacher = "";
-      let topN = 0;
-      for (const [tch, n] of m.entries()) {
-        if (n > topN) {
-          topTeacher = tch;
-          topN = n;
-        }
-      }
-      if (topTeacher) best.set(subj, topTeacher);
-    }
-    return best;
-  }
+  // ==========================================
+  // TABS
+  // ==========================================
 
   function setTab(mode) {
-    const isCurrent = mode === "current";
+    const isCurrent =
+      mode === "current";
 
-    tabCurrent.classList.toggle("active", isCurrent);
-    tabCurrent.setAttribute("aria-selected", isCurrent ? "true" : "false");
+    tabCurrent.classList.toggle(
+      "active",
+      isCurrent
+    );
 
-    tabArchive.classList.toggle("active", !isCurrent);
-    tabArchive.setAttribute("aria-selected", !isCurrent ? "true" : "false");
+    tabCurrent.setAttribute(
+      "aria-selected",
+      isCurrent
+        ? "true"
+        : "false"
+    );
+
+    tabArchive.classList.toggle(
+      "active",
+      !isCurrent
+    );
+
+    tabArchive.setAttribute(
+      "aria-selected",
+      !isCurrent
+        ? "true"
+        : "false"
+    );
 
     state.mode = mode;
   }
 
+  // ==========================================
+  // RENDER
+  // ==========================================
+
   function render() {
-    const cls = getActiveClass();
-    buildSYFromAdmin();
+    subjList.innerHTML = "";
 
-    // header labels
-    if (gradeSectionEl) gradeSectionEl.textContent = `${cls.grade} - Section ${cls.section}`;
-    if (syLabelEl) syLabelEl.textContent = state.sy ? `SY ${state.sy}` : "SY —";
+    // ==========================================
+    // DISPLAY GRADE
+    // ==========================================
 
-    // If no active SY yet, show empty
-    if (!state.sy) {
-      subjList.innerHTML = "";
-      subjEmpty.classList.remove("hidden");
-      return;
+    if (gradeEl) {
+      gradeEl.textContent =
+        state.grade || "Grade —";
     }
 
-    // Subjects list from Admin gradeSubjects
-    let subjects = readAdminSubjectsForGrade(cls.grade);
+    // ==========================================
+    // SUBJECTS
+    // ==========================================
 
-    // Current vs Archive:
-    // Admin subjects store doesn't support archived SY yet,
-    // so Archive tab will be empty for now (until we upgrade admin-subjects later).
-    if (state.mode === "archive") {
+    let subjects = [
+      ...state.subjects,
+    ];
+
+    // Archive is not implemented yet.
+    if (
+      state.mode === "archive"
+    ) {
       subjects = [];
     }
 
-    // Search filter
-    const q = norm(state.q);
+    // ==========================================
+    // SEARCH
+    // ==========================================
+
+    const q = norm(
+      state.q
+    );
+
     if (q) {
-      subjects = subjects.filter((x) => norm(x.subject).includes(q));
+      subjects =
+        subjects.filter(
+          (subject) =>
+            norm(subject).includes(q)
+        );
     }
 
-    subjList.innerHTML = "";
+    // ==========================================
+    // EMPTY STATE
+    // ==========================================
 
     if (!subjects.length) {
-      subjEmpty.classList.remove("hidden");
+
+      subjEmpty.textContent =
+        state.mode === "archive"
+          ? "No archived subjects."
+          : "No subjects to display.";
+
+      subjEmpty.classList.remove(
+        "hidden"
+      );
+
       return;
     }
-    subjEmpty.classList.add("hidden");
 
-    const teacherMap = buildTeacherMapFromSchedule(cls);
+    subjEmpty.classList.add(
+      "hidden"
+    );
 
-    subjects.forEach((x) => {
-      const subj = x.subject || "—";
-      const teacher = teacherMap.get(subj) || "—";
+    // ==========================================
+    // RENDER SUBJECTS
+    // ==========================================
 
-      const row = document.createElement("div");
-      row.className = "subj-row";
-      row.innerHTML = `
-        <div>
-            <div class="subj-name">${escapeHtml(subj)}</div>
-            <div class="subj-meta">${escapeHtml(cls.grade)}</div>
-        </div>
+    subjects.forEach(
+      (subject) => {
 
-        <div class="subj-pill">Section ${escapeHtml(cls.section)}</div>
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "subj-row";
+
+        row.innerHTML = `
+          <div>
+            <div class="subj-name">
+              ${escapeHtml(subject)}
+            </div>
+
+            <div class="subj-meta">
+              ${escapeHtml(state.grade)}
+            </div>
+          </div>
         `;
-      subjList.appendChild(row);
-    });
+
+        subjList.appendChild(
+          row
+        );
+      }
+    );
   }
 
-  // events
-  tabCurrent.addEventListener("click", () => {
-    setTab("current");
-    render();
-  });
+  // ==========================================
+  // CURRENT TAB
+  // ==========================================
 
-  tabArchive.addEventListener("click", () => {
-    setTab("archive");
-    render();
-  });
+  tabCurrent.addEventListener(
+    "click",
+    () => {
+      setTab("current");
+      render();
+    }
+  );
 
-  // SY is admin-controlled single option now, but keep safe
-  sySelect.addEventListener("change", () => {
-    state.sy = sySelect.value || "";
-    render();
-  });
+  // ==========================================
+  // ARCHIVE TAB
+  // ==========================================
 
-  subjSearch?.addEventListener("input", (e) => {
-    state.q = String(e.target.value || "");
-    render();
-  });
+  tabArchive.addEventListener(
+    "click",
+    () => {
+      setTab("archive");
+      render();
+    }
+  );
 
-  // boot
+  // ==========================================
+  // SEARCH
+  // ==========================================
+
+  subjSearch?.addEventListener(
+    "input",
+    (event) => {
+
+      state.q =
+        String(
+          event.target.value || ""
+        );
+
+      render();
+    }
+  );
+
+  // ==========================================
+  // INITIALIZE
+  // ==========================================
+
   setTab("current");
-  render();
+
+  fetchSubjects();
 }

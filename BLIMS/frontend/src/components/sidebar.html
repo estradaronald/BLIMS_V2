@@ -1,141 +1,441 @@
-<!-- frontend/src/components/sidebar.html --> 
-<aside class="sidebar" id="sidebar" data-role="admin"> 
-  <div class="sb-top"> 
-    <div class="sb-logo-wrap"> 
-      <img 
-        src="../../assets/images/logo.png" 
-        class="sb-logo" 
-        alt="School Logo" 
-      /> 
-    </div> 
- 
-    <div class="sb-school"> 
-      <div class="sb-school-name">Bolosan Elementary School</div> 
-      <div class="sb-school-sub">Bolosan District, Dagupan City</div> 
-    </div> 
-  </div> 
- 
-  <nav class="sb-nav"> 
- 
-    <!-- ========================= 
-         OVERVIEW 
-    ========================== --> 
-    <div class="sb-section-title">OVERVIEW</div> 
- 
-    <a class="sb-item" href="./dashboard.html" data-nav="dashboard"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/dashboard.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">DASHBOARD</span> 
-    </a> 
- 
- 
-    <!-- ========================= 
-         USER MANAGEMENT 
-    ========================== --> 
-    <div class="sb-section-title">USER MANAGEMENT</div> 
- 
-    <a class="sb-item" href="./students.html" data-nav="students"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/learner.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">LEARNERS</span> 
-    </a> 
- 
-    <a class="sb-item" href="./teachers.html" data-nav="teachers"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/faculty.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">FACULTY</span> 
+<!-- frontend/src/components/sidebar.html -->
+
+<aside class="sidebar" id="sidebar" data-role="admin">
+
+  <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
+
+  <div class="sb-top">
+
+    <div class="sb-logo-wrap">
+      <img
+        src="../../assets/images/logo.png"
+        class="sb-logo"
+        alt="School Logo"
+      />
+    </div>
+
+    <div class="sb-school">
+
+      <div class="sb-school-name">
+        Bolosan Elementary School
+      </div>
+
+      <div class="sb-school-sub">
+        Bolosan District, Dagupan City
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+  <nav class="sb-nav">
+
+
+    <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+    <div class="sb-section-title">
+      OVERVIEW
+    </div>
+
+
+    <a
+      class="sb-item"
+      href="./dashboard.html"
+      data-nav="dashboard"
+    >
+
+      <span class="sb-ico">
+        <img
+          src="../../assets/icons/dashboard.svg"
+          alt=""
+        />
+      </span>
+
+      <span class="sb-text">
+        DASHBOARD
+      </span>
+
     </a>
 
-    <!-- ADMIN ACCOUNTS -->
-    <a class="sb-item" href="./create-admin.html" data-nav="create-admin"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/admin.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">ADMIN ACCOUNTS</span> 
+
+    <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+    <div class="sb-divider"></div>
+
+
+    <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+    <div
+      class="sb-group"
+      data-group="user-management"
+    >
+
+      <button
+        class="sb-group-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="sbUserManagement"
+      >
+
+        <span class="sb-group-title">
+          USER MANAGEMENT
+        </span>
+
+        <span
+          class="sb-chevron"
+          aria-hidden="true"
+        >
+          ˅
+        </span>
+
+      </button>
+
+
+      <div
+        class="sb-submenu"
+        id="sbUserManagement"
+      >
+
+        <a
+          class="sb-item"
+          href="./students.html"
+          data-nav="students"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/learner.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            LEARNERS
+          </span>
+
+        </a>
+
+
+        <a
+          class="sb-item"
+          href="./teachers.html"
+          data-nav="teachers"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/faculty.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            FACULTY
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+    <div class="sb-divider"></div>
+
+
+    <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+    <div
+      class="sb-group"
+      data-group="academic-setup"
+    >
+
+      <button
+        class="sb-group-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="sbAcademicSetup"
+      >
+
+        <span class="sb-group-title">
+          ACADEMIC SETUP
+        </span>
+
+        <span
+          class="sb-chevron"
+          aria-hidden="true"
+        >
+          ˅
+        </span>
+
+      </button>
+
+
+      <div
+        class="sb-submenu"
+        id="sbAcademicSetup"
+      >
+
+        <a
+          class="sb-item"
+          href="./grade-levels.html"
+          data-nav="grade-levels"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/grades.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            GRADE LEVELS &amp; SECTIONS
+          </span>
+
+        </a>
+
+
+        <a
+          class="sb-item"
+          href="./subjects.html"
+          data-nav="subjects"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/subjects.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            SUBJECTS
+          </span>
+
+        </a>
+
+
+        <a
+          class="sb-item"
+          href="./class-schedule.html"
+          data-nav="class-schedule"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/classsched.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            CLASS SCHEDULE
+          </span>
+
+        </a>
+
+
+        <a
+          class="sb-item"
+          href="./school-year.html"
+          data-nav="school-year"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/schoolyear.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            SCHOOL YEAR &amp; QUARTERS
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+    <div class="sb-divider"></div>
+
+
+    <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+    <div
+      class="sb-group"
+      data-group="records"
+    >
+
+      <button
+        class="sb-group-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="sbRecords"
+      >
+
+        <span class="sb-group-title">
+          RECORDS
+        </span>
+
+        <span
+          class="sb-chevron"
+          aria-hidden="true"
+        >
+          ˅
+        </span>
+
+      </button>
+
+
+      <div
+        class="sb-submenu"
+        id="sbRecords"
+      >
+
+        <a
+          class="sb-item"
+          href="./attendance.html"
+          data-nav="attendance"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/attendance.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            ATTENDANCE
+          </span>
+
+        </a>
+
+
+        <a
+          class="sb-item"
+          href="./academic-records.html"
+          data-nav="academic-records"
+        >
+
+          <span class="sb-ico">
+            <img
+              src="../../assets/icons/academicrecord.svg"
+              alt=""
+            />
+          </span>
+
+          <span class="sb-text">
+            ACADEMIC RECORDS
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+    <div class="sb-divider"></div>
+
+
+    <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+    <div class="sb-section-title">
+      COMMUNICATION
+    </div>
+
+
+    <a
+      class="sb-item"
+      href="./announcements.html"
+      data-nav="announcements"
+    >
+
+      <span class="sb-ico">
+        <img
+          src="../../assets/icons/anouncement.svg"
+          alt=""
+        />
+      </span>
+
+      <span class="sb-text">
+        ANNOUNCEMENTS
+      </span>
+
     </a>
- 
- 
-    <!-- ========================= 
-         ACADEMIC SETUP 
-    ========================== --> 
-    <div class="sb-section-title">ACADEMIC SETUP</div> 
- 
-    <a class="sb-item" href="./grade-levels.html" data-nav="grade-levels"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/grades.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">GRADE LEVELS &amp; SECTIONS</span> 
-    </a> 
- 
-    <a class="sb-item" href="./subjects.html" data-nav="subjects"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/subjects.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">SUBJECTS</span> 
-    </a> 
- 
-    <a class="sb-item" href="./class-schedule.html" data-nav="class-schedule"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/classsched.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">CLASS SCHEDULE</span> 
-    </a> 
- 
-    <a class="sb-item" href="./school-year.html" data-nav="school-year"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/schoolyear.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">SCHOOL YEAR &amp; QUARTERS</span> 
-    </a> 
- 
- 
-    <!-- ========================= 
-         RECORDS 
-    ========================== --> 
-    <div class="sb-section-title">RECORDS</div> 
- 
-    <a class="sb-item" href="./attendance.html" data-nav="attendance"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/attendance.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">ATTENDANCE</span> 
-    </a> 
- 
-    <a class="sb-item" href="./academic-records.html" data-nav="academic-records"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/academicrecord.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">ACADEMIC RECORDS</span> 
-    </a> 
- 
- 
-    <!-- ========================= 
-         COMMUNICATION 
-    ========================== --> 
-    <div class="sb-section-title">COMMUNICATION</div> 
- 
-    <a class="sb-item" href="./announcements.html" data-nav="announcements"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/anouncement.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">ANNOUNCEMENTS</span> 
-    </a> 
- 
- 
-    <!-- ========================= 
-         SYSTEM 
-    ========================== --> 
-    <div class="sb-section-title">SYSTEM</div> 
- 
-    <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs"> 
-      <span class="sb-ico"> 
-        <img src="../../assets/icons/auditlogs.svg" alt="" /> 
-      </span> 
-      <span class="sb-text">AUDIT LOGS</span> 
-    </a> 
- 
-  </nav> 
+
+
+    <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+    <div class="sb-divider"></div>
+
+
+    <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+    <div class="sb-section-title">
+      SYSTEM
+    </div>
+
+
+    <a
+      class="sb-item"
+      href="./audit-logs.html"
+      data-nav="audit-logs"
+    >
+
+      <span class="sb-ico">
+        <img
+          src="../../assets/icons/auditlogs.svg"
+          alt=""
+        />
+      </span>
+
+      <span class="sb-text">
+        AUDIT LOGS
+      </span>
+
+    </a>
+
+  </nav>
+
 </aside>

@@ -10,11 +10,22 @@
 //   PATCH  /api/admin/students/:studentId/disable
 //   POST   /api/admin/students/:studentId/reset-password
 //
+// Bulk Create frontend:
+//   - Manual learner entry
+//   - Grade Level optional
+//   - Section optional
+//   - Excel upload
+//   - Excel template download
+//   - Validation
+//   - Created account result display
+//   - Created account Excel download
+//
 // Uses:
 //   - Session cookies
 //   - CSRF token
 //   - PSGC API for Province / City / Barangay
 //   - +63 phone format
+//   - SheetJS for Excel import/export
 // =====================================================
 
 (function () {
@@ -139,7 +150,8 @@
 
       if (!raw) return null;
 
-      const parsed = JSON.parse(raw);
+      const parsed =
+        JSON.parse(raw);
 
       if (
         !parsed?.data ||
@@ -148,7 +160,10 @@
         return null;
       }
 
-      if (Date.now() > parsed.expiresAt) {
+      if (
+        Date.now() >
+        parsed.expiresAt
+      ) {
         return null;
       }
 
@@ -175,7 +190,8 @@
   }
 
   async function fetchJSON(url) {
-    const response = await fetch(url);
+    const response =
+      await fetch(url);
 
     if (!response.ok) {
       throw new Error(
@@ -197,7 +213,10 @@
         `${PSGC_BASE}/provinces`
       );
 
-    cacheSet("provinces", data);
+    cacheSet(
+      "provinces",
+      data
+    );
 
     return data;
   }
@@ -208,7 +227,8 @@
     const key =
       `cities_${provinceCode}`;
 
-    const cached = cacheGet(key);
+    const cached =
+      cacheGet(key);
 
     if (cached) return cached;
 
@@ -217,7 +237,10 @@
         `${PSGC_BASE}/provinces/${provinceCode}/cities-municipalities`
       );
 
-    cacheSet(key, data);
+    cacheSet(
+      key,
+      data
+    );
 
     return data;
   }
@@ -228,7 +251,8 @@
     const key =
       `brgys_${cityCode}`;
 
-    const cached = cacheGet(key);
+    const cached =
+      cacheGet(key);
 
     if (cached) return cached;
 
@@ -237,7 +261,10 @@
         `${PSGC_BASE}/cities-municipalities/${cityCode}/barangays`
       );
 
-    cacheSet(key, data);
+    cacheSet(
+      key,
+      data
+    );
 
     return data;
   }
@@ -296,7 +323,8 @@
         if (
           element.value !== cleaned
         ) {
-          element.value = cleaned;
+          element.value =
+            cleaned;
         }
       }
     );
@@ -344,7 +372,8 @@
         if (
           element.value !== cleaned
         ) {
-          element.value = cleaned;
+          element.value =
+            cleaned;
         }
       }
     );
@@ -370,15 +399,19 @@
     let digits =
       digitsOnly(value);
 
-    if (digits.startsWith("63")) {
-      digits = digits.slice(2);
+    if (
+      digits.startsWith("63")
+    ) {
+      digits =
+        digits.slice(2);
     }
 
     if (
       digits.startsWith("0") &&
       digits.length >= 11
     ) {
-      digits = digits.slice(1);
+      digits =
+        digits.slice(1);
     }
 
     return digits.slice(0, 10);
@@ -388,7 +421,9 @@
     const digits =
       toLocal10Digits(value);
 
-    if (digits.length !== 10) {
+    if (
+      digits.length !== 10
+    ) {
       return "";
     }
 
@@ -416,7 +451,8 @@
         if (
           element.value !== cleaned
         ) {
-          element.value = cleaned;
+          element.value =
+            cleaned;
         }
       }
     );
@@ -439,7 +475,8 @@
   // =====================================================
 
   function bindPostalFilter() {
-    const element = $("postal");
+    const element =
+      $("postal");
 
     if (!element) return;
 
@@ -459,7 +496,8 @@
         if (
           element.value !== cleaned
         ) {
-          element.value = cleaned;
+          element.value =
+            cleaned;
         }
       }
     );
@@ -482,7 +520,8 @@
   // =====================================================
 
   function bindLRNFilter() {
-    const element = $("lrn");
+    const element =
+      $("lrn");
 
     if (!element) return;
 
@@ -502,7 +541,8 @@
         if (
           element.value !== cleaned
         ) {
-          element.value = cleaned;
+          element.value =
+            cleaned;
         }
       }
     );
@@ -532,9 +572,11 @@
   let editingStudentId = null;
   let editingStudentSnapshot = null;
 
-  // Temporary passwords are only kept
-  // during this page session.
   const tempPassCache = {};
+
+  // Bulk state
+  let bulkLearnerCount = 0;
+  let bulkCreatedAccounts = [];
 
   // =====================================================
   // CLASSES / SECTIONS
@@ -566,32 +608,135 @@
 
   function showListView() {
     $("listView")
-      ?.classList.remove("hidden");
+      ?.classList.remove(
+        "hidden"
+      );
 
     $("formView")
-      ?.classList.add("hidden");
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("bulkCreateView")
+      ?.classList.add(
+        "hidden"
+      );
 
     const addButton =
       $("addNewBtn");
 
+    const bulkButton =
+      $("bulkCreateBtn");
+
     if (addButton) {
-      addButton.style.display = "";
+      addButton.style.display =
+        "";
+    }
+
+    if (bulkButton) {
+      bulkButton.style.display =
+        "";
     }
   }
 
   function showFormView() {
     $("listView")
-      ?.classList.add("hidden");
+      ?.classList.add(
+        "hidden"
+      );
 
     $("formView")
-      ?.classList.remove("hidden");
+      ?.classList.remove(
+        "hidden"
+      );
+
+    $("bulkCreateView")
+      ?.classList.add(
+        "hidden"
+      );
 
     const addButton =
       $("addNewBtn");
 
+    const bulkButton =
+      $("bulkCreateBtn");
+
     if (addButton) {
-      addButton.style.display = "none";
+      addButton.style.display =
+        "none";
     }
+
+    if (bulkButton) {
+      bulkButton.style.display =
+        "none";
+    }
+  }
+
+  function showBulkCreateView() {
+    $("listView")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("formView")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("bulkCreateView")
+      ?.classList.remove(
+        "hidden"
+      );
+
+    const addButton =
+      $("addNewBtn");
+
+    const bulkButton =
+      $("bulkCreateBtn");
+
+    if (addButton) {
+      addButton.style.display =
+        "none";
+    }
+
+    if (bulkButton) {
+      bulkButton.style.display =
+        "none";
+    }
+
+    clearBulkCreateError();
+
+    initializeBulkCreate();
+  }
+
+  function hideBulkCreateView() {
+    $("bulkCreateView")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("listView")
+      ?.classList.remove(
+        "hidden"
+      );
+
+    const addButton =
+      $("addNewBtn");
+
+    const bulkButton =
+      $("bulkCreateBtn");
+
+    if (addButton) {
+      addButton.style.display =
+        "";
+    }
+
+    if (bulkButton) {
+      bulkButton.style.display =
+        "";
+    }
+
+    clearBulkCreateError();
   }
 
   // =====================================================
@@ -626,10 +771,78 @@
   }
 
   // =====================================================
+  // BULK ERROR
+  // =====================================================
+
+  function setBulkCreateError(
+    message
+  ) {
+    const box =
+      $("bulkCreateError");
+
+    if (!box) return;
+
+    box.textContent =
+      message;
+
+    box.classList.remove(
+      "hidden"
+    );
+  }
+
+  function clearBulkCreateError() {
+    const box =
+      $("bulkCreateError");
+
+    if (!box) return;
+
+    box.textContent = "";
+
+    box.classList.add(
+      "hidden"
+    );
+  }
+
+  // =====================================================
+  // BULK IMPORT STATUS
+  // =====================================================
+
+  function showBulkImportStatus(
+    message
+  ) {
+    const box =
+      $("bulkImportStatus");
+
+    if (!box) return;
+
+    box.textContent =
+      message;
+
+    box.classList.remove(
+      "hidden"
+    );
+  }
+
+  function clearBulkImportStatus() {
+    const box =
+      $("bulkImportStatus");
+
+    if (!box) return;
+
+    box.textContent = "";
+
+    box.classList.add(
+      "hidden"
+    );
+  }
+
+  // =====================================================
   // HELPERS
   // =====================================================
 
-  function classSectionLabel(student) {
+  function classSectionLabel(
+    student
+  ) {
     const className =
       student.className || "";
 
@@ -702,22 +915,24 @@
           String(b)
         )
       )
-      .forEach((className) => {
-        const option =
-          document.createElement(
-            "option"
+      .forEach(
+        (className) => {
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            className;
+
+          option.textContent =
+            className;
+
+          filter.appendChild(
+            option
           );
-
-        option.value =
-          className;
-
-        option.textContent =
-          className;
-
-        filter.appendChild(
-          option
-        );
-      });
+        }
+      );
 
     filter.value =
       classes.includes(current)
@@ -786,7 +1001,9 @@
 
     tbody.innerHTML = "";
 
-    if (filtered.length === 0) {
+    if (
+      filtered.length === 0
+    ) {
       const row =
         document.createElement(
           "tr"
@@ -801,7 +1018,9 @@
         </td>
       `;
 
-      tbody.appendChild(row);
+      tbody.appendChild(
+        row
+      );
 
       return;
     }
@@ -907,7 +1126,9 @@
           </td>
         `;
 
-        tbody.appendChild(row);
+        tbody.appendChild(
+          row
+        );
       }
     );
   }
@@ -918,9 +1139,18 @@
 
   function escapeHtml(value) {
     return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
       .replace(
         /"/g,
         "&quot;"
@@ -935,7 +1165,10 @@
   // MODAL HELPERS
   // =====================================================
 
-  function setText(id, value) {
+  function setText(
+    id,
+    value
+  ) {
     const element = $(id);
 
     if (element) {
@@ -944,7 +1177,10 @@
     }
   }
 
-  function setValue(id, value) {
+  function setValue(
+    id,
+    value
+  ) {
     const element = $(id);
 
     if (element) {
@@ -1054,7 +1290,9 @@
   // OPEN STUDENT MODAL
   // =====================================================
 
-  async function openStudentModal(id) {
+  async function openStudentModal(
+    id
+  ) {
     const modal =
       $("studentModal");
 
@@ -1079,43 +1317,51 @@
     setText(
       "smStudentId",
       `Student ID: ${
-        student.studentId || "—"
+        student.studentId ||
+        "—"
       }`
     );
 
     setValue(
       "smFullName",
-      fullName(student) || "—"
+      fullName(student) ||
+        "—"
     );
 
     setValue(
       "smStudentIdBasic",
-      student.studentId || "—"
+      student.studentId ||
+        "—"
     );
 
     setValue(
       "smLRN",
-      student.lrn || "—"
+      student.lrn ||
+        "—"
     );
 
     setValue(
       "smGender",
-      student.gender || "—"
+      student.gender ||
+        "—"
     );
 
     setValue(
       "smDob",
-      student.dob || "—"
+      student.dob ||
+        "—"
     );
 
     setValue(
       "smPhone",
-      student.phone || "—"
+      student.phone ||
+        "—"
     );
 
     setValue(
       "smEmail",
-      student.email || "—"
+      student.email ||
+        "—"
     );
 
     const address =
@@ -1123,7 +1369,8 @@
 
     setValue(
       "smStreet",
-      address.street || "—"
+      address.street ||
+        "—"
     );
 
     setValue(
@@ -1143,45 +1390,51 @@
 
     setValue(
       "smPostal",
-      address.postal || "—"
+      address.postal ||
+        "—"
     );
 
     const [
       provinceName,
       cityName,
       barangayName,
-    ] = await Promise.all([
-      resolveProvinceName(
-        address.provinceCode
-      ),
-      resolveCityName(
-        address.provinceCode,
-        address.cityCode
-      ),
-      resolveBarangayName(
-        address.cityCode,
-        address.brgyCode
-      ),
-    ]);
+    ] =
+      await Promise.all([
+        resolveProvinceName(
+          address.provinceCode
+        ),
+        resolveCityName(
+          address.provinceCode,
+          address.cityCode
+        ),
+        resolveBarangayName(
+          address.cityCode,
+          address.brgyCode
+        ),
+      ]);
 
     setValue(
       "smProvince",
-      provinceName || "—"
+      provinceName ||
+        "—"
     );
 
     setValue(
       "smCity",
-      cityName || "—"
+      cityName ||
+        "—"
     );
 
     setValue(
       "smBrgy",
-      barangayName || "—"
+      barangayName ||
+        "—"
     );
 
     setValue(
       "smAccId",
-      student.studentId || "—"
+      student.studentId ||
+        "—"
     );
 
     const status =
@@ -1198,21 +1451,25 @@
       .querySelectorAll(
         ".tmodal-tab"
       )
-      .forEach((button) => {
-        button.classList.remove(
-          "active"
-        );
-      });
+      .forEach(
+        (button) => {
+          button.classList.remove(
+            "active"
+          );
+        }
+      );
 
     document
       .querySelectorAll(
         ".tmodal-panel"
       )
-      .forEach((panel) => {
-        panel.classList.add(
-          "hidden"
-        );
-      });
+      .forEach(
+        (panel) => {
+          panel.classList.add(
+            "hidden"
+          );
+        }
+      );
 
     document
       .querySelector(
@@ -1289,47 +1546,53 @@
       .querySelectorAll(
         ".tmodal-tab"
       )
-      .forEach((button) => {
-        button.addEventListener(
-          "click",
-          () => {
-            document
-              .querySelectorAll(
-                ".tmodal-tab"
-              )
-              .forEach((item) => {
-                item.classList.remove(
-                  "active"
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              document
+                .querySelectorAll(
+                  ".tmodal-tab"
+                )
+                .forEach(
+                  (item) => {
+                    item.classList.remove(
+                      "active"
+                    );
+                  }
                 );
-              });
 
-            button.classList.add(
-              "active"
-            );
+              button.classList.add(
+                "active"
+              );
 
-            const tab =
-              button.dataset.tab;
+              const tab =
+                button.dataset.tab;
 
-            document
-              .querySelectorAll(
-                ".tmodal-panel"
-              )
-              .forEach((panel) => {
-                panel.classList.add(
+              document
+                .querySelectorAll(
+                  ".tmodal-panel"
+                )
+                .forEach(
+                  (panel) => {
+                    panel.classList.add(
+                      "hidden"
+                    );
+                  }
+                );
+
+              document
+                .querySelector(
+                  `.tmodal-panel[data-panel="${tab}"]`
+                )
+                ?.classList.remove(
                   "hidden"
                 );
-              });
-
-            document
-              .querySelector(
-                `.tmodal-panel[data-panel="${tab}"]`
-              )
-              ?.classList.remove(
-                "hidden"
-              );
-          }
-        );
-      });
+            }
+          );
+        }
+      );
 
     $("studentModalEditBtn")
       ?.addEventListener(
@@ -1350,7 +1613,9 @@
       ?.addEventListener(
         "click",
         async () => {
-          if (!activeStudentId) {
+          if (
+            !activeStudentId
+          ) {
             return;
           }
 
@@ -1466,10 +1731,14 @@
       const provinces =
         await getProvinces();
 
-      provinces.sort((a, b) =>
-        String(a.name || "")
-          .localeCompare(
-            String(b.name || "")
+      provinces.sort(
+        (a, b) =>
+          String(
+            a.name || ""
+          ).localeCompare(
+            String(
+              b.name || ""
+            )
           )
       );
 
@@ -1534,7 +1803,8 @@
       </option>
     `;
 
-    barangaySelect.disabled = true;
+    barangaySelect.disabled =
+      true;
 
     if ($("postal")) {
       $("postal").value = "";
@@ -1548,31 +1818,38 @@
           provinceCode
         );
 
-      cities.sort((a, b) =>
-        String(a.name || "")
-          .localeCompare(
-            String(b.name || "")
+      cities.sort(
+        (a, b) =>
+          String(
+            a.name || ""
+          ).localeCompare(
+            String(
+              b.name || ""
+            )
           )
       );
 
-      cities.forEach((city) => {
-        const option =
-          document.createElement(
-            "option"
+      cities.forEach(
+        (city) => {
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            city.code;
+
+          option.textContent =
+            city.name;
+
+          citySelect.appendChild(
+            option
           );
+        }
+      );
 
-        option.value =
-          city.code;
-
-        option.textContent =
-          city.name;
-
-        citySelect.appendChild(
-          option
-        );
-      });
-
-      citySelect.disabled = false;
+      citySelect.disabled =
+        false;
     } catch (error) {
       console.warn(
         "PSGC cities error:",
@@ -1604,7 +1881,8 @@
       </option>
     `;
 
-    barangaySelect.disabled = true;
+    barangaySelect.disabled =
+      true;
 
     if ($("postal")) {
       $("postal").value = "";
@@ -1618,10 +1896,14 @@
           cityCode
         );
 
-      barangays.sort((a, b) =>
-        String(a.name || "")
-          .localeCompare(
-            String(b.name || "")
+      barangays.sort(
+        (a, b) =>
+          String(
+            a.name || ""
+          ).localeCompare(
+            String(
+              b.name || ""
+            )
           )
       );
 
@@ -1712,13 +1994,15 @@
       "tempPass",
     ];
 
-    fields.forEach((id) => {
-      const element = $(id);
+    fields.forEach(
+      (id) => {
+        const element = $(id);
 
-      if (element) {
-        element.value = "";
+        if (element) {
+          element.value = "";
+        }
       }
-    });
+    );
 
     if ($("suffix")) {
       $("suffix").value = "";
@@ -1743,7 +2027,8 @@
     }
 
     if ($("provinceSelect")) {
-      $("provinceSelect").value = "";
+      $("provinceSelect").value =
+        "";
     }
 
     if ($("citySelect")) {
@@ -1904,13 +2189,15 @@
       .querySelectorAll(
         'input[name="gender"]'
       )
-      .forEach((radio) => {
-        radio.checked =
-          (
-            radio.value || ""
-          ).toLowerCase() ===
-          gender;
-      });
+      .forEach(
+        (radio) => {
+          radio.checked =
+            (
+              radio.value || ""
+            ).toLowerCase() ===
+            gender;
+        }
+      );
 
     if ($("phone")) {
       $("phone").value =
@@ -2055,6 +2342,7 @@
       setError(
         validationError
       );
+
       return;
     }
 
@@ -2140,10 +2428,7 @@
           true;
       }
 
-      // =================================================
-      // UPDATE EXISTING STUDENT
-      // =================================================
-
+      // UPDATE
       if (editingStudentId) {
         await apiFetch(
           `/api/admin/students/${editingStudentId}`,
@@ -2172,10 +2457,7 @@
         return;
       }
 
-      // =================================================
-      // CREATE NEW STUDENT
-      // =================================================
-
+      // CREATE
       const data =
         await apiFetch(
           "/api/admin/students",
@@ -2193,8 +2475,6 @@
       const tempPass =
         data?.tempPass || "";
 
-      // Store temporary password
-      // only for this page session.
       if (
         created?.id &&
         tempPass
@@ -2203,11 +2483,6 @@
           created.id
         ] = tempPass;
       }
-
-      // =================================================
-      // DISPLAY GENERATED CREDENTIALS
-      // DIRECTLY IN LOGIN / ACCOUNT DETAILS
-      // =================================================
 
       if ($("studentId")) {
         $("studentId").value =
@@ -2219,26 +2494,13 @@
           tempPass;
       }
 
-      // Keep the form open so the admin
-      // can see the generated credentials.
-      showFormView();
-
-      // Refresh the student table
-      // in the background.
       await loadStudents();
 
-      // Make sure we remain on the form.
       showFormView();
 
-      // This is now a new student,
-      // not an editing session.
       editingStudentId = null;
       editingStudentSnapshot =
         null;
-
-      // Do NOT clear the form here.
-      // The Student ID and Temporary Password
-      // must remain visible.
 
     } catch (error) {
       console.error(
@@ -2310,15 +2572,1507 @@
   }
 
   // =====================================================
+  // BULK CREATE
+  // =====================================================
+
+  function createBulkLearnerRow(
+    data = {}
+  ) {
+    bulkLearnerCount++;
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "bulk-learner-row";
+
+    row.dataset.row =
+      bulkLearnerCount;
+
+    row.innerHTML = `
+      <div class="bulk-row-header">
+
+        <div class="bulk-row-number">
+          Learner ${bulkLearnerCount}
+        </div>
+
+        <button
+          type="button"
+          class="bulk-remove-btn"
+          title="Remove learner"
+        >
+          Remove
+        </button>
+
+      </div>
+
+
+      <div class="bulk-row-fields">
+
+        <!-- First Name -->
+
+        <div class="bulk-field">
+
+          <label>
+            First Name
+          </label>
+
+          <input
+            type="text"
+            class="bulk-first-name"
+            placeholder="First name"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- Last Name -->
+
+        <div class="bulk-field">
+
+          <label>
+            Last Name
+          </label>
+
+          <input
+            type="text"
+            class="bulk-last-name"
+            placeholder="Last name"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- LRN -->
+
+        <div class="bulk-field">
+
+          <label>
+            LRN
+          </label>
+
+          <input
+            type="text"
+            class="bulk-lrn"
+            placeholder="12-digit LRN"
+            maxlength="12"
+            inputmode="numeric"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- Grade Level -->
+
+        <div class="bulk-field">
+
+          <label>
+            Grade Level
+            <span class="bulk-optional">
+              (Optional)
+            </span>
+          </label>
+
+          <select class="bulk-grade">
+
+            <option value="">
+              Select grade
+            </option>
+
+            <option value="Kindergarten">
+              Kindergarten
+            </option>
+
+            <option value="Grade 1">
+              Grade 1
+            </option>
+
+            <option value="Grade 2">
+              Grade 2
+            </option>
+
+            <option value="Grade 3">
+              Grade 3
+            </option>
+
+            <option value="Grade 4">
+              Grade 4
+            </option>
+
+            <option value="Grade 5">
+              Grade 5
+            </option>
+
+            <option value="Grade 6">
+              Grade 6
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Section -->
+
+        <div class="bulk-field">
+
+          <label>
+            Section
+            <span class="bulk-optional">
+              (Optional)
+            </span>
+          </label>
+
+          <input
+            type="text"
+            class="bulk-section"
+            placeholder="Section"
+            autocomplete="off"
+          />
+
+        </div>
+
+      </div>
+    `;
+
+    const firstName =
+      row.querySelector(
+        ".bulk-first-name"
+      );
+
+    const lastName =
+      row.querySelector(
+        ".bulk-last-name"
+      );
+
+    const lrn =
+      row.querySelector(
+        ".bulk-lrn"
+      );
+
+    const grade =
+      row.querySelector(
+        ".bulk-grade"
+      );
+
+    const section =
+      row.querySelector(
+        ".bulk-section"
+      );
+
+
+    // Apply imported values
+
+    if (firstName) {
+      firstName.value =
+        filterNameValue(
+          data.firstName || ""
+        );
+    }
+
+    if (lastName) {
+      lastName.value =
+        filterNameValue(
+          data.lastName || ""
+        );
+    }
+
+    if (lrn) {
+      lrn.value =
+        digitsOnly(
+          data.lrn || ""
+        ).slice(0, 12);
+    }
+
+    if (grade) {
+      grade.value =
+        normalizeGradeLevel(
+          data.gradeLevel || ""
+        );
+    }
+
+    if (section) {
+      section.value =
+        filterNameValue(
+          data.section || ""
+        );
+    }
+
+
+    // Remove row
+
+    const removeButton =
+      row.querySelector(
+        ".bulk-remove-btn"
+      );
+
+    removeButton?.addEventListener(
+      "click",
+      () => {
+
+        row.remove();
+
+        renumberBulkLearners();
+
+        const remaining =
+          document.querySelectorAll(
+            ".bulk-learner-row"
+          );
+
+        if (
+          remaining.length === 0
+        ) {
+          createBulkLearnerRow();
+        }
+
+      }
+    );
+
+
+    // Filters
+
+    bindBulkNameFilter(
+      firstName
+    );
+
+    bindBulkNameFilter(
+      lastName
+    );
+
+    bindBulkNameFilter(
+      section
+    );
+
+    bindBulkLRNFilter(
+      lrn
+    );
+
+
+    $("bulkLearnersContainer")
+      ?.appendChild(row);
+  }
+
+  // =====================================================
+  // NORMALIZE GRADE LEVEL
+  // =====================================================
+
+  function normalizeGradeLevel(
+    value
+  ) {
+    const normalized =
+      String(value || "")
+        .trim()
+        .toLowerCase();
+
+    const grades = {
+      kindergarten:
+        "Kindergarten",
+
+      "grade 1":
+        "Grade 1",
+
+      grade1:
+        "Grade 1",
+
+      "grade 2":
+        "Grade 2",
+
+      grade2:
+        "Grade 2",
+
+      "grade 3":
+        "Grade 3",
+
+      grade3:
+        "Grade 3",
+
+      "grade 4":
+        "Grade 4",
+
+      grade4:
+        "Grade 4",
+
+      "grade 5":
+        "Grade 5",
+
+      grade5:
+        "Grade 5",
+
+      "grade 6":
+        "Grade 6",
+
+      grade6:
+        "Grade 6",
+    };
+
+    return grades[
+      normalized
+    ] || "";
+  }
+
+  // =====================================================
+  // BULK NAME FILTER
+  // =====================================================
+
+  function bindBulkNameFilter(
+    element
+  ) {
+    if (!element) return;
+
+    element.addEventListener(
+      "input",
+      () => {
+        const cleaned =
+          filterNameValue(
+            element.value
+          );
+
+        if (
+          element.value !==
+          cleaned
+        ) {
+          element.value =
+            cleaned;
+        }
+      }
+    );
+
+    element.addEventListener(
+      "paste",
+      () => {
+        requestAnimationFrame(() => {
+          element.value =
+            filterNameValue(
+              element.value
+            );
+        });
+      }
+    );
+  }
+
+  // =====================================================
+  // BULK LRN FILTER
+  // =====================================================
+
+  function bindBulkLRNFilter(
+    element
+  ) {
+    if (!element) return;
+
+    element.addEventListener(
+      "input",
+      () => {
+        const cleaned =
+          digitsOnly(
+            element.value
+          ).slice(0, 12);
+
+        if (
+          element.value !==
+          cleaned
+        ) {
+          element.value =
+            cleaned;
+        }
+      }
+    );
+
+    element.addEventListener(
+      "paste",
+      () => {
+        requestAnimationFrame(() => {
+          element.value =
+            digitsOnly(
+              element.value
+            ).slice(0, 12);
+        });
+      }
+    );
+  }
+
+  // =====================================================
+  // RENUMBER BULK ROWS
+  // =====================================================
+
+  function renumberBulkLearners() {
+    document
+      .querySelectorAll(
+        ".bulk-learner-row"
+      )
+      .forEach(
+        (row, index) => {
+
+          const number =
+            row.querySelector(
+              ".bulk-row-number"
+            );
+
+          if (number) {
+            number.textContent =
+              `Learner ${
+                index + 1
+              }`;
+          }
+
+        }
+      );
+  }
+
+  // =====================================================
+  // INITIALIZE BULK CREATE
+  // =====================================================
+
+  function initializeBulkCreate() {
+    const container =
+      $("bulkLearnersContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    bulkLearnerCount = 0;
+
+    bulkCreatedAccounts = [];
+
+    hideCreatedAccounts();
+
+    clearBulkImportStatus();
+
+    createBulkLearnerRow();
+
+    createBulkLearnerRow();
+  }
+
+  // =====================================================
+  // GET BULK LEARNERS
+  // =====================================================
+
+  function getBulkLearners() {
+    const rows =
+      Array.from(
+        document.querySelectorAll(
+          ".bulk-learner-row"
+        )
+      );
+
+    return rows.map(
+      (row) => ({
+
+        firstName:
+          row.querySelector(
+            ".bulk-first-name"
+          )?.value.trim() ||
+          "",
+
+        lastName:
+          row.querySelector(
+            ".bulk-last-name"
+          )?.value.trim() ||
+          "",
+
+        lrn:
+          row.querySelector(
+            ".bulk-lrn"
+          )?.value.trim() ||
+          "",
+
+        gradeLevel:
+          row.querySelector(
+            ".bulk-grade"
+          )?.value ||
+          "",
+
+        section:
+          row.querySelector(
+            ".bulk-section"
+          )?.value.trim() ||
+          "",
+
+      })
+    );
+  }
+
+  // =====================================================
+  // VALIDATE BULK LEARNERS
+  // =====================================================
+
+  function validateBulkLearners() {
+    const learners =
+      getBulkLearners();
+
+    if (
+      learners.length === 0
+    ) {
+      return (
+        "Please add at least one learner."
+      );
+    }
+
+    const seenLRNs =
+      new Set();
+
+    for (
+      let index = 0;
+      index < learners.length;
+      index++
+    ) {
+      const learner =
+        learners[index];
+
+      const number =
+        index + 1;
+
+      if (
+        !learner.firstName ||
+        !learner.lastName
+      ) {
+        return (
+          `Learner ${number}: First Name and Last Name are required.`
+        );
+      }
+
+      if (
+        !/^\d{12}$/.test(
+          learner.lrn
+        )
+      ) {
+        return (
+          `Learner ${number}: LRN must be exactly 12 digits.`
+        );
+      }
+
+      if (
+        seenLRNs.has(
+          learner.lrn
+        )
+      ) {
+        return (
+          `Learner ${number}: LRN ${learner.lrn} is duplicated in this batch.`
+        );
+      }
+
+      seenLRNs.add(
+        learner.lrn
+      );
+
+      /*
+        Grade Level is optional.
+
+        Section is optional.
+
+        We intentionally do not
+        validate either field.
+      */
+    }
+
+    return "";
+  }
+
+  // =====================================================
+  // EXCEL TEMPLATE DOWNLOAD
+  // =====================================================
+
+  function downloadBulkTemplate() {
+
+    if (
+      typeof XLSX === "undefined"
+    ) {
+      alert(
+        "Excel functionality is unavailable. Please check the SheetJS library."
+      );
+
+      return;
+    }
+
+    const rows = [
+
+      {
+        "First Name":
+          "Juan",
+
+        "Last Name":
+          "Dela Cruz",
+
+        "LRN":
+          "123456789012",
+
+        "Grade Level":
+          "Grade 6",
+
+        "Section":
+          "Mabini",
+      },
+
+      {
+        "First Name":
+          "Maria",
+
+        "Last Name":
+          "Santos",
+
+        "LRN":
+          "123456789013",
+
+        "Grade Level":
+          "",
+
+        "Section":
+          "",
+      },
+
+    ];
+
+
+    const worksheet =
+      XLSX.utils.json_to_sheet(
+        rows
+      );
+
+
+    worksheet["!cols"] = [
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+    ];
+
+
+    const workbook =
+      XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Learners"
+    );
+
+
+    XLSX.writeFile(
+      workbook,
+      "BLIMS_Learner_Bulk_Create_Template.xlsx"
+    );
+  }
+
+  // =====================================================
+  // EXCEL UPLOAD
+  // =====================================================
+
+  async function handleBulkExcelUpload(
+    event
+  ) {
+
+    const file =
+      event.target.files?.[0];
+
+    if (!file) return;
+
+    clearBulkCreateError();
+
+    clearBulkImportStatus();
+
+
+    const validExtensions = [
+      ".xlsx",
+      ".xls",
+    ];
+
+
+    const fileName =
+      String(
+        file.name || ""
+      ).toLowerCase();
+
+
+    const validFile =
+      validExtensions.some(
+        (extension) =>
+          fileName.endsWith(
+            extension
+          )
+      );
+
+
+    if (!validFile) {
+
+      setBulkCreateError(
+        "Please upload an Excel file (.xlsx or .xls)."
+      );
+
+      event.target.value = "";
+
+      return;
+    }
+
+
+    if (
+      typeof XLSX === "undefined"
+    ) {
+
+      setBulkCreateError(
+        "Excel functionality is unavailable. Please check the SheetJS library."
+      );
+
+      event.target.value = "";
+
+      return;
+    }
+
+
+    try {
+
+      showBulkImportStatus(
+        "Reading Excel file..."
+      );
+
+
+      const arrayBuffer =
+        await file.arrayBuffer();
+
+
+      const workbook =
+        XLSX.read(
+          arrayBuffer,
+          {
+            type: "array",
+          }
+        );
+
+
+      const firstSheetName =
+        workbook.SheetNames?.[0];
+
+
+      if (!firstSheetName) {
+
+        throw new Error(
+          "The Excel file does not contain a worksheet."
+        );
+
+      }
+
+
+      const worksheet =
+        workbook.Sheets[
+          firstSheetName
+        ];
+
+
+      const rawRows =
+        XLSX.utils.sheet_to_json(
+          worksheet,
+          {
+            defval: "",
+            raw: false,
+          }
+        );
+
+
+      if (
+        !Array.isArray(rawRows) ||
+        rawRows.length === 0
+      ) {
+
+        throw new Error(
+          "The Excel file does not contain any learner records."
+        );
+
+      }
+
+
+      const learners =
+        parseExcelLearners(
+          rawRows
+        );
+
+
+      if (
+        learners.length === 0
+      ) {
+
+        throw new Error(
+          "No valid learner rows were found in the Excel file."
+        );
+
+      }
+
+
+      const importError =
+        validateImportedLearners(
+          learners
+        );
+
+
+      if (importError) {
+
+        throw new Error(
+          importError
+        );
+
+      }
+
+
+      const container =
+        $("bulkLearnersContainer");
+
+      if (!container) return;
+
+
+      container.innerHTML = "";
+
+      bulkLearnerCount = 0;
+
+
+      learners.forEach(
+        (learner) => {
+
+          createBulkLearnerRow(
+            learner
+          );
+
+        }
+      );
+
+
+      renumberBulkLearners();
+
+
+      showBulkImportStatus(
+        `${learners.length} learner(s) imported successfully from "${file.name}".`
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Excel import error:",
+        error
+      );
+
+      setBulkCreateError(
+        error.message ||
+        "Failed to import Excel file."
+      );
+
+    } finally {
+
+      event.target.value = "";
+
+    }
+  }
+
+  // =====================================================
+  // PARSE EXCEL LEARNERS
+  // =====================================================
+
+  function parseExcelLearners(
+    rows
+  ) {
+
+    return rows
+      .map(
+        (row) => {
+
+          const normalized =
+            {};
+
+          Object.keys(row)
+            .forEach(
+              (key) => {
+
+                const normalizedKey =
+                  normalizeExcelHeader(
+                    key
+                  );
+
+                normalized[
+                  normalizedKey
+                ] = String(
+                  row[key] ?? ""
+                ).trim();
+
+              }
+            );
+
+
+          return {
+
+            firstName:
+              filterNameValue(
+                normalized.firstName ||
+                ""
+              ),
+
+            lastName:
+              filterNameValue(
+                normalized.lastName ||
+                ""
+              ),
+
+            lrn:
+              digitsOnly(
+                normalized.lrn ||
+                ""
+              ).slice(0, 12),
+
+            gradeLevel:
+              normalizeGradeLevel(
+                normalized.gradeLevel ||
+                ""
+              ),
+
+            section:
+              filterNameValue(
+                normalized.section ||
+                ""
+              ),
+
+          };
+
+        }
+      )
+      .filter(
+        (learner) =>
+          learner.firstName ||
+          learner.lastName ||
+          learner.lrn ||
+          learner.gradeLevel ||
+          learner.section
+      );
+  }
+
+  // =====================================================
+  // NORMALIZE EXCEL HEADERS
+  // =====================================================
+
+  function normalizeExcelHeader(
+    header
+  ) {
+
+    const value =
+      String(
+        header || ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(
+          /[\s_-]+/g,
+          ""
+        );
+
+
+    if (
+      value === "firstname" ||
+      value === "first"
+    ) {
+      return "firstName";
+    }
+
+
+    if (
+      value === "lastname" ||
+      value === "last"
+    ) {
+      return "lastName";
+    }
+
+
+    if (
+      value === "lrn"
+    ) {
+      return "lrn";
+    }
+
+
+    if (
+      value === "gradelevel" ||
+      value === "grade"
+    ) {
+      return "gradeLevel";
+    }
+
+
+    if (
+      value === "section"
+    ) {
+      return "section";
+    }
+
+
+    return value;
+  }
+
+  // =====================================================
+  // VALIDATE IMPORTED LEARNERS
+  // =====================================================
+
+  function validateImportedLearners(
+    learners
+  ) {
+
+    const seenLRNs =
+      new Set();
+
+
+    for (
+      let index = 0;
+      index < learners.length;
+      index++
+    ) {
+
+      const learner =
+        learners[index];
+
+      const excelRow =
+        index + 2;
+
+
+      if (
+        !learner.firstName
+      ) {
+
+        return (
+          `Excel row ${excelRow}: First Name is required.`
+        );
+
+      }
+
+
+      if (
+        !learner.lastName
+      ) {
+
+        return (
+          `Excel row ${excelRow}: Last Name is required.`
+        );
+
+      }
+
+
+      if (
+        !/^\d{12}$/.test(
+          learner.lrn
+        )
+      ) {
+
+        return (
+          `Excel row ${excelRow}: LRN must be exactly 12 digits.`
+        );
+
+      }
+
+
+      if (
+        seenLRNs.has(
+          learner.lrn
+        )
+      ) {
+
+        return (
+          `Excel row ${excelRow}: LRN ${learner.lrn} is duplicated in the uploaded file.`
+        );
+
+      }
+
+
+      seenLRNs.add(
+        learner.lrn
+      );
+
+    }
+
+
+    return "";
+  }
+
+  // =====================================================
+  // CREATED ACCOUNTS
+  // =====================================================
+
+  function showCreatedAccounts(
+    accounts
+  ) {
+
+    const section =
+      $("bulkCreatedAccounts");
+
+    const tbody =
+      $("bulkCreatedAccountsTbody");
+
+    const message =
+      $("bulkSuccessMessage");
+
+
+    if (
+      !section ||
+      !tbody
+    ) {
+      return;
+    }
+
+
+    bulkCreatedAccounts =
+      Array.isArray(accounts)
+        ? accounts
+        : [];
+
+
+    tbody.innerHTML = "";
+
+
+    bulkCreatedAccounts.forEach(
+      (account, index) => {
+
+        const row =
+          document.createElement(
+            "tr"
+          );
+
+
+        const learnerName =
+          [
+            account.firstName,
+            account.lastName,
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+
+        row.innerHTML = `
+          <td>
+            ${index + 1}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              learnerName || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              account.lrn || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              account.gradeLevel || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              account.section || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              account.studentId || "—"
+            )}
+          </td>
+
+          <td class="password-cell">
+            ${escapeHtml(
+              account.tempPass || "—"
+            )}
+          </td>
+        `;
+
+
+        tbody.appendChild(
+          row
+        );
+
+      }
+    );
+
+
+    if (message) {
+
+      message.textContent =
+        `${bulkCreatedAccounts.length} learner account(s) were created successfully.`;
+
+    }
+
+
+    section.classList.remove(
+      "hidden"
+    );
+  }
+
+  function hideCreatedAccounts() {
+
+    const section =
+      $("bulkCreatedAccounts");
+
+    if (!section) return;
+
+    section.classList.add(
+      "hidden"
+    );
+
+
+    const tbody =
+      $("bulkCreatedAccountsTbody");
+
+    if (tbody) {
+      tbody.innerHTML = "";
+    }
+
+
+    bulkCreatedAccounts = [];
+  }
+
+  // =====================================================
+  // DOWNLOAD CREATED ACCOUNTS
+  // =====================================================
+
+  function downloadCreatedAccounts() {
+
+    if (
+      typeof XLSX === "undefined"
+    ) {
+
+      alert(
+        "Excel functionality is unavailable. Please check the SheetJS library."
+      );
+
+      return;
+    }
+
+
+    if (
+      !bulkCreatedAccounts.length
+    ) {
+
+      alert(
+        "There are no created accounts to download."
+      );
+
+      return;
+    }
+
+
+    const rows =
+      bulkCreatedAccounts.map(
+        (account) => ({
+
+          "First Name":
+            account.firstName || "",
+
+          "Last Name":
+            account.lastName || "",
+
+          "LRN":
+            account.lrn || "",
+
+          "Grade Level":
+            account.gradeLevel || "",
+
+          "Section":
+            account.section || "",
+
+          "Student ID":
+            account.studentId || "",
+
+          "Temporary Password":
+            account.tempPass || "",
+
+        })
+      );
+
+
+    const worksheet =
+      XLSX.utils.json_to_sheet(
+        rows
+      );
+
+
+    worksheet["!cols"] = [
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 24 },
+    ];
+
+
+    const workbook =
+      XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Created Accounts"
+    );
+
+
+    XLSX.writeFile(
+      workbook,
+      "BLIMS_Created_Learner_Accounts.xlsx"
+    );
+  }
+
+  // =====================================================
+  // BULK CREATE SUBMIT
+  // =====================================================
+
+  async function submitBulkCreate() {
+
+    clearBulkCreateError();
+
+
+    const validationError =
+      validateBulkLearners();
+
+
+    if (validationError) {
+
+      setBulkCreateError(
+        validationError
+      );
+
+      return;
+    }
+
+
+    const learners =
+      getBulkLearners();
+
+
+    const submitButton =
+      $("bulkCreateSubmitBtn");
+
+
+    try {
+
+      if (submitButton) {
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          "Creating...";
+
+      }
+
+
+      /*
+        =================================================
+        BACKEND CONNECTION
+        =================================================
+
+        This is intentionally prepared for
+        the future backend endpoint.
+
+        Payload:
+
+        {
+          learners: [
+            {
+              firstName: "Juan",
+              lastName: "Dela Cruz",
+              lrn: "123456789012",
+              gradeLevel: "Grade 6",
+              section: "Mabini"
+            }
+          ]
+        }
+
+        Grade Level and Section may be "".
+
+        Expected backend response:
+
+        {
+          students: [
+            {
+              firstName: "Juan",
+              lastName: "Dela Cruz",
+              lrn: "123456789012",
+              gradeLevel: "Grade 6",
+              section: "Mabini",
+              studentId: "STU-000001",
+              tempPass: "X7kP9mQ2"
+            }
+          ]
+        }
+      */
+
+
+      /*
+        FRONTEND ONLY FOR NOW
+
+        We do NOT generate fake credentials.
+
+        This makes sure Student IDs and temporary
+        passwords come from the backend once connected.
+      */
+
+      console.log(
+        "Bulk learners ready for backend:",
+        {
+          learners,
+        }
+      );
+
+
+      alert(
+        `${learners.length} learner(s) passed validation and are ready for backend creation.`
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Bulk create error:",
+        error
+      );
+
+      setBulkCreateError(
+        error.message ||
+        "Failed to create learners."
+      );
+
+    } finally {
+
+      if (submitButton) {
+
+        submitButton.disabled =
+          false;
+
+        submitButton.textContent =
+          "Create Learners";
+
+      }
+
+    }
+  }
+
+  // =====================================================
   // EVENTS
   // =====================================================
 
   function bindEvents() {
-    // Add New
+
+    // ===================================================
+    // ADD NEW
+    // ===================================================
+
     $("addNewBtn")
       ?.addEventListener(
         "click",
         async () => {
+
           editingStudentId =
             null;
 
@@ -2328,17 +4082,167 @@
           showFormView();
 
           clearForm();
+
           clearError();
 
           await loadProvinces();
+
         }
       );
 
-    // Cancel
+
+    // ===================================================
+    // BULK CREATE
+    // ===================================================
+
+    $("bulkCreateBtn")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          /*
+            No classes are loaded here.
+
+            Grade Level and Section are optional,
+            so Bulk Create does not depend on the
+            class summary endpoint.
+          */
+
+          showBulkCreateView();
+
+        }
+      );
+
+
+    // ===================================================
+    // ADD ANOTHER BULK LEARNER
+    // ===================================================
+
+    $("addBulkLearnerBtn")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          createBulkLearnerRow();
+
+        }
+      );
+
+
+    // ===================================================
+    // CANCEL BULK CREATE
+    // ===================================================
+
+    $("bulkCancelBtn")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          hideBulkCreateView();
+
+        }
+      );
+
+
+    // ===================================================
+    // SUBMIT BULK CREATE
+    // ===================================================
+
+    $("bulkCreateSubmitBtn")
+      ?.addEventListener(
+        "click",
+        submitBulkCreate
+      );
+
+
+    // ===================================================
+    // UPLOAD EXCEL
+    // ===================================================
+
+    $("bulkUploadBtn")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          $("bulkExcelInput")
+            ?.click();
+
+        }
+      );
+
+
+    // ===================================================
+    // EXCEL FILE SELECTED
+    // ===================================================
+
+    $("bulkExcelInput")
+      ?.addEventListener(
+        "change",
+        handleBulkExcelUpload
+      );
+
+
+    // ===================================================
+    // DOWNLOAD TEMPLATE
+    // ===================================================
+
+    $("bulkDownloadTemplateBtn")
+      ?.addEventListener(
+        "click",
+        downloadBulkTemplate
+      );
+
+
+    // ===================================================
+    // DOWNLOAD CREATED ACCOUNTS
+    // ===================================================
+
+    $("bulkDownloadAccountsBtn")
+      ?.addEventListener(
+        "click",
+        downloadCreatedAccounts
+      );
+
+
+    // ===================================================
+    // DONE
+    // ===================================================
+
+    $("bulkDoneBtn")
+      ?.addEventListener(
+        "click",
+        async () => {
+
+          hideCreatedAccounts();
+
+          hideBulkCreateView();
+
+          try {
+
+            await loadStudents();
+
+          } catch (error) {
+
+            console.warn(
+              "Failed to refresh learners:",
+              error
+            );
+
+          }
+
+        }
+      );
+
+
+    // ===================================================
+    // CANCEL INDIVIDUAL FORM
+    // ===================================================
+
     $("cancelBtn")
       ?.addEventListener(
         "click",
         () => {
+
           editingStudentId =
             null;
 
@@ -2348,47 +4252,74 @@
           showListView();
 
           clearForm();
+
         }
       );
 
-    // Reset
+
+    // ===================================================
+    // RESET
+    // ===================================================
+
     $("resetBtn")
       ?.addEventListener(
         "click",
         async () => {
-          if (editingStudentId) {
+
+          if (
+            editingStudentId
+          ) {
+
             await resetEditForm();
+
             return;
           }
 
           clearForm();
 
           await loadProvinces();
+
         }
       );
 
-    // Save
+
+    // ===================================================
+    // SAVE
+    // ===================================================
+
     $("saveBtn")
       ?.addEventListener(
         "click",
         saveStudent
       );
 
-    // Search
+
+    // ===================================================
+    // SEARCH
+    // ===================================================
+
     $("searchInput")
       ?.addEventListener(
         "input",
         renderStudentsTable
       );
 
-    // Class filter
+
+    // ===================================================
+    // CLASS FILTER
+    // ===================================================
+
     $("classFilter")
       ?.addEventListener(
         "change",
         renderStudentsTable
       );
 
-    // Address
+
+    // ===================================================
+    // ADDRESS
+    // ===================================================
+
     $("provinceSelect")
       ?.addEventListener(
         "change",
@@ -2401,11 +4332,16 @@
         onCityChange
       );
 
-    // Student table actions
+
+    // ===================================================
+    // STUDENT TABLE ACTIONS
+    // ===================================================
+
     $("studentsTbody")
       ?.addEventListener(
         "click",
         (event) => {
+
           const button =
             event.target.closest(
               "button"
@@ -2413,36 +4349,47 @@
 
           if (!button) return;
 
+
           const id =
             button.dataset.id;
 
           if (!id) return;
+
 
           if (
             button.classList.contains(
               "t-view"
             )
           ) {
+
             openStudentModal(id);
+
             return;
           }
+
 
           if (
             button.classList.contains(
               "t-edit"
             )
           ) {
+
             startEditStudent(id);
+
             return;
           }
+
 
           if (
             button.classList.contains(
               "t-del"
             )
           ) {
+
             deleteStudentById(id);
+
           }
+
         }
       );
   }
@@ -2454,11 +4401,15 @@
   document.addEventListener(
     "DOMContentLoaded",
     async () => {
+
       await fetchCsrf();
 
       bindEvents();
 
       bindStudentModalEvents();
+
+
+      // Individual form filters
 
       bindNameFilter(
         "firstName"
@@ -2484,21 +4435,31 @@
 
       bindLRNFilter();
 
+
+      // Initial page
+
       renderClassFilter();
 
       showListView();
 
+
       try {
+
         await loadClasses();
 
         await loadStudents();
+
       } catch (error) {
+
         console.warn(error);
 
         setError(
           "Backend not reachable or route missing. Make sure the server is running and /api/admin/students exists."
         );
+
       }
+
     }
   );
+
 })();

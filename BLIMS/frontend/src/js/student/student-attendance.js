@@ -13,10 +13,12 @@ function $(id) {
 /* ===============================
    TOPBAR
 ================================= */
+
 function initTopbarMenu() {
   const userMenuBtn = $("userMenuBtn");
   const userMenu = $("userMenu");
   const userbox = $("userbox");
+
   if (!userMenuBtn || !userMenu || !userbox) return;
 
   userMenuBtn.addEventListener("click", (ev) => {
@@ -25,30 +27,35 @@ function initTopbarMenu() {
   });
 
   document.addEventListener("click", (ev) => {
-    if (!userbox.contains(ev.target)) userMenu.classList.remove("open");
+    if (!userbox.contains(ev.target)) {
+      userMenu.classList.remove("open");
+    }
   });
 }
 
+/* ===============================
+   LOGOUT
+================================= */
+
 function initLogout() {
   const btn = $("topbarLogout");
+
   if (!btn) return;
+
   btn.addEventListener("click", () => {
     window.location.href = "../../login.html";
   });
 }
 
 /* ===============================
-   ATTENDANCE (Student)
-   - Admin Active SY: blims_school_years_v1
-   - Student active class: blims_active_student_class_v1
-   - Attendance records (prototype): blims_attendance_v1
-   - Backend-ready: keep parsing isolated in normalizeRecord()
+   ATTENDANCE
+   Student
+   Backend-connected
 ================================= */
+
 function initAttendance() {
   const gradeSectionEl = $("attGradeSection");
-  const syLabelEl = $("attSYLabel");
 
-  const sySelect = $("attSYSelect");
   const monthSelect = $("attMonthSelect");
 
   const tabTable = $("attTabTable");
@@ -68,67 +75,47 @@ function initAttendance() {
   const lateEl = $("attLate");
   const rateEl = $("attRate");
 
+  // School Year is intentionally not used here.
+  // It is handled internally by the backend.
+
   if (
-    !sySelect || !monthSelect || !tabTable || !tabCal ||
-    !viewTable || !viewCal || !tbody || !calTitle || !calGrid ||
-    !empty || !presentEl || !absentEl || !lateEl || !rateEl
-  ) return;
-
-  // LS keys
-  const LS_ACTIVE_CLASS = "blims_active_student_class_v1";
-  const LS_SCHOOL_YEARS = "blims_school_years_v1";
-  const LS_ATT = "blims_attendance_v1";
-
-    // ✅ DEV ONLY: seed mock attendance if empty
-  function seedAttendanceIfEmpty(activeSY, cls) {
-    const existing = readJSON(LS_ATT, null);
-    if (Array.isArray(existing) && existing.length) return;
-
-    function iso(y, m, d) {
-      const mm = String(m).padStart(2, "0");
-      const dd = String(d).padStart(2, "0");
-      return `${y}-${mm}-${dd}`;
-    }
-
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth() + 1;
-
-    const demo = [
-      { date: iso(y, m, 1), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 2), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 3), status: "late", remarks: "Arrived 10 mins late", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 4), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 5), status: "absent", remarks: "Sick leave", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-
-      { date: iso(y, m, 8), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 9), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 10), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 11), status: "late", remarks: "Traffic", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-      { date: iso(y, m, 12), status: "present", remarks: "", grade: cls.grade, section: cls.section, schoolYear: activeSY },
-    ];
-
-    localStorage.setItem(LS_ATT, JSON.stringify(demo));
-    console.log("[Attendance] Mock data seeded.");
+    !monthSelect ||
+    !tabTable ||
+    !tabCal ||
+    !viewTable ||
+    !viewCal ||
+    !tbody ||
+    !calTitle ||
+    !calGrid ||
+    !empty ||
+    !presentEl ||
+    !absentEl ||
+    !lateEl ||
+    !rateEl
+  ) {
+    return;
   }
+
+  // ==========================================
+  // STATE
+  // ==========================================
 
   const state = {
-    mode: "table",     // table | calendar
-    sy: "",            // active school year name from admin, e.g. "2025-2026"
-    month: "all",      // "all" or "0..11"
+    mode: "table",
+    month: "all",
+
+    grade: "",
+    section: "",
+
+    records: [],
   };
 
-  function readJSON(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
+  // ==========================================
+  // HELPERS
+  // ==========================================
 
-  function escapeHtml(s) {
-    return String(s ?? "")
+  function escapeHtml(value) {
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -136,316 +123,792 @@ function initAttendance() {
       .replaceAll("'", "&#039;");
   }
 
-  function norm(s) {
-    return String(s || "").trim().toLowerCase();
+  function norm(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
   }
 
-  function getActiveClass() {
-    try {
-      const raw = localStorage.getItem(LS_ACTIVE_CLASS);
-      if (raw) {
-        const v = JSON.parse(raw);
-        if (v && v.grade != null && v.section != null) {
-          return { grade: String(v.grade), section: String(v.section) };
-        }
-      }
-    } catch {}
-    // fallback demo
-    return { grade: "Grade 6", section: "A" };
-  }
-
-  function getAdminActiveSY() {
-    const store = readJSON(LS_SCHOOL_YEARS, null);
-    if (!store || !Array.isArray(store.items)) return "";
-    const active = store.items.find((x) => x && x.id === store.activeId);
-    return active ? String(active.name || "").trim() : "";
-  }
-
-  // Admin-controlled: single option (active SY only)
-  function buildSYFromAdmin() {
-    const adminSY = getAdminActiveSY();
-
-    if (!adminSY) {
-      sySelect.innerHTML = `<option value="">SY —</option>`;
-      sySelect.disabled = true;
-      state.sy = "";
-      return;
+  function normalizeRecord(record) {
+    if (!record || typeof record !== "object") {
+      return null;
     }
 
-    state.sy = adminSY;
-    sySelect.innerHTML = `<option value="${escapeHtml(adminSY)}">SY ${escapeHtml(adminSY)}</option>`;
-    sySelect.value = adminSY;
-    sySelect.disabled = true;
+    const date = String(
+      record.date || ""
+    ).trim();
+
+    if (!date) {
+      return null;
+    }
+
+    const status = norm(
+      record.status
+    );
+
+    let normalizedStatus = "";
+
+    if (status === "present") {
+      normalizedStatus = "present";
+    } else if (status === "absent") {
+      normalizedStatus = "absent";
+    } else if (status === "late") {
+      normalizedStatus = "late";
+    } else if (status === "excused") {
+      normalizedStatus = "excused";
+    }
+
+    return {
+      id: String(record.id || ""),
+      date,
+      status: normalizedStatus,
+
+      statusLabel:
+        record.statusLabel ||
+        (
+          normalizedStatus
+            ? normalizedStatus.charAt(0).toUpperCase() +
+              normalizedStatus.slice(1)
+            : "—"
+        ),
+    };
   }
 
-  // Normalize record shape so backend integration later is easy
-  // Expected prototype shape (suggested):
-  // { date:"2026-02-10", status:"present|absent|late", remarks:"", grade:"Grade 6", section:"A", schoolYear:"2025-2026" }
-  function normalizeRecord(r) {
-    if (!r || typeof r !== "object") return null;
+  function parseDate(dateStr) {
+    if (!dateStr) {
+      return null;
+    }
 
-    const date = String(r.date || r.day || r.attDate || "").trim();
-    if (!date) return null;
+    const d = new Date(
+      `${dateStr}T00:00:00`
+    );
 
-    const statusRaw = norm(r.status || r.state || r.attendance || "");
-    const status =
-      statusRaw.includes("abs") ? "absent" :
-      statusRaw.includes("late") ? "late" :
-      statusRaw.includes("pres") ? "present" :
-      "present";
+    if (Number.isNaN(d.getTime())) {
+      return null;
+    }
 
-    const remarks = String(r.remarks || r.note || "").trim();
-
-    const grade = String(r.grade || r.gradeLevel || "").trim();
-    const section = String(r.section || r.classSection || "").trim();
-    const schoolYear = String(r.schoolYear || r.sy || "").trim();
-
-    return { date, status, remarks, grade, section, schoolYear, raw: r };
-  }
-
-  function gradeMatches(itemGrade, activeGrade) {
-    const a = norm(activeGrade);
-    const g = norm(itemGrade);
-    if (!a) return true;
-    if (!g) return true;
-    const aNum = a.match(/\d+/)?.[0] || "";
-    const gNum = g.match(/\d+/)?.[0] || "";
-    return a === g || (aNum && gNum && aNum === gNum);
-  }
-
-  function sectionMatches(itemSection, activeSection) {
-    const a = norm(activeSection);
-    const s = norm(itemSection);
-    if (!a) return true;
-    if (!s) return true;
-    const aLetter = a.replace(/section/g, "").trim();
-    const sLetter = s.replace(/section/g, "").trim();
-    return a === s || aLetter === s || sLetter === a || aLetter === sLetter;
+    return d;
   }
 
   function parseMonthIndex(dateStr) {
-    // expects YYYY-MM-DD
-    const d = new Date(dateStr);
-    if (Number.isNaN(d.getTime())) return null;
-    return d.getMonth(); // 0..11
+    const d = parseDate(dateStr);
+
+    if (!d) {
+      return null;
+    }
+
+    return d.getMonth();
   }
 
   function niceDate(dateStr) {
-    const d = new Date(dateStr);
-    if (Number.isNaN(d.getTime())) return dateStr || "—";
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+    const d = parseDate(dateStr);
+
+    if (!d) {
+      return dateStr || "—";
+    }
+
+    return d.toLocaleDateString(
+      undefined,
+      {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      }
+    );
   }
+
+  function monthName(index) {
+    const names = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    return names[index] || "Month";
+  }
+
+  // ==========================================
+  // STATUS PILL
+  // ==========================================
 
   function statusPill(status) {
     const cls =
-      status === "present" ? "att-status att-present" :
-      status === "absent" ? "att-status att-absent" :
-      "att-status att-late";
+      status === "present"
+        ? "att-status att-present"
+        : status === "absent"
+        ? "att-status att-absent"
+        : status === "late"
+        ? "att-status att-late"
+        : "att-status";
 
-    const txt =
-      status === "present" ? "Present" :
-      status === "absent" ? "Absent" :
-      "Late";
+    const text =
+      status === "present"
+        ? "Present"
+        : status === "absent"
+        ? "Absent"
+        : status === "late"
+        ? "Late"
+        : status === "excused"
+        ? "Excused"
+        : "—";
 
-    return `<span class="${cls}">${txt}</span>`;
+    return `
+      <span class="${cls}">
+        ${escapeHtml(text)}
+      </span>
+    `;
   }
 
+  // ==========================================
+  // FETCH ATTENDANCE
+  // ==========================================
+
+  async function fetchAttendance() {
+    try {
+      empty.textContent =
+        "Loading attendance...";
+
+      empty.classList.remove(
+        "hidden"
+      );
+
+      tbody.innerHTML = "";
+      calGrid.innerHTML = "";
+
+      const response = await fetch(
+        "/api/student/attendance",
+        {
+          method: "GET",
+
+          credentials: "include",
+
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const result =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !result.ok
+      ) {
+        throw new Error(
+          result.message ||
+            "Failed to load attendance."
+        );
+      }
+
+      const data =
+        result.data || {};
+
+      // ==========================================
+      // STUDENT
+      // ==========================================
+
+      const student =
+        data.student || {};
+
+      state.grade = String(
+        student.grade || ""
+      ).trim();
+
+      state.section = String(
+        student.section || ""
+      ).trim();
+
+      // ==========================================
+      // RECORDS
+      // ==========================================
+
+      state.records =
+        Array.isArray(
+          data.records
+        )
+          ? data.records
+              .map(normalizeRecord)
+              .filter(Boolean)
+          : [];
+
+      // ==========================================
+      // INITIAL MONTH
+      // ==========================================
+
+      state.month =
+        monthSelect.value ||
+        "all";
+
+      render();
+
+    } catch (error) {
+      console.error(
+        "❌ Failed to fetch student attendance:",
+        error
+      );
+
+      state.records = [];
+      state.grade = "";
+      state.section = "";
+
+      tbody.innerHTML = "";
+      calGrid.innerHTML = "";
+
+      empty.textContent =
+        "Unable to load attendance.";
+
+      empty.classList.remove(
+        "hidden"
+      );
+    }
+  }
+
+  // ==========================================
+  // MODE
+  // ==========================================
+
   function setMode(mode) {
-    const isTable = mode === "table";
+    const isTable =
+      mode === "table";
 
-    tabTable.classList.toggle("active", isTable);
-    tabTable.setAttribute("aria-selected", isTable ? "true" : "false");
+    tabTable.classList.toggle(
+      "active",
+      isTable
+    );
 
-    tabCal.classList.toggle("active", !isTable);
-    tabCal.setAttribute("aria-selected", !isTable ? "true" : "false");
+    tabTable.setAttribute(
+      "aria-selected",
+      isTable
+        ? "true"
+        : "false"
+    );
 
-    viewTable.classList.toggle("hidden", !isTable);
-    viewCal.classList.toggle("hidden", isTable);
+    tabCal.classList.toggle(
+      "active",
+      !isTable
+    );
+
+    tabCal.setAttribute(
+      "aria-selected",
+      !isTable
+        ? "true"
+        : "false"
+    );
+
+    viewTable.classList.toggle(
+      "hidden",
+      !isTable
+    );
+
+    viewCal.classList.toggle(
+      "hidden",
+      isTable
+    );
 
     state.mode = mode;
   }
 
+  // ==========================================
+  // FILTER RECORDS
+  // ==========================================
+
+  function getFilteredRecords() {
+    let list = [
+      ...state.records,
+    ];
+
+    if (
+      state.month !== "all"
+    ) {
+      const monthIndex =
+        Number(state.month);
+
+      list =
+        list.filter(
+          (record) =>
+            parseMonthIndex(
+              record.date
+            ) === monthIndex
+        );
+    }
+
+    return list;
+  }
+
+  // ==========================================
+  // SUMMARY
+  // ==========================================
+
   function computeSummary(list) {
-    let present = 0, absent = 0, late = 0;
-    list.forEach((r) => {
-      if (r.status === "present") present++;
-      else if (r.status === "absent") absent++;
-      else if (r.status === "late") late++;
+    let present = 0;
+    let absent = 0;
+    let late = 0;
+
+    list.forEach((record) => {
+      if (
+        record.status ===
+        "present"
+      ) {
+        present++;
+      }
+
+      else if (
+        record.status ===
+        "absent"
+      ) {
+        absent++;
+      }
+
+      else if (
+        record.status ===
+        "late"
+      ) {
+        late++;
+      }
     });
 
-    const total = present + absent + late;
-    const attended = present + late;
-    const rate = total ? Math.round((attended / total) * 100) : 0;
+    const total =
+      present +
+      absent +
+      late;
 
-    presentEl.textContent = String(present);
-    absentEl.textContent = String(absent);
-    lateEl.textContent = String(late);
-    rateEl.textContent = total ? `${rate}%` : "—";
+    // Match backend calculation:
+    // present / total * 100
+
+    const rate =
+      total > 0
+        ? Math.round(
+            (present / total) *
+              100
+          )
+        : null;
+
+    presentEl.textContent =
+      String(present);
+
+    absentEl.textContent =
+      String(absent);
+
+    lateEl.textContent =
+      String(late);
+
+    rateEl.textContent =
+      rate === null
+        ? "—"
+        : `${rate}%`;
   }
+
+  // ==========================================
+  // TABLE
+  // ==========================================
 
   function renderTable(list) {
     tbody.innerHTML = "";
 
-    // newest first
-    const sorted = list.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const sorted =
+      list
+        .slice()
+        .sort((a, b) =>
+          String(b.date).localeCompare(
+            String(a.date)
+          )
+        );
 
-    sorted.forEach((r) => {
-      const tr = document.createElement("tr");
+    sorted.forEach((record) => {
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
       tr.innerHTML = `
-        <td>${escapeHtml(niceDate(r.date))}</td>
-        <td>${statusPill(r.status)}</td>
-        <td>${escapeHtml(r.remarks || "—")}</td>
+        <td>
+          ${escapeHtml(
+            niceDate(record.date)
+          )}
+        </td>
+
+        <td>
+          ${statusPill(
+            record.status
+          )}
+        </td>
       `;
-      tbody.appendChild(tr);
+
+      tbody.appendChild(
+        tr
+      );
     });
   }
 
-  function monthName(idx) {
-    const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    return names[idx] || "Month";
-  }
+  // ==========================================
+  // CALENDAR
+  // ==========================================
 
   function renderCalendar(list) {
-    // If month is "all", just show current month for calendar view
-    let monthIdx = state.month === "all" ? new Date().getMonth() : Number(state.month);
+    let monthIndex =
+      state.month === "all"
+        ? new Date().getMonth()
+        : Number(state.month);
 
-    if (Number.isNaN(monthIdx) || monthIdx < 0 || monthIdx > 11) monthIdx = new Date().getMonth();
+    if (
+      Number.isNaN(monthIndex) ||
+      monthIndex < 0 ||
+      monthIndex > 11
+    ) {
+      monthIndex =
+        new Date().getMonth();
+    }
 
-    calTitle.textContent = monthName(monthIdx);
+    calTitle.textContent =
+      monthName(monthIndex);
 
-    // Build a map dateStr -> status (if multiple, prioritize absent > late > present)
+    // ------------------------------------------
+    // Determine calendar year
+    // ------------------------------------------
+
+    let year =
+      new Date().getFullYear();
+
+    const monthRecord =
+      list.find(
+        (record) =>
+          parseMonthIndex(
+            record.date
+          ) === monthIndex
+      );
+
+    if (monthRecord) {
+      const d =
+        parseDate(
+          monthRecord.date
+        );
+
+      if (d) {
+        year =
+          d.getFullYear();
+      }
+    }
+
+    // ------------------------------------------
+    // Map attendance by date
+    // ------------------------------------------
+
     const map = new Map();
-    list.forEach((r) => {
-      const mi = parseMonthIndex(r.date);
-      if (mi !== monthIdx) return;
 
-      const prev = map.get(r.date);
-      if (!prev) return map.set(r.date, r.status);
+    list.forEach((record) => {
+      const recordMonth =
+        parseMonthIndex(
+          record.date
+        );
 
-      const rank = (s) => (s === "absent" ? 3 : s === "late" ? 2 : 1);
-      if (rank(r.status) > rank(prev)) map.set(r.date, r.status);
+      if (
+        recordMonth !==
+        monthIndex
+      ) {
+        return;
+      }
+
+      const previous =
+        map.get(record.date);
+
+      if (!previous) {
+        map.set(
+          record.date,
+          record.status
+        );
+
+        return;
+      }
+
+      // Priority:
+      // absent > late > excused > present
+
+      const rank = (status) => {
+        if (
+          status === "absent"
+        ) {
+          return 4;
+        }
+
+        if (
+          status === "late"
+        ) {
+          return 3;
+        }
+
+        if (
+          status === "excused"
+        ) {
+          return 2;
+        }
+
+        if (
+          status === "present"
+        ) {
+          return 1;
+        }
+
+        return 0;
+      };
+
+      if (
+        rank(record.status) >
+        rank(previous)
+      ) {
+        map.set(
+          record.date,
+          record.status
+        );
+      }
     });
 
-    // Calendar grid for the month (simple)
-    const year = new Date().getFullYear(); // frontend-only; backend can set this later
-    const first = new Date(year, monthIdx, 1);
-    const last = new Date(year, monthIdx + 1, 0);
+    // ------------------------------------------
+    // Build calendar
+    // ------------------------------------------
 
-    const startDow = first.getDay(); // 0 Sun .. 6 Sat
-    const daysInMonth = last.getDate();
+    const first =
+      new Date(
+        year,
+        monthIndex,
+        1
+      );
+
+    const last =
+      new Date(
+        year,
+        monthIndex + 1,
+        0
+      );
+
+    const startDow =
+      first.getDay();
+
+    const daysInMonth =
+      last.getDate();
 
     calGrid.innerHTML = "";
 
-    // pad blanks
-    for (let i = 0; i < startDow; i++) {
-      const blank = document.createElement("div");
-      blank.className = "att-cal-day";
-      blank.style.opacity = "0";
-      calGrid.appendChild(blank);
+    // Blank cells before day 1
+    for (
+      let i = 0;
+      i < startDow;
+      i++
+    ) {
+      const blank =
+        document.createElement(
+          "div"
+        );
+
+      blank.className =
+        "att-cal-day";
+
+      blank.style.opacity =
+        "0";
+
+      calGrid.appendChild(
+        blank
+      );
     }
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const d = new Date(year, monthIdx, day);
-      const iso = d.toISOString().slice(0, 10);
+    // Days
+    for (
+      let day = 1;
+      day <= daysInMonth;
+      day++
+    ) {
+      const month =
+        String(
+          monthIndex + 1
+        ).padStart(
+          2,
+          "0"
+        );
 
-      const st = map.get(iso) || "";
-      const cell = document.createElement("div");
-      cell.className = "att-cal-day" + (st ? ` ${st}` : "");
+      const dayString =
+        String(day).padStart(
+          2,
+          "0"
+        );
+
+      const iso =
+        `${year}-${month}-${dayString}`;
+
+      const status =
+        map.get(iso) || "";
+
+      const cell =
+        document.createElement(
+          "div"
+        );
+
+      cell.className =
+        "att-cal-day" +
+        (
+          status
+            ? ` ${status}`
+            : ""
+        );
+
+      let statusLetter = "";
+
+      if (
+        status === "present"
+      ) {
+        statusLetter = "P";
+      }
+
+      else if (
+        status === "absent"
+      ) {
+        statusLetter = "A";
+      }
+
+      else if (
+        status === "late"
+      ) {
+        statusLetter = "L";
+      }
+
+      else if (
+        status === "excused"
+      ) {
+        statusLetter = "E";
+      }
 
       cell.innerHTML = `
-        <div>${day}</div>
-        <div style="font-weight:1000; font-size:10px; opacity:.8;">
-          ${st ? (st === "present" ? "P" : st === "absent" ? "A" : "L") : ""}
+        <div>
+          ${day}
+        </div>
+
+        <div
+          style="
+            font-weight:1000;
+            font-size:10px;
+            opacity:.8;
+          "
+        >
+          ${statusLetter}
         </div>
       `;
 
-      calGrid.appendChild(cell);
+      calGrid.appendChild(
+        cell
+      );
     }
   }
 
-  function getFilteredRecords() {
-    const cls = getActiveClass();
-    buildSYFromAdmin();
-
-    // Header labels
-    if (gradeSectionEl) gradeSectionEl.textContent = `${cls.grade} - Section ${cls.section}`;
-    if (syLabelEl) syLabelEl.textContent = state.sy ? `SY ${state.sy}` : "SY —";
-
-    // If no active SY set by admin, nothing to show
-    if (!state.sy) return { cls, list: [] };
-
-    const raw = readJSON(LS_ATT, []);
-    const all = Array.isArray(raw) ? raw : [];
-
-    let list = all
-      .map(normalizeRecord)
-      .filter(Boolean)
-      .filter((r) => gradeMatches(r.grade, cls.grade))
-      .filter((r) => sectionMatches(r.section, cls.section))
-      .filter((r) => !r.schoolYear || r.schoolYear === state.sy);
-
-    if (state.month !== "all") {
-      const m = Number(state.month);
-      list = list.filter((r) => parseMonthIndex(r.date) === m);
-    }
-
-    return { cls, list };
-  }
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   function render() {
-  const cls = getActiveClass();
-  buildSYFromAdmin();
+    // ------------------------------------------
+    // Grade + Section
+    // ------------------------------------------
 
-  // ✅ seed mock data ONLY if empty and we have active SY
-  if (state.sy) {
-    seedAttendanceIfEmpty(state.sy, cls);
-  }
+    if (gradeSectionEl) {
+      const grade =
+        state.grade ||
+        "Grade —";
 
-  const { list } = getFilteredRecords();
+      const section =
+        state.section;
+
+      gradeSectionEl.textContent =
+        section
+          ? `${grade} - Section ${section}`
+          : grade;
+    }
+
+    // ------------------------------------------
+    // Filter
+    // ------------------------------------------
+
+    const list =
+      getFilteredRecords();
+
+    // ------------------------------------------
+    // Summary
+    // ------------------------------------------
 
     computeSummary(list);
 
-    // Empty state handling
-    const hasAny = list.length > 0;
+    // ------------------------------------------
+    // Empty state
+    // ------------------------------------------
 
-    empty.classList.toggle("hidden", hasAny);
-    viewTable.classList.toggle("hidden", !hasAny && state.mode === "table" ? false : state.mode !== "table");
-    // Keep calendar visible when selected, even if empty
-    // (we still show empty message below the views)
-    // We'll just render empty views.
-    if (state.mode === "table") renderTable(list);
-    else renderCalendar(list);
+    const hasRecords =
+      list.length > 0;
 
-    // If no records, still render blank table header (tbody empty) + calendar grid
-    if (!hasAny) {
-      if (state.mode === "table") tbody.innerHTML = "";
-      else renderCalendar(list);
+    empty.classList.toggle(
+      "hidden",
+      hasRecords
+    );
+
+    if (!hasRecords) {
+      empty.textContent =
+        "No attendance record yet.";
+    }
+
+    // ------------------------------------------
+    // Current view
+    // ------------------------------------------
+
+    if (
+      state.mode === "table"
+    ) {
+      renderTable(list);
+    } else {
+      renderCalendar(list);
     }
   }
 
-  // Events
-  tabTable.addEventListener("click", () => {
-    setMode("table");
-    render();
-  });
+  // ==========================================
+  // EVENTS
+  // ==========================================
 
-  tabCal.addEventListener("click", () => {
-    setMode("calendar");
-    render();
-  });
+  tabTable.addEventListener(
+    "click",
+    () => {
+      setMode("table");
+      render();
+    }
+  );
 
-  monthSelect.addEventListener("change", () => {
-    state.month = monthSelect.value || "all";
-    render();
-  });
+  tabCal.addEventListener(
+    "click",
+    () => {
+      setMode("calendar");
+      render();
+    }
+  );
 
-  // SY is admin-controlled single option but keep safe
-  sySelect.addEventListener("change", () => {
-    state.sy = sySelect.value || "";
-    render();
-  });
+  monthSelect.addEventListener(
+    "change",
+    () => {
+      state.month =
+        monthSelect.value ||
+        "all";
 
-  // Boot
+      render();
+    }
+  );
+
+  // ==========================================
+  // BOOT
+  // ==========================================
+
   setMode("table");
-  render();
+
+  fetchAttendance();
 }
