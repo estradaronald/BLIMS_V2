@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+
   <title>Admin - Students</title>
+
 
   <!-- Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,10 +16,12 @@
     crossorigin
   />
 
+
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
     rel="stylesheet"
   />
+
 
   <!-- Prevent sidebar flash -->
   <script>
@@ -26,6 +30,7 @@
         const collapsed =
           localStorage.getItem("admin_sidebar_collapsed_v1") === "1";
 
+
         if (collapsed) {
           document.documentElement.classList.add("sb-collapsed");
         }
@@ -33,13 +38,16 @@
     })();
   </script>
 
+
   <!-- Styles -->
   <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
   <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
   <link rel="stylesheet" href="../../styles/admin/admin-students.css" />
 </head>
 
+
 <body data-page="students">
+
 
   <!-- Floating sidebar toggle -->
   <button
@@ -51,22 +59,30 @@
     ←
   </button>
 
+
   <div class="app">
+
 
     <!-- Sidebar -->
     <div id="sidebar-mount"></div>
 
+
     <main class="content">
+
 
       <!-- =========================
            TOP BAR
       ========================== -->
 
+
       <header class="topbar">
+
 
         <div class="topbar-right">
 
+
           <div class="tb-user" id="userbox">
+
 
             <img
               class="tb-avatar"
@@ -74,17 +90,22 @@
               alt="avatar"
             />
 
+
             <div class="tb-meta">
+
 
               <div class="tb-name">
                 Estrada, Ronald B.
               </div>
 
+
               <div class="tb-role">
                 Admin
               </div>
 
+
             </div>
+
 
             <button
               class="tb-drop"
@@ -94,7 +115,9 @@
               ▾
             </button>
 
+
             <div class="tb-menu" id="userMenu">
+
 
               <button
                 class="tb-item"
@@ -102,6 +125,7 @@
               >
                 Settings
               </button>
+
 
               <button
                 class="tb-item danger"
@@ -111,32 +135,44 @@
                 Logout
               </button>
 
+
             </div>
+
 
           </div>
 
+
         </div>
 
+
       </header>
+
+
 
 
       <!-- =========================
            PAGE
       ========================== -->
 
+
       <section class="teachers-wrap">
+
 
         <!-- =========================
              PAGE HEADER
         ========================== -->
 
+
         <div class="teachers-page-head">
+
 
           <h2 class="teachers-title">
             Learners
           </h2>
 
+
           <div class="students-head-actions">
+
 
             <button
               id="bulkCreateBtn"
@@ -147,6 +183,7 @@
               <span class="t-plus">＋</span>
             </button>
 
+
             <button
               id="addNewBtn"
               class="t-add-btn"
@@ -156,35 +193,47 @@
               <span class="t-plus">＋</span>
             </button>
 
+
           </div>
 
+
         </div>
+
+
 
 
         <!-- =========================
              LIST VIEW
         ========================== -->
 
+
         <section
           id="listView"
           class="t-view"
         >
 
+
           <div class="card t-card">
 
+
             <div class="t-card-head">
+
 
               <div class="t-subtitle">
                 All Learners List
               </div>
 
+
               <div class="t-tools">
 
+
                 <div class="t-search">
+
 
                   <span class="t-search-ico">
                     🔎
                   </span>
+
 
                   <input
                     id="searchInput"
@@ -192,59 +241,78 @@
                     placeholder="Search by Name, ID, or LRN"
                   />
 
+
                 </div>
+
 
                 <select
                   id="classFilter"
                   class="t-filter"
                 >
 
+
                   <option value="all">
                     All Classes
                   </option>
 
+
                 </select>
 
+
               </div>
+
 
             </div>
 
 
+
+
             <div class="t-table-wrap">
+
 
               <table class="t-table">
 
+
                 <thead>
 
+
                   <tr>
+
 
                     <th style="width:70px">
                       No.
                     </th>
 
+
                     <th>
                       Full Name
                     </th>
+
 
                     <th>
                       Student ID
                     </th>
 
+
                     <th>
                       LRN
                     </th>
+
 
                     <th>
                       Email
                     </th>
 
+
                     <th>
                       Class &amp; Section
                     </th>
 
+
                     <th>
                       Contact No.
                     </th>
+
 
                     <th
                       class="t-action-head"
@@ -253,173 +321,235 @@
                       Action
                     </th>
 
+
                   </tr>
+
 
                 </thead>
 
 
+
+
                 <tbody id="studentsTbody">
 
+
                   <tr class="t-empty">
+
 
                     <td colspan="8">
                       No students yet.
                     </td>
 
+
                   </tr>
+
 
                 </tbody>
 
+
               </table>
+
 
             </div>
 
+
           </div>
 
+
         </section>
+
+
 
 
         <!-- =========================
              ADD / EDIT FORM
         ========================== -->
 
+
         <section
           id="formView"
           class="t-view hidden"
         >
 
+
           <div class="t-form-grid">
+
 
             <!-- LEFT COLUMN -->
 
+
             <div class="t-form-left t-left-col">
 
+
               <div class="card t-form-card t-basic-card">
+
 
                 <div class="t-form-hd">
                   Basic Information
                 </div>
 
+
                 <div class="t-form-bd">
+
 
                   <div class="t-basic-left">
 
+
                     <div class="t-row2">
 
+
                       <div class="t-field">
+
 
                         <label>
                           First Name
                         </label>
+
 
                         <input
                           id="firstName"
                           type="text"
                         />
 
+
                       </div>
 
+
                       <div class="t-field">
+
 
                         <label>
                           Last Name
                         </label>
+
 
                         <input
                           id="lastName"
                           type="text"
                         />
 
+
                       </div>
+
 
                     </div>
 
 
+
+
                     <div class="t-row2">
 
+
                       <div class="t-field">
+
 
                         <label>
                           Middle Name
                         </label>
+
 
                         <input
                           id="middleName"
                           type="text"
                         />
 
+
                       </div>
 
+
                       <div class="t-field">
+
 
                         <label>
                           Suffix
                         </label>
+
 
                         <select
                           id="suffix"
                           class="t-select"
                         >
 
+
                           <option value="">
                             None
                           </option>
+
 
                           <option value="Jr.">
                             Jr.
                           </option>
 
+
                           <option value="Sr.">
                             Sr.
                           </option>
+
 
                           <option value="II">
                             II
                           </option>
 
+
                           <option value="III">
                             III
                           </option>
+
 
                           <option value="IV">
                             IV
                           </option>
 
+
                           <option value="V">
                             V
                           </option>
 
+
                         </select>
 
+
                       </div>
+
 
                     </div>
 
 
+
+
                     <div class="t-row2">
 
+
                       <div class="t-field">
+
 
                         <label>
                           Date of Birth
                         </label>
+
 
                         <input
                           id="dob"
                           type="date"
                         />
 
+
                       </div>
 
+
                       <div class="t-field">
+
 
                         <label>
                           Gender
                         </label>
 
+
                         <div class="t-gender">
 
+
                           <label class="t-radio">
+
 
                             <input
                               type="radio"
@@ -428,13 +558,17 @@
                               checked
                             />
 
+
                             <span>
                               Male
                             </span>
 
+
                           </label>
 
+
                           <label class="t-radio">
+
 
                             <input
                               type="radio"
@@ -442,26 +576,36 @@
                               value="female"
                             />
 
+
                             <span>
                               Female
                             </span>
 
+
                           </label>
+
 
                         </div>
 
+
                       </div>
+
 
                     </div>
 
 
+
+
                     <div class="t-row2">
 
+
                       <div class="t-field">
+
 
                         <label>
                           LRN
                         </label>
+
 
                         <input
                           id="lrn"
@@ -469,44 +613,62 @@
                           placeholder="Learner Reference Number"
                         />
 
+
                       </div>
+
 
                     </div>
 
+
                   </div>
+
 
                 </div>
 
+
               </div>
+
 
             </div>
 
 
+
+
             <!-- RIGHT COLUMN -->
+
 
             <div class="t-form-right t-right-col">
 
+
               <div class="card t-form-card">
+
 
                 <div class="t-form-hd">
                   Contact &amp; Address
                 </div>
 
+
                 <div class="t-form-bd">
+
 
                   <div class="t-row2">
 
+
                     <div class="t-field">
+
 
                       <label>
                         Phone
                       </label>
 
+
                       <div class="phone-input">
+
 
                         <span class="phone-prefix">
                           +63
                         </span>
+
 
                         <input
                           id="phone"
@@ -515,62 +677,85 @@
                           placeholder="9123456789"
                         />
 
+
                       </div>
+
 
                     </div>
 
 
+
+
                     <div class="t-field">
+
 
                       <label>
                         Email
                       </label>
+
 
                       <input
                         id="email"
                         type="email"
                       />
 
+
                     </div>
+
 
                   </div>
 
 
+
+
                   <div class="t-field">
+
 
                     <label>
                       Street
                     </label>
+
 
                     <input
                       id="street"
                       type="text"
                     />
 
+
                   </div>
+
+
 
 
                   <div class="t-row2">
 
+
                     <div class="t-field">
+
 
                       <label>
                         Province
                       </label>
+
 
                       <select
                         id="provinceSelect"
                         class="t-select"
                       ></select>
 
+
                     </div>
+
+
 
 
                     <div class="t-field">
 
+
                       <label>
                         City
                       </label>
+
 
                       <select
                         id="citySelect"
@@ -578,18 +763,25 @@
                         disabled
                       ></select>
 
+
                     </div>
+
 
                   </div>
 
 
+
+
                   <div class="t-row2">
 
+
                     <div class="t-field">
+
 
                       <label>
                         Barangay
                       </label>
+
 
                       <select
                         id="brgySelect"
@@ -597,44 +789,61 @@
                         disabled
                       ></select>
 
+
                     </div>
+
+
 
 
                     <div class="t-field">
 
+
                       <label>
                         Postal Code
                       </label>
+
 
                       <input
                         id="postal"
                         type="text"
                       />
 
+
                     </div>
+
 
                   </div>
 
+
                 </div>
+
 
               </div>
 
 
+
+
               <div class="card t-form-card">
+
 
                 <div class="t-form-hd">
                   Account Setting
                 </div>
 
+
                 <div class="t-form-bd">
+
 
                   <div class="t-row2">
 
+
                     <div class="t-field">
+
 
                       <label>
                         Student ID
                       </label>
+
 
                       <input
                         id="studentId"
@@ -643,14 +852,19 @@
                         placeholder="Automatically generated"
                       />
 
+
                     </div>
+
+
 
 
                     <div class="t-field">
 
+
                       <label>
                         Temporary Password
                       </label>
+
 
                       <input
                         id="tempPass"
@@ -659,9 +873,13 @@
                         placeholder="Automatically generated"
                       />
 
+
                     </div>
 
+
                   </div>
+
+
 
 
                   <small class="account-note">
@@ -669,9 +887,13 @@
                     generated by the system.
                   </small>
 
+
                 </div>
 
+
               </div>
+
+
 
 
               <div
@@ -680,9 +902,12 @@
               ></div>
 
 
+
+
               <div
                 class="t-form-actions t-form-actions-bottom"
               >
+
 
                 <button
                   id="cancelBtn"
@@ -692,6 +917,7 @@
                   Cancel
                 </button>
 
+
                 <button
                   id="resetBtn"
                   class="t-ghost"
@@ -699,6 +925,7 @@
                 >
                   Reset
                 </button>
+
 
                 <button
                   id="saveBtn"
@@ -708,50 +935,70 @@
                   Save
                 </button>
 
+
               </div>
+
 
             </div>
 
+
           </div>
 
+
         </section>
+
+
 
 
         <!-- =========================
              BULK CREATE VIEW
         ========================== -->
 
+
         <section
           id="bulkCreateView"
           class="t-view hidden"
         >
 
+
           <div class="card bulk-create-card">
+
 
             <!-- HEADER -->
 
+
             <div class="bulk-create-header">
 
+
               <div>
+
 
                 <div class="bulk-create-title">
                   Bulk Create Learners
                 </div>
 
+
                 <div class="bulk-create-subtitle">
                   Create multiple learner accounts at once.
                 </div>
 
+
               </div>
+
 
             </div>
 
 
+
+
             <!-- IMPORT TOOLS -->
+
 
             <div class="bulk-import-tools">
 
+
               <div class="bulk-import-left">
+
 
                 <button
                   id="bulkUploadBtn"
@@ -762,6 +1009,7 @@
                   Upload Excel
                 </button>
 
+
                 <button
                   id="bulkDownloadTemplateBtn"
                   class="bulk-tool-btn"
@@ -771,6 +1019,7 @@
                   Download Template
                 </button>
 
+
                 <input
                   id="bulkExcelInput"
                   type="file"
@@ -778,16 +1027,22 @@
                   hidden
                 />
 
+
               </div>
 
+
               <div class="bulk-import-note">
-                Excel columns: First Name, Last Name, LRN, Grade Level, Section
+                Excel columns: First Name, Last Name, LRN, Phone, Grade Level, Section
               </div>
+
 
             </div>
 
 
+
+
             <!-- IMPORT STATUS -->
+
 
             <div
               id="bulkImportStatus"
@@ -795,7 +1050,10 @@
             ></div>
 
 
+
+
             <!-- ERROR -->
+
 
             <div
               id="bulkCreateError"
@@ -805,16 +1063,68 @@
 
             <!-- MANUAL ENTRY LABEL -->
 
-            <div class="bulk-entry-label">
-              Learner Information
+
+            <div class="bulk-entry-header">
+
+
+              <div>
+                <div class="bulk-entry-label">
+                  Learner Information
+                </div>
+
+
+                <div class="bulk-entry-note">
+                  Grade Level and Section are optional.
+                </div>
+              </div>
+
+
+              <div class="bulk-row-generator">
+
+
+                <label
+                  for="bulkLearnerCount"
+                  class="bulk-row-generator-label"
+                >
+                  Number of Learners
+                </label>
+
+
+                <div class="bulk-row-generator-controls">
+
+
+                  <input
+                    id="bulkLearnerCount"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value="2"
+                    placeholder="2"
+                  />
+
+
+                  <button
+                    id="generateBulkRowsBtn"
+                    type="button"
+                    class="bulk-generate-btn"
+                  >
+                    Generate
+                  </button>
+
+
+                </div>
+
+
+              </div>
+
+
             </div>
 
-            <div class="bulk-entry-note">
-              Grade Level and Section are optional.
-            </div>
+
 
 
             <!-- LEARNER ROWS -->
+
 
             <div
               id="bulkLearnersContainer"
@@ -822,7 +1132,10 @@
             ></div>
 
 
+
+
             <!-- ADD ANOTHER -->
+
 
             <button
               id="addBulkLearnerBtn"
@@ -834,9 +1147,13 @@
             </button>
 
 
+
+
             <!-- ACTIONS -->
 
+
             <div class="bulk-create-actions">
+
 
               <button
                 id="bulkCancelBtn"
@@ -846,6 +1163,7 @@
                 Cancel
               </button>
 
+
               <button
                 id="bulkCreateSubmitBtn"
                 class="t-save"
@@ -854,29 +1172,38 @@
                 Create Learners
               </button>
 
+
             </div>
+
+
 
 
             <!-- =========================
                  CREATED ACCOUNTS RESULT
             ========================== -->
 
+
             <section
               id="bulkCreatedAccounts"
               class="bulk-created-accounts hidden"
             >
 
+
               <div class="bulk-success-banner">
+
 
                 <div class="bulk-success-icon">
                   ✓
                 </div>
 
+
                 <div>
+
 
                   <div class="bulk-success-title">
                     Learners Created Successfully
                   </div>
+
 
                   <div
                     id="bulkSuccessMessage"
@@ -885,25 +1212,34 @@
                     The learner accounts have been created successfully.
                   </div>
 
+
                 </div>
+
 
               </div>
 
 
+
+
               <div class="bulk-results-head">
 
+
                 <div>
+
 
                   <div class="bulk-results-title">
                     Created Accounts
                   </div>
+
 
                   <div class="bulk-results-note">
                     Keep these credentials secure. Temporary passwords should
                     be provided to the corresponding learners.
                   </div>
 
+
                 </div>
+
 
                 <button
                   id="bulkDownloadAccountsBtn"
@@ -914,58 +1250,79 @@
                   Download Created Accounts
                 </button>
 
+
               </div>
+
+
 
 
               <div class="bulk-results-table-wrap">
 
+
                 <table class="bulk-results-table">
+
 
                   <thead>
 
+
                     <tr>
+
 
                       <th>
                         No.
                       </th>
 
+
                       <th>
                         Learner
                       </th>
+
 
                       <th>
                         LRN
                       </th>
 
+
                       <th>
                         Grade Level
                       </th>
+
 
                       <th>
                         Section
                       </th>
 
+
                       <th>
                         Student ID
                       </th>
+
 
                       <th>
                         Temporary Password
                       </th>
 
+
                     </tr>
 
+
                   </thead>
+
 
                   <tbody id="bulkCreatedAccountsTbody">
                   </tbody>
 
+
                 </table>
+
 
               </div>
 
 
+
+
               <div class="bulk-result-actions">
+
 
                 <button
                   id="bulkDoneBtn"
@@ -975,24 +1332,34 @@
                   Done
                 </button>
 
+
               </div>
+
 
             </section>
 
+
           </div>
+
 
         </section>
 
+
       </section>
+
 
     </main>
 
+
   </div>
+
+
 
 
   <!-- =========================
        STUDENT PROFILE MODAL
   ========================== -->
+
 
   <div
     id="studentModal"
@@ -1000,10 +1367,13 @@
     aria-hidden="true"
   >
 
+
     <div
       class="tmodal-backdrop"
       id="studentModalBackdrop"
     ></div>
+
+
 
 
     <div
@@ -1014,11 +1384,15 @@
       aria-labelledby="studentModalTitle"
     >
 
+
       <div class="tmodal-head">
+
 
         <div class="tmodal-head-left">
 
+
           <div>
+
 
             <div
               id="studentModalTitle"
@@ -1027,29 +1401,41 @@
               Student Profile
             </div>
 
+
             <div class="tmodal-sub">
+
 
               <span id="smStudentId">
                 Student ID: —
               </span>
 
+
               <span class="tmodal-dot">
                 •
               </span>
 
+
               <span class="tmodal-status">
+
 
                 <span class="tmodal-status-dot"></span>
 
+
                 Active
+
 
               </span>
 
+
             </div>
+
 
           </div>
 
+
         </div>
+
+
 
 
         <button
@@ -1061,10 +1447,14 @@
           ✕
         </button>
 
+
       </div>
 
 
+
+
       <div class="tmodal-tabs">
+
 
         <button
           class="tmodal-tab active"
@@ -1073,6 +1463,8 @@
         >
           Basic Info
         </button>
+
+
 
 
         <button
@@ -1084,6 +1476,8 @@
         </button>
 
 
+
+
         <button
           class="tmodal-tab"
           data-tab="account"
@@ -1092,90 +1486,123 @@
           Account
         </button>
 
+
       </div>
 
 
+
+
       <div class="tmodal-body">
+
 
         <div
           class="tmodal-panel"
           data-panel="basic"
         >
 
+
           <div class="tmodal-grid">
 
+
             <div class="tmodal-field">
+
 
               <label>
                 Full Name
               </label>
+
 
               <input
                 id="smFullName"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Student ID
               </label>
+
 
               <input
                 id="smStudentIdBasic"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 LRN
               </label>
+
 
               <input
                 id="smLRN"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Gender
               </label>
+
 
               <input
                 id="smGender"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Date of Birth
               </label>
+
 
               <input
                 id="smDob"
                 readonly
               />
 
+
             </div>
+
 
           </div>
 
+
         </div>
+
+
 
 
         <div
@@ -1183,108 +1610,147 @@
           data-panel="address"
         >
 
+
           <div class="tmodal-grid">
 
+
             <div class="tmodal-field">
+
 
               <label>
                 Phone
               </label>
+
 
               <input
                 id="smPhone"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Email
               </label>
+
 
               <input
                 id="smEmail"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Street
               </label>
+
 
               <input
                 id="smStreet"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Province
               </label>
+
 
               <input
                 id="smProvince"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 City
               </label>
+
 
               <input
                 id="smCity"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Barangay
               </label>
+
 
               <input
                 id="smBrgy"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Postal Code
               </label>
+
 
               <input
                 id="smPostal"
                 readonly
               />
 
+
             </div>
+
 
           </div>
 
+
         </div>
+
+
 
 
         <div
@@ -1292,27 +1758,36 @@
           data-panel="account"
         >
 
+
           <div class="tmodal-grid">
 
+
             <div class="tmodal-field">
+
 
               <label>
                 Student ID
               </label>
+
 
               <input
                 id="smAccId"
                 readonly
               />
 
+
             </div>
+
+
 
 
             <div class="tmodal-field">
 
+
               <label>
                 Account Status
               </label>
+
 
               <input
                 id="smAccountStatus"
@@ -1320,16 +1795,23 @@
                 readonly
               />
 
+
             </div>
+
 
           </div>
 
+
         </div>
+
 
       </div>
 
 
+
+
       <div class="tmodal-foot">
+
 
         <button
           class="t-ghost"
@@ -1340,7 +1822,10 @@
         </button>
 
 
+
+
         <div class="tmodal-foot-right">
+
 
           <button
             class="t-save"
@@ -1351,6 +1836,8 @@
           </button>
 
 
+
+
           <button
             class="tmodal-danger"
             id="studentModalDisableBtn"
@@ -1359,28 +1846,38 @@
             Disable Account
           </button>
 
+
         </div>
+
 
       </div>
 
+
     </div>
 
+
   </div>
+
+
 
 
   <!-- =========================
        JAVASCRIPT
   ========================== -->
 
+
   <!-- SheetJS for Excel import/export -->
   <script
     src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
   ></script>
+
 
   <script src="../../js/auth/admin-guard.js"></script>
   <script src="../../js/admin/sidebar.js"></script>
   <script src="../../js/admin/admin-dashboard.js"></script>
   <script src="../../js/admin/admin-students.js"></script>
 
+
 </body>
 </html>
+

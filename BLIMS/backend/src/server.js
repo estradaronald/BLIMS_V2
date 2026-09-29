@@ -50,6 +50,9 @@ const teacherScheduleRoutes = require("./routes/teacher.schedule.routes");
 const teacherAssessmentRoutes = require("./routes/teacher.assessment.routes");
 const teacherGradeRoutes = require("./routes/teacherGrade.routes");
 
+// Teacher Promotion
+const teacherPromotionRoutes = require("./routes/teacherPromotion.routes");
+
 // Teacher announcements
 const teacherAnnouncementsRoutes = require("./routes/teacher.announcements.routes");
 
@@ -430,6 +433,23 @@ app.use(
 app.use(
   "/api/teacher/grades",
   teacherGradeRoutes
+);
+
+// ==================================================
+// TEACHER PROMOTION
+// ==================================================
+//
+// GET
+// /api/teacher/promotion
+//
+// POST
+// /api/teacher/promotion/submit
+//
+// ==================================================
+
+app.use(
+  "/api/teacher/promotion",
+  teacherPromotionRoutes
 );
 
 // ==================================================

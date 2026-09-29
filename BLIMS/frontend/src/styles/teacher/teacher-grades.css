@@ -1,24 +1,390 @@
-/* frontend/src/styles/teacher/teacher-grades.css */
+/* =========================================================
+   TEACHER GRADES
+   Standalone teacher grades styles.
+   Does NOT depend on admin/sidebar.css
+   Does NOT depend on admin-dashboard.css
+========================================================= */
+
 
 /* =========================================================
-   HEADER SPACING
-   ========================================================= */
+   GLOBAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    Arial,
+    sans-serif;
+
+  background: #d9d9d9;
+
+  color: #0b2c4a;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   APP LAYOUT
+========================================================= */
+
+.app {
+  display: block;
+  width: 100%;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+/*
+  Teacher sidebar:
+  left: 14px
+  width: 260px
+
+  Content:
+  14px + 260px + 14px = 288px
+*/
+
+.content {
+  margin:
+    14px 14px 14px 288px;
+
+  background: #e9e9e9;
+
+  border-radius: 14px;
+
+  padding: 14px;
+
+  min-height:
+    calc(100vh - 28px);
+
+  position: relative;
+
+  transition:
+    margin-left 0.18s ease;
+}
+
+
+/* =========================================================
+   COLLAPSED SIDEBAR
+========================================================= */
+
+html.sb-collapsed .content {
+  margin-left: 114px;
+}
+
+
+/* =========================================================
+   FLOATING SIDEBAR TOGGLE
+========================================================= */
+
+.sidebar-float-toggle {
+  position: fixed;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.20),
+    0 0 0 3px rgba(11, 77, 122, 0.15);
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999999;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.sidebar-float-toggle:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.25),
+    0 0 0 4px rgba(11, 77, 122, 0.25);
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
 
 .topbar {
+  height: 56px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
   margin-bottom: 4px;
+
+  padding:
+    6px 8px 6px 60px;
+
+  position: relative;
+
+  z-index: 50;
+
+  overflow: visible !important;
 }
+
+.topbar-left {
+  flex: 1;
+}
+
+.topbar-right {
+  position: relative;
+
+  z-index: 60;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  overflow: visible !important;
+}
+
+
+/* =========================================================
+   USER AREA
+========================================================= */
+
+.tb-user {
+  position: relative;
+
+  z-index: 70;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    8px 10px;
+
+  background: #ffffff;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.10);
+
+  overflow: visible !important;
+}
+
+.tb-avatar {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.tb-meta {
+  display: flex;
+
+  flex-direction: column;
+
+  line-height: 1.1;
+}
+
+.tb-name {
+  font-weight: 900;
+
+  font-size: 13px;
+}
+
+.tb-role {
+  font-size: 11px;
+
+  color:
+    rgba(11, 44, 74, 0.60);
+}
+
+.tb-drop {
+  width: 34px;
+  height: 34px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #f1f4f8;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  line-height: 1;
+
+  padding: 0;
+}
+
+
+/* =========================================================
+   USER DROPDOWN
+========================================================= */
+
+.tb-menu {
+  position: absolute;
+
+  top:
+    calc(100% + 10px);
+
+  right: 0;
+
+  min-width: 190px;
+
+  background: #ffffff;
+
+  border:
+    1px solid rgba(11, 44, 74, 0.12);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.12);
+
+  padding: 8px;
+
+  z-index: 9999;
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transform:
+    translateY(8px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    visibility 0.18s ease;
+}
+
+.tb-menu.open {
+  opacity: 1;
+
+  visibility: visible;
+
+  transform:
+    translateY(0);
+
+  pointer-events: auto;
+}
+
+.tb-item {
+  width: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  text-align: left;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  font: inherit;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  color:
+    rgba(11, 44, 74, 0.88);
+
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease;
+}
+
+.tb-item:hover {
+  background:
+    #f5f7fb;
+}
+
+.tb-item.danger {
+  color:
+    #b42318;
+}
+
+.tb-item.danger:hover {
+  background:
+    rgba(220, 53, 69, 0.08);
+}
+
+
+/* =========================================================
+   GRADES PAGE
+========================================================= */
 
 .gr-page {
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 .gr-page-title {
-  margin: 0 0 10px;
+  margin:
+    0 0 10px;
+
   font-size: 34px;
+
   font-weight: 1000;
+
   color: #0b2c4a;
+
   line-height: 1.15;
+
   letter-spacing: 0;
 }
 
@@ -30,114 +396,157 @@
 
 /* =========================================================
    MAIN LAYOUT
-   ========================================================= */
-
-/*
-   UPDATED:
-   Class Grades and Grades Summary are now stacked vertically.
-
-   Order:
-   1. Class Grades
-   2. Grades Summary
-*/
+========================================================= */
 
 .gr-grid {
   display: grid;
+
   grid-template-columns: 1fr;
+
   gap: 14px;
+
   align-items: start;
+
+  width: 100%;
 }
 
 
 /* =========================================================
    MAIN GRADES CARD
-   ========================================================= */
+========================================================= */
 
 .gr-card {
   padding: 12px;
+
   display: flex;
+
   flex-direction: column;
+
   min-width: 0;
+
+  width: 100%;
 }
 
 .gr-card-top {
   display: flex;
+
   align-items: flex-start;
+
   justify-content: space-between;
+
   gap: 12px;
+
   margin-bottom: 10px;
 }
 
 .gr-card-title {
   font-size: 16px;
+
   font-weight: 1000;
+
   color: #0b2c4a;
 }
 
 .gr-card-sub {
   color: #6b7b8a;
+
   font-size: 12px;
+
   font-weight: 800;
+
   margin-top: 2px;
 }
 
 
 /* =========================================================
    CONTROLS
-   ========================================================= */
+========================================================= */
 
 .gr-card-controls {
   display: flex;
+
   align-items: center;
+
   justify-content: flex-end;
+
   gap: 10px;
+
   flex-wrap: wrap;
 }
 
 .gr-pill {
   display: flex;
+
   align-items: center;
+
   gap: 8px;
-  padding: 8px 10px;
+
+  padding:
+    8px 10px;
+
   border-radius: 12px;
-  background: #fff;
-  border: 1px solid #e6eef6;
+
+  background: #ffffff;
+
+  border:
+    1px solid #e6eef6;
 }
 
 .gr-pill-label {
   font-size: 12px;
+
   color: #6b7b8a;
+
   font-weight: 900;
 }
 
 .gr-select {
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
+
   border-radius: 10px;
-  padding: 8px 10px;
-  background: #fff;
+
+  padding:
+    8px 10px;
+
+  background: #ffffff;
+
   font-weight: 900;
+
   outline: none;
+
   cursor: pointer;
+
   color: #263746;
 }
 
 .gr-select:focus {
   border-color: #8bb7ff;
-  box-shadow: 0 0 0 3px rgba(40, 120, 255, 0.12);
+
+  box-shadow:
+    0 0 0 3px rgba(40, 120, 255, 0.12);
 }
 
 
 /* =========================================================
    ADD ASSESSMENT BUTTONS
-   ========================================================= */
+========================================================= */
 
 .gr-mini {
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
+
   border-radius: 12px;
-  padding: 10px 12px;
+
+  padding:
+    10px 12px;
+
   cursor: pointer;
+
   font-weight: 1000;
-  background: #fff;
+
+  background: #ffffff;
+
   color: #0b5a8b;
 
   transition:
@@ -149,25 +558,34 @@
 
 .gr-mini:hover {
   background: #f4f9ff;
+
   border-color: #c9dced;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(11, 90, 139, 0.08);
+
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 4px 12px rgba(11, 90, 139, 0.08);
 }
 
 .gr-mini:active {
-  transform: translateY(0);
+  transform:
+    translateY(0);
 }
 
 
 /* =========================================================
    ASSESSMENT AREA
-   ========================================================= */
+========================================================= */
 
 .gr-assessment-area {
   margin-bottom: 12px;
+
   padding: 12px;
 
-  border: 1px solid #e8eef5;
+  border:
+    1px solid #e8eef5;
+
   border-radius: 14px;
 
   background: #f9fbfd;
@@ -175,107 +593,141 @@
 
 .gr-assessment-header {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   gap: 12px;
+
   margin-bottom: 10px;
 }
 
 .gr-assessment-title {
   font-size: 13px;
+
   font-weight: 1000;
+
   color: #0b2c4a;
 }
 
 .gr-assessment-sub {
   margin-top: 3px;
+
   font-size: 11px;
+
   color: #6b7b8a;
+
   font-weight: 700;
 }
 
 
 /* =========================================================
    ASSESSMENT LIST
-   ========================================================= */
+========================================================= */
 
 .gr-assessment-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 10px;
 }
 
 .gr-assessment-empty {
   padding: 12px;
 
-  border: 1px dashed #d9e4ee;
+  border:
+    1px dashed #d9e4ee;
+
   border-radius: 10px;
 
-  background: #fff;
+  background: #ffffff;
 
   text-align: center;
 
   color: #7b8996;
+
   font-size: 12px;
+
   font-weight: 800;
 }
 
 
 /* =========================================================
    ASSESSMENT GROUP
-   ========================================================= */
+========================================================= */
 
 .gr-assessment-group {
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
+
   border-radius: 12px;
 
-  background: #fff;
+  background: #ffffff;
 
   overflow: hidden;
 }
 
 .gr-assessment-group-title {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   gap: 10px;
 
-  padding: 9px 12px;
+  padding:
+    9px 12px;
 
   background: #f4f8fc;
-  border-bottom: 1px solid #e8eef5;
+
+  border-bottom:
+    1px solid #e8eef5;
 
   color: #263746;
+
   font-size: 12px;
+
   font-weight: 1000;
 }
 
 .gr-assessment-group-title small {
   color: #0b5a8b;
+
   font-size: 11px;
+
   font-weight: 1000;
 }
 
 .gr-assessment-items {
   display: flex;
+
   flex-direction: column;
 }
 
 
 /* =========================================================
    INDIVIDUAL ASSESSMENT
-   ========================================================= */
+========================================================= */
 
 .gr-assessment-item {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   gap: 12px;
 
-  padding: 10px 12px;
+  padding:
+    10px 12px;
 
-  background: #fff;
-  border-bottom: 1px solid #eef3f8;
+  background: #ffffff;
+
+  border-bottom:
+    1px solid #eef3f8;
 }
 
 .gr-assessment-item:last-child {
@@ -288,16 +740,21 @@
 
 .gr-assessment-info {
   min-width: 0;
+
   flex: 1;
 }
 
 .gr-assessment-name {
   font-size: 12px;
+
   font-weight: 1000;
+
   color: #263746;
 
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
@@ -305,7 +762,9 @@
   margin-top: 2px;
 
   font-size: 10px;
+
   color: #7a8997;
+
   font-weight: 800;
 }
 
@@ -313,31 +772,39 @@
   flex-shrink: 0;
 
   font-size: 11px;
+
   font-weight: 1000;
+
   color: #0b5a8b;
 }
 
 
 /* =========================================================
    DELETE ASSESSMENT BUTTON
-   ========================================================= */
+========================================================= */
 
 .gr-assessment-delete {
   width: 28px;
   height: 28px;
+
   flex-shrink: 0;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #e8eef5;
+  border:
+    1px solid #e8eef5;
+
   border-radius: 8px;
 
-  background: #fff;
+  background: #ffffff;
+
   color: #9a4a4a;
 
   font-size: 18px;
+
   line-height: 1;
 
   cursor: pointer;
@@ -351,19 +818,24 @@
 
 .gr-assessment-delete:hover {
   background: #fff4f4;
+
   border-color: #f0caca;
+
   color: #c0392b;
-  transform: scale(1.04);
+
+  transform:
+    scale(1.04);
 }
 
 .gr-assessment-delete:active {
-  transform: scale(0.96);
+  transform:
+    scale(0.96);
 }
 
 
 /* =========================================================
    TABLE
-   ========================================================= */
+========================================================= */
 
 .gr-table-wrap {
   flex: 1;
@@ -371,31 +843,41 @@
   overflow: auto;
 
   border-radius: 14px;
-  border: 1px solid #e8eef5;
+
+  border:
+    1px solid #e8eef5;
 
   min-height: 420px;
+
   max-height: 620px;
 
-  background: #fff;
+  background: #ffffff;
+
+  width: 100%;
 }
 
 .gr-table {
   width: 100%;
 
   border-collapse: separate;
+
   border-spacing: 0;
 
   min-width: 1000px;
 
-  background: #fff;
+  background: #ffffff;
 }
 
 .gr-table th,
 .gr-table td {
-  padding: 10px 10px;
+  padding:
+    10px 10px;
 
-  border-bottom: 1px solid #eef3f8;
-  border-right: 1px solid #eef3f8;
+  border-bottom:
+    1px solid #eef3f8;
+
+  border-right:
+    1px solid #eef3f8;
 
   vertical-align: middle;
 
@@ -404,6 +886,7 @@
 
 .gr-table th {
   position: sticky;
+
   top: 0;
 
   background: #f7f9fc;
@@ -411,7 +894,9 @@
   z-index: 3;
 
   font-size: 12px;
+
   color: #2f3a45;
+
   font-weight: 1000;
 }
 
@@ -423,6 +908,7 @@
   background: #eef5ff;
 
   font-size: 12px;
+
   font-weight: 1000;
 }
 
@@ -436,7 +922,9 @@
 
 .gr-table thead small {
   color: #6b7b8a;
+
   font-size: 10px;
+
   font-weight: 800;
 }
 
@@ -464,11 +952,13 @@
 
 /* =========================================================
    STUDENT
-   ========================================================= */
+========================================================= */
 
 .gr-student {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 }
 
@@ -480,36 +970,44 @@
 
   object-fit: cover;
 
-  border: 2px solid #fff;
+  border:
+    2px solid #ffffff;
 
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.10);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.10);
 
   flex-shrink: 0;
 }
 
 .gr-name {
   font-weight: 1000;
+
   color: #263746;
 }
 
 .gr-id {
   font-size: 11px;
+
   color: #6b7b8a;
+
   font-weight: 800;
 }
 
 
 /* =========================================================
    GRADE INPUT
-   ========================================================= */
+========================================================= */
 
 .gr-input {
   width: 86px;
 
-  padding: 8px 10px;
+  padding:
+    8px 10px;
 
   border-radius: 10px;
-  border: 1px solid #e6eef6;
+
+  border:
+    1px solid #e6eef6;
 
   outline: none;
 
@@ -517,7 +1015,8 @@
 
   text-align: center;
 
-  background: #fff;
+  background: #ffffff;
+
   color: #263746;
 
   box-sizing: border-box;
@@ -530,7 +1029,8 @@
 .gr-input:focus {
   border-color: #8bb7ff;
 
-  box-shadow: 0 0 0 3px rgba(40, 120, 255, 0.12);
+  box-shadow:
+    0 0 0 3px rgba(40, 120, 255, 0.12);
 }
 
 .gr-input::-webkit-outer-spin-button,
@@ -541,10 +1041,11 @@
 
 /* =========================================================
    FINAL GRADE / REMARKS
-   ========================================================= */
+========================================================= */
 
 .gr-final {
   font-weight: 1000;
+
   color: #0b2c4a;
 }
 
@@ -555,13 +1056,15 @@
 
 /* =========================================================
    WEIGHTS
-   ========================================================= */
+========================================================= */
 
 .gr-note {
   margin-top: 12px;
+
   padding-top: 12px;
 
-  border-top: 1px solid #eef3f8;
+  border-top:
+    1px solid #eef3f8;
 }
 
 .gr-note-title {
@@ -575,9 +1078,11 @@
 .gr-note-grid {
   display: grid;
 
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    1fr 1fr;
 
-  gap: 6px 16px;
+  gap:
+    6px 16px;
 
   font-size: 12px;
 
@@ -599,15 +1104,7 @@
 
 /* =========================================================
    GRADES SUMMARY
-   ========================================================= */
-
-/*
-   UPDATED:
-   Summary is now BELOW the Class Grades card.
-
-   It is no longer sticky because it is part of the
-   normal vertical page flow.
-*/
+========================================================= */
 
 .gr-side {
   padding: 14px;
@@ -621,6 +1118,7 @@
 
 .gr-side-title {
   font-weight: 1000;
+
   font-size: 16px;
 
   margin-bottom: 10px;
@@ -631,12 +1129,13 @@
 
 /* =========================================================
    SUMMARY METRICS
-   ========================================================= */
+========================================================= */
 
 .gr-metrics {
   display: grid;
 
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
 
   gap: 10px;
 }
@@ -645,14 +1144,18 @@
   display: flex;
 
   justify-content: space-between;
+
   align-items: center;
 
-  padding: 10px 10px;
+  padding:
+    10px;
 
-  border: 1px solid #eef3f8;
+  border:
+    1px solid #eef3f8;
+
   border-radius: 12px;
 
-  background: #fff;
+  background: #ffffff;
 }
 
 .gr-metric span {
@@ -674,7 +1177,7 @@
 
 /* =========================================================
    SAVE ACTIONS
-   ========================================================= */
+========================================================= */
 
 .gr-side-actions {
   margin-top: 12px;
@@ -691,7 +1194,8 @@
 
   border-radius: 12px;
 
-  padding: 12px 12px;
+  padding:
+    12px;
 
   cursor: pointer;
 
@@ -704,28 +1208,33 @@
 }
 
 .gr-btn:hover {
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 }
 
 .gr-btn:active {
-  transform: translateY(0);
+  transform:
+    translateY(0);
 }
 
 .gr-btn-primary {
   background: #0b5a8b;
-  color: #fff;
+
+  color: #ffffff;
 }
 
 .gr-btn-primary:hover {
   background: #094d77;
 
-  box-shadow: 0 5px 14px rgba(11, 90, 139, 0.18);
+  box-shadow:
+    0 5px 14px rgba(11, 90, 139, 0.18);
 }
 
 .gr-btn-ghost {
-  background: #fff;
+  background: #ffffff;
 
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
 
   color: #0b5a8b;
 }
@@ -739,18 +1248,20 @@
 
 /* =========================================================
    SAVE STATUS
-   ========================================================= */
+========================================================= */
 
 .gr-status {
   margin-top: 12px;
 
-  padding: 10px 12px;
+  padding:
+    10px 12px;
 
   border-radius: 12px;
 
   font-weight: 1000;
 
-  background: rgba(255, 193, 7, 0.16);
+  background:
+    rgba(255, 193, 7, 0.16);
 
   color: #7a5b00;
 }
@@ -758,21 +1269,7 @@
 
 /* =========================================================
    ASSESSMENT MODAL
-   ========================================================= */
-
-/*
-   These styles are required by the updated teacher-grades.js.
-
-   The modal is dynamically created with:
-   .gr-modal-overlay
-   .gr-modal
-   .gr-modal-header
-   .gr-modal-title
-   .gr-modal-description
-   .gr-modal-close
-   .gr-form-group
-   .gr-modal-actions
-*/
+========================================================= */
 
 .gr-modal-overlay {
   position: fixed;
@@ -784,22 +1281,27 @@
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   padding: 20px;
 
-  background: rgba(11, 44, 74, 0.42);
+  background:
+    rgba(11, 44, 74, 0.42);
 
   backdrop-filter: blur(3px);
+
   -webkit-backdrop-filter: blur(3px);
 }
 
 .gr-modal {
-  width: min(100%, 480px);
+  width:
+    min(100%, 480px);
 
-  background: #fff;
+  background: #ffffff;
 
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
 
   border-radius: 18px;
 
@@ -809,18 +1311,25 @@
 
   overflow: hidden;
 
-  animation: grModalIn 0.16s ease-out;
+  animation:
+    grModalIn 0.16s ease-out;
 }
 
 @keyframes grModalIn {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+
+    transform:
+      translateY(8px)
+      scale(0.98);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
@@ -828,13 +1337,16 @@
   display: flex;
 
   align-items: flex-start;
+
   justify-content: space-between;
 
   gap: 16px;
 
-  padding: 18px 18px 14px;
+  padding:
+    18px 18px 14px;
 
-  border-bottom: 1px solid #eef3f8;
+  border-bottom:
+    1px solid #eef3f8;
 }
 
 .gr-modal-title {
@@ -868,11 +1380,12 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #e6eef6;
+  border:
+    1px solid #e6eef6;
 
   border-radius: 10px;
 
-  background: #fff;
+  background: #ffffff;
 
   color: #6b7b8a;
 
@@ -899,7 +1412,7 @@
 
 /* =========================================================
    MODAL FORM
-   ========================================================= */
+========================================================= */
 
 #assessmentForm {
   padding: 18px;
@@ -932,13 +1445,15 @@
 
   box-sizing: border-box;
 
-  padding: 11px 12px;
+  padding:
+    11px 12px;
 
-  border: 1px solid #dfe8f0;
+  border:
+    1px solid #dfe8f0;
 
   border-radius: 10px;
 
-  background: #fff;
+  background: #ffffff;
 
   color: #263746;
 
@@ -966,18 +1481,20 @@
 .gr-form-group input:focus {
   border-color: #8bb7ff;
 
-  box-shadow: 0 0 0 3px rgba(40, 120, 255, 0.12);
+  box-shadow:
+    0 0 0 3px rgba(40, 120, 255, 0.12);
 }
 
 
 /* =========================================================
    MODAL ACTIONS
-   ========================================================= */
+========================================================= */
 
 .gr-modal-actions {
   display: flex;
 
   justify-content: flex-end;
+
   align-items: center;
 
   gap: 10px;
@@ -986,7 +1503,8 @@
 
   padding-top: 14px;
 
-  border-top: 1px solid #eef3f8;
+  border-top:
+    1px solid #eef3f8;
 }
 
 .gr-modal-actions .gr-btn {
@@ -996,9 +1514,9 @@
 
 /* =========================================================
    RESPONSIVE
-   ========================================================= */
+========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
 
   .gr-card-top {
     flex-direction: column;
@@ -1009,6 +1527,10 @@
 
     justify-content: flex-start;
   }
+}
+
+
+@media (max-width: 900px) {
 
   .gr-note-grid {
     grid-template-columns: 1fr;
@@ -1021,11 +1543,25 @@
   }
 
   .gr-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
   .gr-side-actions {
     flex-direction: column;
+  }
+}
+
+
+@media (max-width: 750px) {
+
+  .content,
+  html.sb-collapsed .content {
+    margin-left: 114px;
+  }
+
+  .gr-page-title {
+    font-size: 30px;
   }
 }
 
@@ -1093,5 +1629,18 @@
 
   .gr-modal-actions .gr-btn {
     width: 100%;
+  }
+}
+
+
+@media (max-width: 520px) {
+
+  .content,
+  html.sb-collapsed .content {
+    margin-left: 100px;
+
+    margin-right: 8px;
+
+    padding: 10px;
   }
 }

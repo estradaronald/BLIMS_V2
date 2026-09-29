@@ -9,6 +9,7 @@
 //   DELETE /api/admin/students/:studentId
 //   PATCH  /api/admin/students/:studentId/disable
 //   POST   /api/admin/students/:studentId/reset-password
+//   POST   /api/admin/students/bulk
 //
 // Bulk Create frontend:
 //   - Manual learner entry
@@ -2667,6 +2668,34 @@
         </div>
 
 
+        <!-- Phone -->
+
+        <div class="bulk-field">
+
+          <label>
+            Phone
+          </label>
+
+          <div class="phone-input">
+
+            <span class="phone-prefix">
+              +63
+            </span>
+
+            <input
+              type="text"
+              class="bulk-phone"
+              placeholder="9123456789"
+              maxlength="10"
+              inputmode="numeric"
+              autocomplete="off"
+            />
+
+          </div>
+
+        </div>
+
+
         <!-- Grade Level -->
 
         <div class="bulk-field">
@@ -2755,6 +2784,11 @@
         ".bulk-lrn"
       );
 
+    const phone =
+      row.querySelector(
+        ".bulk-phone"
+      );
+
     const grade =
       row.querySelector(
         ".bulk-grade"
@@ -2787,6 +2821,13 @@
         digitsOnly(
           data.lrn || ""
         ).slice(0, 12);
+    }
+
+    if (phone) {
+      phone.value =
+        toLocal10Digits(
+          data.phone || ""
+        ).slice(0, 10);
     }
 
     if (grade) {
@@ -2850,6 +2891,10 @@
 
     bindBulkLRNFilter(
       lrn
+    );
+
+    bindBulkPhoneFilter(
+      phone
     );
 
 
@@ -2996,6 +3041,51 @@
   }
 
   // =====================================================
+  // BULK PHONE FILTER
+  // =====================================================
+
+  function bindBulkPhoneFilter(
+    element
+  ) {
+    if (!element) return;
+
+    element.setAttribute(
+      "maxlength",
+      "10"
+    );
+
+    element.addEventListener(
+      "input",
+      () => {
+        const cleaned =
+          toLocal10Digits(
+            element.value
+          );
+
+        if (
+          element.value !==
+          cleaned
+        ) {
+          element.value =
+            cleaned;
+        }
+      }
+    );
+
+    element.addEventListener(
+      "paste",
+      () => {
+        requestAnimationFrame(() => {
+          element.value =
+            toLocal10Digits(
+              element.value
+            );
+        });
+      }
+    );
+  }
+
+  // =====================================================
   // RENUMBER BULK ROWS
   // =====================================================
 
@@ -3049,6 +3139,31 @@
   }
 
   // =====================================================
+  // GENERATE BULK LEARNER ROWS
+  // =====================================================
+
+  function generateBulkLearnerRows(count) {
+    const container =
+      $("bulkLearnersContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    bulkLearnerCount = 0;
+
+    for (
+      let i = 0;
+      i < count;
+      i++
+    ) {
+      createBulkLearnerRow();
+    }
+
+    renumberBulkLearners();
+  }
+
+  // =====================================================
   // GET BULK LEARNERS
   // =====================================================
 
@@ -3080,6 +3195,13 @@
             ".bulk-lrn"
           )?.value.trim() ||
           "",
+
+        phone:
+          toStoredPhone(
+            row.querySelector(
+              ".bulk-phone"
+            )?.value || ""
+          ),
 
         gradeLevel:
           row.querySelector(
@@ -3147,6 +3269,16 @@
       }
 
       if (
+        !/^\+63\d{10}$/.test(
+          learner.phone
+        )
+      ) {
+        return (
+          `Learner ${number}: Phone must be exactly 10 digits.`
+        );
+      }
+
+      if (
         seenLRNs.has(
           learner.lrn
         )
@@ -3201,6 +3333,9 @@
         "LRN":
           "123456789012",
 
+        "Phone":
+          "9123456789",
+
         "Grade Level":
           "Grade 6",
 
@@ -3217,6 +3352,9 @@
 
         "LRN":
           "123456789013",
+
+        "Phone":
+          "",
 
         "Grade Level":
           "",
@@ -3237,6 +3375,7 @@
     worksheet["!cols"] = [
       { wch: 18 },
       { wch: 22 },
+      { wch: 18 },
       { wch: 18 },
       { wch: 18 },
       { wch: 18 },
@@ -3520,6 +3659,12 @@
                 ""
               ).slice(0, 12),
 
+            phone:
+              toLocal10Digits(
+                normalized.phone ||
+                  ""
+              ),
+
             gradeLevel:
               normalizeGradeLevel(
                 normalized.gradeLevel ||
@@ -3586,6 +3731,17 @@
       value === "lrn"
     ) {
       return "lrn";
+    }
+
+    if (
+      value === "phone" ||
+      value === "mobile" ||
+      value === "mobilenumber" ||
+      value === "contact" ||
+      value === "contactno" ||
+      value === "contactnumber"
+    ) {
+      return "phone";
     }
 
 
@@ -3666,6 +3822,16 @@
 
       }
 
+      if (
+        !/^\d{10}$/.test(
+          learner.phone
+        )
+      ) {
+        return (
+          `Excel row ${excelRow}: Phone must be exactly 10 digits.`
+        );
+      }
+
 
       if (
         seenLRNs.has(
@@ -3716,9 +3882,85 @@
     }
 
 
+    /*
+      Normalize backend response.
+
+      The backend may return either:
+
+      {
+        firstName,
+        lastName,
+        lrn,
+        gradeLevel,
+        section,
+        studentId,
+        tempPass
+      }
+
+      OR:
+
+      {
+        student: {
+          firstName,
+          lastName,
+          lrn,
+          className,
+          sectionName,
+          studentId
+        },
+        tempPass
+      }
+    */
+
     bulkCreatedAccounts =
       Array.isArray(accounts)
-        ? accounts
+        ? accounts.map(
+            (account) => {
+
+              const student =
+                account?.student ||
+                {};
+
+              return {
+                firstName:
+                  account.firstName ||
+                  student.firstName ||
+                  "",
+
+                lastName:
+                  account.lastName ||
+                  student.lastName ||
+                  "",
+
+                lrn:
+                  account.lrn ||
+                  student.lrn ||
+                  "",
+
+                gradeLevel:
+                  account.gradeLevel ||
+                  student.gradeLevel ||
+                  student.className ||
+                  "",
+
+                section:
+                  account.section ||
+                  student.section ||
+                  student.sectionName ||
+                  "",
+
+                studentId:
+                  account.studentId ||
+                  student.studentId ||
+                  "",
+
+                tempPass:
+                  account.tempPass ||
+                  "",
+              };
+
+            }
+          )
         : [];
 
 
@@ -3931,6 +4173,8 @@
 
     clearBulkCreateError();
 
+    clearBulkImportStatus();
+
 
     const validationError =
       validateBulkLearners();
@@ -3972,8 +4216,9 @@
         BACKEND CONNECTION
         =================================================
 
-        This is intentionally prepared for
-        the future backend endpoint.
+        Send the validated learners to:
+
+        POST /api/admin/students/bulk
 
         Payload:
 
@@ -3983,6 +4228,7 @@
               firstName: "Juan",
               lastName: "Dela Cruz",
               lrn: "123456789012",
+              phone: "+639123456789",
               gradeLevel: "Grade 6",
               section: "Mabini"
             }
@@ -3991,17 +4237,27 @@
 
         Grade Level and Section may be "".
 
+        The backend is responsible for:
+
+        - Duplicate LRN checking
+        - Student ID generation
+        - Temporary password generation
+        - Password hashing
+        - User creation
+        - Student creation
+
         Expected backend response:
 
         {
-          students: [
+          ok: true,
+          learners: [
             {
               firstName: "Juan",
               lastName: "Dela Cruz",
               lrn: "123456789012",
               gradeLevel: "Grade 6",
               section: "Mabini",
-              studentId: "STU-000001",
+              studentId: "STD-0001",
               tempPass: "X7kP9mQ2"
             }
           ]
@@ -4009,26 +4265,98 @@
       */
 
 
+      const data =
+        await apiFetch(
+          "/api/admin/students/bulk",
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              learners,
+            }),
+          }
+        );
+
+
       /*
-        FRONTEND ONLY FOR NOW
-
-        We do NOT generate fake credentials.
-
-        This makes sure Student IDs and temporary
-        passwords come from the backend once connected.
+        Make sure the backend explicitly
+        reports a successful operation.
       */
 
-      console.log(
-        "Bulk learners ready for backend:",
-        {
-          learners,
-        }
+      if (
+        data?.ok === false
+      ) {
+        throw new Error(
+          data?.message ||
+          "Failed to create learners."
+        );
+      }
+
+
+      /*
+        The backend returns the created
+        learner accounts.
+
+        These include the generated:
+
+        - Student ID
+        - Temporary Password
+      */
+
+      const accounts =
+        Array.isArray(
+          data?.learners
+        )
+          ? data.learners
+          : [];
+
+
+      if (
+        accounts.length === 0
+      ) {
+        throw new Error(
+          "The server did not return any created learner accounts."
+        );
+      }
+
+
+      /*
+        Display the generated accounts
+        in the Created Accounts table.
+      */
+
+      showCreatedAccounts(
+        accounts
       );
 
 
-      alert(
-        `${learners.length} learner(s) passed validation and are ready for backend creation.`
-      );
+      /*
+        Clear the import status because
+        the import/create process is now
+        complete.
+      */
+
+      clearBulkImportStatus();
+
+
+      /*
+        Refresh the main learner table
+        so the newly-created learners
+        immediately appear in the system.
+      */
+
+      try {
+
+        await loadStudents();
+
+      } catch (refreshError) {
+
+        console.warn(
+          "Learners were created, but the learner list could not be refreshed:",
+          refreshError
+        );
+
+      }
 
 
     } catch (error) {
@@ -4113,6 +4441,48 @@
         }
       );
 
+    // ===================================================
+    // GENERATE BULK LEARNER ROWS
+    // ===================================================
+
+    $("generateBulkRowsBtn")
+      ?.addEventListener(
+        "click",
+        () => {
+
+          const input =
+            $("bulkLearnerCount");
+
+          if (!input) return;
+
+          const count =
+            Number.parseInt(
+              input.value,
+              10
+            );
+
+          if (
+            !Number.isInteger(count) ||
+            count < 1 ||
+            count > 100
+          ) {
+
+            setBulkCreateError(
+              "Please enter a number between 1 and 100."
+            );
+
+            return;
+          }
+
+          clearBulkCreateError();
+
+          generateBulkLearnerRows(
+            count
+          );
+
+        }
+      );
+
 
     // ===================================================
     // ADD ANOTHER BULK LEARNER
@@ -4127,7 +4497,6 @@
 
         }
       );
-
 
     // ===================================================
     // CANCEL BULK CREATE

@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
 
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   />
 
+
   <title>BLIMS - Login</title>
+
 
   <link
     rel="stylesheet"
@@ -16,22 +19,32 @@
   />
 </head>
 
+
 <body>
 
+
   <!-- ================= BACKGROUND ================= -->
+
 
   <div class="bg"></div>
 
 
+
+
   <!-- ================= PAGE WRAPPER ================= -->
+
 
   <main class="wrap">
 
+
     <!-- ================= SCHOOL HEADER ================= -->
+
 
     <section class="top-card">
 
+
       <div class="top-center">
+
 
         <div class="logo">
           <img
@@ -40,29 +53,51 @@
           />
         </div>
 
+
         <div class="school-text">
 
-          <h1>BLIMS</h1>
 
-          <p>
-            Bolosan Learning Information Management System
-          </p>
+        <h1>
+          Bolosan Elementary School
+        </h1>
 
-        </div>
+
+        <p>
+          Bolosan District, Dagupan City
+        </p>
+
+
+        <span>
+          School ID 102163
+        </span>
+
 
       </div>
+
+
+      </div>
+
 
     </section>
 
 
+
+
     <!-- ================= LOGIN CARD ================= -->
+
 
     <section
       id="viewLogin"
       class="login-card card-view is-active"
     >
 
+
       <h2>Sign In</h2>
+
+
+      <p class="login-welcome">
+        Welcome back! Please enter your credentials.
+      </p>
 
 
       <p
@@ -77,15 +112,36 @@
         autocomplete="on"
       >
 
+
         <!-- USERNAME -->
+
 
         <label for="username">
           Username
         </label>
 
+
         <div class="input-group">
 
-          <span class="icon">👤</span>
+
+          <span
+            class="icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 11.2C14.43 11.2 16.4 9.23 16.4 6.8C16.4 4.37 14.43 2.4 12 2.4C9.57 2.4 7.6 4.37 7.6 6.8C7.6 9.23 9.57 11.2 12 11.2Z"
+              />
+              <path
+                d="M4.2 21.6C4.2 16.86 7.32 13.6 12 13.6C16.68 13.6 19.8 16.86 19.8 21.6H4.2Z"
+              />
+            </svg>
+          </span>
+
 
           <input
             id="username"
@@ -96,18 +152,38 @@
             required
           />
 
+
         </div>
 
 
+
+
         <!-- PASSWORD -->
+
 
         <label for="password">
           Password
         </label>
 
+
         <div class="input-group">
 
-          <span class="icon">🔒</span>
+
+          <span
+            class="icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 9V7.5C17 4.74 14.76 2.5 12 2.5C9.24 2.5 7 4.74 7 7.5V9H5.5C4.67 9 4 9.67 4 10.5V20C4 20.83 4.67 21.5 5.5 21.5H18.5C19.33 21.5 20 20.83 20 20V10.5C20 9.67 19.33 9 18.5 9H17ZM9 7.5C9 5.84 10.34 4.5 12 4.5C13.66 4.5 15 5.84 15 7.5V9H9V7.5ZM12 13C12.83 13 13.5 13.67 13.5 14.5C13.5 15.05 13.2 15.53 12.75 15.79V18H11.25V15.79C10.8 15.53 10.5 15.05 10.5 14.5C10.5 13.67 11.17 13 12 13Z"
+              />
+            </svg>
+          </span>
+
 
           <input
             id="password"
@@ -118,6 +194,7 @@
             required
           />
 
+
           <button
             type="button"
             id="togglePassword"
@@ -125,116 +202,388 @@
             aria-label="Show password"
           >
 
-            <span id="eyeIcon">
-              👁️
+
+            <span
+              id="eyeIcon"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2.5 12C4.5 8.3 7.7 6 12 6C16.3 6 19.5 8.3 21.5 12C19.5 15.7 16.3 18 12 18C7.7 18 4.5 15.7 2.5 12Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="2.5"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+              </svg>
             </span>
+
 
             <span
               id="eyeOffIcon"
+              aria-hidden="true"
               style="display: none;"
             >
-              🙈
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 3L21 21"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M10.6 6.2C11.05 6.07 11.52 6 12 6C16.3 6 19.5 8.3 21.5 12C20.75 13.38 19.82 14.55 18.72 15.48"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M6.1 8.1C4.65 9.03 3.45 10.32 2.5 12C4.5 15.7 7.7 18 12 18C13.25 18 14.42 17.8 15.48 17.42"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9.9 9.9C9.36 10.44 9.03 11.18 9.03 12C9.03 13.64 10.36 14.97 12 14.97C12.82 14.97 13.56 14.64 14.1 14.1"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
             </span>
+
 
           </button>
 
+
         </div>
 
 
-        <!-- CAPTCHA -->
+
+
+        <!-- ================= HUMAN VERIFICATION ================= -->
+
 
         <div class="captcha-section">
 
-          <label>
+
+          <label class="captcha-label">
             Security Check
           </label>
 
+
           <div class="captcha-box">
 
-            <span id="capA">0</span>
 
-            <span>+</span>
+            <div class="captcha-header">
 
-            <span id="capB">0</span>
 
-            <span>=</span>
+              <div
+                class="captcha-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2.5L20 5.5V11.2C20 16.4 16.6 20.2 12 21.5C7.4 20.2 4 16.4 4 11.2V5.5L12 2.5Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M9 12.1L11.1 14.2L15.5 9.8"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
 
-            <input
-              id="capAns"
-              type="number"
-              inputmode="numeric"
-              placeholder="?"
-              autocomplete="off"
-              required
-            />
 
-            <button
-              type="button"
-              id="capRefresh"
-              aria-label="Refresh CAPTCHA"
-              title="Refresh CAPTCHA"
-            >
-              ↻
-            </button>
+              <div class="captcha-heading">
+
+
+                <strong>
+                  Verify you're human
+                </strong>
+
+
+                <span>
+                  Solve the equation to continue.
+                </span>
+
+
+              </div>
+
+
+            </div>
+
+
+
+
+            <div class="captcha-challenge">
+
+
+              <div class="captcha-number">
+                <span id="capA">0</span>
+              </div>
+
+
+              <span class="captcha-operator">
+                +
+              </span>
+
+
+              <div class="captcha-number">
+                <span id="capB">0</span>
+              </div>
+
+
+              <span class="captcha-operator">
+                =
+              </span>
+
+
+              <input
+                id="capAns"
+                class="captcha-answer"
+                type="number"
+                inputmode="numeric"
+                placeholder="Enter answer"
+                aria-label="CAPTCHA answer"
+                autocomplete="off"
+                required
+              />
+
+
+              <button
+                type="button"
+                id="capRefresh"
+                class="captcha-refresh"
+                aria-label="Generate a new security check"
+                title="Generate a new security check"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 11A8 8 0 0 0 6.2 6.2L4 8.5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M4 4.5V8.5H8"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M4 13A8 8 0 0 0 17.8 17.8L20 15.5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M20 19.5V15.5H16"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+
+
+            </div>
+
+
+
+
+            <div class="captcha-info">
+
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9"
+                  fill="currentColor"
+                />
+                <path
+                  d="M12 10.5V16"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="12"
+                  cy="7.5"
+                  r="1"
+                  fill="white"
+                />
+              </svg>
+
+
+              <span>
+                Human verification helps keep your account secure.
+              </span>
+
+
+            </div>
+
+
+
+
+            <p
+              id="capMsg"
+              class="captcha-msg"
+              aria-live="polite"
+            ></p>
+
 
           </div>
 
-          <p
-            id="capMsg"
-            class="captcha-msg"
-            aria-live="polite"
-          ></p>
 
         </div>
 
 
-        <!-- LOGIN BUTTON -->
+
 
         <button
           id="loginBtn"
           class="login-btn"
           type="submit"
         >
-          Sign In
+          <span>Sign In</span>
+
+
+          <span
+            class="login-btn-icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12H19"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+
+
+              <path
+                d="M13 6L19 12L13 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
         </button>
+
 
       </form>
 
 
-      <!-- FORGOT PASSWORD -->
 
-      <button
-        id="forgotLink"
-        class="link-btn"
-        type="button"
-      >
-        Forgot Password?
-      </button>
+
+      
+
+
 
 
       <p class="notice">
-        Secure access to the Bolosan Learning Information
-        Management System.
+
+
+        <span
+          class="notice-icon"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2.5L19 5.2V10.9C19 15.5 16.1 19 12 20.5C7.9 19 5 15.5 5 10.9V5.2L12 2.5Z"
+              fill="currentColor"
+            />
+
+
+            <path
+              d="M9.1 11.8L11.2 13.9L15.1 9.9"
+              stroke="white"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+
+
+        <span>
+          Secure access to the Bolosan Learning Information
+          Management System.
+        </span>
+
+
       </p>
+
 
     </section>
 
 
+
+
     <!-- ================= FORGOT PASSWORD ================= -->
+
 
     <section
       id="viewForgot"
       class="login-card card-view"
     >
 
+
       <h2>
         Forgot Password?
       </h2>
 
 
-      <p
-        class="login-msg"
-      >
+      <p class="login-msg">
         Please contact the BLIMS administrator to
         recover or reset your account password.
       </p>
@@ -248,15 +597,20 @@
         ← Back to Sign In
       </button>
 
+
     </section>
 
 
+
+
     <!-- ================= ADMIN SECONDARY PIN ================= -->
+
 
     <section
       id="viewMFA"
       class="login-card card-view"
     >
+
 
       <h2>
         Admin Verification
@@ -277,6 +631,7 @@
         autocomplete="off"
       >
 
+
         <label for="mfaCode">
           Secondary PIN
         </label>
@@ -284,9 +639,22 @@
 
         <div class="input-group">
 
-          <span class="icon">
-            🔐
+
+          <span
+            class="icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 9V7.5C17 4.74 14.76 2.5 12 2.5C9.24 2.5 7 4.74 7 7.5V9H5.5C4.67 9 4 9.67 4 10.5V20C4 20.83 4.67 21.5 5.5 21.5H18.5C19.33 21.5 20 20.83 20 20V10.5C20 9.67 19.33 9 18.5 9H17ZM9 7.5C9 5.84 10.34 4.5 12 4.5C13.66 4.5 15 5.84 15 7.5V9H9V7.5ZM12 13C12.83 13 13.5 13.67 13.5 14.5C13.5 15.05 13.2 15.53 12.75 15.79V18H11.25V15.79C10.8 15.53 10.5 15.05 10.5 14.5C10.5 13.67 11.17 13 12 13Z"
+              />
+            </svg>
           </span>
+
 
           <input
             id="mfaCode"
@@ -301,6 +669,7 @@
             required
           />
 
+
         </div>
 
 
@@ -309,8 +678,37 @@
           class="login-btn"
           type="submit"
         >
-          Verify PIN
+          <span>Verify PIN</span>
+
+
+          <span
+            class="login-btn-icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12H19"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+
+
+              <path
+                d="M13 6L19 12L13 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
         </button>
+
 
       </form>
 
@@ -323,14 +721,20 @@
         ← Back to Sign In
       </button>
 
+
     </section>
+
 
   </main>
 
 
-  <!-- ================= JAVASCRIPT ================= -->
+
 
   <script src="./src/js/login.js"></script>
 
+
 </body>
 </html>
+
+
+

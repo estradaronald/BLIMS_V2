@@ -1,12 +1,16 @@
 // frontend/src/js/admin/sidebar.js
 
+
 document.addEventListener("DOMContentLoaded", async () => {
+
 
   const STORAGE_KEY =
     "admin_sidebar_collapsed_v1";
 
+
   const FLOAT_GAP = 14;
   const FLOAT_NUDGE = 10;
+
 
   /*
    * Bump this whenever sidebar.html structure changes.
@@ -15,33 +19,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     "__adminSidebarHTML_v8";
 
 
+
+
   /* =====================================================
      CURRENT PAGE
   ====================================================== */
 
+
   const rawKey =
     (document.body?.dataset?.page || "").trim();
 
+
   const activeKey =
     rawKey || "dashboard";
+
+
 
 
   /* =====================================================
      SIDEBAR MOUNT
   ====================================================== */
 
+
   const mount =
     document.getElementById("sidebar-mount");
 
+
   if (!mount) return;
+
+
 
 
   /* =====================================================
      HELPERS
   ====================================================== */
 
+
   const getSidebar = () =>
     document.getElementById("sidebar");
+
+
 
 
   const getFloatBtn = () =>
@@ -53,14 +70,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 
-  const getBellIcon = () =>
-    document.querySelector(".tb-icon") ||
-    document.querySelector(
-      ".topbar .tb-icon"
-    ) ||
-    document.querySelector(
-      ".topbar .icon-btn"
-    );
+
+
+  const getUserBox = () =>
+  document.getElementById("userbox");
 
 
   const normalize = (value) =>
@@ -69,25 +82,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       .toLowerCase();
 
 
+
+
   /* =====================================================
      FLOATING BUTTON
   ====================================================== */
 
+
   const setArrow = (collapsed) => {
+
 
     const btn = getFloatBtn();
 
+
     if (!btn) return;
+
 
     btn.textContent =
       collapsed
         ? "→"
         : "←";
 
+
     btn.title =
       collapsed
         ? "Expand sidebar"
         : "Collapse sidebar";
+
 
     btn.setAttribute(
       "aria-label",
@@ -98,65 +119,88 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
+
+
   const applyCollapsed = (collapsed) => {
+
 
     const sidebar = getSidebar();
 
+
     if (!sidebar) return;
+
 
     sidebar.classList.toggle(
       "is-collapsed",
       collapsed
     );
 
+
     document.documentElement.classList.toggle(
       "sb-collapsed",
       collapsed
     );
 
+
     setArrow(collapsed);
   };
+
+
 
 
   /* =====================================================
      FLOATING BUTTON POSITION
   ====================================================== */
 
+
   let frozenTopPx = null;
 
 
-  const computeTopFromBell = () => {
+
+
+  const computeTopFromUserBox = () => {
+
 
     const btn = getFloatBtn();
-    const bell = getBellIcon();
+    const userBox = getUserBox();
 
-    if (!btn || !bell) return null;
 
-    const b =
-      bell.getBoundingClientRect();
+    if (!btn || !userBox) return null;
+
+
+    const userRect =
+      userBox.getBoundingClientRect();
+
 
     const btnH =
       btn.offsetHeight || 40;
 
+
     return Math.round(
-      b.top +
-      b.height / 2 -
+      userRect.top +
+      userRect.height / 2 -
       btnH / 2
     );
   };
+
+
 
 
   const positionFloatButton = ({
     freezeTop = false
   } = {}) => {
 
+
     const sidebar = getSidebar();
     const btn = getFloatBtn();
 
+
     if (!sidebar || !btn) return;
+
 
     const rect =
       sidebar.getBoundingClientRect();
+
 
     btn.style.left =
       `${Math.round(
@@ -166,13 +210,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       )}px`;
 
 
+
+
     if (
       frozenTopPx == null ||
       freezeTop
     ) {
 
+
       const t =
-        computeTopFromBell();
+        computeTopFromUserBox();
+
 
       if (t != null) {
         frozenTopPx = t;
@@ -180,7 +228,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+
+
     if (frozenTopPx != null) {
+
 
       btn.style.top =
         `${frozenTopPx}px`;
@@ -188,22 +239,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
+
+
   const positionSafe = (opts) => {
+
 
     positionFloatButton(opts);
 
-    requestAnimationFrame(() =>
-      positionFloatButton(opts)
-    );
 
     requestAnimationFrame(() =>
       positionFloatButton(opts)
     );
+
+
+    requestAnimationFrame(() =>
+      positionFloatButton(opts)
+    );
+
 
     setTimeout(
       () => positionFloatButton(opts),
       50
     );
+
 
     setTimeout(
       () => positionFloatButton(opts),
@@ -212,37 +270,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
+
+
   /* =====================================================
      SIDEBAR COLLAPSE
   ====================================================== */
 
+
   const toggleSidebar = () => {
+
 
     const sidebar = getSidebar();
 
+
     if (!sidebar) return;
+
 
     const collapsed =
       !sidebar.classList.contains(
         "is-collapsed"
       );
 
+
     localStorage.setItem(
       STORAGE_KEY,
       collapsed ? "1" : "0"
     );
 
+
     applyCollapsed(collapsed);
+
 
     positionSafe();
   };
+
+
 
 
   /* =====================================================
      LOAD SIDEBAR HTML
   ====================================================== */
 
+
   try {
+
 
     let html =
       sessionStorage.getItem(
@@ -250,11 +321,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
 
+
+
     /*
      * Load sidebar from cache first.
      */
 
+
     if (!html) {
+
 
       const res =
         await fetch(
@@ -265,7 +340,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
+
+
       if (!res.ok) {
+
 
         throw new Error(
           "Failed to load sidebar.html"
@@ -273,8 +351,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
 
+
+
       html =
         await res.text();
+
+
 
 
       sessionStorage.setItem(
@@ -284,25 +366,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+
+
     mount.innerHTML = html;
+
 
   } catch (err) {
 
+
     console.error(err);
+
 
     mount.innerHTML =
       "<!-- admin sidebar failed to load -->";
 
+
     return;
   }
+
+
 
 
   /* =====================================================
      ACTIVE NAV ITEM
   ====================================================== */
 
+
   const current =
     normalize(activeKey);
+
+
 
 
   const candidates =
@@ -311,7 +404,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 
+
+
   candidates.forEach((el) => {
+
 
     const key =
       normalize(
@@ -321,9 +417,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
 
+
+
     const isActive =
       key &&
       key === current;
+
+
 
 
     el.classList.toggle(
@@ -332,26 +432,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 
+
+
     if (isActive) {
+
 
       el.setAttribute(
         "aria-current",
         "page"
       );
 
+
     } else {
+
 
       el.removeAttribute(
         "aria-current"
       );
     }
 
+
   });
+
+
 
 
   /* =====================================================
      GROUP DROPDOWNS
   ====================================================== */
+
 
   const groups =
     mount.querySelectorAll(
@@ -359,29 +468,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 
+
+
   /*
    * Open or close a dropdown group.
    */
+
 
   function setGroupOpen(
     group,
     open
   ) {
 
+
     if (!group) return;
+
 
     const toggle =
       group.querySelector(
         ".sb-group-toggle"
       );
 
+
     if (!toggle) return;
+
+
 
 
     group.classList.toggle(
       "is-open",
       open
     );
+
+
 
 
     toggle.setAttribute(
@@ -393,7 +512,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
+
+
   groups.forEach((group) => {
+
 
     const toggle =
       group.querySelector(
@@ -401,7 +523,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
 
+
+
     if (!toggle) return;
+
+
 
 
     /*
@@ -409,10 +535,13 @@ document.addEventListener("DOMContentLoaded", async () => {
      * belongs to this dropdown.
      */
 
+
     const hasActiveItem =
       !!group.querySelector(
         ".sb-item.active"
       );
+
+
 
 
     /*
@@ -425,22 +554,29 @@ document.addEventListener("DOMContentLoaded", async () => {
      * belongs to this group.
      */
 
+
     setGroupOpen(
       group,
       hasActiveItem
     );
 
 
+
+
     /* -----------------------------------------------
        TOGGLE DROPDOWN
     ------------------------------------------------ */
+
 
     toggle.addEventListener(
       "click",
       (event) => {
 
+
         event.preventDefault();
         event.stopPropagation();
+
+
 
 
         const isOpen =
@@ -449,22 +585,30 @@ document.addEventListener("DOMContentLoaded", async () => {
           );
 
 
+
+
         setGroupOpen(
           group,
           !isOpen
         );
 
 
+
+
         positionSafe();
       }
     );
 
+
   });
+
+
 
 
   /* =====================================================
      PREVENT ACTIVE LINK RELOAD GLITCH
   ====================================================== */
+
 
   mount
     .querySelectorAll(
@@ -474,15 +618,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     )
     .forEach((a) => {
 
+
       a.addEventListener(
         "click",
         (event) => {
+
 
           const href =
             a.getAttribute("href");
 
 
+
+
           if (!href) return;
+
+
 
 
           const targetPath =
@@ -492,8 +642,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             ).pathname;
 
 
+
+
           const currentPath =
             window.location.pathname;
+
+
 
 
           /*
@@ -502,25 +656,33 @@ document.addEventListener("DOMContentLoaded", async () => {
            * the user is already on.
            */
 
+
           if (
             targetPath ===
             currentPath
           ) {
 
+
             event.preventDefault();
+
 
             positionSafe();
           }
 
+
         }
       );
 
+
     });
+
+
 
 
   /* =====================================================
      APPLY PERSISTED SIDEBAR COLLAPSE
   ====================================================== */
+
 
   const collapsed =
     localStorage.getItem(
@@ -528,15 +690,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     ) === "1";
 
 
+
+
   applyCollapsed(collapsed);
+
+
 
 
   /* =====================================================
      FLOATING COLLAPSE BUTTON
   ====================================================== */
 
+
   const floatBtn =
     getFloatBtn();
+
+
 
 
   if (
@@ -544,15 +713,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     !floatBtn.dataset.bound
   ) {
 
+
     floatBtn.dataset.bound = "1";
+
+
 
 
     floatBtn.addEventListener(
       "click",
       (event) => {
 
+
         event.preventDefault();
         event.stopPropagation();
+
 
         toggleSidebar();
       }
@@ -560,9 +734,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
+
+
   /* =====================================================
      KEEP BUTTON POSITIONED
   ====================================================== */
+
 
   window.addEventListener(
     "resize",
@@ -573,6 +750,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
 
+
+
   window.addEventListener(
     "load",
     () =>
@@ -580,6 +759,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         freezeTop: true
       })
   );
+
+
 
 
   window.addEventListener(
@@ -592,12 +773,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
 
+
+
   /* =====================================================
      INITIAL FLOATING BUTTON POSITION
   ====================================================== */
+
 
   positionSafe({
     freezeTop: true
   });
 
+
 });
+

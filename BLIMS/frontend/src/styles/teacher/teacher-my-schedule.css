@@ -1,4 +1,132 @@
 /* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    Arial,
+    sans-serif;
+
+  background: #d9d9d9;
+
+  color: #0b2c4a;
+}
+
+
+/* =========================================================
+   APP LAYOUT
+
+   Teacher sidebar is FIXED.
+
+   Therefore the content needs to reserve:
+
+   14px left margin
+   + 260px sidebar
+   + 14px spacing
+
+   = 288px
+========================================================= */
+
+.app {
+  display: block;
+
+  width: 100%;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.content {
+  margin:
+    14px 14px 14px 288px;
+
+  background: #e9e9e9;
+
+  border-radius: 14px;
+
+  padding: 14px;
+
+  min-height:
+    calc(100vh - 28px);
+
+  position: relative;
+
+  transition:
+    margin-left 0.18s ease;
+}
+
+
+/* =========================================================
+   COLLAPSED SIDEBAR CONTENT
+
+   14px + 86px + 14px = 114px
+========================================================= */
+
+html.sb-collapsed .content {
+  margin-left: 114px;
+}
+
+
+/* =========================================================
+   SIDEBAR FLOAT TOGGLE
+========================================================= */
+
+.sidebar-float-toggle {
+  position: fixed;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.20),
+    0 0 0 3px rgba(11, 77, 122, 0.15);
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999999;
+
+  transition:
+    all 0.2s ease;
+}
+
+.sidebar-float-toggle:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.25),
+    0 0 0 4px rgba(11, 77, 122, 0.25);
+}
+
+
+
+
+/* =========================================================
    TEACHER MY SCHEDULE
    frontend/src/styles/teacher/teacher-my-schedule.css
    ========================================================= */
