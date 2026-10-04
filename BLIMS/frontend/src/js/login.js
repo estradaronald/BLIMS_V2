@@ -1,67 +1,112 @@
 (function () {
+
   if (window.__loginInit) return;
+
   window.__loginInit = true;
 
+
+
   const $ = (id) => document.getElementById(id);
+
+
 
   // =========================
   // LOGIN
   // =========================
 
   const loginForm = $("loginForm");
+
   const usernameEl = $("username");
+
   const passwordEl = $("password");
+
   const loginBtn = $("loginBtn");
+
   const loginMsg = $("loginMsg");
+
+
 
   // =========================
   // VIEWS
   // =========================
 
   const viewLogin = $("viewLogin");
+
   const viewForgot = $("viewForgot");
+
   const viewMFA = $("viewMFA");
+
+
 
   // =========================
   // NAVIGATION
   // =========================
 
   const forgotLink = $("forgotLink");
+
   const backToLogin = $("backToLogin");
+
   const backToLoginFromMFA = $("backToLoginFromMFA");
+
+
 
   // =========================
   // PASSWORD TOGGLE
   // =========================
 
   const togglePasswordBtn = $("togglePassword");
+
   const eyeIcon = $("eyeIcon");
+
   const eyeOffIcon = $("eyeOffIcon");
+
+
 
   // =========================
   // CAPTCHA
   // =========================
 
   const capA = $("capA");
+
   const capB = $("capB");
+
   const capAns = $("capAns");
+
   const capRefresh = $("capRefresh");
+
   const capMsg = $("capMsg");
+
+
 
   // =========================
   // SECONDARY PIN
   // =========================
 
   const mfaForm = $("mfaForm");
+
   const mfaCodeEl = $("mfaCode");
+
   const mfaBtn = $("mfaBtn");
+
   const mfaMsg = $("mfaMsg");
+
+
 
   // =========================
   // API ENDPOINTS
   // =========================
 
   const LOGIN_ENDPOINT = "/api/auth/login";
+
+  const CAPTCHA_FAIL_ENDPOINT =
+    "/api/auth/captcha/fail";
+
+  const CAPTCHA_SUCCESS_ENDPOINT =
+    "/api/auth/captcha/success";
+
+  const CAPTCHA_STATUS_ENDPOINT =
+    "/api/auth/captcha/status";
+
   const SECONDARY_VERIFY_ENDPOINT =
     "/api/auth/secondary/verify";
 
@@ -70,29 +115,46 @@
   const CHANGE_PASSWORD_PAGE =
     "/change-password.html";
 
+
+
   // =========================
   // DASHBOARDS
   // =========================
 
   const DASH_BY_ROLE = {
-    admin: "/src/pages/admin/dashboard.html",
+
+    admin:
+      "/src/pages/admin/dashboard.html",
 
     teacher:
       "/src/pages/teachers/teacher-dashboard.html",
 
     student:
       "/src/pages/students/student-dashboard.html",
+
   };
+
+
 
   const DEFAULT_REDIRECT =
     "/src/pages/admin/dashboard.html";
+
+
 
   // =========================
   // STATE
   // =========================
 
   let csrfToken = "";
+
   let captchaAnswer = null;
+
+  let captchaLocked = false;
+
+  let captchaLockTimer = null;
+
+  let captchaLockedUntil = 0;
+
 
 
   // =========================
@@ -116,18 +178,31 @@
     });
 
 
+
     if (view === "login" && viewLogin) {
+
       viewLogin.classList.add("is-active");
+
     }
+
+
 
     if (view === "forgot" && viewForgot) {
+
       viewForgot.classList.add("is-active");
+
     }
 
+
+
     if (view === "secondary" && viewMFA) {
+
       viewMFA.classList.add("is-active");
+
     }
+
   }
+
 
 
   // =========================
@@ -144,7 +219,9 @@
       "error",
       "success"
     );
+
   }
+
 
 
   function showError(element, message) {
@@ -156,7 +233,9 @@
     element.classList.remove("success");
 
     element.classList.add("error");
+
   }
+
 
 
   function showSuccess(element, message) {
@@ -168,7 +247,9 @@
     element.classList.remove("error");
 
     element.classList.add("success");
+
   }
+
 
 
   // =========================
@@ -180,17 +261,29 @@
     let payload = {};
 
     try {
+
       payload = await response.json();
+
     } catch {
+
       payload = {};
+
     }
 
+
+
     return {
+
       ok: response.ok,
+
       status: response.status,
+
       data: payload,
+
     };
+
   }
+
 
 
   // =========================
@@ -211,8 +304,10 @@
       );
 
 
+
       const result =
         await parseResponse(response);
+
 
 
       if (
@@ -222,7 +317,10 @@
 
         csrfToken =
           result.data.csrfToken;
+
       }
+
+
 
     } catch (error) {
 
@@ -230,20 +328,31 @@
         "Unable to load CSRF token:",
         error
       );
+
     }
+
   }
+
 
 
   async function ensureCsrfToken() {
 
     if (csrfToken) {
+
       return csrfToken;
+
     }
+
+
 
     await loadCsrfToken();
 
+
+
     return csrfToken;
+
   }
+
 
 
   // =========================
@@ -253,8 +362,11 @@
   function generateCaptcha() {
 
     if (!capA || !capB) {
+
       return;
+
     }
+
 
 
     const a =
@@ -264,34 +376,464 @@
       Math.floor(Math.random() * 9) + 1;
 
 
+
     captchaAnswer = a + b;
 
 
+
     capA.textContent = a;
+
     capB.textContent = b;
 
 
+
     if (capAns) {
+
       capAns.value = "";
+
+      capAns.disabled = captchaLocked;
+
     }
 
 
-    clearMessage(capMsg);
+
+    if (capRefresh) {
+
+      capRefresh.disabled = captchaLocked;
+
+    }
+
+
+
+    if (!captchaLocked) {
+
+      clearMessage(capMsg);
+
+    }
+
   }
 
 
-  function validateCaptcha() {
+
+  function setCaptchaControlsDisabled(disabled) {
+
+    if (capAns) {
+
+      capAns.disabled = disabled;
+
+    }
+
+
+
+    if (capRefresh) {
+
+      capRefresh.disabled = disabled;
+
+    }
+
+
+
+    if (loginBtn) {
+
+      loginBtn.disabled = disabled;
+
+    }
+
+  }
+
+
+
+  function stopCaptchaLockTimer() {
+
+    if (captchaLockTimer) {
+
+      clearInterval(captchaLockTimer);
+
+      captchaLockTimer = null;
+
+    }
+
+  }
+
+
+
+  function startCaptchaLock(seconds) {
+
+    const safeSeconds =
+      Math.max(
+        1,
+        Number(seconds) || 60
+      );
+
+
+
+    stopCaptchaLockTimer();
+
+
+
+    captchaLocked = true;
+
+
+
+    captchaLockedUntil =
+      Date.now() +
+      safeSeconds * 1000;
+
+
+
+    setCaptchaControlsDisabled(true);
+
+
+
+    generateCaptcha();
+
+
+
+    function updateCountdown() {
+
+      const remaining =
+        Math.max(
+          0,
+          Math.ceil(
+            (captchaLockedUntil - Date.now()) /
+              1000
+          )
+        );
+
+
+
+      if (remaining <= 0) {
+
+        stopCaptchaLockTimer();
+
+
+
+        captchaLocked = false;
+
+        captchaLockedUntil = 0;
+
+
+
+        setCaptchaControlsDisabled(false);
+
+
+
+        generateCaptcha();
+
+
+
+        showSuccess(
+          capMsg,
+          "CAPTCHA unlocked. Please try again."
+        );
+
+
+
+        return;
+
+      }
+
+
+
+      showError(
+        capMsg,
+        `Too many incorrect CAPTCHA attempts. ` +
+        `Please wait ${remaining} seconds.`
+      );
+
+    }
+
+
+
+    updateCountdown();
+
+
+
+    captchaLockTimer =
+      setInterval(
+        updateCountdown,
+        250
+      );
+
+  }
+
+
+
+  async function loadCaptchaStatus() {
+
+    try {
+
+      const response =
+        await fetch(
+          CAPTCHA_STATUS_ENDPOINT,
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store"
+          }
+        );
+
+
+
+      const result =
+        await parseResponse(response);
+
+
+
+      if (
+        result.ok &&
+        result.data?.captchaLocked
+      ) {
+
+        startCaptchaLock(
+          result.data.retryAfterSeconds
+        );
+
+        return;
+
+      }
+
+
+
+      captchaLocked = false;
+
+      captchaLockedUntil = 0;
+
+
+
+      setCaptchaControlsDisabled(false);
+
+
+
+    } catch (error) {
+
+      console.error(
+        "Unable to load CAPTCHA status:",
+        error
+      );
+
+    }
+
+  }
+
+
+
+  async function reportCaptchaFailure() {
+
+    try {
+
+      const response =
+        await fetch(
+          CAPTCHA_FAIL_ENDPOINT,
+          {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({})
+          }
+        );
+
+
+
+      const result =
+        await parseResponse(response);
+
+
+
+      const payload =
+        result.data || {};
+
+
+
+      if (
+        response.status === 429 ||
+        payload.captchaLocked
+      ) {
+
+        startCaptchaLock(
+          payload.retryAfterSeconds || 60
+        );
+
+
+
+        return payload;
+
+      }
+
+
+
+      if (
+        !result.ok ||
+        payload.ok === false
+      ) {
+
+        showError(
+          capMsg,
+          payload.message ||
+            "Incorrect CAPTCHA answer."
+        );
+
+
+
+        return payload;
+
+      }
+
+
+
+      return payload;
+
+
+
+    } catch (error) {
+
+      console.error(
+        "CAPTCHA failure report error:",
+        error
+      );
+
+
+
+      showError(
+        capMsg,
+        "Unable to verify CAPTCHA attempt. Please try again."
+      );
+
+
+
+      return null;
+
+    }
+
+  }
+
+
+
+  async function reportCaptchaSuccess() {
+
+    try {
+
+      const response =
+        await fetch(
+          CAPTCHA_SUCCESS_ENDPOINT,
+          {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({})
+          }
+        );
+
+
+
+      const result =
+        await parseResponse(response);
+
+
+
+      const payload =
+        result.data || {};
+
+
+
+      if (
+        response.status === 429 ||
+        payload.captchaLocked
+      ) {
+
+        startCaptchaLock(
+          payload.retryAfterSeconds || 60
+        );
+
+
+
+        return false;
+
+      }
+
+
+
+      if (
+        !result.ok ||
+        payload.ok === false
+      ) {
+
+        showError(
+          capMsg,
+          payload.message ||
+            "Unable to verify CAPTCHA."
+        );
+
+
+
+        return false;
+
+      }
+
+
+
+      return true;
+
+
+
+    } catch (error) {
+
+      console.error(
+        "CAPTCHA success report error:",
+        error
+      );
+
+
+
+      showError(
+        capMsg,
+        "Unable to verify CAPTCHA. Please try again."
+      );
+
+
+
+      return false;
+
+    }
+
+  }
+
+
+
+  async function validateCaptcha() {
+
+    if (captchaLocked) {
+
+      return false;
+
+    }
+
+
 
     if (
       !capAns ||
       captchaAnswer === null
     ) {
+
       return true;
+
     }
 
 
+
     const answer =
-      Number(capAns.value.trim());
+      Number(
+        capAns.value.trim()
+      );
+
 
 
     if (!Number.isInteger(answer)) {
@@ -301,27 +843,95 @@
         "Please solve the CAPTCHA."
       );
 
+
+
       return false;
+
     }
+
 
 
     if (answer !== captchaAnswer) {
 
-      showError(
-        capMsg,
-        "Incorrect CAPTCHA answer."
-      );
+      // Generate a new CAPTCHA after
+      // every incorrect answer.
 
       generateCaptcha();
 
+
+
+      const result =
+        await reportCaptchaFailure();
+
+
+
+      if (
+        result?.captchaLocked
+      ) {
+
+        return false;
+
+      }
+
+
+
+      const remaining =
+        result?.remainingAttempts;
+
+
+
+      if (
+        Number.isInteger(remaining) &&
+        remaining > 0
+      ) {
+
+        showError(
+          capMsg,
+          `Incorrect CAPTCHA answer. ` +
+          `${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`
+        );
+
+      } else {
+
+        showError(
+          capMsg,
+          "Incorrect CAPTCHA answer."
+        );
+
+      }
+
+
+
       return false;
+
     }
+
+
+
+    // Correct CAPTCHA:
+    // reset the backend counter.
+
+    const success =
+      await reportCaptchaSuccess();
+
+
+
+    if (!success) {
+
+      return false;
+
+    }
+
 
 
     clearMessage(capMsg);
 
+
+
     return true;
+
   }
+
 
 
   // =========================
@@ -334,8 +944,11 @@
       !togglePasswordBtn ||
       !passwordEl
     ) {
+
       return;
+
     }
+
 
 
     togglePasswordBtn.addEventListener(
@@ -346,10 +959,12 @@
           passwordEl.type === "password";
 
 
+
         passwordEl.type =
           isPassword
             ? "text"
             : "password";
+
 
 
         if (eyeIcon) {
@@ -358,7 +973,9 @@
             isPassword
               ? "none"
               : "";
+
         }
+
 
 
         if (eyeOffIcon) {
@@ -367,7 +984,9 @@
             isPassword
               ? ""
               : "none";
+
         }
+
 
 
         togglePasswordBtn.setAttribute(
@@ -376,9 +995,12 @@
             ? "Hide password"
             : "Show password"
         );
+
       }
     );
+
   }
+
 
 
   // =========================
@@ -391,7 +1013,9 @@
       DASH_BY_ROLE[role] ||
       DEFAULT_REDIRECT
     );
+
   }
+
 
 
   function redirectAfterLogin(payload) {
@@ -401,13 +1025,19 @@
       window.location.href =
         CHANGE_PASSWORD_PAGE;
 
+
+
       return;
+
     }
+
 
 
     window.location.href =
       getDashboard(payload?.role);
+
   }
+
 
 
   // =========================
@@ -418,22 +1048,31 @@
 
     event.preventDefault();
 
+
+
     clearMessage(loginMsg);
+
 
 
     if (
       !usernameEl ||
       !passwordEl
     ) {
+
       return;
+
     }
+
 
 
     const username =
       usernameEl.value.trim();
 
+
+
     const password =
       passwordEl.value;
+
 
 
     if (!username) {
@@ -443,10 +1082,16 @@
         "Please enter your username."
       );
 
+
+
       usernameEl.focus();
 
+
+
       return;
+
     }
+
 
 
     if (!password) {
@@ -456,15 +1101,24 @@
         "Please enter your password."
       );
 
+
+
       passwordEl.focus();
 
+
+
       return;
+
     }
 
 
-    if (!validateCaptcha()) {
+
+    if (!(await validateCaptcha())) {
+
       return;
+
     }
+
 
 
     const originalText =
@@ -473,13 +1127,16 @@
         : "Sign In";
 
 
+
     if (loginBtn) {
 
       loginBtn.disabled = true;
 
       loginBtn.textContent =
         "Signing In...";
+
     }
+
 
 
     try {
@@ -488,17 +1145,23 @@
         await ensureCsrfToken();
 
 
+
       const headers = {
+
         "Content-Type":
           "application/json",
+
       };
+
 
 
       if (token) {
 
         headers["X-CSRF-Token"] =
           token;
+
       }
+
 
 
       const response =
@@ -515,15 +1178,49 @@
               username,
               password,
             }),
+
           }
         );
+
 
 
       const result =
         await parseResponse(response);
 
+
+
       const payload =
         result.data;
+
+
+
+      // =========================
+      // CAPTCHA LOCKOUT
+      // =========================
+
+      if (
+        response.status === 429 &&
+        payload?.captchaLocked
+      ) {
+
+        startCaptchaLock(
+          payload.retryAfterSeconds || 60
+        );
+
+
+
+        showError(
+          capMsg,
+          payload.message ||
+            "Too many incorrect CAPTCHA attempts."
+        );
+
+
+
+        return;
+
+      }
+
 
 
       // =========================
@@ -541,10 +1238,16 @@
             "Invalid username or password."
         );
 
+
+
         generateCaptcha();
 
+
+
         return;
+
       }
+
 
 
       // =========================
@@ -558,33 +1261,44 @@
         clearMessage(loginMsg);
 
 
+
         if (mfaMsg) {
 
           mfaMsg.textContent =
             "Enter your 6-digit Secondary PIN to continue.";
+
         }
+
 
 
         if (mfaCodeEl) {
 
           mfaCodeEl.value = "";
+
         }
+
 
 
         showView("secondary");
 
 
+
         setTimeout(() => {
 
           if (mfaCodeEl) {
+
             mfaCodeEl.focus();
+
           }
 
         }, 50);
 
 
+
         return;
+
       }
+
 
 
       // =========================
@@ -597,14 +1311,20 @@
           payload
         );
 
+
+
         return;
+
       }
+
 
 
       showError(
         loginMsg,
         "Login succeeded, but no user role was returned."
       );
+
+
 
     } catch (error) {
 
@@ -614,22 +1334,29 @@
       );
 
 
+
       showError(
         loginMsg,
         "Unable to connect to the server. Please try again."
       );
 
+
+
     } finally {
 
       if (loginBtn) {
 
-        loginBtn.disabled = false;
+        loginBtn.disabled = captchaLocked;
 
         loginBtn.textContent =
           originalText;
+
       }
+
     }
+
   }
+
 
 
   // =========================
@@ -640,16 +1367,23 @@
 
     event.preventDefault();
 
+
+
     clearMessage(mfaMsg);
 
 
+
     if (!mfaCodeEl) {
+
       return;
+
     }
+
 
 
     const pin =
       mfaCodeEl.value.trim();
+
 
 
     // Exactly 6 digits
@@ -661,10 +1395,16 @@
         "Secondary PIN must be exactly 6 digits."
       );
 
+
+
       mfaCodeEl.focus();
 
+
+
       return;
+
     }
+
 
 
     const originalText =
@@ -673,13 +1413,16 @@
         : "Verify PIN";
 
 
+
     if (mfaBtn) {
 
       mfaBtn.disabled = true;
 
       mfaBtn.textContent =
         "Verifying...";
+
     }
+
 
 
     try {
@@ -688,17 +1431,23 @@
         await ensureCsrfToken();
 
 
+
       const headers = {
+
         "Content-Type":
           "application/json",
+
       };
+
 
 
       if (token) {
 
         headers["X-CSRF-Token"] =
           token;
+
       }
+
 
 
       const response =
@@ -714,15 +1463,20 @@
             body: JSON.stringify({
               pin,
             }),
+
           }
         );
+
 
 
       const result =
         await parseResponse(response);
 
+
+
       const payload =
         result.data;
+
 
 
       // =========================
@@ -741,12 +1495,19 @@
         );
 
 
+
         mfaCodeEl.value = "";
+
+
 
         mfaCodeEl.focus();
 
+
+
         return;
+
       }
+
 
 
       // =========================
@@ -762,8 +1523,12 @@
           "Unexpected account role. Please sign in again."
         );
 
+
+
         return;
+
       }
+
 
 
       // =========================
@@ -774,6 +1539,8 @@
         payload
       );
 
+
+
     } catch (error) {
 
       console.error(
@@ -782,10 +1549,13 @@
       );
 
 
+
       showError(
         mfaMsg,
         "Unable to connect to the server. Please try again."
       );
+
+
 
     } finally {
 
@@ -795,9 +1565,13 @@
 
         mfaBtn.textContent =
           originalText;
+
       }
+
     }
+
   }
+
 
 
   // =========================
@@ -819,9 +1593,12 @@
           clearMessage(mfaMsg);
 
           showView("forgot");
+
         }
       );
+
     }
+
 
 
     // Back from Forgot Password
@@ -837,12 +1614,18 @@
           showView("login");
 
 
+
           if (usernameEl) {
+
             usernameEl.focus();
+
           }
+
         }
       );
+
     }
+
 
 
     // Back from Secondary PIN
@@ -858,21 +1641,32 @@
           clearMessage(mfaMsg);
 
 
+
           if (mfaCodeEl) {
+
             mfaCodeEl.value = "";
+
           }
+
 
 
           showView("login");
 
 
+
           if (passwordEl) {
+
             passwordEl.focus();
+
           }
+
         }
       );
+
     }
+
   }
+
 
 
   // =========================
@@ -882,8 +1676,11 @@
   function setupPinInput() {
 
     if (!mfaCodeEl) {
+
       return;
+
     }
+
 
 
     mfaCodeEl.addEventListener(
@@ -894,8 +1691,10 @@
           this.value
             .replace(/\D/g, "")
             .slice(0, 6);
+
       }
     );
+
 
 
     mfaCodeEl.addEventListener(
@@ -903,14 +1702,23 @@
       function (event) {
 
         const allowedKeys = [
+
           "Backspace",
+
           "Delete",
+
           "ArrowLeft",
+
           "ArrowRight",
+
           "Tab",
+
           "Home",
+
           "End",
+
         ];
+
 
 
         if (
@@ -920,8 +1728,11 @@
           event.ctrlKey ||
           event.metaKey
         ) {
+
           return;
+
         }
+
 
 
         if (
@@ -931,10 +1742,14 @@
         ) {
 
           event.preventDefault();
+
         }
+
       }
     );
+
   }
+
 
 
   // =========================
@@ -949,7 +1764,9 @@
         "submit",
         handleLoginSubmit
       );
+
     }
+
 
 
     if (mfaForm) {
@@ -958,17 +1775,34 @@
         "submit",
         handleSecondarySubmit
       );
+
     }
+
 
 
     if (capRefresh) {
 
       capRefresh.addEventListener(
         "click",
-        generateCaptcha
+        function () {
+
+          if (captchaLocked) {
+
+            return;
+
+          }
+
+
+
+          generateCaptcha();
+
+        }
       );
+
     }
+
   }
+
 
 
   // =========================
@@ -983,22 +1817,41 @@
     showView("login");
 
 
+
     generateCaptcha();
+
 
 
     setupPasswordToggle();
 
+
+
     setupNavigation();
 
+
+
     setupPinInput();
+
+
 
     setupEventListeners();
 
 
+
     await loadCsrfToken();
+
+
+
+    // Restore CAPTCHA lockout after refresh.
+
+    await loadCaptchaStatus();
+
   }
 
 
+
   init();
+
+
 
 })();

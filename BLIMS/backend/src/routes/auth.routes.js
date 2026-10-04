@@ -10,6 +10,14 @@ const router = express.Router();
 
 
 // =======================================================
+// CAPTCHA SETTINGS
+// =======================================================
+
+const CAPTCHA_MAX_ATTEMPTS = 3;
+const CAPTCHA_LOCKOUT_MS = 60 * 1000;
+
+
+// =======================================================
 // Helpers
 // =======================================================
 
@@ -151,6 +159,7 @@ function requireSafeString(
 
   let s = value;
 
+
   if (trim) {
     s = s.trim();
   }
@@ -246,10 +255,142 @@ function badRequest(
 
 
 // =======================================================
+// CAPTCHA LOCKOUT HELPERS
+// =======================================================
+
+function getCaptchaState(req) {
+
+  if (!req.session.captchaGuard) {
+
+    req.session.captchaGuard = {
+      failedAttempts: 0,
+      lockedUntil: 0
+    };
+
+  }
+
+  return req.session.captchaGuard;
+
+}
+
+
+function getCaptchaLockResponse(req) {
+
+  const state =
+    getCaptchaState(req);
+
+  const now = Date.now();
+
+
+  // Lockout expired
+  if (
+    state.lockedUntil &&
+    now >= state.lockedUntil
+  ) {
+
+    state.failedAttempts = 0;
+    state.lockedUntil = 0;
+
+  }
+
+
+  if (
+    state.lockedUntil &&
+    now < state.lockedUntil
+  ) {
+
+    const retryAfterSeconds =
+      Math.ceil(
+        (state.lockedUntil - now) / 1000
+      );
+
+    return {
+      locked: true,
+      retryAfterSeconds
+    };
+
+  }
+
+
+  return {
+    locked: false,
+    retryAfterSeconds: 0
+  };
+
+}
+
+
+function registerCaptchaFailure(req) {
+
+  const state =
+    getCaptchaState(req);
+
+  const now = Date.now();
+
+
+  // If previous lock expired,
+  // start a fresh counter.
+  if (
+    state.lockedUntil &&
+    now >= state.lockedUntil
+  ) {
+
+    state.failedAttempts = 0;
+    state.lockedUntil = 0;
+
+  }
+
+
+  state.failedAttempts += 1;
+
+
+  // 3 wrong CAPTCHA attempts
+  if (
+    state.failedAttempts >=
+    CAPTCHA_MAX_ATTEMPTS
+  ) {
+
+    state.lockedUntil =
+      Date.now() + CAPTCHA_LOCKOUT_MS;
+
+    return {
+      locked: true,
+      failedAttempts:
+        state.failedAttempts,
+      retryAfterSeconds: 60
+    };
+
+  }
+
+
+  return {
+    locked: false,
+    failedAttempts:
+      state.failedAttempts,
+    remainingAttempts:
+      CAPTCHA_MAX_ATTEMPTS -
+      state.failedAttempts
+  };
+
+}
+
+
+function resetCaptchaGuard(req) {
+
+  req.session.captchaGuard = {
+    failedAttempts: 0,
+    lockedUntil: 0
+  };
+
+}
+
+
+// =======================================================
 // POST /api/auth/login
 // =======================================================
 //
 // ADMIN:
+//
 // Username + Password
 //        ↓
 // Secondary 6-digit PIN
@@ -257,6 +398,7 @@ function badRequest(
 // Admin Dashboard
 //
 // TEACHER/STUDENT:
+//
 // Username + Password
 //        ↓
 // Normal login
@@ -269,6 +411,28 @@ router.post(
   async (req, res) => {
 
     try {
+
+      // ===================================================
+      // CAPTCHA LOCKOUT CHECK
+      // ===================================================
+
+      const captchaLock =
+        getCaptchaLockResponse(req);
+
+      if (captchaLock.locked) {
+
+        return res.status(429).json({
+          ok: false,
+          captchaLocked: true,
+          retryAfterSeconds:
+            captchaLock.retryAfterSeconds,
+          message:
+            `Too many incorrect CAPTCHA attempts. ` +
+            `Please wait ${captchaLock.retryAfterSeconds} seconds.`
+        });
+
+      }
+
 
       // ===================================================
       // Validate username
@@ -307,7 +471,9 @@ router.post(
       // ===================================================
 
       const invalid =
-        async (usernameForAudit = "") => {
+        async (
+          usernameForAudit = ""
+        ) => {
 
           await writeAudit(req, {
 
@@ -380,6 +546,10 @@ router.post(
       }
 
 
+      // ===================================================
+      // Account status
+      // ===================================================
+
       if (
         user.status !== "active"
       ) {
@@ -408,13 +578,32 @@ router.post(
 
 
       // ===================================================
+      // CAPTCHA LOGIN SUCCESS
+      // ===================================================
+      //
+      // The frontend calls /captcha/success after
+      // successfully solving the CAPTCHA.
+      //
+      // We also reset here as a safety cleanup after
+      // successful password verification.
+      //
+      // ===================================================
+
+      resetCaptchaGuard(req);
+
+
+      // ===================================================
       // ADMIN -> SECONDARY PIN REQUIRED
       // ===================================================
 
       if (user.role === "admin") {
 
-        // Make sure the admin has a secondary PIN.
-        if (!user.secondary_password_hash) {
+
+        // Make sure the admin has
+        // a secondary PIN.
+        if (
+          !user.secondary_password_hash
+        ) {
 
           await writeAudit(req, {
 
@@ -573,6 +762,7 @@ router.post(
 
       });
 
+
     } catch (err) {
 
       console.error(
@@ -621,6 +811,286 @@ router.post(
     }
 
   }
+
+);
+
+
+// =======================================================
+// POST /api/auth/captcha/fail
+// =======================================================
+//
+// Called by login.js when the user enters
+// an incorrect CAPTCHA answer.
+//
+// 3 failed attempts = 60-second lockout.
+//
+// =======================================================
+
+router.post(
+  "/captcha/fail",
+  async (req, res) => {
+
+    try {
+
+      const lock =
+        registerCaptchaFailure(req);
+
+
+      if (lock.locked) {
+
+        await writeAudit(req, {
+
+          action:
+            "AUTH_CAPTCHA_LOCKOUT",
+
+          outcome:
+            "FAIL",
+
+          message:
+            "CAPTCHA failed 3 times; 60-second lockout",
+
+          meta: {
+
+            failedAttempts:
+              lock.failedAttempts,
+
+            lockoutSeconds:
+              60
+
+          }
+
+        });
+
+
+        return res.status(429).json({
+
+          ok: false,
+
+          captchaLocked: true,
+
+          failedAttempts:
+            lock.failedAttempts,
+
+          retryAfterSeconds:
+            lock.retryAfterSeconds,
+
+          message:
+            "Too many incorrect CAPTCHA attempts. Please wait 60 seconds."
+
+        });
+
+      }
+
+
+      await writeAudit(req, {
+
+        action:
+          "AUTH_CAPTCHA_FAIL",
+
+        outcome:
+          "FAIL",
+
+        message:
+          "Incorrect CAPTCHA answer",
+
+        meta: {
+
+          failedAttempts:
+            lock.failedAttempts,
+
+          remainingAttempts:
+            lock.remainingAttempts
+
+        }
+
+      });
+
+
+      return res.status(400).json({
+
+        ok: false,
+
+        captchaLocked: false,
+
+        failedAttempts:
+          lock.failedAttempts,
+
+        remainingAttempts:
+          lock.remainingAttempts,
+
+        message:
+          "Incorrect CAPTCHA answer."
+
+      });
+
+
+    } catch (err) {
+
+      console.error(
+        "CAPTCHA failure route error:",
+        err
+      );
+
+
+      return res.status(500).json({
+
+        ok: false,
+
+        message:
+          "Something went wrong"
+
+      });
+
+    }
+
+  }
+
+);
+
+
+// =======================================================
+// POST /api/auth/captcha/success
+// =======================================================
+//
+// Called by login.js after the CAPTCHA answer is
+// successfully solved.
+//
+// Resets the CAPTCHA failure counter.
+//
+// =======================================================
+
+router.post(
+  "/captcha/success",
+  async (req, res) => {
+
+    try {
+
+      const lock =
+        getCaptchaLockResponse(req);
+
+
+      // Do not allow a locked session
+      // to reset itself.
+      if (lock.locked) {
+
+        return res.status(429).json({
+
+          ok: false,
+
+          captchaLocked: true,
+
+          retryAfterSeconds:
+            lock.retryAfterSeconds,
+
+          message:
+            `CAPTCHA is locked. Please wait ${lock.retryAfterSeconds} seconds.`
+
+        });
+
+      }
+
+
+      resetCaptchaGuard(req);
+
+
+      return res.json({
+
+        ok: true,
+
+        captchaLocked: false,
+
+        failedAttempts: 0,
+
+        remainingAttempts:
+          CAPTCHA_MAX_ATTEMPTS
+
+      });
+
+
+    } catch (err) {
+
+      console.error(
+        "CAPTCHA success route error:",
+        err
+      );
+
+
+      return res.status(500).json({
+
+        ok: false,
+
+        message:
+          "Something went wrong"
+
+      });
+
+    }
+
+  }
+
+);
+
+
+// =======================================================
+// GET /api/auth/captcha/status
+// =======================================================
+//
+// Used when login.js loads or the page is refreshed.
+//
+// Allows the frontend to restore an active lockout.
+//
+// =======================================================
+
+router.get(
+  "/captcha/status",
+  (req, res) => {
+
+    const lock =
+      getCaptchaLockResponse(req);
+
+    const state =
+      getCaptchaState(req);
+
+
+    if (lock.locked) {
+
+      return res.json({
+
+        ok: true,
+
+        captchaLocked: true,
+
+        retryAfterSeconds:
+          lock.retryAfterSeconds,
+
+        failedAttempts:
+          state.failedAttempts
+
+      });
+
+    }
+
+
+    return res.json({
+
+      ok: true,
+
+      captchaLocked: false,
+
+      failedAttempts:
+        state.failedAttempts,
+
+      remainingAttempts:
+        Math.max(
+          0,
+          CAPTCHA_MAX_ATTEMPTS -
+          state.failedAttempts
+        )
+
+    });
+
+  }
+
 );
 
 
@@ -631,6 +1101,7 @@ router.post(
 // Used only for admin login.
 //
 // Main password must already be verified.
+//
 // Then the 6-digit secondary PIN is verified.
 //
 // =======================================================
@@ -890,9 +1361,12 @@ router.post(
             "Invalid secondary PIN",
 
           meta: {
+
             role: "admin",
+
             username:
               user.username
+
           }
 
         });
@@ -933,6 +1407,7 @@ router.post(
 
 
       // Remove pending authentication
+
       delete req.session.secondaryAuth;
 
 
@@ -952,9 +1427,12 @@ router.post(
           "Admin secondary PIN verified",
 
         meta: {
+
           role: "admin",
+
           username:
             user.username
+
         }
 
       });
@@ -974,6 +1452,7 @@ router.post(
           !!user.must_change_password
 
       });
+
 
     } catch (err) {
 
@@ -995,6 +1474,7 @@ router.post(
     }
 
   }
+
 );
 
 
@@ -1033,6 +1513,7 @@ router.post(
         }
       );
 
+
       return res.json({
         ok: true
       });
@@ -1049,6 +1530,7 @@ router.post(
             "Logout error:",
             err
           );
+
 
           return res.status(500).json({
 
@@ -1081,6 +1563,7 @@ router.post(
     );
 
   }
+
 );
 
 
@@ -1119,6 +1602,7 @@ router.get(
     });
 
   }
+
 );
 
 
@@ -1140,6 +1624,7 @@ router.get(
     });
 
   }
+
 );
 
 
@@ -1208,7 +1693,8 @@ router.post(
       // =================================================
 
       if (
-        newPassword !== confirmPassword
+        newPassword !==
+        confirmPassword
       ) {
 
         return res.status(400).json({
@@ -1296,8 +1782,10 @@ router.post(
           newPassword
         );
 
+
       user.must_change_password =
         false;
+
 
       user.password_changed_at =
         new Date();
@@ -1337,6 +1825,7 @@ router.post(
 
       });
 
+
     } catch (err) {
 
       console.error(
@@ -1375,7 +1864,12 @@ router.post(
     }
 
   }
+
 );
 
+
+// =======================================================
+// EXPORT
+// =======================================================
 
 module.exports = router;

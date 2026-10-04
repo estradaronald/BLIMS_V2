@@ -274,8 +274,9 @@
 
         </div>
 
-
-
+<div class="forgot-password">
+  <a href="#" id="forgotLink">Forgot Password?</a>
+</div>
 
         <!-- ================= HUMAN VERIFICATION ================= -->
 
@@ -571,34 +572,91 @@
 
     <!-- ================= FORGOT PASSWORD ================= -->
 
+<section
+  id="viewForgot"
+  class="login-card card-view"
+>
 
-    <section
-      id="viewForgot"
-      class="login-card card-view"
+  <h2>
+    Forgot Password?
+  </h2>
+
+  <p class="login-msg">
+    Enter your registered email address to recover your account password.
+  </p>
+
+  <label for="forgotEmail">
+    Email Address
+  </label>
+
+  <div class="input-group">
+    <span
+      class="icon"
+      aria-hidden="true"
     >
-
-
-      <h2>
-        Forgot Password?
-      </h2>
-
-
-      <p class="login-msg">
-        Please contact the BLIMS administrator to
-        recover or reset your account password.
-      </p>
-
-
-      <button
-        id="backToLogin"
-        class="link-btn"
-        type="button"
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        ← Back to Sign In
-      </button>
+        <path
+          d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+        />
+      </svg>
+    </span>
 
+    <input
+      id="forgotEmail"
+      name="forgotEmail"
+      type="email"
+      placeholder="Enter your registered email"
+      autocomplete="email"
+    />
+  </div>
 
-    </section>
+  <button
+    id="forgotContinueBtn"
+    class="login-btn"
+    type="button"
+  >
+    <span>Continue</span>
+
+    <span
+      class="login-btn-icon"
+      aria-hidden="true"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5 12H19"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M13 6L19 12L13 18"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </span>
+  </button>
+
+  <button
+    id="backToLogin"
+    class="link-btn"
+    type="button"
+  >
+    ← Back to Sign In
+  </button>
+
+</section>
 
 
 
