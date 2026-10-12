@@ -16,9 +16,6 @@
 ========================================================= */
 
 
-body {
-  background: #e4e5e7;
-}
 
 
 /* =========================================================
@@ -66,13 +63,25 @@ body {
 ========================================================= */
 
 
-.students-head-actions {
+.teachers-head-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 
+.t-form-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.t-form-header-actions + .t-bulk-btn {
+  margin-left: 4px;
+}
 /* =========================================================
    BULK CREATE BUTTON
 ========================================================= */
@@ -130,75 +139,100 @@ body {
 ========================================================= */
 
 
+/* =========================================================
+   FORM LAYOUT — MATCH FACULTY
+========================================================= */
+
+
 .t-form-grid {
-  display: flex !important;
-  flex-direction: column !important;
+  display: grid !important;
+
+
+  grid-template-columns: 1.05fr 0.95fr;
+
+
+  grid-template-areas: "basic right";
+
+
+  gap: 14px;
+
+
+  align-items: start;
 
 
   width: 100%;
+}
 
 
+.t-form-left {
+  grid-area: basic;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
 
-.t-form-left,
-.t-form-right,
-.t-left-col,
-.t-right-col {
+.t-form-right {
+  grid-area: right;
+
+
   width: 100%;
   min-width: 0;
 
 
-  display: block !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 14px;
+
+
+  margin-top: 0;
+  padding-top: 0;
 }
 
 
 /* =========================================================
-   FORM CARDS
+   FORM CARDS — MATCH FACULTY
 ========================================================= */
 
 
-.t-form-card,
-.t-basic-card {
+.t-form-card {
   width: 100%;
-
-
-  height: auto !important;
-  min-height: 0 !important;
-
-
-  box-sizing: border-box;
-
-
   overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 14px;
+  box-sizing: border-box;
 }
 
 
 .t-form-hd {
-  padding: 12px 14px;
+  padding: 16px 16px 12px;
 
 
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 1000;
 
 
   color: #0b2c4a;
 
 
-  border-bottom: 1px solid
-    rgba(11, 44, 74, 0.10);
+  background: #f8fafc;
+
+
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+
+
+  line-height: 1.25;
 }
 
 
 .t-form-bd {
-  width: 100%;
+  padding: 16px;
 
 
-  padding: 14px;
-
-
-  box-sizing: border-box;
+  background: #f8fafc;
 }
 
 
@@ -208,10 +242,8 @@ body {
 
 
 .t-basic-card .t-form-bd {
-  display: block !important;
+  display: block;
 }
-
-
 .t-basic-left {
   width: 100%;
   min-width: 0;
@@ -219,7 +251,7 @@ body {
 
 
 /* =========================================================
-   ROWS
+   FORM ROWS — MATCH FACULTY
 ========================================================= */
 
 
@@ -227,12 +259,10 @@ body {
   display: grid;
 
 
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
 
-  gap: 16px;
+  gap: 12px;
 
 
   width: 100%;
@@ -243,39 +273,27 @@ body {
 
 
 /* =========================================================
-   FIELDS
+   FIELDS — MATCH FACULTY
 ========================================================= */
-
-
 .t-field {
   width: 100%;
   min-width: 0;
-
-
-  margin-bottom: 14px;
-
-
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 
 
 .t-field:last-child {
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
 
 
 .t-field label {
   display: block;
-
-
-  font-size: 12px;
+  margin-bottom: 6px;
+  font-size: 11px;
   font-weight: 1000;
-
-
   color: #0b2c4a;
-
-
-  margin-bottom: 7px;
 }
 
 
@@ -284,29 +302,24 @@ body {
 .t-select {
   width: 100%;
   max-width: none;
-
-
   height: 38px;
-
-
   box-sizing: border-box;
-
-
   border-radius: 10px;
-
-
-  border: 1px solid
-    rgba(11, 44, 74, 0.10);
-
-
-  padding: 0 12px;
-
-
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  padding: 0 10px;
   outline: none;
-
-
   background: #ffffff;
   color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+
+.t-field input:focus,
+.t-field select:focus,
+.t-select:focus {
+  border-color: rgba(11, 77, 122, 0.35);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
 
 
@@ -316,30 +329,30 @@ body {
 
 
 .t-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
 
 
-  padding-right: 44px;
+  padding: 0 44px 0 10px;
 
 
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
 
 
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 14px 14px;
-}
+  outline: none;
+  background-color: #fff;
+  color: #0b2c4a;
 
 
-.t-select:disabled {
-  background-color: #f1f3f5;
-  color: #8a929b;
+  font-family: inherit;
+  font-size: 12px;
 
 
-  cursor: not-allowed;
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
 }
 
 
@@ -349,68 +362,66 @@ body {
 
 
 .t-basic-left > .t-row2 {
+  margin-bottom: 10px;
+}
+
+
+.t-basic-left > .t-row2:last-child {
+  margin-bottom: 0;
+}
+
+
+.t-basic-left > .t-field {
   margin-bottom: 0;
 }
 
 
 .t-basic-left > .t-row2:last-child {
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 
 .t-basic-left > .t-row2:last-child .t-field {
-  grid-column: 1;
+  grid-column: auto;
 }
 
 
 /* =========================================================
    GENDER
 ========================================================= */
-
-
 .t-gender {
   display: flex;
   align-items: center;
-
-
-  gap: 20px;
-
-
+  gap: 18px;
   min-height: 38px;
 }
 
 
 .t-radio {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-
-
   gap: 8px;
-
-
+  margin: 0 !important;
+  padding: 0;
   font-size: 13px;
   font-weight: 900;
-
-
   color: #0b2c4a;
-
-
+  line-height: 1;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 
 .t-radio input {
-  width: 14px;
-  height: 14px;
-
-
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px;
+  margin: 0 !important;
+  padding: 0;
+  flex: 0 0 14px;
   accent-color: #0b4d7a;
 }
-
-
 /* =========================================================
    ACCOUNT DETAILS
 ========================================================= */
@@ -418,6 +429,7 @@ body {
 
 .t-right-col > .t-form-card {
   width: 100%;
+  flex: 0 0 auto;
 }
 
 
@@ -425,23 +437,21 @@ body {
 #tempPass {
   background: #f1f3f5;
   color: #64748b;
-
-
   cursor: default;
+}
+
+
+#studentId::placeholder,
+#tempPass::placeholder {
+  color: #94a3b8;
 }
 
 
 .account-note {
   display: block;
-
-
-  margin-top: 2px;
-
-
+  margin-top: 6px;
   font-size: 13px;
   line-height: 1.5;
-
-
   color: #64748b;
 }
 
@@ -454,24 +464,12 @@ body {
 .phone-input {
   display: flex;
   align-items: stretch;
-
-
   width: 100%;
   height: 38px;
-
-
-  border: 1px solid #d4d8dd;
-
-
+  border: 1px solid rgba(11, 44, 74, 0.1);
   border-radius: 10px;
-
-
   overflow: hidden;
-
-
   background: #ffffff;
-
-
   box-sizing: border-box;
 }
 
@@ -520,6 +518,27 @@ body {
 }
 
 
+.phone-input .t-help {
+  display: none;
+}
+
+
+.phone-input + .t-help {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+
+.t-help {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64748b;
+}
 /* =========================================================
    FORM ERROR
 ========================================================= */
@@ -527,87 +546,38 @@ body {
 
 .t-error {
   width: 100%;
-
-
   box-sizing: border-box;
-
-
   margin-top: 0;
-
-
   background: #ffecec;
-
-
   border: 1px solid #ffd1d1;
-
-
   color: #a61b1b;
-
-
   padding: 10px 12px;
-
-
-  border-radius: 12px;
-
-
+  border-radius: 10px;
   font-weight: 900;
   font-size: 13px;
-}
-
-
-/* =========================================================
-   ACTION BUTTONS
-========================================================= */
-
-
-.t-form-actions-bottom {
-  width: 100%;
-
-
-  display: flex;
-
-
-  justify-content: flex-end;
-  align-items: center;
-
-
-  gap: 10px;
-
-
-  margin-top: 28px;
-
-
-  padding: 0 0 8px;
+  line-height: 1.4;
 }
 
 
 /* =========================================================
    STUDENT TABLE ACTION BUTTONS
 ========================================================= */
-
-
 .t-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-
-
-  gap: 10px;
+  gap: 8px;
 }
 
 
 .t-icon-btn {
-  width: 42px;
-  height: 42px;
-
-
+  width: 38px;
+  height: 38px;
   padding: 0;
 
 
   border: 1px solid #e2e8f0;
-
-
-  border-radius: 12px;
+  border-radius: 10px;
 
 
   background: #ffffff;
@@ -629,13 +599,11 @@ body {
 
 
 .t-icon-btn img {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 
 
   display: block;
-
-
   object-fit: contain;
 }
 
@@ -658,15 +626,8 @@ body {
 
 
 .t-actions .t-icon-btn.t-del img {
-  filter:
-    brightness(0)
-    saturate(100%)
-    invert(18%)
-    sepia(96%)
-    saturate(6000%)
-    hue-rotate(350deg)
-    brightness(92%)
-    contrast(110%) !important;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(6000%)
+    hue-rotate(350deg) brightness(92%) contrast(110%) !important;
 }
 
 
@@ -677,21 +638,18 @@ body {
 
 
 .t-actions .t-icon-btn.t-del:hover img {
-  filter:
-    brightness(0)
-    saturate(100%)
-    invert(14%)
-    sepia(98%)
-    saturate(7000%)
-    hue-rotate(350deg)
-    brightness(85%)
-    contrast(115%) !important;
+  filter: brightness(0) saturate(100%) invert(14%) sepia(98%) saturate(7000%)
+    hue-rotate(350deg) brightness(85%) contrast(115%) !important;
 }
 
 
 .t-icon-btn:hover {
   transform: translateY(-1px);
 }
+
+
+
+
 
 
 /* =========================================================
@@ -744,8 +702,7 @@ body {
   padding-bottom: 18px;
 
 
-  border-bottom: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border-bottom: 1px solid rgba(11, 44, 74, 0.1);
 }
 
 
@@ -792,8 +749,7 @@ body {
   padding: 14px;
 
 
-  border: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border: 1px solid rgba(11, 44, 74, 0.1);
 
 
   border-radius: 12px;
@@ -1055,8 +1011,7 @@ body {
   padding: 0 10px;
 
 
-  border: 1px solid
-    rgba(11, 44, 74, 0.12);
+  border: 1px solid rgba(11, 44, 74, 0.12);
 
 
   border-radius: 10px;
@@ -1088,9 +1043,7 @@ body {
   border-color: #0b4d7a;
 
 
-  box-shadow:
-    0 0 0 3px
-    rgba(11, 77, 122, 0.08);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
 
 
@@ -1177,8 +1130,7 @@ body {
   padding: 18px;
 
 
-  border: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border: 1px solid rgba(11, 44, 74, 0.1);
 
 
   border-radius: 14px;
@@ -1267,12 +1219,10 @@ body {
 
 
   grid-template-columns:
-    minmax(0, 1.15fr)
-    minmax(0, 1.15fr)
-    minmax(0, 1fr)
-    minmax(0, 1fr)
-    minmax(0, 1fr)
-    minmax(0, 1fr);
+    1.15fr
+    1.15fr
+    1.15fr
+    0.75fr;
 
 
   gap: 14px;
@@ -1337,8 +1287,7 @@ body {
   padding: 0 11px;
 
 
-  border: 1px solid
-    rgba(11, 44, 74, 0.12);
+  border: 1px solid rgba(11, 44, 74, 0.12);
 
 
   border-radius: 10px;
@@ -1365,9 +1314,7 @@ body {
   border-color: #0b4d7a;
 
 
-  box-shadow:
-    0 0 0 3px
-    rgba(11, 77, 122, 0.08);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
 
 
@@ -1386,8 +1333,7 @@ body {
   height: 44px;
 
 
-  border: 1px dashed
-    rgba(11, 77, 122, 0.35);
+  border: 1px dashed rgba(11, 77, 122, 0.35);
 
 
   border-radius: 10px;
@@ -1480,8 +1426,7 @@ body {
   padding-top: 18px;
 
 
-  border-top: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border-top: 1px solid rgba(11, 44, 74, 0.1);
 }
 
 
@@ -1497,8 +1442,7 @@ body {
   padding-top: 24px;
 
 
-  border-top: 1px solid
-    rgba(11, 44, 74, 0.12);
+  border-top: 1px solid rgba(11, 44, 74, 0.12);
 }
 
 
@@ -1708,8 +1652,7 @@ body {
   overflow-x: auto;
 
 
-  border: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border: 1px solid rgba(11, 44, 74, 0.1);
 
 
   border-radius: 12px;
@@ -1749,8 +1692,7 @@ body {
   background: #f8fafc;
 
 
-  border-bottom: 1px solid
-    rgba(11, 44, 74, 0.10);
+  border-bottom: 1px solid rgba(11, 44, 74, 0.1);
 }
 
 
@@ -1767,8 +1709,7 @@ body {
   color: #334155;
 
 
-  border-bottom: 1px solid
-    rgba(11, 44, 74, 0.07);
+  border-bottom: 1px solid rgba(11, 44, 74, 0.07);
 }
 
 
@@ -1813,20 +1754,13 @@ body {
 
 
 @media (max-width: 1200px) {
-
-
   .bulk-row-fields {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-
 }
 
 
 @media (max-width: 1000px) {
-
-
   .bulk-import-tools {
     align-items: flex-start;
 
@@ -1846,17 +1780,27 @@ body {
 
     flex-direction: column;
   }
-
-
 }
 
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+  .t-form-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "basic"
+      "right";
+  }
 
 
   .t-row2,
   .t-basic-left > .t-row2 {
     grid-template-columns: 1fr;
+  }
+
+
+  .t-form-left,
+  .t-form-right {
+    width: 100%;
   }
 
 
@@ -1866,50 +1810,19 @@ body {
 
 
   .bulk-row-fields {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-
-}
-
-
-@media (max-width: 800px) {
-
-
-  .students-head-actions {
-    width: 100%;
-  }
-
-
-  .students-head-actions button {
-    flex: 1;
-  }
-
-
 }
 
 
 @media (max-width: 650px) {
-
-
   .t-form-grid {
     gap: 12px;
   }
 
 
-  .t-form-actions-bottom {
-    justify-content: stretch;
-  }
-
-
-  .t-form-actions-bottom button {
-    flex: 1;
-  }
-
-
   .t-actions {
-    gap: 6px;
+    gap: 8px;
   }
 
 
@@ -1945,28 +1858,35 @@ body {
   .bulk-tool-btn {
     flex: 1;
   }
-
-
 }
 
 
 @media (max-width: 550px) {
+  .t-form-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 
 
+  .t-form-header-actions .t-ghost,
+  .t-form-header-actions .t-save {
+    flex: 1 1 0;
+    min-width: 0;
+  }
   .teachers-page-head {
     align-items: stretch;
-
-
     flex-direction: column;
   }
 
 
-  .students-head-actions {
+  .teachers-head-actions {
+    width: 100%;
     flex-direction: column;
+    gap: 8px;
   }
 
 
-  .students-head-actions button {
+  .teachers-head-actions button {
     width: 100%;
   }
 
@@ -2027,17 +1947,9 @@ body {
   .bulk-row-generator-controls input {
     width: 80px;
   }
-
-
 }
 
 
-/* =========================================================
-   STUDENT FORM SPACING
-========================================================= */
 
 
-.t-form-right .t-form-card + .t-form-card {
-  margin-top: 24px;
-}
 

@@ -1,459 +1,509 @@
 <!-- frontend/src/pages/teacher/teacher-my-schedule.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <head>
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Teacher - My Schedule</title>
 
-  <!-- =========================================================
-       PREVENT SIDEBAR FLASH
-       ========================================================= -->
-  <script>
-    (function () {
-      try {
-        const collapsed =
-          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1";
-
-        if (collapsed) {
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1"
+        ) {
           document.documentElement.classList.add("sb-collapsed");
         }
-      } catch (_) {}
-    })();
-  </script>
 
-  <!-- =========================================================
+
+        /* Sidebar navigation group state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
+          );
+
+
+          if (saved["classroom"] === true) {
+            document.documentElement.classList.add("sb-preopen-classroom");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    <title>Teacher - My Schedule</title>
+
+
+    <!-- =========================================================
        FONT
        ========================================================= -->
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- =========================================================
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- =========================================================
        SHARED ADMIN / TEACHER STYLES
        ========================================================= -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-sidebar.css"
-  />
+    <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  />
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin-announcements.css"
-  />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-  <!-- =========================================================
+
+    <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+
+
+    <!-- =========================================================
        TEACHER SCHEDULE STYLES
        IMPORTANT:
        We are NOT loading student-schedule.css here.
        ========================================================= -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-my-schedule.css"
-  />
+    <link
+      rel="stylesheet"
+      href="../../styles/teacher/teacher-my-schedule.css"
+    />
 
-  <!-- =========================================================
+
+    <!-- =========================================================
        PAGE ANIMATIONS
        ========================================================= -->
-  <link
-    rel="stylesheet"
-    href="../../shared/css/page-animations.css"
-  />
-</head>
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
 
-<body data-page="teacher-schedule">
 
-  <!-- =========================================================
+  <body data-page="teacher-my-schedule">
+    <!-- =========================================================
        SIDEBAR FLOAT TOGGLE
        ========================================================= -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
-  <div class="app">
 
-    <!-- =======================================================
-         SIDEBAR
-         ======================================================= -->
-    <div id="sidebar-mount"></div>
-
-    <!-- =======================================================
-         MAIN CONTENT
-         ======================================================= -->
-    <main class="content page-animate">
-
-      <!-- =====================================================
-           TOP BAR
-           ===================================================== -->
-      <header class="topbar reveal-soft">
-
-        <div class="topbar-right">
-
-          
-
-          <div
-            class="tb-user"
-            id="userbox"
-          >
-
+    <div class="app">
+      <!-- TEACHER SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <!-- SCHOOL HEADER -->
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="Teacher avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
-
-            <div class="tb-meta">
-
-              <div class="tb-name">
-                Bruan, Alvin
-              </div>
-
-              <div class="tb-role">
-                Faculty
-              </div>
-
-            </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-              aria-expanded="false"
-            >
-              ▾
-            </button>
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-            </div>
-
           </div>
 
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
         </div>
 
-      </header>
+
+        <nav class="sb-nav" aria-label="Teacher navigation">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
 
 
-      <!-- =====================================================
-           PAGE
+          <a
+            class="sb-item"
+            href="./teacher-dashboard.html"
+            data-nav="teacher-dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- CLASSROOM -->
+          <div class="sb-group" data-group="classroom">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbTeacherClassroom"
+            >
+              <span class="sb-group-title">CLASSROOM</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbTeacherClassroom">
+              <a
+                class="sb-item"
+                href="./teacher-my-schedule.html"
+                data-nav="teacher-my-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-students.html"
+                data-nav="teacher-students"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+                <span class="sb-text">LEARNERS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-attendance.html"
+                data-nav="teacher-attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-grades.html"
+                data-nav="teacher-grades"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-promotion.html"
+                data-nav="teacher-promotion"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/promotion.svg" alt="" />
+                </span>
+                <span class="sb-text">PROMOTION</span>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- LEARNING ACTIVITIES -->
+          <div class="sb-section-title">LEARNING ACTIVITIES</div>
+
+
+          <!-- ASSIGNMENT -->
+          <a
+            class="sb-item"
+            href="./teacher-assessment.html"
+            data-nav="teacher-assessment"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/asess.svg" alt="" />
+            </span>
+            <span class="sb-text">ASSIGNMENT</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <!-- ANNOUNCEMENTS -->
+          <a
+            class="sb-item"
+            href="./teacher-announcements.html"
+            data-nav="teacher-announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <!-- =======================================================
+         MAIN CONTENT
+         ======================================================= -->
+      <main class="content page-animate">
+        <!-- =====================================================
+           TOP BAR
            ===================================================== -->
-      <section class="teachers-wrap">
-
-        <!-- PAGE TITLE -->
-        <div class="teachers-page-head reveal-soft">
-
-          <h2 class="teachers-title">
-            My Schedule
-          </h2>
-
-        </div>
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="Teacher avatar"
+              />
 
 
-        <!-- ===================================================
-             SCHEDULE CARD
-             =================================================== -->
-        <div class="card t-card sched-card reveal-scale">
+              <div class="tb-meta">
+                <div class="tb-name">Bruan, Alvin</div>
 
-          <!-- =================================================
-               CARD HEADER
-               ================================================= -->
-          <div class="t-card-head sched-head reveal-item">
 
-            <!-- LEFT -->
-            <div class="sched-left">
-
-              <div class="t-subtitle">
-                Weekly Timetable
+                <div class="tb-role">Faculty</div>
               </div>
 
-              <!--
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+                aria-expanded="false"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <!-- =====================================================
+           PAGE
+           ===================================================== -->
+        <section class="teachers-wrap">
+          <!-- PAGE TITLE -->
+          <div class="teachers-page-head reveal-soft">
+            <h2 class="teachers-title">My Schedule</h2>
+          </div>
+
+
+          <!-- ===================================================
+             SCHEDULE CARD
+             =================================================== -->
+          <div class="card t-card sched-card reveal-scale">
+            <!-- =================================================
+               CARD HEADER
+               ================================================= -->
+            <div class="t-card-head sched-head reveal-item">
+              <!-- LEFT -->
+              <div class="sched-left">
+                <div class="t-subtitle">Weekly Timetable</div>
+
+
+                <!--
                 Only show the teacher's assigned
                 grade/section here.
+
 
                 Room and School Year are intentionally
                 not displayed in the header.
               -->
-              <div class="sched-sub">
+                <div class="sched-sub">
+                  <span id="schedGradeSection"> — </span>
+                </div>
 
-                <span id="schedGradeSection">
-                  —
-                </span>
 
-              </div>
-
-              <!--
+                <!--
                 Hidden compatibility elements.
+
 
                 These remain in the DOM so the existing
                 JavaScript can continue referencing
                 schedRoom and schedSY without errors.
 
+
                 They are NOT displayed to the teacher.
               -->
-              <span
-                id="schedRoom"
-                hidden
-              >
-                Room —
-              </span>
-
-              <span
-                id="schedSY"
-                hidden
-              ></span>
-
-            </div>
+                <span id="schedRoom" hidden> Room — </span>
 
 
-            <!-- RIGHT -->
-            <div class="sched-actions reveal-item">
-
-              <!-- VIEW TOGGLE -->
-              <div
-                class="sched-toggle"
-                role="tablist"
-                aria-label="Schedule View Toggle"
-              >
-
-                <button
-                  class="sched-tab active"
-                  id="viewWeekBtn"
-                  type="button"
-                  role="tab"
-                  aria-selected="true"
-                >
-                  Week View
-                </button>
-
-                <button
-                  class="sched-tab"
-                  id="viewDayBtn"
-                  type="button"
-                  role="tab"
-                  aria-selected="false"
-                >
-                  Day View
-                </button>
-
+                <span id="schedSY" hidden></span>
               </div>
 
 
-              <!-- DAY SELECT -->
-              <select
-                id="daySelect"
-                class="t-filter sched-day"
-                aria-label="Select day"
-                disabled
-              >
+              <!-- RIGHT -->
+              <div class="sched-actions reveal-item">
+                <!-- VIEW TOGGLE -->
+                <div
+                  class="sched-toggle"
+                  role="tablist"
+                  aria-label="Schedule View Toggle"
+                >
+                  <button
+                    class="sched-tab active"
+                    id="viewWeekBtn"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Week View
+                  </button>
 
-                <option value="mon">
-                  Monday
-                </option>
 
-                <option value="tue">
-                  Tuesday
-                </option>
+                  <button
+                    class="sched-tab"
+                    id="viewDayBtn"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Day View
+                  </button>
+                </div>
 
-                <option value="wed">
-                  Wednesday
-                </option>
 
-                <option value="thu">
-                  Thursday
-                </option>
+                <!-- DAY SELECT -->
+                <select
+                  id="daySelect"
+                  class="t-filter sched-day"
+                  aria-label="Select day"
+                  disabled
+                >
+                  <option value="mon">Monday</option>
 
-                <option value="fri">
-                  Friday
-                </option>
 
-              </select>
+                  <option value="tue">Tuesday</option>
 
+
+                  <option value="wed">Wednesday</option>
+
+
+                  <option value="thu">Thursday</option>
+
+
+                  <option value="fri">Friday</option>
+                </select>
+              </div>
             </div>
 
-          </div>
 
-
-          <!-- =================================================
+            <!-- =================================================
                SCHEDULE BODY
                ================================================= -->
-          <div class="sched-body reveal-item">
-
-            <!-- =================================================
+            <div class="sched-body reveal-item">
+              <!-- =================================================
                  LOADING
                  ================================================= -->
-            <div
-              id="schedLoading"
-              class="sched-empty reveal-item"
-            >
-              Loading schedule...
-            </div>
+              <div id="schedLoading" class="sched-empty reveal-item">
+                Loading schedule...
+              </div>
 
 
-            <!-- =================================================
+              <!-- =================================================
                  WEEK VIEW
                  ================================================= -->
-            <div
-              id="weekView"
-              class="sched-week hidden"
-            >
-
-              <!-- MONDAY -->
-              <div class="sched-col reveal-item">
-
-                <div class="sched-col-head">
-                  Monday
+              <div id="weekView" class="sched-week hidden">
+                <!-- MONDAY -->
+                <div class="sched-col reveal-item">
+                  <div class="sched-col-head">Monday</div>
                 </div>
 
+
+                <!-- TUESDAY -->
+                <div class="sched-col reveal-item">
+                  <div class="sched-col-head">Tuesday</div>
+                </div>
+
+
+                <!-- WEDNESDAY -->
+                <div class="sched-col reveal-item">
+                  <div class="sched-col-head">Wednesday</div>
+                </div>
+
+
+                <!-- THURSDAY -->
+                <div class="sched-col reveal-item">
+                  <div class="sched-col-head">Thursday</div>
+                </div>
+
+
+                <!-- FRIDAY -->
+                <div class="sched-col reveal-item">
+                  <div class="sched-col-head">Friday</div>
+                </div>
               </div>
 
 
-              <!-- TUESDAY -->
-              <div class="sched-col reveal-item">
-
-                <div class="sched-col-head">
-                  Tuesday
-                </div>
-
-              </div>
-
-
-              <!-- WEDNESDAY -->
-              <div class="sched-col reveal-item">
-
-                <div class="sched-col-head">
-                  Wednesday
-                </div>
-
-              </div>
-
-
-              <!-- THURSDAY -->
-              <div class="sched-col reveal-item">
-
-                <div class="sched-col-head">
-                  Thursday
-                </div>
-
-              </div>
-
-
-              <!-- FRIDAY -->
-              <div class="sched-col reveal-item">
-
-                <div class="sched-col-head">
-                  Friday
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <!-- =================================================
+              <!-- =================================================
                  DAY VIEW
                  ================================================= -->
-            <div
-              id="dayView"
-              class="sched-dayview hidden"
-            >
-
-              <div class="sched-day-head reveal-item">
-
-                <div
-                  class="sched-col-head"
-                  id="dayViewTitle"
-                >
-                  Monday
+              <div id="dayView" class="sched-dayview hidden">
+                <div class="sched-day-head reveal-item">
+                  <div class="sched-col-head" id="dayViewTitle">Monday</div>
                 </div>
 
+
+                <div class="sched-day-list" id="dayViewList"></div>
               </div>
 
 
-              <div
-                class="sched-day-list"
-                id="dayViewList"
-              ></div>
-
-            </div>
-
-
-            <!-- =================================================
+              <!-- =================================================
                  EMPTY / ERROR
                  ================================================= -->
-            <div
-              id="schedEmpty"
-              class="sched-empty hidden reveal-item"
-            >
-              No schedule available yet.
+              <div id="schedEmpty" class="sched-empty hidden reveal-item">
+                No schedule available yet.
+              </div>
             </div>
-
           </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
+        </section>
+      </main>
+    </div>
 
 
-  <!-- =========================================================
+    <!-- =========================================================
        SHARED JAVASCRIPT
        ========================================================= -->
 
-  <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher sidebar -->
-  <script src="../../js/teacher/teacher-sidebar.js"></script>
+    <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher schedule -->
-  <script src="../../js/teacher/teacher-my-schedule.js"></script>
 
-</body>
+    <!-- Teacher sidebar -->
+    <script src="../../js/teacher/teacher-sidebar.js"></script>
+
+
+    <!-- Teacher schedule -->
+    <script src="../../js/teacher/teacher-my-schedule.js"></script>
+  </body>
 </html>
+
+
+

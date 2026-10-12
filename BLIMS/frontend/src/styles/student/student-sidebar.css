@@ -1,9 +1,827 @@
 /* frontend/src/styles/student/student-sidebar.css */
-/* Keep it consistent with admin sidebar.css, but allows student-specific tweaks later. */
-/* For now: minimal/no overrides to maintain uniformity. */
 
-/* Match teacher placement */
-.sidebar-float-toggle{
-  top: 18px;
-  left: 18px;
+
+/* Student sidebar rebuilt from the finalized Teacher sidebar reference. */
+
+
+:root {
+  --navy: #0b4d7a;
+  --navy-2: #083e63;
+  --sbText: rgba(255, 255, 255, 0.92);
+  --sbDim: rgba(255, 255, 255, 0.7);
+  --sbHover: rgba(255, 255, 255, 0.08);
+  --sbLine: rgba(255, 255, 255, 0.1);
+  --sb-w: 260px;
+  --sb-w-collapsed: 86px;
 }
+
+
+/* =========================================
+   APP LAYOUT
+   ========================================= */
+
+
+.app {
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+
+@media (min-width: 701px) {
+  body:has(.sidebar[data-role="student"]) .content {
+    margin-left: 288px;
+  }
+
+
+  html.sb-collapsed
+    body:has(.sidebar[data-role="student"])
+    .content {
+    margin-left: 114px;
+  }
+}
+
+
+/* =========================================
+   SIDEBAR BASE
+   ========================================= */
+
+
+.sidebar {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+
+
+  display: flex;
+  flex-direction: column;
+
+
+  width: var(--sb-w);
+  min-width: var(--sb-w);
+  height: calc(100vh - 28px);
+
+
+  overflow: hidden;
+  border-radius: 14px;
+
+
+  background: linear-gradient(
+    180deg,
+    #0b4d7a 0%,
+    #08466f 48%,
+    #073d61 100%
+  );
+
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================
+   FLOATING SIDEBAR TOGGLE
+   ========================================= */
+
+
+.sidebar-float-toggle {
+  position: fixed;
+  z-index: 999999;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+
+  border: 0;
+  border-radius: 12px;
+
+
+  background: #fff;
+  color: var(--navy);
+
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(11, 77, 122, 0.15);
+
+
+  cursor: pointer;
+  visibility: hidden;
+
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.sidebar-float-toggle:hover {
+  transform: translateY(-2px);
+
+
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.25),
+    0 0 0 4px rgba(11, 77, 122, 0.25);
+}
+
+
+/* =========================================
+   SCHOOL HEADER
+   ========================================= */
+
+
+.sb-top {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 8px;
+}
+
+
+.sb-logo-wrap {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+
+  width: 72px;
+  height: 72px;
+
+
+  border-radius: 50%;
+  background: transparent;
+}
+
+
+.sb-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+
+.sb-school {
+  padding: 0 8px;
+  text-align: center;
+}
+
+
+.sb-school-name {
+  color: var(--sbText);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.1px;
+}
+
+
+.sb-school-sub {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
+  opacity: 0.78;
+}
+
+
+/* =========================================
+   NAVIGATION
+   ========================================= */
+
+
+.sb-nav {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 5px;
+
+
+  min-height: 0;
+  margin-top: 6px;
+  padding: 9px 12px 13px;
+
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+
+.sb-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+.sb-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.sb-nav::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+
+.sb-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+
+.sb-section-title {
+  padding: 9px 5px 3px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+
+.sb-section-title:first-child {
+  padding-top: 2px;
+}
+
+
+.sb-divider {
+  flex: 0 0 auto;
+  height: 1px;
+  margin: 3px 10px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+
+/* =========================================
+   MY LEARNING DROPDOWN
+   ========================================= */
+
+
+.sb-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+
+.sb-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+
+  width: 100%;
+  min-height: 36px;
+  padding: 4px 7px;
+
+
+  border: 0;
+  border-radius: 9px;
+
+
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+
+.sb-group-title {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+
+.sb-chevron {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.65;
+
+
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+
+.sb-group-toggle:hover {
+  background: var(--sbHover);
+}
+
+
+.sb-group-toggle:hover .sb-chevron {
+  opacity: 1;
+}
+
+
+.sb-group.is-open > .sb-group-toggle .sb-chevron {
+  transform: rotate(180deg);
+}
+
+
+.sb-group:has(.sb-item.active) .sb-group-toggle {
+  color: #fff;
+}
+
+
+.sb-group:has(.sb-item.active) .sb-group-title {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+
+.sb-group-toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: -2px;
+}
+
+
+.sb-submenu {
+  position: relative;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+
+
+  margin-left: 5px;
+  padding-left: 13px;
+}
+
+
+.sb-group.is-open > .sb-submenu {
+  display: flex;
+}
+
+
+.sb-submenu::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+
+
+  width: 1px;
+  border-radius: 999px;
+
+
+  background: rgba(255, 255, 255, 0.12);
+  content: "";
+}
+
+
+/* Restore the saved My Learning state before first paint. */
+
+
+html.sb-preopen-learning
+  .sidebar[data-role="student"]
+  .sb-group[data-group="my-learning"]
+  .sb-submenu {
+  display: flex;
+}
+
+
+html.sb-preopen-learning
+  .sidebar[data-role="student"]
+  .sb-group[data-group="my-learning"]
+  .sb-chevron {
+  transform: rotate(180deg);
+}
+
+
+/* =========================================
+   NAVIGATION LINKS
+   ========================================= */
+
+
+.sb-item {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+
+
+  min-height: 43px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+
+
+  border-radius: 10px;
+
+
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  text-decoration: none;
+
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.sb-ico {
+  display: flex;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+
+
+  width: 34px;
+  height: 34px;
+
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.08);
+
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.sb-ico img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  transition: filter 0.18s ease;
+}
+
+
+.sb-item:hover {
+  background: rgba(255, 255, 255, 0.075);
+}
+
+
+.sb-item:hover .sb-ico {
+  transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+
+.sb-item.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+
+.sb-item.active::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+
+
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+
+
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  content: "";
+}
+
+
+.sb-item.active .sb-ico {
+  transform: none;
+  background: var(--navy);
+}
+
+
+.sb-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: -2px;
+}
+
+
+.sb-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* =========================================
+   COLLAPSED DESKTOP SIDEBAR
+   ========================================= */
+
+
+.sidebar.is-collapsed,
+html.sb-collapsed .sidebar {
+  width: var(--sb-w-collapsed);
+  min-width: var(--sb-w-collapsed);
+}
+
+
+.sidebar.is-collapsed .sb-school,
+.sidebar.is-collapsed .sb-section-title,
+.sidebar.is-collapsed .sb-text,
+html.sb-collapsed .sidebar .sb-school,
+html.sb-collapsed .sidebar .sb-section-title,
+html.sb-collapsed .sidebar .sb-text {
+  display: none;
+}
+
+
+.sidebar.is-collapsed .sb-group-toggle,
+.sidebar.is-collapsed .sb-divider,
+html.sb-collapsed .sidebar .sb-group-toggle,
+html.sb-collapsed .sidebar .sb-divider {
+  display: none;
+}
+
+
+.sidebar.is-collapsed .sb-submenu,
+html.sb-collapsed .sidebar .sb-submenu {
+  display: flex;
+  gap: 5px;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+
+.sidebar.is-collapsed .sb-submenu::before,
+html.sb-collapsed .sidebar .sb-submenu::before {
+  display: none;
+}
+
+
+.sidebar.is-collapsed .sb-group,
+html.sb-collapsed .sidebar .sb-group {
+  gap: 0;
+}
+
+
+.sidebar.is-collapsed .sb-top,
+html.sb-collapsed .sidebar .sb-top {
+  padding: 18px 10px 8px;
+}
+
+
+.sidebar.is-collapsed .sb-logo-wrap,
+html.sb-collapsed .sidebar .sb-logo-wrap {
+  width: 62px;
+  height: 62px;
+}
+
+
+.sidebar.is-collapsed .sb-logo,
+html.sb-collapsed .sidebar .sb-logo {
+  width: 52px;
+  height: 52px;
+}
+
+
+.sidebar.is-collapsed .sb-nav,
+html.sb-collapsed .sidebar .sb-nav {
+  gap: 5px;
+  padding: 10px 9px;
+}
+
+
+.sidebar.is-collapsed .sb-item,
+html.sb-collapsed .sidebar .sb-item {
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  min-height: 43px;
+  padding: 5px;
+}
+
+
+.sidebar.is-collapsed .sb-ico,
+html.sb-collapsed .sidebar .sb-ico {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+}
+
+
+.sidebar.is-collapsed .sb-item.active::before,
+html.sb-collapsed .sidebar .sb-item.active::before {
+  top: 8px;
+  bottom: 8px;
+}
+
+
+/* =========================================
+   MOBILE DRAWER
+   ========================================= */
+
+
+@media (max-width: 700px) {
+  .sidebar {
+    top: 14px;
+    bottom: 14px;
+    left: 14px;
+
+
+    width: 260px;
+    min-width: 260px;
+    height: auto;
+
+
+    transform: translateX(calc(-100% - 20px));
+    transition: transform 0.25s ease;
+  }
+
+
+  html.sb-mobile-open .sidebar {
+    transform: translateX(0);
+  }
+
+
+  html.sb-mobile-closed .sidebar {
+    transform: translateX(calc(-100% - 20px));
+  }
+
+
+  /* Keep the mobile drawer expanded even if desktop collapse was saved. */
+
+
+  html.sb-collapsed .sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-school,
+  html.sb-collapsed .sidebar .sb-section-title,
+  html.sb-collapsed .sidebar .sb-group-toggle {
+    display: initial;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-text {
+    display: inline;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-submenu {
+    display: none;
+    margin-left: 5px;
+    padding-left: 13px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-group.is-open > .sb-submenu {
+    display: flex;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-submenu::before {
+    display: block;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-top {
+    padding: 16px 16px 8px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-logo-wrap {
+    width: 72px;
+    height: 72px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-logo {
+    width: 88px;
+    height: 88px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-nav {
+    gap: 5px;
+    padding: 9px 12px 13px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-item {
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 43px;
+    padding: 7px 10px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-ico {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+  }
+
+
+  .content,
+  html.sb-collapsed .content {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+
+  .sidebar-float-toggle {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    right: auto;
+    z-index: 1003;
+
+
+    width: 42px;
+    height: 42px;
+  }
+
+
+  html.sb-mobile-open .sidebar-float-toggle {
+    left: 284px;
+  }
+
+
+  .sb-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+
+
+    background: rgba(10, 25, 40, 0.35);
+
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+
+  html.sb-mobile-open .sb-mobile-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+
+/* =========================================
+   REDUCED MOTION
+   ========================================= */
+
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-float-toggle,
+  .sb-item,
+  .sb-ico,
+  .sb-chevron,
+  .sb-group-toggle,
+  .sb-mobile-backdrop {
+    transition: none !important;
+  }
+
+
+  .sb-nav {
+    scroll-behavior: auto;
+  }
+}
+

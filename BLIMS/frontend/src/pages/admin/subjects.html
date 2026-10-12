@@ -1,201 +1,736 @@
 <!-- frontend/src/pages/admin/subjects.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Subjects</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Subjects</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- Shared -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Page -->
-  <link rel="stylesheet" href="../../styles/admin/admin-subjects.css" />
-</head>
 
-<body data-page="subjects">
-  <button class="sidebar-float-toggle" id="sidebarFloatToggle" type="button" aria-label="Toggle sidebar">←</button>
+    <!-- Shared -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-  <div class="app">
-    <div id="sidebar-mount"></div>
 
-    <main class="content">
-      <header class="topbar">
-        <div class="topbar-right">
-          
+    <!-- Page -->
+    <link rel="stylesheet" href="../../styles/admin/admin-subjects.css" />
 
-          <div class="tb-user" id="userbox">
-            <img class="tb-avatar" src="../../assets/images/bg.jpg" alt="avatar" />
-            <div class="tb-meta">
-              <div class="tb-name">Estrada, Ronald B.</div>
-              <div class="tb-role">Admin</div>
-            </div>
-            <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">Settings</button>
-              <button class="tb-item danger" type="button" id="topbarLogout">Logout</button>
-            </div>
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
+
+
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
+
+
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
+
+
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
+
+
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
+
+
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
+
+
+  <body data-page="subjects">
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
+
+
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+
+
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
-      </header>
 
-      <section class="sub-wrap">
-        <div class="sub-head">
-          <div>
-            <h2 class="sub-title">Subjects</h2>
-            <div class="sub-sub">Manage subjects per grade level.</div>
+
+        <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
+            >
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
+            </div>
           </div>
 
-          <div class="sub-head-actions">
-            <button class="sub-ghost" id="addGradeBtn" type="button">Add Grade Level</button>
-            <button class="sub-primary" id="addSubjectBtn" type="button">
-              Add Subject <span class="sub-plus">＋</span>
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SECTIONS &amp; FACULTY </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
+              <div class="tb-meta">
+                <div class="tb-name">Estrada, Ronald B.</div>
+                <div class="tb-role">Admin</div>
+              </div>
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <section class="sub-wrap">
+          <div class="sub-head">
+            <div>
+              <h2 class="sub-title">Subjects</h2>
+              <div class="sub-sub">Manage subjects per grade level.</div>
+            </div>
+
+
+            <div class="sub-head-actions">
+              <button class="sub-ghost" id="addGradeBtn" type="button">
+                Add Grade Level
+              </button>
+              <button
+                class="sub-primary"
+                id="addSubjectBtn"
+                type="button"
+                disabled
+              >
+                Add Subject <span class="sub-plus">＋</span>
+              </button>
+            </div>
+          </div>
+
+
+          <div class="sub-grid">
+            <aside class="card sub-left">
+              <div class="sub-left-head">
+                <div class="sub-left-title">Grade Levels</div>
+                <div class="sub-left-hint">
+                  Select a grade to manage its subjects.
+                </div>
+              </div>
+
+
+              <div id="gradeList" class="sub-grade-list"></div>
+            </aside>
+
+
+            <section class="card sub-right">
+              <div class="sub-right-head">
+                <div>
+                  <div class="sub-right-title" id="selectedGradeTitle">
+                    Select a Grade Level
+                  </div>
+                  <div class="sub-right-sub" id="selectedGradeSub">
+                    Choose a grade level from the left to view and manage its
+                    subjects.
+                  </div>
+                </div>
+
+
+                <div class="sub-tools">
+                  <div class="sub-search">
+                    <span class="sub-search-ico">🔎</span>
+                    <input
+                      id="searchInput"
+                      type="text"
+                      placeholder="Search subject..."
+                      disabled
+                    />
+                  </div>
+
+
+                  <button
+                    class="sub-ghost"
+                    id="editSubjectsBtn"
+                    type="button"
+                    disabled
+                  >
+                    Manage Subjects
+                  </button>
+                  <button
+                    class="sub-danger"
+                    id="deleteGradeBtn"
+                    type="button"
+                    disabled
+                  >
+                    Delete Grade Level
+                  </button>
+                </div>
+              </div>
+
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 80px">No.</th>
+                      <th>Subject</th>
+                      <th style="width: 180px; text-align: center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="subjectsTbody">
+                    <tr class="sub-empty">
+                      <td colspan="3">
+                        Select a grade level to view its subjects.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+
+    <!-- ======================
+      SUBJECT MODAL
+  ======================= -->
+    <div id="subjectModal" class="sub-modal hidden" aria-hidden="true">
+      <div class="sub-backdrop" id="subjectModalBackdrop"></div>
+
+
+      <div
+        class="sub-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="subjectModalTitle"
+        tabindex="-1"
+      >
+        <div class="sub-mhead">
+          <div>
+            <div class="sub-mtitle" id="subjectModalTitle">Add Subject</div>
+            <div class="sub-msub" id="subjectModalSub">
+              Manage subjects for the chosen grade.
+            </div>
+          </div>
+          <button
+            class="sub-x"
+            id="subjectModalCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+
+        <div class="sub-mbody">
+          <div class="sub-form">
+            <div class="sub-field">
+              <label>Grade Level</label>
+              <select id="modalGrade" class="sub-input"></select>
+            </div>
+
+
+            <div class="sub-field sub-wide">
+              <label>Subjects</label>
+              <div class="sub-checklist" id="subjectChecklist"></div>
+            </div>
+
+
+            <div class="sub-field sub-wide">
+              <label>Add New Subject (optional)</label>
+              <div class="sub-addline">
+                <input
+                  id="newSubjectInput"
+                  class="sub-input"
+                  type="text"
+                  placeholder="e.g., Science, Filipino, MAPEH"
+                />
+                <button id="addNewSubjectBtn" class="sub-chip" type="button">
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+          <div id="subjectModalError" class="sub-error hidden"></div>
+        </div>
+
+
+        <div class="sub-mfoot">
+          <button class="sub-ghost" id="subjectCancelBtn" type="button">
+            Cancel
+          </button>
+          <div class="sub-foot-right">
+            <button class="sub-ghost" id="subjectClearBtn" type="button">
+              Clear
+            </button>
+            <button class="sub-save" id="subjectSaveBtn" type="button">
+              Save
             </button>
           </div>
         </div>
-
-        <div class="sub-grid">
-          <aside class="card sub-left">
-            <div class="sub-left-head">
-              <div class="sub-left-title">Grade Levels</div>
-              <div class="sub-left-hint">Select a grade to manage its subjects.</div>
-            </div>
-
-            <div id="gradeList" class="sub-grade-list"></div>
-          </aside>
-
-          <section class="card sub-right">
-            <div class="sub-right-head">
-              <div>
-                <div class="sub-right-title" id="selectedGradeTitle">Kinder</div>
-                <div class="sub-right-sub">Subjects assigned to this grade level.</div>
-              </div>
-
-              <div class="sub-tools">
-                <div class="sub-search">
-                  <span class="sub-search-ico">🔎</span>
-                  <input id="searchInput" type="text" placeholder="Search subject..." />
-                </div>
-
-                <button class="sub-ghost" id="editSubjectsBtn" type="button">Edit Subjects</button>
-                <button class="sub-danger" id="deleteGradeBtn" type="button">Delete Grade</button>
-              </div>
-            </div>
-
-            <div class="sub-table-wrap">
-              <table class="sub-table">
-                <thead>
-                  <tr>
-                    <th style="width:80px;">No.</th>
-                    <th>Subject</th>
-                    <th style="width:180px; text-align:center;">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="subjectsTbody">
-                  <tr class="sub-empty">
-                    <td colspan="3">No subjects yet for this grade.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- ======================
-      SUBJECT MODAL
-  ======================= -->
-  <div id="subjectModal" class="sub-modal hidden" aria-hidden="true">
-    <div class="sub-backdrop" id="subjectModalBackdrop"></div>
-
-    <div class="sub-dialog" role="dialog" aria-modal="true" aria-labelledby="subjectModalTitle" tabindex="-1">
-      <div class="sub-mhead">
-        <div>
-          <div class="sub-mtitle" id="subjectModalTitle">Add Subject</div>
-          <div class="sub-msub" id="subjectModalSub">Manage subjects for the chosen grade.</div>
-        </div>
-        <button class="sub-x" id="subjectModalCloseX" type="button" aria-label="Close">✕</button>
-      </div>
-
-      <div class="sub-mbody">
-        <div class="sub-form">
-          <div class="sub-field">
-            <label>Grade Level</label>
-            <select id="modalGrade" class="sub-input"></select>
-          </div>
-
-          <div class="sub-field sub-wide">
-            <label>Subjects</label>
-            <div class="sub-checklist" id="subjectChecklist"></div>
-          </div>
-
-          <div class="sub-field sub-wide">
-            <label>Add New Subject (optional)</label>
-            <div class="sub-addline">
-              <input id="newSubjectInput" class="sub-input" type="text" placeholder="e.g., Science, Filipino, MAPEH" />
-              <button id="addNewSubjectBtn" class="sub-chip" type="button">Add</button>
-            </div>
-            
-          </div>
-        </div>
-
-        <div id="subjectModalError" class="sub-error hidden"></div>
-      </div>
-
-      <div class="sub-mfoot">
-        <button class="sub-ghost" id="subjectCancelBtn" type="button">Cancel</button>
-        <div class="sub-foot-right">
-          <button class="sub-ghost" id="subjectClearBtn" type="button">Close</button>
-          <button class="sub-save" id="subjectSaveBtn" type="button">Save</button>
-        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ======================
+
+    <!-- ======================
       ADD GRADE MODAL
   ======================= -->
-  <div id="gradeModal" class="sub-modal hidden" aria-hidden="true">
-    <div class="sub-backdrop" id="gradeModalBackdrop"></div>
+    <div id="gradeModal" class="sub-modal hidden" aria-hidden="true">
+      <div class="sub-backdrop" id="gradeModalBackdrop"></div>
 
-    <div class="sub-dialog sub-sm" role="dialog" aria-modal="true" aria-labelledby="gradeModalTitle" tabindex="-1">
-      <div class="sub-mhead">
-        <div>
-          <div class="sub-mtitle" id="gradeModalTitle">Add Grade Level</div>
-          <div class="sub-msub">Add a custom grade level (optional).</div>
+
+      <div
+        class="sub-dialog sub-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gradeModalTitle"
+        tabindex="-1"
+      >
+        <div class="sub-mhead">
+          <div>
+            <div class="sub-mtitle" id="gradeModalTitle">Add Grade Level</div>
+            <div class="sub-msub">Add a custom grade level (optional).</div>
+          </div>
+          <button
+            class="sub-x"
+            id="gradeModalCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
-        <button class="sub-x" id="gradeModalCloseX" type="button" aria-label="Close">✕</button>
-      </div>
 
-      <div class="sub-mbody">
-        <div class="sub-field">
-          <label>Grade Level Name</label>
-          <input id="gradeNameInput" class="sub-input" type="text" placeholder="e.g., Grade 7, SPED, Sectional" />
+
+        <div class="sub-mbody">
+          <div class="sub-field">
+            <label>Grade Level Name</label>
+            <input
+              id="gradeNameInput"
+              class="sub-input"
+              type="text"
+              placeholder="e.g., Grade 7, SPED, Sectional"
+            />
+          </div>
+          <div id="gradeModalError" class="sub-error hidden"></div>
         </div>
-        <div id="gradeModalError" class="sub-error hidden"></div>
-      </div>
 
-      <div class="sub-mfoot">
-        <button class="sub-ghost" id="gradeCancelBtn" type="button">Cancel</button>
-        <div class="sub-foot-right">
-          <button class="sub-save" id="gradeSaveBtn" type="button">Add Grade</button>
+
+        <div class="sub-mfoot">
+          <button class="sub-ghost" id="gradeCancelBtn" type="button">
+            Cancel
+          </button>
+          <div class="sub-foot-right">
+            <button class="sub-save" id="gradeSaveBtn" type="button">
+              Add Grade
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="../../js/auth/admin-guard.js"></script>
-  <script src="../../js/admin/sidebar.js"></script>
-  <script src="../../js/admin/admin-dashboard.js"></script>
-  <script src="../../js/admin/admin-subjects.js"></script>
-</body>
+
+    <!-- ======================
+  DELETE CONFIRM MODAL
+======================= -->
+    <div id="confirmModal" class="sub-modal hidden" aria-hidden="true">
+      <div class="sub-backdrop" id="confirmModalBackdrop"></div>
+
+
+      <div
+        class="sub-dialog sub-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirmModalTitle"
+        tabindex="-1"
+      >
+        <div class="sub-mhead">
+          <div>
+            <div class="sub-mtitle" id="confirmModalTitle">Delete Item?</div>
+
+
+            <div class="sub-msub" id="confirmModalSub">
+              This action cannot be undone.
+            </div>
+          </div>
+
+
+          <button
+            class="sub-x"
+            id="confirmCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+
+        <div class="sub-mbody">
+          <div class="sub-confirm-text" id="confirmText">
+            Are you sure you want to delete this item?
+          </div>
+        </div>
+
+
+        <div class="sub-mfoot">
+          <button class="sub-ghost" id="confirmCancelBtn" type="button">
+            Cancel
+          </button>
+
+
+          <div class="sub-foot-right">
+            <button class="sub-danger" id="confirmDeleteBtn" type="button">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================
+  SUCCESS NOTIFICATION
+======================= -->
+    <div
+      id="successToast"
+      class="sub-toast hidden"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="sub-toast-icon" aria-hidden="true">✓</span>
+      <span id="successToastText">Success.</span>
+    </div>
+
+
+    <script src="../../js/auth/admin-guard.js"></script>
+    <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/admin/admin-dashboard.js"></script>
+    <script src="../../js/admin/admin-subjects.js"></script>
+  </body>
 </html>
+
+
+

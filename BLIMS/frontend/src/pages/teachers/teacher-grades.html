@@ -1,586 +1,610 @@
 <!-- frontend/src/pages/teacher/teacher-grades.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Teacher - Grades</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
 
-  <link
-  rel="stylesheet"
-  href="../../styles/teacher/teacher-sidebar.css"
-/>
+        /* Sidebar navigation group state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
+          );
 
-  <!-- Teacher Grades -->
-  <link rel="stylesheet" href="../../styles/teacher/teacher-grades.css" />
 
-  <!-- Page Animations -->
-  <link rel="stylesheet" href="../../shared/css/page-animations.css" />
-</head>
+          if (saved["classroom"] === true) {
+            document.documentElement.classList.add("sb-preopen-classroom");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<body data-page="teacher-grades">
 
-  <!-- =========================================================
+    <title>Teacher - Grades</title>
+
+
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
+
+
+    <!-- Teacher Grades -->
+    <link rel="stylesheet" href="../../styles/teacher/teacher-grades.css" />
+
+
+    <!-- Page Animations -->
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="teacher-grades">
+    <!-- =========================================================
        FLOATING SIDEBAR TOGGLE
   ========================================================== -->
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-  <div class="app">
-
-    <!-- =======================================================
-         SIDEBAR
-    ======================================================== -->
-
-    <div id="sidebar-mount"></div>
-
-
-    <!-- =======================================================
-         MAIN CONTENT
-    ======================================================== -->
-
-    <main class="content page-animate">
-
-
-      <!-- =====================================================
-           TOPBAR
-      ====================================================== -->
-
-      <header class="topbar reveal-soft">
-
-        <div class="topbar-left"></div>
-
-        <div class="topbar-right">
-
-         
-
-
-          <!-- User -->
-          <div class="tb-user" id="userbox">
-
+    <div class="app">
+      <!-- TEACHER SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <!-- SCHOOL HEADER -->
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
-
-            <div class="tb-meta">
-
-              <div class="tb-name">
-                Bruan, Alvin
-              </div>
-
-              <div
-                class="tb-role"
-                id="tbRole"
-              >
-                Faculty
-              </div>
-
-            </div>
+          </div>
 
 
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <nav class="sb-nav" aria-label="Teacher navigation">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-dashboard.html"
+            data-nav="teacher-dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- CLASSROOM -->
+          <div class="sb-group" data-group="classroom">
             <button
-              class="tb-drop"
-              id="userMenuBtn"
+              class="sb-group-toggle"
               type="button"
-              aria-label="Open user menu"
+              aria-expanded="false"
+              aria-controls="sbTeacherClassroom"
             >
-              ▾
+              <span class="sb-group-title">CLASSROOM</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
 
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
+            <div class="sb-submenu" id="sbTeacherClassroom">
+              <a
+                class="sb-item"
+                href="./teacher-my-schedule.html"
+                data-nav="teacher-my-schedule"
               >
-                Settings
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
 
 
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
+              <a
+                class="sb-item"
+                href="./teacher-students.html"
+                data-nav="teacher-students"
               >
-                Logout
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+                <span class="sb-text">LEARNERS</span>
+              </a>
 
+
+              <a
+                class="sb-item"
+                href="./teacher-attendance.html"
+                data-nav="teacher-attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-grades.html"
+                data-nav="teacher-grades"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-promotion.html"
+                data-nav="teacher-promotion"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/promotion.svg" alt="" />
+                </span>
+                <span class="sb-text">PROMOTION</span>
+              </a>
             </div>
-
           </div>
 
-        </div>
 
-      </header>
-
+          <div class="sb-divider"></div>
 
 
-      <!-- =====================================================
+          <!-- LEARNING ACTIVITIES -->
+          <div class="sb-section-title">LEARNING ACTIVITIES</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-assessment.html"
+            data-nav="teacher-assessment"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/asess.svg" alt="" />
+            </span>
+            <span class="sb-text">ASSIGNMENT</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-announcements.html"
+            data-nav="teacher-announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <!-- =======================================================
+         MAIN CONTENT
+    ======================================================== -->
+
+
+      <main class="content page-animate">
+        <!-- =====================================================
+           TOPBAR
+      ====================================================== -->
+
+
+        <header class="topbar reveal-soft">
+          <div class="topbar-left"></div>
+
+
+          <div class="topbar-right">
+            <!-- User -->
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
+
+
+              <div class="tb-meta">
+                <div class="tb-name">Bruan, Alvin</div>
+
+
+                <div class="tb-role" id="tbRole">Faculty</div>
+              </div>
+
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <!-- =====================================================
            GRADES PAGE
       ====================================================== -->
 
-      <section class="gr-page ms-page">
 
-
-        <!-- ===================================================
+        <section class="gr-page ms-page">
+          <!-- ===================================================
              PAGE TITLE
         ==================================================== -->
 
-        <div
-          class="gr-page-title ms-title reveal-soft"
-          id="grTitle"
-        >
-          Grades
-        </div>
+
+          <div class="gr-page-title ms-title reveal-soft" id="grTitle">
+            Grades
+          </div>
 
 
-
-        <!-- ===================================================
+          <!-- ===================================================
              GRADES GRID
         ==================================================== -->
 
-        <div class="gr-grid">
 
-
-          <!-- =================================================
+          <div class="gr-grid">
+            <!-- =================================================
                MAIN GRADES CARD
           ================================================== -->
 
-          <section class="card gr-card reveal-scale">
 
-
-            <!-- ===============================================
+            <section class="card gr-card reveal-scale">
+              <!-- ===============================================
                  CARD HEADER / CONTROLS
             ================================================ -->
 
-            <div class="gr-card-top reveal-item">
 
-              <div>
+              <div class="gr-card-top reveal-item">
+                <div>
+                  <div class="gr-card-title">Class Grades</div>
 
-                <div class="gr-card-title">
-                  Class Grades
+
+                  <div class="gr-card-sub" id="grScopeLabel">
+                    Select a subject and quarter
+                  </div>
                 </div>
 
-                <div
-                  class="gr-card-sub"
-                  id="grScopeLabel"
-                >
-                  Select a subject and quarter
-                </div>
 
-              </div>
-
-
-              <!-- =============================================
+                <!-- =============================================
                    CONTROLS
               ============================================== -->
 
-              <div class="gr-card-controls">
+
+                <div class="gr-card-controls">
+                  <!-- Quarter -->
+                  <div class="gr-pill">
+                    <span class="gr-pill-label"> Quarter </span>
 
 
-                <!-- Quarter -->
-                <div class="gr-pill">
+                    <select id="quarterSelect" class="gr-select">
+                      <!-- Terms are populated dynamically by teacher-grades.js -->
+                    </select>
+                  </div>
 
-                  <span class="gr-pill-label">
-                    Quarter
-                  </span>
 
-                  <select
-  id="quarterSelect"
-  class="gr-select"
->
-  <!-- Terms are populated dynamically by teacher-grades.js -->
-</select>
+                  <!-- Subject -->
+                  <div class="gr-pill">
+                    <span class="gr-pill-label"> Subject </span>
+
+
+                    <select id="subjectSelect" class="gr-select">
+                      <!-- Filled by teacher-grades.js -->
+                    </select>
+                  </div>
+
+
+                  <!-- Add Written Work -->
+                  <button id="addWWBtn" class="gr-mini" type="button">
+                    ＋ Add Written Work
+                  </button>
+
+
+                  <!-- Add Performance -->
+                  <button id="addPTBtn" class="gr-mini" type="button">
+                    ＋ Add Performance
+                  </button>
+
+
+                  <!-- Add Exam -->
+                  <button id="addExamBtn" class="gr-mini" type="button">
+                    ＋ Add Exam
+                  </button>
                 </div>
-
-
-
-                <!-- Subject -->
-                <div class="gr-pill">
-
-                  <span class="gr-pill-label">
-                    Subject
-                  </span>
-
-                  <select
-                    id="subjectSelect"
-                    class="gr-select"
-                  >
-                    <!-- Filled by teacher-grades.js -->
-                  </select>
-
-                </div>
-
-
-
-                <!-- Add Written Work -->
-                <button
-                  id="addWWBtn"
-                  class="gr-mini"
-                  type="button"
-                >
-                  ＋ Add Written Work
-                </button>
-
-
-
-                <!-- Add Performance -->
-                <button
-                  id="addPTBtn"
-                  class="gr-mini"
-                  type="button"
-                >
-                  ＋ Add Performance
-                </button>
-
-
-
-                <!-- Add Exam -->
-                <button
-                  id="addExamBtn"
-                  class="gr-mini"
-                  type="button"
-                >
-                  ＋ Add Exam
-                </button>
-
               </div>
 
-            </div>
 
-
-
-            <!-- =================================================
+              <!-- =================================================
                  ASSESSMENT LIST
             ================================================== -->
 
-            <div
-              class="gr-assessment-area reveal-item"
-              id="assessmentArea"
-            >
 
-              <div class="gr-assessment-header">
+              <div class="gr-assessment-area reveal-item" id="assessmentArea">
+                <div class="gr-assessment-header">
+                  <div>
+                    <div class="gr-assessment-title">Assessments</div>
 
-                <div>
 
-                  <div class="gr-assessment-title">
-                    Assessments
+                    <div class="gr-assessment-sub">
+                      Assessments you add will appear as columns in the grade
+                      table.
+                    </div>
                   </div>
-
-                  <div class="gr-assessment-sub">
-                    Assessments you add will appear as columns in the grade table.
-                  </div>
-
                 </div>
 
-              </div>
 
-
-              <!--
+                <!--
                 teacher-grades.js will dynamically populate
                 this container.
 
+
                 Example:
+
 
                 Written Works
                 ├── Quiz 1 — 20 pts
                 └── Activity 1 — 30 pts
 
+
                 Performance / Recitation
                 ├── Recitation 1 — 10 pts
                 └── Performance Task 1 — 50 pts
+
 
                 Exam
                 └── Quarter 1 Exam — 50 pts
               -->
 
-              <div
-                id="assessmentList"
-                class="gr-assessment-list"
-              >
 
-                <div class="gr-assessment-empty">
-                  No assessments added yet.
+                <div id="assessmentList" class="gr-assessment-list">
+                  <div class="gr-assessment-empty">
+                    No assessments added yet.
+                  </div>
                 </div>
-
               </div>
 
-            </div>
 
-
-
-            <!-- =================================================
+              <!-- =================================================
                  GRADES TABLE
             ================================================== -->
 
-            <div
-              class="gr-table-wrap reveal-item"
-            >
 
-              <table
-                class="gr-table"
-                id="gradesTable"
-              >
-
-                <!--
+              <div class="gr-table-wrap reveal-item">
+                <table class="gr-table" id="gradesTable">
+                  <!--
                   teacher-grades.js dynamically creates
                   the table header based on assessments.
 
+
                   Initial state:
+
 
                   Student | Final Grade
                 -->
 
-                <thead id="gradesThead">
 
-                  <tr>
-
-                    <th>
-                      Student
-                    </th>
-
-                    <th>
-                      Final Grade
-                    </th>
-
-                  </tr>
-
-                </thead>
+                  <thead id="gradesThead">
+                    <tr>
+                      <th>Student</th>
 
 
-                <tbody id="gradesTbody">
-
-                  <tr>
-
-                    <td
-                      colspan="2"
-                      class="gr-empty"
-                    >
-                      Loading students…
-                    </td>
-
-                  </tr>
-
-                </tbody>
-
-              </table>
-
-            </div>
+                      <th>Final Grade</th>
+                    </tr>
+                  </thead>
 
 
+                  <tbody id="gradesTbody">
+                    <tr>
+                      <td colspan="2" class="gr-empty">Loading students…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-            <!-- =================================================
+
+              <!-- =================================================
                  WEIGHTS
             ================================================== -->
 
-            <div class="gr-note reveal-item">
 
-              <div class="gr-note-title">
-                Grading Weights
+              <div class="gr-note reveal-item">
+                <div class="gr-note-title">Grading Weights</div>
+
+
+                <div class="gr-note-grid">
+                  <div>
+                    <b> Performance / Recitation </b>
+
+
+                    <span> 50% </span>
+                  </div>
+
+
+                  <div>
+                    <b> Written Works </b>
+
+
+                    <span> 30% </span>
+                  </div>
+
+
+                  <div>
+                    <b> Exam </b>
+
+
+                    <span> 20% </span>
+                  </div>
+                </div>
               </div>
+            </section>
 
 
-              <div class="gr-note-grid">
-
-                <div>
-                  <b>
-                    Performance / Recitation
-                  </b>
-
-                  <span>
-                    50%
-                  </span>
-                </div>
-
-
-                <div>
-                  <b>
-                    Written Works
-                  </b>
-
-                  <span>
-                    30%
-                  </span>
-                </div>
-
-
-                <div>
-                  <b>
-                    Exam
-                  </b>
-
-                  <span>
-                    20%
-                  </span>
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-
-          <!-- =================================================
+            <!-- =================================================
                RIGHT SIDE — GRADES SUMMARY
           ================================================== -->
 
-          <aside class="card gr-side reveal-scale">
+
+            <aside class="card gr-side reveal-scale">
+              <div class="gr-side-title reveal-item">Grades Summary</div>
 
 
-            <div class="gr-side-title reveal-item">
-              Grades Summary
-            </div>
-
-
-
-            <!-- =================================================
+              <!-- =================================================
                  METRICS
             ================================================== -->
 
-            <div class="gr-metrics reveal-item">
+
+              <div class="gr-metrics reveal-item">
+                <!-- Total Students -->
+                <div class="gr-metric">
+                  <span> Total Students </span>
 
 
-              <!-- Total Students -->
-              <div class="gr-metric">
+                  <b id="mTotal"> 0 </b>
+                </div>
 
-                <span>
-                  Total Students
-                </span>
 
-                <b id="mTotal">
-                  0
-                </b>
+                <!-- Class Average -->
+                <div class="gr-metric">
+                  <span> Class Average </span>
 
+
+                  <b id="mAvg"> — </b>
+                </div>
+
+
+                <!-- Highest -->
+                <div class="gr-metric">
+                  <span> Highest Final </span>
+
+
+                  <b id="mHigh"> — </b>
+                </div>
+
+
+                <!-- Lowest -->
+                <div class="gr-metric">
+                  <span> Lowest Final </span>
+
+
+                  <b id="mLow"> — </b>
+                </div>
               </div>
 
 
-
-              <!-- Class Average -->
-              <div class="gr-metric">
-
-                <span>
-                  Class Average
-                </span>
-
-                <b id="mAvg">
-                  —
-                </b>
-
-              </div>
-
-
-
-              <!-- Highest -->
-              <div class="gr-metric">
-
-                <span>
-                  Highest Final
-                </span>
-
-                <b id="mHigh">
-                  —
-                </b>
-
-              </div>
-
-
-
-              <!-- Lowest -->
-              <div class="gr-metric">
-
-                <span>
-                  Lowest Final
-                </span>
-
-                <b id="mLow">
-                  —
-                </b>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- =================================================
+              <!-- =================================================
                  SAVE
             ================================================== -->
 
-            <div class="gr-side-actions reveal-item">
 
-              <button
-                id="saveAllBtn"
-                class="gr-btn gr-btn-primary"
-                type="button"
-              >
-                💾 Save All Grades
-              </button>
-
-            </div>
-
+              <div class="gr-side-actions reveal-item">
+                <button
+                  id="saveAllBtn"
+                  class="gr-btn gr-btn-primary"
+                  type="button"
+                >
+                  💾 Save All Grades
+                </button>
+              </div>
 
 
-            <!-- =================================================
+              <!-- =================================================
                  SAVE STATUS
             ================================================== -->
 
-            <div
-              class="gr-status reveal-item"
-              id="saveStatus"
-            >
-              Not Saved
-            </div>
 
-          </aside>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
+              <div class="gr-status reveal-item" id="saveStatus">Not Saved</div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
 
 
-
-  <!-- =========================================================
+    <!-- =========================================================
        JAVASCRIPT
   ========================================================== -->
 
-  <!-- Page animations -->
-  <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher sidebar -->
-  <script src="../../js/teacher/teacher-sidebar.js"></script>
+    <!-- Page animations -->
+    <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher grades -->
-  <script src="../../js/teacher/teacher-grades.js"></script>
 
-</body>
+    <!-- Teacher sidebar -->
+    <script src="../../js/teacher/teacher-sidebar.js"></script>
+
+
+    <!-- Teacher grades -->
+    <script src="../../js/teacher/teacher-grades.js"></script>
+  </body>
 </html>
+
+
+

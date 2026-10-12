@@ -11,19 +11,24 @@
 //   GET    /api/admin/grade-levels
 //   DELETE /api/admin/grade-levels/:id
 
+
 document.addEventListener("DOMContentLoaded", async () => {
   const $ = (id) => document.getElementById(id);
+
 
   // UI
   const gradeList = $("gradeList");
   const selectedGradeTitle = $("selectedGradeTitle");
   const subjectsTbody = $("subjectsTbody");
   const searchInput = $("searchInput");
+  const selectedGradeSub = $("selectedGradeSub");
+
 
   const addGradeBtn = $("addGradeBtn");
   const addSubjectBtn = $("addSubjectBtn");
   const editSubjectsBtn = $("editSubjectsBtn");
   const deleteGradeBtn = $("deleteGradeBtn");
+
 
   // subject modal
   const subjectModal = $("subjectModal");
@@ -36,10 +41,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const subjectModalSub = $("subjectModalSub");
   const subjectModalError = $("subjectModalError");
 
+
   const modalGrade = $("modalGrade");
   const subjectChecklist = $("subjectChecklist");
   const newSubjectInput = $("newSubjectInput");
   const addNewSubjectBtn = $("addNewSubjectBtn");
+
 
   // grade modal
   const gradeModal = $("gradeModal");
@@ -50,12 +57,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gradeNameInput = $("gradeNameInput");
   const gradeModalError = $("gradeModalError");
 
+
+  // confirmation modal + success toast
+  const confirmModal = $("confirmModal");
+  const confirmModalBackdrop = $("confirmModalBackdrop");
+  const confirmCloseX = $("confirmCloseX");
+  const confirmCancelBtn = $("confirmCancelBtn");
+  const confirmDeleteBtn = $("confirmDeleteBtn");
+  const confirmText = $("confirmText");
+
+
+  const successToast = $("successToast");
+  const successToastText = $("successToastText");
+
+
   // state
   let activeGrade = "Kinder";
   let grades = []; // [{ _id, grade }]
   let masterSubjects = [];
   let gradeSubjectsMap = {};
   let csrfToken = "";
+
 
   // ==============================
   // helpers
@@ -69,31 +91,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       .replaceAll("'", "&#039;");
   }
 
+
   function norm(s) {
-    return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    return String(s || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
   }
+
 
   function gradeKey(s) {
     return norm(s);
   }
 
+
   function uniqStrings(list) {
     const out = [];
     const seen = new Set();
+
 
     for (const item of Array.isArray(list) ? list : []) {
       const value = String(item || "").trim();
       if (!value) continue;
 
+
       const key = norm(value);
       if (seen.has(key)) continue;
+
 
       seen.add(key);
       out.push(value);
     }
 
+
     return out;
   }
+
 
   function showSubjectError(msg) {
     if (!subjectModalError) return;
@@ -101,11 +134,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     subjectModalError.classList.remove("hidden");
   }
 
+
   function hideSubjectError() {
     if (!subjectModalError) return;
     subjectModalError.textContent = "";
     subjectModalError.classList.add("hidden");
   }
+
 
   function showGradeError(msg) {
     if (!gradeModalError) return;
@@ -113,11 +148,84 @@ document.addEventListener("DOMContentLoaded", async () => {
     gradeModalError.classList.remove("hidden");
   }
 
+
   function hideGradeError() {
     if (!gradeModalError) return;
     gradeModalError.textContent = "";
     gradeModalError.classList.add("hidden");
   }
+
+
+  // ==============================
+  // confirmation modal + success toast
+  // ==============================
+
+
+  let pendingDelete = null;
+  let successToastTimer = null;
+
+
+  function openConfirm({
+    title = "Delete Item?",
+    sub = "This action cannot be undone.",
+    text = "Are you sure you want to delete this item?",
+    action = null,
+  } = {}) {
+    if (!confirmModal) return;
+
+
+    const titleEl = $("confirmModalTitle");
+    const subEl = $("confirmModalSub");
+
+
+    if (titleEl) titleEl.textContent = title;
+    if (subEl) subEl.textContent = sub;
+    if (confirmText) confirmText.textContent = text;
+
+
+    pendingDelete = action;
+
+
+    confirmModal.classList.remove("hidden");
+    confirmModal.setAttribute("aria-hidden", "false");
+
+
+    setTimeout(() => confirmDeleteBtn?.focus(), 0);
+  }
+
+
+  function closeConfirm() {
+    if (!confirmModal) return;
+
+
+    confirmModal.classList.add("hidden");
+    confirmModal.setAttribute("aria-hidden", "true");
+
+
+    pendingDelete = null;
+  }
+
+
+  function showSuccess(message) {
+    if (!successToast || !successToastText) return;
+
+
+    successToastText.textContent = message;
+
+
+    successToast.classList.remove("hidden");
+
+
+    if (successToastTimer) {
+      clearTimeout(successToastTimer);
+    }
+
+
+    successToastTimer = setTimeout(() => {
+      successToast.classList.add("hidden");
+    }, 3000);
+  }
+
 
   function gradeNameOf(item) {
     if (!item) return "";
@@ -125,23 +233,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     return String(item.grade || item.name || "").trim();
   }
 
+
   function getCurrentGradeDoc() {
-    return grades.find((g) => gradeKey(gradeNameOf(g)) === gradeKey(activeGrade)) || null;
+    return (
+      grades.find((g) => gradeKey(gradeNameOf(g)) === gradeKey(activeGrade)) ||
+      null
+    );
   }
+
 
   function getGradeNames() {
     return grades.map((g) => gradeNameOf(g)).filter(Boolean);
   }
+
 
   function findGradeName(name) {
     const key = gradeKey(name);
     return getGradeNames().find((g) => gradeKey(g) === key) || "";
   }
 
+
   function getSubjectsForGrade(grade) {
     const exactGrade = findGradeName(grade) || String(grade || "").trim();
     return uniqStrings(gradeSubjectsMap[exactGrade] || []);
   }
+
 
   function setModalBusy(isBusy) {
     if (addNewSubjectBtn) addNewSubjectBtn.disabled = isBusy;
@@ -150,6 +266,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (modalGrade) modalGrade.disabled = isBusy;
     if (newSubjectInput) newSubjectInput.disabled = isBusy;
   }
+
+
+  function updateGradeControls() {
+    const hasGrade = Boolean(activeGrade);
+
+
+    if (addSubjectBtn) {
+      addSubjectBtn.disabled = !hasGrade;
+    }
+
+
+    if (searchInput) {
+      searchInput.disabled = !hasGrade;
+    }
+
+
+    if (editSubjectsBtn) {
+      editSubjectsBtn.disabled = !hasGrade;
+    }
+
+
+    if (deleteGradeBtn) {
+      deleteGradeBtn.disabled = !hasGrade;
+    }
+  }
+
 
   // ==============================
   // csrf + api
@@ -161,6 +303,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         headers: { Accept: "application/json" },
       });
 
+
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok && typeof data.csrfToken === "string") {
         csrfToken = data.csrfToken;
@@ -170,24 +313,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+
   async function apiFetch(url, opts = {}) {
     const method = String(opts.method || "GET").toUpperCase();
+
 
     const headers = {
       "Content-Type": "application/json",
       ...(opts.headers || {}),
     };
 
+
     if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
       if (!csrfToken) await fetchCsrf();
       if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
     }
+
 
     const res = await fetch(url, {
       ...opts,
       headers,
       credentials: "include",
     });
+
 
     let data = null;
     try {
@@ -196,12 +344,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       // ignore non-json
     }
 
+
     if (!res.ok) {
       throw new Error(data?.message || `Request failed (${res.status})`);
     }
 
+
     return data;
   }
+
 
   // ==============================
   // backend loaders
@@ -209,7 +360,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadGradesFromBackend() {
     const data = await apiFetch("/api/admin/grade-levels");
 
+
     let list = [];
+
 
     if (Array.isArray(data)) {
       list = data;
@@ -225,6 +378,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       list = data.data.gradeLevels;
     }
 
+
     grades = list
       .map((item) => {
         if (typeof item === "string") {
@@ -237,6 +391,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
       .filter((x) => x.grade);
 
+
     const names = getGradeNames();
     if (!names.length) {
       activeGrade = "";
@@ -247,20 +402,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+
   async function loadSummary() {
     await loadGradesFromBackend();
 
+
     const data = await apiFetch("/api/admin/subjects/summary");
+
 
     const payload =
       data && typeof data === "object" && data.ok === true && data.data
         ? data.data
         : data;
 
+
     const rows = Array.isArray(payload?.grades) ? payload.grades : [];
     const masters = Array.isArray(payload?.masterSubjects)
       ? payload.masterSubjects
       : [];
+
 
     const nextMap = {};
     getGradeNames().forEach((g) => {
@@ -269,6 +429,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         : [];
     });
 
+
     rows.forEach((r) => {
       const rowGrade = findGradeName(r?.grade);
       if (rowGrade) {
@@ -276,13 +437,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
+
     gradeSubjectsMap = nextMap;
 
-    const combined = [
-      ...masters,
-      ...Object.values(nextMap).flat(),
-    ];
+
+    const combined = [...masters, ...Object.values(nextMap).flat()];
     masterSubjects = uniqStrings(combined).sort((a, b) => a.localeCompare(b));
+
 
     const names = getGradeNames();
     if (!names.length) {
@@ -294,21 +455,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+
   async function loadSubjectsByGrade(grade) {
     const exactGrade = findGradeName(grade);
     if (!exactGrade) return;
 
+
     const data = await apiFetch(
-      `/api/admin/subjects?grade=${encodeURIComponent(exactGrade)}`
+      `/api/admin/subjects?grade=${encodeURIComponent(exactGrade)}`,
     );
+
 
     const payload =
       data && typeof data === "object" && data.ok === true && data.data
         ? data.data
         : data;
 
+
     gradeSubjectsMap[exactGrade] = uniqStrings(payload?.subjects || []);
   }
+
 
   // ==============================
   // grade list
@@ -317,24 +483,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!gradeList) return;
     gradeList.innerHTML = "";
 
+
     const gradeNames = getGradeNames();
+
 
     gradeNames.forEach((g) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className =
-        "sub-grade-btn" + (gradeKey(g) === gradeKey(activeGrade) ? " active" : "");
+        "sub-grade-btn" +
+        (gradeKey(g) === gradeKey(activeGrade) ? " active" : "");
+
 
       const left = document.createElement("span");
       left.textContent = g;
+
 
       const pill = document.createElement("span");
       pill.className = "sub-grade-pill";
       const n = getSubjectsForGrade(g).length;
       pill.textContent = `${n} subject${n === 1 ? "" : "s"}`;
 
+
       btn.appendChild(left);
       btn.appendChild(pill);
+
 
       btn.addEventListener("click", async () => {
         activeGrade = g;
@@ -343,9 +516,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         render();
       });
 
+
       gradeList.appendChild(btn);
     });
   }
+
 
   // ==============================
   // table
@@ -353,37 +528,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   function renderTable() {
     if (!subjectsTbody) return;
 
+
     const q = norm(searchInput?.value || "");
     const list = getSubjectsForGrade(activeGrade).sort((a, b) =>
-      a.localeCompare(b)
+      a.localeCompare(b),
     );
+
 
     const filtered = list.filter((s) => !q || norm(s).includes(q));
 
+
     if (!filtered.length) {
+      const emptyMessage = activeGrade
+        ? "No subjects yet for this grade."
+        : "Select a grade level to view its subjects.";
+
+
       subjectsTbody.innerHTML = `
-        <tr class="sub-empty">
-          <td colspan="3">No subjects yet for this grade.</td>
-        </tr>
-      `;
+    <tr class="sub-empty">
+      <td colspan="3">${emptyMessage}</td>
+    </tr>
+  `;
       return;
     }
+
 
     subjectsTbody.innerHTML = filtered
       .map((subj, idx) => {
         return `
-          <tr>
-            <td>${idx + 1}</td>
-            <td><strong>${esc(subj)}</strong></td>
-            <td style="text-align:center;">
-              <div class="sub-actions">
-                <button class="sub-icon-btn sub-del" type="button" data-act="del" data-name="${esc(subj)}" title="Remove">🗑</button>
-              </div>
-            </td>
-          </tr>
-        `;
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${esc(subj)}</td>
+        <td style="text-align:center;">
+          <div class="sub-actions">
+            <button
+              class="sub-icon-btn sub-del"
+              type="button"
+              data-act="del"
+              data-name="${esc(subj)}"
+              title="Remove"
+            >
+              <img
+                src="../../assets/icons/delete.svg"
+                alt="Remove"
+              />
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
       })
       .join("");
+
 
     subjectsTbody.querySelectorAll("button[data-act='del']").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -394,25 +590,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+
   async function removeSubjectFromGrade(name) {
-    if (!activeGrade) return;
+    if (!activeGrade || !name) return;
 
-    try {
-      await apiFetch("/api/admin/subjects/assign", {
-        method: "DELETE",
-        body: JSON.stringify({
-          grade: activeGrade,
-          subject: name,
-        }),
-      });
 
-      await loadSubjectsByGrade(activeGrade);
-      await loadSummary();
-      render();
-    } catch (err) {
-      alert(err.message || "Failed to remove subject.");
-    }
+    const grade = activeGrade;
+
+
+    openConfirm({
+      title: "Remove Subject?",
+      sub: "This action cannot be undone.",
+      text: `Are you sure you want to remove "${name}" from ${grade}?`,
+      action: async () => {
+        try {
+          await apiFetch("/api/admin/subjects/assign", {
+            method: "DELETE",
+            body: JSON.stringify({
+              grade,
+              subject: name,
+            }),
+          });
+
+
+          await loadSubjectsByGrade(grade);
+          await loadSummary();
+          render();
+
+
+          closeConfirm();
+          showSuccess(`Subject "${name}" removed successfully.`);
+        } catch (err) {
+          closeConfirm();
+          alert(err.message || "Failed to remove subject.");
+        }
+      },
+    });
   }
+
 
   // ==============================
   // subject modal
@@ -420,16 +635,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   function openSubjectModal(mode = "add") {
     if (!subjectModal) return;
 
+
     if (subjectModalTitle) {
       subjectModalTitle.textContent =
         mode === "edit" ? "Edit Subjects" : "Add Subject";
     }
 
+
     if (subjectModalSub) {
       subjectModalSub.textContent = "Manage subjects for the chosen grade.";
     }
 
+
     hideSubjectError();
+
 
     if (modalGrade) {
       modalGrade.innerHTML = getGradeNames()
@@ -438,17 +657,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       modalGrade.value = findGradeName(activeGrade) || activeGrade;
     }
 
+
     if (newSubjectInput) newSubjectInput.value = "";
-    if (subjectClearBtn) subjectClearBtn.textContent = "Close";
-    if (subjectSaveBtn) subjectSaveBtn.classList.add("hidden");
+    if (subjectClearBtn) subjectClearBtn.textContent = "Clear";
+    if (subjectSaveBtn) subjectSaveBtn.classList.remove("hidden");
+
 
     buildChecklist();
+
 
     subjectModal.classList.remove("hidden");
     subjectModal.setAttribute("aria-hidden", "false");
 
+
     setTimeout(() => modalGrade?.focus(), 0);
   }
+
 
   function closeSubjectModal() {
     if (!subjectModal) return;
@@ -457,11 +681,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     hideSubjectError();
   }
 
+
   function buildChecklist() {
     if (!subjectChecklist) return;
 
+
     const grade = findGradeName(modalGrade?.value || activeGrade);
-    const subjects = getSubjectsForGrade(grade).sort((a, b) => a.localeCompare(b));
+    const subjects = getSubjectsForGrade(grade).sort((a, b) =>
+      a.localeCompare(b),
+    );
+
 
     if (!subjects.length) {
       subjectChecklist.innerHTML = `
@@ -472,22 +701,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+
     subjectChecklist.innerHTML = subjects
       .map((s, idx) => {
         return `
           <div class="sub-check" data-subject-row="true" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
             <span style="font-weight:600;">${idx + 1}. ${esc(s)}</span>
             <button
-              type="button"
-              class="sub-icon-btn sub-del"
-              data-act="remove-modal-subject"
-              data-name="${esc(s)}"
-              title="Remove"
-            >🗑</button>
+            type="button"
+            class="sub-icon-btn sub-del"
+            data-act="remove-modal-subject"
+            data-name="${esc(s)}"
+            title="Remove"
+          >
+            <img
+              src="../../assets/icons/delete.svg"
+              alt="Remove"
+            />
+          </button>
           </div>
         `;
       })
       .join("");
+
 
     subjectChecklist
       .querySelectorAll("button[data-act='remove-modal-subject']")
@@ -500,15 +736,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
   }
 
+
   async function removeSubjectFromGradeFromModal(name) {
     const grade = findGradeName(modalGrade?.value || activeGrade);
     if (!grade || !name) return;
 
-    const ok = window.confirm(`Remove "${name}" from ${grade}?`);
-    if (!ok) return;
 
+    openConfirm({
+      title: "Remove Subject?",
+      sub: "This action cannot be undone.",
+      text: `Are you sure you want to remove "${name}" from ${grade}?`,
+      action: async () => {
+        await removeSubjectFromGradeFromModalConfirmed(name, grade);
+      },
+    });
+  }
+
+
+  async function removeSubjectFromGradeFromModalConfirmed(name, grade) {
     try {
       setModalBusy(true);
+
 
       await apiFetch("/api/admin/subjects/assign", {
         method: "DELETE",
@@ -518,40 +766,56 @@ document.addEventListener("DOMContentLoaded", async () => {
         }),
       });
 
+
       if (gradeKey(activeGrade) === gradeKey(grade)) {
         activeGrade = grade;
       }
 
+
       await loadSubjectsByGrade(grade);
       await loadSummary();
+
 
       if (selectedGradeTitle && gradeKey(activeGrade) === gradeKey(grade)) {
         selectedGradeTitle.textContent = grade;
       }
 
+
       buildChecklist();
       render();
+
+
+      closeConfirm();
+      showSuccess(`Subject "${name}" removed successfully.`);
     } catch (err) {
+      closeConfirm();
       showSubjectError(err.message || "Failed to remove subject.");
     } finally {
       setModalBusy(false);
     }
   }
 
+
   async function addNewSubjectToGrade() {
     const raw = String(newSubjectInput?.value || "").trim();
     const grade = findGradeName(modalGrade?.value || activeGrade);
 
+
     if (!grade) return showSubjectError("Grade is required.");
     if (!raw) return showSubjectError("Enter a subject name to add.");
 
-    const existsInGrade = getSubjectsForGrade(grade).some((s) => norm(s) === norm(raw));
+
+    const existsInGrade = getSubjectsForGrade(grade).some(
+      (s) => norm(s) === norm(raw),
+    );
     if (existsInGrade) {
       return showSubjectError("That subject already exists in this grade.");
     }
 
+
     try {
       setModalBusy(true);
+
 
       await apiFetch("/api/admin/subjects", {
         method: "POST",
@@ -561,17 +825,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         }),
       });
 
+
       activeGrade = grade;
+
 
       await loadSubjectsByGrade(grade);
       await loadSummary();
 
+
       if (selectedGradeTitle) selectedGradeTitle.textContent = grade;
+
 
       if (newSubjectInput) newSubjectInput.value = "";
       hideSubjectError();
       buildChecklist();
       render();
+
+
+      showSuccess(`Subject "${raw}" added successfully.`);
     } catch (err) {
       showSubjectError(err.message || "Failed to add subject.");
     } finally {
@@ -579,15 +850,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+
   // kept only so existing bindings won't break if HTML still has button
   function clearChecks() {
-    closeSubjectModal();
+    if (newSubjectInput) {
+      newSubjectInput.value = "";
+    }
+
+
+    hideSubjectError();
+    newSubjectInput?.focus();
   }
+
 
   // kept only so existing bindings won't break if HTML still has save button
   async function saveSubjectsToGrade() {
+    hideSubjectError();
     closeSubjectModal();
   }
+
 
   // ==============================
   // grade modal
@@ -600,15 +881,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => gradeNameInput?.focus(), 0);
   }
 
+
   function closeGradeModal() {
     gradeModal?.classList.add("hidden");
     gradeModal?.setAttribute("aria-hidden", "true");
     hideGradeError();
   }
 
+
   async function saveGrade() {
     const name = String(gradeNameInput?.value || "").trim();
     if (!name) return showGradeError("Grade level name is required.");
+
 
     try {
       await apiFetch("/api/admin/grade-levels", {
@@ -616,54 +900,85 @@ document.addEventListener("DOMContentLoaded", async () => {
         body: JSON.stringify({ grade: name }),
       });
 
+
       await loadSummary();
       activeGrade = findGradeName(name) || name;
 
+
       if (selectedGradeTitle) selectedGradeTitle.textContent = activeGrade;
+
 
       closeGradeModal();
       render();
+
+
+      showSuccess(`Grade level "${activeGrade}" added successfully.`);
     } catch (err) {
       showGradeError(err.message || "Failed to add grade level.");
     }
   }
 
+
   async function deleteGradeLevel() {
     if (!activeGrade) {
-      return alert("No grade level selected.");
+      return;
     }
+
 
     const gradeDoc = getCurrentGradeDoc();
     const gradeId = gradeDoc?._id;
 
+
     if (!gradeId) {
-      return alert("Grade level ID not found.");
+      console.error("Grade level ID not found.");
+      return;
     }
 
-    const ok = window.confirm(
-      `Delete grade level "${activeGrade}"?\n\nThis may also affect sections and subject assignments under this grade.`
-    );
-    if (!ok) return;
 
-    try {
-      await apiFetch(`/api/admin/grade-levels/${encodeURIComponent(gradeId)}`, {
-        method: "DELETE",
-      });
+    const grade = activeGrade;
 
-      delete gradeSubjectsMap[activeGrade];
 
-      await loadSummary();
+    openConfirm({
+      title: "Delete Grade Level?",
+      sub: "This action cannot be undone.",
+      text: `Are you sure you want to delete "${grade}"? This may also affect sections and subject assignments under this grade.`,
+      action: async () => {
+        try {
+          await apiFetch(
+            `/api/admin/grade-levels/${encodeURIComponent(gradeId)}`,
+            {
+              method: "DELETE",
+            },
+          );
 
-      if (activeGrade) {
-        await loadSubjectsByGrade(activeGrade);
-      }
 
-      render();
-      alert("Grade level deleted successfully.");
-    } catch (err) {
-      alert(err.message || "Failed to delete grade level.");
-    }
+          delete gradeSubjectsMap[grade];
+
+
+          activeGrade = "";
+
+
+          await loadSummary();
+
+
+          if (activeGrade) {
+            await loadSubjectsByGrade(activeGrade);
+          }
+
+
+          render();
+
+
+          closeConfirm();
+          showSuccess(`Grade level "${grade}" deleted successfully.`);
+        } catch (err) {
+          closeConfirm();
+          alert(err.message || "Failed to delete grade level.");
+        }
+      },
+    });
   }
+
 
   // ==============================
   // render
@@ -671,23 +986,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   function render() {
     const gradeNames = getGradeNames();
 
+
     if (!findGradeName(activeGrade)) {
       activeGrade = gradeNames[0] || "";
     } else {
       activeGrade = findGradeName(activeGrade);
     }
 
+
     if (selectedGradeTitle) {
-      selectedGradeTitle.textContent = activeGrade || "No Grade";
+      selectedGradeTitle.textContent = activeGrade || "Select a Grade Level";
     }
+
+
+    if (selectedGradeSub) {
+      selectedGradeSub.textContent = activeGrade
+        ? "Subjects assigned to this grade level."
+        : "Choose a grade level from the left to view and manage its subjects.";
+    }
+
 
     buildGradeList();
     renderTable();
 
-    if (deleteGradeBtn) {
-      deleteGradeBtn.disabled = !activeGrade;
-    }
+
+    updateGradeControls();
   }
+
 
   // ==============================
   // events
@@ -695,13 +1020,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   addGradeBtn?.addEventListener("click", openGradeModal);
   deleteGradeBtn?.addEventListener("click", deleteGradeLevel);
 
+
   addSubjectBtn?.addEventListener("click", () => openSubjectModal("add"));
   editSubjectsBtn?.addEventListener("click", () => openSubjectModal("edit"));
+
 
   // subject modal
   subjectModalBackdrop?.addEventListener("click", closeSubjectModal);
   subjectModalCloseX?.addEventListener("click", closeSubjectModal);
   subjectCancelBtn?.addEventListener("click", closeSubjectModal);
+
 
   modalGrade?.addEventListener("change", async () => {
     const grade = findGradeName(modalGrade.value);
@@ -712,8 +1040,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     hideSubjectError();
   });
 
+
   subjectClearBtn?.addEventListener("click", clearChecks);
   subjectSaveBtn?.addEventListener("click", saveSubjectsToGrade);
+
 
   addNewSubjectBtn?.addEventListener("click", addNewSubjectToGrade);
   newSubjectInput?.addEventListener("keydown", (e) => {
@@ -723,28 +1053,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+
   // grade modal
   gradeModalBackdrop?.addEventListener("click", closeGradeModal);
   gradeModalCloseX?.addEventListener("click", closeGradeModal);
   gradeCancelBtn?.addEventListener("click", closeGradeModal);
   gradeSaveBtn?.addEventListener("click", saveGrade);
+  // confirmation modal
+  confirmModalBackdrop?.addEventListener("click", closeConfirm);
+  confirmCloseX?.addEventListener("click", closeConfirm);
+  confirmCancelBtn?.addEventListener("click", closeConfirm);
+
+
+  confirmDeleteBtn?.addEventListener("click", async () => {
+    if (typeof pendingDelete !== "function") {
+      closeConfirm();
+      return;
+    }
+
+
+    const action = pendingDelete;
+    pendingDelete = null;
+
+
+    try {
+      await action();
+    } catch (err) {
+      console.error(err);
+      closeConfirm();
+    }
+  });
   gradeNameInput?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") saveGrade();
   });
 
+
   // search
   searchInput?.addEventListener("input", render);
+
 
   // ESC close
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
+
+
+    if (confirmModal && !confirmModal.classList.contains("hidden")) {
+      return closeConfirm();
+    }
+
+
     if (gradeModal && !gradeModal.classList.contains("hidden")) {
       return closeGradeModal();
     }
+
+
     if (subjectModal && !subjectModal.classList.contains("hidden")) {
       return closeSubjectModal();
     }
   });
+
 
   // ==============================
   // init
@@ -753,9 +1120,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     await fetchCsrf();
     await loadSummary();
 
+
     if (activeGrade) {
       await loadSubjectsByGrade(activeGrade);
     }
+
 
     render();
   } catch (err) {
@@ -763,3 +1132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("Failed to load subjects. Make sure the backend routes are working.");
   }
 });
+
+
+

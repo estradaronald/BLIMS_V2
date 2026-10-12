@@ -32,6 +32,7 @@ const adminGradeLevelsRoutes = require("./routes/admin-grade-levels.routes");
 const adminSubjectsRoutes = require("./routes/admin-subjects.routes");
 const adminSchoolYearsRoutes = require("./routes/admin.school-years.routes");
 const adminClassScheduleRoutes = require("./routes/admin.class-schedule.routes");
+const adminAttendanceRoutes = require("./routes/admin.attendance.routes");
 
 // Admin account management
 const adminAccountsRoutes = require("./routes/admin.routes");
@@ -201,11 +202,8 @@ app.use(
 
     cookie: {
       httpOnly: true,
-
       sameSite: "lax",
-
       secure: false,
-
       maxAge: 1000 * 60 * 30,
     },
   })
@@ -367,6 +365,13 @@ app.use(
 app.use(
   "/api/admin",
   adminClassScheduleRoutes
+);
+
+// Attendance
+
+app.use(
+  "/api/admin",
+  adminAttendanceRoutes
 );
 
 // ==================================================

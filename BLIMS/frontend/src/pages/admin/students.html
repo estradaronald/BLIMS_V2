@@ -1,1883 +1,1384 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 
-  <title>Admin - Students</title>
+    <title>Admin - Students</title>
 
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
 
-  <!-- Prevent sidebar flash -->
-  <script>
-    (function () {
-      try {
-        const collapsed =
-          localStorage.getItem("admin_sidebar_collapsed_v1") === "1";
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-students.css" />
 
 
-        if (collapsed) {
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
+
+
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
           document.documentElement.classList.add("sb-collapsed");
         }
-      } catch {}
-    })();
-  </script>
 
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-students.css" />
-</head>
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
 
 
-<body data-page="students">
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
 
 
-  <!-- Floating sidebar toggle -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
 
 
-  <div class="app">
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
 
 
-    <!-- Sidebar -->
-    <div id="sidebar-mount"></div>
+  <body data-page="students">
+    <!-- Floating sidebar toggle -->
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-    <main class="content">
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
 
 
-      <!-- =========================
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+
+
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
+            >
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> GRADE LEVELS &amp; SECTIONS </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content">
+        <!-- =========================
            TOP BAR
       ========================== -->
 
 
-      <header class="topbar">
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
 
-        <div class="topbar-right">
+              <div class="tb-meta">
+                <div class="tb-name">Estrada, Ronald B.</div>
 
 
-          <div class="tb-user" id="userbox">
-
-
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            />
-
-
-            <div class="tb-meta">
-
-
-              <div class="tb-name">
-                Estrada, Ronald B.
+                <div class="tb-role">Admin</div>
               </div>
 
 
-              <div class="tb-role">
-                Admin
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
               </div>
-
-
             </div>
-
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-            >
-              ▾
-            </button>
-
-
-            <div class="tb-menu" id="userMenu">
-
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-
-            </div>
-
-
           </div>
+        </header>
 
 
-        </div>
-
-
-      </header>
-
-
-
-
-      <!-- =========================
+        <!-- =========================
            PAGE
       ========================== -->
 
 
-      <section class="teachers-wrap">
-
-
-        <!-- =========================
+        <section class="teachers-wrap">
+          <!-- =========================
              PAGE HEADER
         ========================== -->
 
 
-        <div class="teachers-page-head">
+          <div class="teachers-page-head">
+            <h2 class="teachers-title">Learners</h2>
 
 
-          <h2 class="teachers-title">
-            Learners
-          </h2>
+            <div class="teachers-head-actions">
+              <div id="formHeaderActions" class="t-form-header-actions hidden">
+                <button id="cancelBtn" class="t-ghost" type="button">
+                  Cancel
+                </button>
+                <button id="resetBtn" class="t-ghost" type="button">
+                  Reset
+                </button>
+                <button id="saveBtn" class="t-save" type="button">Save</button>
+              </div>
 
 
-          <div class="students-head-actions">
+              <button id="bulkCreateBtn" class="t-bulk-btn" type="button">
+                Bulk Create <span class="t-plus">＋</span>
+              </button>
 
 
-            <button
-              id="bulkCreateBtn"
-              class="t-bulk-btn"
-              type="button"
-            >
-              Bulk Create
-              <span class="t-plus">＋</span>
-            </button>
-
-
-            <button
-              id="addNewBtn"
-              class="t-add-btn"
-              type="button"
-            >
-              Add New
-              <span class="t-plus">＋</span>
-            </button>
-
-
+              <button id="addNewBtn" class="t-add-btn" type="button">
+                Add New <span class="t-plus">＋</span>
+              </button>
+            </div>
           </div>
 
 
-        </div>
-
-
-
-
-        <!-- =========================
+          <!-- =========================
              LIST VIEW
         ========================== -->
 
 
-        <section
-          id="listView"
-          class="t-view"
-        >
-
-
-          <div class="card t-card">
-
-
-            <div class="t-card-head">
-
-
-              <div class="t-subtitle">
-                All Learners List
-              </div>
-
-
-              <div class="t-tools">
-
-
-                <div class="t-search">
-
-
-                  <span class="t-search-ico">
-                    🔎
-                  </span>
-
-
-                  <input
-                    id="searchInput"
-                    type="text"
-                    placeholder="Search by Name, ID, or LRN"
-                  />
-
-
-                </div>
-
-
-                <select
-                  id="classFilter"
-                  class="t-filter"
-                >
-
-
-                  <option value="all">
-                    All Classes
-                  </option>
-
-
-                </select>
-
-
-              </div>
-
-
-            </div>
-
-
-
-
-            <div class="t-table-wrap">
-
-
-              <table class="t-table">
-
-
-                <thead>
-
-
-                  <tr>
-
-
-                    <th style="width:70px">
-                      No.
-                    </th>
-
-
-                    <th>
-                      Full Name
-                    </th>
-
-
-                    <th>
-                      Student ID
-                    </th>
-
-
-                    <th>
-                      LRN
-                    </th>
-
-
-                    <th>
-                      Email
-                    </th>
-
-
-                    <th>
-                      Class &amp; Section
-                    </th>
-
-
-                    <th>
-                      Contact No.
-                    </th>
-
-
-                    <th
-                      class="t-action-head"
-                      style="width:150px"
-                    >
-                      Action
-                    </th>
-
-
-                  </tr>
-
-
-                </thead>
-
-
-
-
-                <tbody id="studentsTbody">
-
-
-                  <tr class="t-empty">
-
-
-                    <td colspan="8">
-                      No students yet.
-                    </td>
-
-
-                  </tr>
-
-
-                </tbody>
-
-
-              </table>
-
-
-            </div>
-
-
-          </div>
-
-
-        </section>
-
-
-
-
-        <!-- =========================
-             ADD / EDIT FORM
-        ========================== -->
-
-
-        <section
-          id="formView"
-          class="t-view hidden"
-        >
-
-
-          <div class="t-form-grid">
-
-
-            <!-- LEFT COLUMN -->
-
-
-            <div class="t-form-left t-left-col">
-
-
-              <div class="card t-form-card t-basic-card">
-
-
-                <div class="t-form-hd">
-                  Basic Information
-                </div>
-
-
-                <div class="t-form-bd">
-
-
-                  <div class="t-basic-left">
-
-
-                    <div class="t-row2">
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          First Name
-                        </label>
-
-
-                        <input
-                          id="firstName"
-                          type="text"
-                        />
-
-
-                      </div>
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          Last Name
-                        </label>
-
-
-                        <input
-                          id="lastName"
-                          type="text"
-                        />
-
-
-                      </div>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-row2">
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          Middle Name
-                        </label>
-
-
-                        <input
-                          id="middleName"
-                          type="text"
-                        />
-
-
-                      </div>
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          Suffix
-                        </label>
-
-
-                        <select
-                          id="suffix"
-                          class="t-select"
-                        >
-
-
-                          <option value="">
-                            None
-                          </option>
-
-
-                          <option value="Jr.">
-                            Jr.
-                          </option>
-
-
-                          <option value="Sr.">
-                            Sr.
-                          </option>
-
-
-                          <option value="II">
-                            II
-                          </option>
-
-
-                          <option value="III">
-                            III
-                          </option>
-
-
-                          <option value="IV">
-                            IV
-                          </option>
-
-
-                          <option value="V">
-                            V
-                          </option>
-
-
-                        </select>
-
-
-                      </div>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-row2">
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          Date of Birth
-                        </label>
-
-
-                        <input
-                          id="dob"
-                          type="date"
-                        />
-
-
-                      </div>
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          Gender
-                        </label>
-
-
-                        <div class="t-gender">
-
-
-                          <label class="t-radio">
-
-
-                            <input
-                              type="radio"
-                              name="gender"
-                              value="male"
-                              checked
-                            />
-
-
-                            <span>
-                              Male
-                            </span>
-
-
-                          </label>
-
-
-                          <label class="t-radio">
-
-
-                            <input
-                              type="radio"
-                              name="gender"
-                              value="female"
-                            />
-
-
-                            <span>
-                              Female
-                            </span>
-
-
-                          </label>
-
-
-                        </div>
-
-
-                      </div>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-row2">
-
-
-                      <div class="t-field">
-
-
-                        <label>
-                          LRN
-                        </label>
-
-
-                        <input
-                          id="lrn"
-                          type="text"
-                          placeholder="Learner Reference Number"
-                        />
-
-
-                      </div>
-
-
-                    </div>
-
-
+          <section id="listView" class="t-view">
+            <div class="card t-card">
+              <div class="t-card-head">
+                <div class="t-list-heading">
+                  <div class="t-subtitle">Learners</div>
+
+
+                  <div class="t-list-description">
+                    Manage and view registered learners.
                   </div>
-
-
                 </div>
 
 
-              </div>
-
-
-            </div>
-
-
-
-
-            <!-- RIGHT COLUMN -->
-
-
-            <div class="t-form-right t-right-col">
-
-
-              <div class="card t-form-card">
-
-
-                <div class="t-form-hd">
-                  Contact &amp; Address
-                </div>
-
-
-                <div class="t-form-bd">
-
-
-                  <div class="t-row2">
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Phone
-                      </label>
-
-
-                      <div class="phone-input">
-
-
-                        <span class="phone-prefix">
-                          +63
-                        </span>
-
-
-                        <input
-                          id="phone"
-                          type="tel"
-                          maxlength="10"
-                          placeholder="9123456789"
-                        />
-
-
-                      </div>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Email
-                      </label>
-
-
-                      <input
-                        id="email"
-                        type="email"
-                      />
-
-
-                    </div>
-
-
-                  </div>
-
-
-
-
-                  <div class="t-field">
-
-
-                    <label>
-                      Street
-                    </label>
+                <div class="t-tools">
+                  <div class="t-search">
+                    <span class="t-search-ico"> 🔎 </span>
 
 
                     <input
-                      id="street"
+                      id="searchInput"
                       type="text"
+                      placeholder="Search by Name, ID, or LRN"
                     />
-
-
                   </div>
 
 
-
-
-                  <div class="t-row2">
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Province
-                      </label>
-
-
-                      <select
-                        id="provinceSelect"
-                        class="t-select"
-                      ></select>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        City
-                      </label>
-
-
-                      <select
-                        id="citySelect"
-                        class="t-select"
-                        disabled
-                      ></select>
-
-
-                    </div>
-
-
-                  </div>
-
-
-
-
-                  <div class="t-row2">
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Barangay
-                      </label>
-
-
-                      <select
-                        id="brgySelect"
-                        class="t-select"
-                        disabled
-                      ></select>
-
-
-                    </div>
-
-
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Postal Code
-                      </label>
-
-
-                      <input
-                        id="postal"
-                        type="text"
-                      />
-
-
-                    </div>
-
-
-                  </div>
-
-
+                  <select id="classFilter" class="t-filter">
+                    <option value="all">All Classes</option>
+                  </select>
                 </div>
-
-
               </div>
 
 
+              <div class="t-table-wrap">
+                <table class="t-table">
+                  <thead>
+                    <tr>
+                      <th class="t-col-no">No.</th>
 
 
-              <div class="card t-form-card">
+                      <th class="t-col-member">Learner</th>
 
 
-                <div class="t-form-hd">
-                  Account Setting
-                </div>
+                      <th class="t-col-contact">Contact</th>
 
 
-                <div class="t-form-bd">
+                      <th class="t-col-professional">Academic Details</th>
 
 
-                  <div class="t-row2">
+                      <th class="t-col-employment">Account</th>
 
 
-                    <div class="t-field">
+                      <th class="t-action-head">Action</th>
+                    </tr>
+                  </thead>
 
 
-                      <label>
-                        Student ID
-                      </label>
-
-
-                      <input
-                        id="studentId"
-                        type="text"
-                        readonly
-                        placeholder="Automatically generated"
-                      />
-
-
-                    </div>
-
-
-
-
-                    <div class="t-field">
-
-
-                      <label>
-                        Temporary Password
-                      </label>
-
-
-                      <input
-                        id="tempPass"
-                        type="text"
-                        readonly
-                        placeholder="Automatically generated"
-                      />
-
-
-                    </div>
-
-
-                  </div>
-
-
-
-
-                  <small class="account-note">
-                    Student ID and temporary password are automatically
-                    generated by the system.
-                  </small>
-
-
-                </div>
-
-
+                  <tbody id="studentsTbody">
+                    <tr class="t-empty">
+                      <td colspan="6">No students yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-
-
-
-
-              <div
-                id="formError"
-                class="t-error hidden"
-              ></div>
-
-
-
-
-              <div
-                class="t-form-actions t-form-actions-bottom"
-              >
-
-
-                <button
-                  id="cancelBtn"
-                  class="t-ghost"
-                  type="button"
-                >
-                  Cancel
-                </button>
-
-
-                <button
-                  id="resetBtn"
-                  class="t-ghost"
-                  type="button"
-                >
-                  Reset
-                </button>
-
-
-                <button
-                  id="saveBtn"
-                  class="t-save"
-                  type="button"
-                >
-                  Save
-                </button>
-
-
-              </div>
-
-
             </div>
+          </section>
 
 
-          </div>
+          <!-- =========================
+     ADD / EDIT FORM
+========================== -->
 
 
-        </section>
+          <section id="formView" class="t-view hidden">
+            <div class="t-form-grid">
+              <!-- =====================
+         LEFT COLUMN
+    ====================== -->
 
 
+              <div class="t-form-left t-left-col">
+                <!-- BASIC INFORMATION -->
+                <div class="card t-form-card t-basic-card">
+                  <div class="t-form-hd">Basic Information</div>
 
 
-        <!-- =========================
+                  <div class="t-form-bd">
+                    <div class="t-basic-left">
+                      <div class="t-row4">
+                        <div class="t-field">
+                          <label> First Name </label>
+                          <input
+                            id="firstName"
+                            type="text"
+                            autocomplete="given-name"
+                            placeholder="First name"
+                          />
+                        </div>
+
+
+                        <div class="t-field">
+                          <label> Middle Name </label>
+                          <input
+                            id="middleName"
+                            type="text"
+                            autocomplete="additional-name"
+                            placeholder="Middle name"
+                          />
+                        </div>
+
+
+                        <div class="t-field">
+                          <label> Last Name </label>
+                          <input
+                            id="lastName"
+                            type="text"
+                            autocomplete="family-name"
+                            placeholder="Last name"
+                          />
+                        </div>
+
+
+                        <div class="t-field">
+                          <label> Suffix </label>
+                          <select id="suffix" class="t-select">
+                            <option value="">None</option>
+                            <option value="Jr.">Jr.</option>
+                            <option value="Sr.">Sr.</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                          </select>
+                        </div>
+                      </div>
+
+
+                      <div class="t-row2">
+                        <div class="t-field">
+                          <label> Date of Birth </label>
+                          <input id="dob" type="date" />
+                        </div>
+
+
+                        <div class="t-field">
+                          <label> Gender </label>
+
+
+                          <div class="t-gender">
+                            <label class="t-radio">
+                              <input type="radio" name="gender" value="Male" />
+                              <span>Male</span>
+                            </label>
+
+
+                            <label class="t-radio">
+                              <input
+                                type="radio"
+                                name="gender"
+                                value="Female"
+                              />
+                              <span>Female</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="t-row2">
+                        <div class="t-field">
+                          <label> LRN </label>
+                          <input
+                            id="lrn"
+                            type="text"
+                            placeholder="Learner Reference Number"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- =====================
+         RIGHT COLUMN
+    ====================== -->
+
+
+              <div class="t-form-right t-right-col">
+                <!-- CONTACT & ADDRESS -->
+                <div class="card t-form-card">
+                  <div class="t-form-hd">Contact &amp; Address</div>
+
+
+                  <div class="t-form-bd">
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label for="phone">Phone</label>
+
+
+                        <div class="t-inline">
+                          <span class="t-prefix">+63</span>
+
+
+                          <input
+                            id="phone"
+                            type="text"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                            placeholder="9123456789"
+                            maxlength="10"
+                          />
+                        </div>
+
+
+                        <small class="t-hint">
+                          Enter 10 digits (e.g., 9123456789)
+                        </small>
+                      </div>
+
+
+                      <div class="t-field">
+                        <label> Email </label>
+
+
+                        <input
+                          id="email"
+                          type="email"
+                          autocomplete="email"
+                          placeholder="Email address"
+                        />
+                      </div>
+                    </div>
+
+
+                    <div class="t-field">
+                      <label> Street </label>
+
+
+                      <input
+                        id="street"
+                        type="text"
+                        autocomplete="street-address"
+                        placeholder="Street address"
+                      />
+                    </div>
+
+
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label> Province </label>
+
+
+                        <select id="provinceSelect" class="t-select"></select>
+                      </div>
+
+
+                      <div class="t-field">
+                        <label> City </label>
+
+
+                        <select
+                          id="citySelect"
+                          class="t-select"
+                          disabled
+                        ></select>
+                      </div>
+                    </div>
+
+
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label> Barangay </label>
+
+
+                        <select
+                          id="brgySelect"
+                          class="t-select"
+                          disabled
+                        ></select>
+                      </div>
+
+
+                      <div class="t-field">
+                        <label> Postal Code </label>
+
+
+                        <input
+                          id="postal"
+                          type="text"
+                          inputmode="numeric"
+                          maxlength="4"
+                          placeholder="2400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- ACCOUNT SETTING -->
+                <div class="card t-form-card">
+                  <div class="t-form-hd">Login / Account Details</div>
+
+
+                  <div class="t-form-bd">
+                    <div class="t-row2">
+                      <div class="t-field">
+                        <label for="studentId">Student ID</label>
+
+
+                        <input
+                          id="studentId"
+                          type="text"
+                          readonly
+                          placeholder="Automatically generated"
+                        />
+                      </div>
+
+
+                      <div class="t-field">
+                        <label for="tempPass">Temporary Password</label>
+
+
+                        <input
+                          id="tempPass"
+                          type="text"
+                          readonly
+                          placeholder="Automatically generated"
+                        />
+
+
+                        <small class="t-hint">
+                          Temporary password is generated automatically.
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- FORM ERROR -->
+                <div id="formError" class="t-error hidden"></div>
+              </div>
+            </div>
+          </section>
+
+
+          <!-- =========================
              BULK CREATE VIEW
         ========================== -->
 
 
-        <section
-          id="bulkCreateView"
-          class="t-view hidden"
-        >
+          <section id="bulkCreateView" class="t-view hidden">
+            <div class="card bulk-create-card">
+              <!-- HEADER -->
 
 
-          <div class="card bulk-create-card">
+              <div class="bulk-create-header">
+                <div>
+                  <div class="bulk-create-title">Bulk Create Learners</div>
 
 
-            <!-- HEADER -->
-
-
-            <div class="bulk-create-header">
-
-
-              <div>
-
-
-                <div class="bulk-create-title">
-                  Bulk Create Learners
-                </div>
-
-
-                <div class="bulk-create-subtitle">
-                  Create multiple learner accounts at once.
-                </div>
-
-
-              </div>
-
-
-            </div>
-
-
-
-
-            <!-- IMPORT TOOLS -->
-
-
-            <div class="bulk-import-tools">
-
-
-              <div class="bulk-import-left">
-
-
-                <button
-                  id="bulkUploadBtn"
-                  class="bulk-tool-btn bulk-upload-btn"
-                  type="button"
-                >
-                  <span>↑</span>
-                  Upload Excel
-                </button>
-
-
-                <button
-                  id="bulkDownloadTemplateBtn"
-                  class="bulk-tool-btn"
-                  type="button"
-                >
-                  <span>↓</span>
-                  Download Template
-                </button>
-
-
-                <input
-                  id="bulkExcelInput"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  hidden
-                />
-
-
-              </div>
-
-
-              <div class="bulk-import-note">
-                Excel columns: First Name, Last Name, LRN, Phone, Grade Level, Section
-              </div>
-
-
-            </div>
-
-
-
-
-            <!-- IMPORT STATUS -->
-
-
-            <div
-              id="bulkImportStatus"
-              class="bulk-import-status hidden"
-            ></div>
-
-
-
-
-            <!-- ERROR -->
-
-
-            <div
-              id="bulkCreateError"
-              class="bulk-error hidden"
-            ></div>
-
-
-            <!-- MANUAL ENTRY LABEL -->
-
-
-            <div class="bulk-entry-header">
-
-
-              <div>
-                <div class="bulk-entry-label">
-                  Learner Information
-                </div>
-
-
-                <div class="bulk-entry-note">
-                  Grade Level and Section are optional.
+                  <div class="bulk-create-subtitle">
+                    Create multiple learner accounts at once.
+                  </div>
                 </div>
               </div>
 
 
-              <div class="bulk-row-generator">
+              <!-- IMPORT TOOLS -->
 
 
-                <label
-                  for="bulkLearnerCount"
-                  class="bulk-row-generator-label"
-                >
-                  Number of Learners
-                </label>
-
-
-                <div class="bulk-row-generator-controls">
-
-
-                  <input
-                    id="bulkLearnerCount"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value="2"
-                    placeholder="2"
-                  />
-
-
+              <div class="bulk-import-tools">
+                <div class="bulk-import-left">
                   <button
-                    id="generateBulkRowsBtn"
+                    id="bulkUploadBtn"
+                    class="bulk-tool-btn bulk-upload-btn"
                     type="button"
-                    class="bulk-generate-btn"
                   >
-                    Generate
+                    <span>↑</span>
+                    Upload Excel
                   </button>
 
 
+                  <button
+                    id="bulkDownloadTemplateBtn"
+                    class="bulk-tool-btn"
+                    type="button"
+                  >
+                    <span>↓</span>
+                    Download Template
+                  </button>
+
+
+                  <input
+                    id="bulkExcelInput"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    hidden
+                  />
                 </div>
 
 
+                <div class="bulk-import-note">
+                  Excel columns: First Name, Middle Name, Last Name, Suffix,
+                  LRN, Phone, Grade Level, Section
+                </div>
               </div>
 
 
-            </div>
+              <!-- IMPORT STATUS -->
 
 
+              <div
+                id="bulkImportStatus"
+                class="bulk-import-status hidden"
+              ></div>
 
 
-            <!-- LEARNER ROWS -->
+              <!-- ERROR -->
 
 
-            <div
-              id="bulkLearnersContainer"
-              class="bulk-learners-container"
-            ></div>
+              <div id="bulkCreateError" class="bulk-error hidden"></div>
 
 
+              <!-- MANUAL ENTRY LABEL -->
 
 
-            <!-- ADD ANOTHER -->
+              <div class="bulk-entry-header">
+                <div>
+                  <div class="bulk-entry-label">Learner Information</div>
 
 
-            <button
-              id="addBulkLearnerBtn"
-              class="bulk-add-row-btn"
-              type="button"
-            >
-              <span>＋</span>
-              Add Another Learner
-            </button>
+                  <div class="bulk-entry-note">
+                    Grade Level and Section are optional.
+                  </div>
+                </div>
 
 
+                <div class="bulk-row-generator">
+                  <label
+                    for="bulkLearnerCount"
+                    class="bulk-row-generator-label"
+                  >
+                    Number of Learners
+                  </label>
 
 
-            <!-- ACTIONS -->
+                  <div class="bulk-row-generator-controls">
+                    <input
+                      id="bulkLearnerCount"
+                      type="number"
+                      min="1"
+                      max="100"
+                      value="2"
+                      placeholder="2"
+                    />
 
 
-            <div class="bulk-create-actions">
+                    <button
+                      id="generateBulkRowsBtn"
+                      type="button"
+                      class="bulk-generate-btn"
+                    >
+                      Generate
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- LEARNER ROWS -->
+
+
+              <div
+                id="bulkLearnersContainer"
+                class="bulk-learners-container"
+              ></div>
+
+
+              <!-- ADD ANOTHER -->
 
 
               <button
-                id="bulkCancelBtn"
-                class="t-ghost"
+                id="addBulkLearnerBtn"
+                class="bulk-add-row-btn"
                 type="button"
               >
-                Cancel
+                <span>＋</span>
+                Add Another Learner
               </button>
 
 
-              <button
-                id="bulkCreateSubmitBtn"
-                class="t-save"
-                type="button"
-              >
-                Create Learners
-              </button>
+              <!-- ACTIONS -->
 
 
-            </div>
+              <div class="bulk-create-actions">
+                <button id="bulkCancelBtn" class="t-ghost" type="button">
+                  Cancel
+                </button>
 
 
+                <button id="bulkCreateSubmitBtn" class="t-save" type="button">
+                  Create Learners
+                </button>
+              </div>
 
 
-            <!-- =========================
+              <!-- =========================
                  CREATED ACCOUNTS RESULT
             ========================== -->
 
 
-            <section
-              id="bulkCreatedAccounts"
-              class="bulk-created-accounts hidden"
-            >
+              <section
+                id="bulkCreatedAccounts"
+                class="bulk-created-accounts hidden"
+              >
+                <div class="bulk-success-banner">
+                  <div class="bulk-success-icon">✓</div>
 
 
-              <div class="bulk-success-banner">
+                  <div>
+                    <div class="bulk-success-title">
+                      Learners Created Successfully
+                    </div>
 
 
-                <div class="bulk-success-icon">
-                  ✓
+                    <div id="bulkSuccessMessage" class="bulk-success-subtitle">
+                      The learner accounts have been created successfully.
+                    </div>
+                  </div>
                 </div>
 
 
-                <div>
+                <div class="bulk-results-head">
+                  <div>
+                    <div class="bulk-results-title">Created Accounts</div>
 
 
-                  <div class="bulk-success-title">
-                    Learners Created Successfully
+                    <div class="bulk-results-note">
+                      Keep these credentials secure. Temporary passwords should
+                      be provided to the corresponding learners.
+                    </div>
                   </div>
 
 
-                  <div
-                    id="bulkSuccessMessage"
-                    class="bulk-success-subtitle"
+                  <button
+                    id="bulkDownloadAccountsBtn"
+                    class="bulk-download-accounts-btn"
+                    type="button"
                   >
-                    The learner accounts have been created successfully.
-                  </div>
-
-
+                    <span>↓</span>
+                    Download Created Accounts
+                  </button>
                 </div>
 
 
-              </div>
+                <div class="bulk-results-table-wrap">
+                  <table class="bulk-results-table">
+                    <thead>
+                      <tr>
+                        <th>No.</th>
 
 
+                        <th>Learner</th>
 
 
-              <div class="bulk-results-head">
+                        <th>LRN</th>
 
 
-                <div>
+                        <th>Grade Level</th>
 
 
-                  <div class="bulk-results-title">
-                    Created Accounts
-                  </div>
+                        <th>Section</th>
 
 
-                  <div class="bulk-results-note">
-                    Keep these credentials secure. Temporary passwords should
-                    be provided to the corresponding learners.
-                  </div>
+                        <th>Student ID</th>
 
 
+                        <th>Temporary Password</th>
+                      </tr>
+                    </thead>
+
+
+                    <tbody id="bulkCreatedAccountsTbody"></tbody>
+                  </table>
                 </div>
 
 
-                <button
-                  id="bulkDownloadAccountsBtn"
-                  class="bulk-download-accounts-btn"
-                  type="button"
-                >
-                  <span>↓</span>
-                  Download Created Accounts
-                </button>
-
-
-              </div>
-
-
-
-
-              <div class="bulk-results-table-wrap">
-
-
-                <table class="bulk-results-table">
-
-
-                  <thead>
-
-
-                    <tr>
-
-
-                      <th>
-                        No.
-                      </th>
-
-
-                      <th>
-                        Learner
-                      </th>
-
-
-                      <th>
-                        LRN
-                      </th>
-
-
-                      <th>
-                        Grade Level
-                      </th>
-
-
-                      <th>
-                        Section
-                      </th>
-
-
-                      <th>
-                        Student ID
-                      </th>
-
-
-                      <th>
-                        Temporary Password
-                      </th>
-
-
-                    </tr>
-
-
-                  </thead>
-
-
-                  <tbody id="bulkCreatedAccountsTbody">
-                  </tbody>
-
-
-                </table>
-
-
-              </div>
-
-
-
-
-              <div class="bulk-result-actions">
-
-
-                <button
-                  id="bulkDoneBtn"
-                  class="t-save"
-                  type="button"
-                >
-                  Done
-                </button>
-
-
-              </div>
-
-
-            </section>
-
-
-          </div>
-
-
+                <div class="bulk-result-actions">
+                  <button id="bulkDoneBtn" class="t-save" type="button">
+                    Done
+                  </button>
+                </div>
+              </section>
+            </div>
+          </section>
         </section>
+      </main>
+    </div>
 
 
-      </section>
-
-
-    </main>
-
-
-  </div>
-
-
-
-
-  <!-- =========================
+    <!-- =========================
        STUDENT PROFILE MODAL
   ========================== -->
 
 
-  <div
-    id="studentModal"
-    class="tmodal hidden"
-    aria-hidden="true"
-  >
+    <div id="studentModal" class="tmodal hidden" aria-hidden="true">
+      <div class="tmodal-backdrop" id="studentModalBackdrop"></div>
 
 
-    <div
-      class="tmodal-backdrop"
-      id="studentModalBackdrop"
-    ></div>
+      <div
+        class="tmodal-dialog"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="studentModalTitle"
+      >
+        <div class="tmodal-head">
+          <div class="tmodal-head-left">
+            <div>
+              <div id="studentModalTitle" class="tmodal-title">
+                Student Profile
+              </div>
 
 
+              <div class="tmodal-sub">
+                <span id="smStudentId"> Student ID: — </span>
 
 
-    <div
-      class="tmodal-dialog"
-      tabindex="-1"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="studentModalTitle"
-    >
+                <span class="tmodal-dot"> • </span>
 
 
-      <div class="tmodal-head">
+                <span class="tmodal-status">
+                  <span class="tmodal-status-dot"></span>
 
 
-        <div class="tmodal-head-left">
+                  Active
+                </span>
+              </div>
+            </div>
+          </div>
 
 
-          <div>
+          <button
+            class="tmodal-x"
+            id="studentModalCloseX"
+            type="button"
+            aria-label="Close student profile"
+          >
+            ✕
+          </button>
+        </div>
 
 
-            <div
-              id="studentModalTitle"
-              class="tmodal-title"
+        <div class="tmodal-tabs">
+          <button class="tmodal-tab active" data-tab="basic" type="button">
+            Basic Info
+          </button>
+
+
+          <button class="tmodal-tab" data-tab="address" type="button">
+            Contact &amp; Address
+          </button>
+
+
+          <button class="tmodal-tab" data-tab="account" type="button">
+            Account
+          </button>
+        </div>
+
+
+        <div class="tmodal-body">
+          <div class="tmodal-panel" data-panel="basic">
+            <div class="tmodal-grid">
+              <div class="tmodal-field">
+                <label> Full Name </label>
+
+
+                <input id="smFullName" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Student ID </label>
+
+
+                <input id="smStudentIdBasic" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> LRN </label>
+
+
+                <input id="smLRN" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Gender </label>
+
+
+                <input id="smGender" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Date of Birth </label>
+
+
+                <input id="smDob" readonly />
+              </div>
+            </div>
+          </div>
+
+
+          <div class="tmodal-panel hidden" data-panel="address">
+            <div class="tmodal-grid">
+              <div class="tmodal-field">
+                <label> Phone </label>
+
+
+                <input id="smPhone" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Email </label>
+
+
+                <input id="smEmail" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Street </label>
+
+
+                <input id="smStreet" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Province </label>
+
+
+                <input id="smProvince" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> City </label>
+
+
+                <input id="smCity" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Barangay </label>
+
+
+                <input id="smBrgy" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Postal Code </label>
+
+
+                <input id="smPostal" readonly />
+              </div>
+            </div>
+          </div>
+
+
+          <div class="tmodal-panel hidden" data-panel="account">
+            <div class="tmodal-grid">
+              <div class="tmodal-field">
+                <label> Student ID </label>
+
+
+                <input id="smAccId" readonly />
+              </div>
+
+
+              <div class="tmodal-field">
+                <label> Account Status </label>
+
+
+                <input id="smAccountStatus" value="Active" readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="tmodal-foot">
+          <button class="t-ghost" id="studentModalCloseBtn" type="button">
+            Close
+          </button>
+
+
+          <div class="tmodal-foot-right">
+            <button class="t-save" id="studentModalEditBtn" type="button">
+              Edit Student
+            </button>
+
+
+            <button
+              class="tmodal-danger"
+              id="studentModalDisableBtn"
+              type="button"
             >
-              Student Profile
-            </div>
-
-
-            <div class="tmodal-sub">
-
-
-              <span id="smStudentId">
-                Student ID: —
-              </span>
-
-
-              <span class="tmodal-dot">
-                •
-              </span>
-
-
-              <span class="tmodal-status">
-
-
-                <span class="tmodal-status-dot"></span>
-
-
-                Active
-
-
-              </span>
-
-
-            </div>
-
-
+              Disable Account
+            </button>
           </div>
-
-
         </div>
-
-
-
-
-        <button
-          class="tmodal-x"
-          id="studentModalCloseX"
-          type="button"
-          aria-label="Close student profile"
-        >
-          ✕
-        </button>
-
-
       </div>
-
-
-
-
-      <div class="tmodal-tabs">
-
-
-        <button
-          class="tmodal-tab active"
-          data-tab="basic"
-          type="button"
-        >
-          Basic Info
-        </button>
-
-
-
-
-        <button
-          class="tmodal-tab"
-          data-tab="address"
-          type="button"
-        >
-          Contact &amp; Address
-        </button>
-
-
-
-
-        <button
-          class="tmodal-tab"
-          data-tab="account"
-          type="button"
-        >
-          Account
-        </button>
-
-
-      </div>
-
-
-
-
-      <div class="tmodal-body">
-
-
-        <div
-          class="tmodal-panel"
-          data-panel="basic"
-        >
-
-
-          <div class="tmodal-grid">
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Full Name
-              </label>
-
-
-              <input
-                id="smFullName"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Student ID
-              </label>
-
-
-              <input
-                id="smStudentIdBasic"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                LRN
-              </label>
-
-
-              <input
-                id="smLRN"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Gender
-              </label>
-
-
-              <input
-                id="smGender"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Date of Birth
-              </label>
-
-
-              <input
-                id="smDob"
-                readonly
-              />
-
-
-            </div>
-
-
-          </div>
-
-
-        </div>
-
-
-
-
-        <div
-          class="tmodal-panel hidden"
-          data-panel="address"
-        >
-
-
-          <div class="tmodal-grid">
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Phone
-              </label>
-
-
-              <input
-                id="smPhone"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Email
-              </label>
-
-
-              <input
-                id="smEmail"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Street
-              </label>
-
-
-              <input
-                id="smStreet"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Province
-              </label>
-
-
-              <input
-                id="smProvince"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                City
-              </label>
-
-
-              <input
-                id="smCity"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Barangay
-              </label>
-
-
-              <input
-                id="smBrgy"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Postal Code
-              </label>
-
-
-              <input
-                id="smPostal"
-                readonly
-              />
-
-
-            </div>
-
-
-          </div>
-
-
-        </div>
-
-
-
-
-        <div
-          class="tmodal-panel hidden"
-          data-panel="account"
-        >
-
-
-          <div class="tmodal-grid">
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Student ID
-              </label>
-
-
-              <input
-                id="smAccId"
-                readonly
-              />
-
-
-            </div>
-
-
-
-
-            <div class="tmodal-field">
-
-
-              <label>
-                Account Status
-              </label>
-
-
-              <input
-                id="smAccountStatus"
-                value="Active"
-                readonly
-              />
-
-
-            </div>
-
-
-          </div>
-
-
-        </div>
-
-
-      </div>
-
-
-
-
-      <div class="tmodal-foot">
-
-
-        <button
-          class="t-ghost"
-          id="studentModalCloseBtn"
-          type="button"
-        >
-          Close
-        </button>
-
-
-
-
-        <div class="tmodal-foot-right">
-
-
-          <button
-            class="t-save"
-            id="studentModalEditBtn"
-            type="button"
-          >
-            Edit Student
-          </button>
-
-
-
-
-          <button
-            class="tmodal-danger"
-            id="studentModalDisableBtn"
-            type="button"
-          >
-            Disable Account
-          </button>
-
-
-        </div>
-
-
-      </div>
-
-
     </div>
 
 
-  </div>
+    <!-- =========================
+       DELETE CONFIRMATION MODAL
+    ========================== -->
 
 
+    <div id="confirmModal" class="t-confirm-modal hidden" aria-hidden="true">
+      <div class="t-confirm-backdrop" id="confirmModalBackdrop"></div>
 
 
-  <!-- =========================
+      <div
+        class="t-confirm-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirmTitle"
+        tabindex="-1"
+      >
+        <div class="t-confirm-head">
+          <div>
+            <div id="confirmTitle" class="t-confirm-title">Delete Student?</div>
+
+
+            <div class="t-confirm-sub">This cannot be undone.</div>
+          </div>
+
+
+          <button
+            class="t-confirm-x"
+            id="confirmCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+
+        <div class="t-confirm-body">
+          <div class="t-confirm-text" id="confirmText">Are you sure?</div>
+        </div>
+
+
+        <div class="t-confirm-foot">
+          <button class="t-ghost" id="confirmCancelBtn" type="button">
+            Cancel
+          </button>
+
+
+          <div class="t-confirm-foot-right">
+            <button class="t-danger" id="confirmDeleteBtn" type="button">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================
+       SUCCESS TOAST
+    ========================== -->
+
+
+    <div
+      id="successToast"
+      class="t-toast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      hidden
+    >
+      <span class="t-toast-icon" aria-hidden="true">✓</span>
+
+
+      <span id="successToastText"></span>
+    </div>
+
+
+    <!-- =========================
        JAVASCRIPT
-  ========================== -->
+    ========================== -->
 
 
-  <!-- SheetJS for Excel import/export -->
-  <script
-    src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
-  ></script>
+    <!-- SheetJS for Excel import/export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
 
-  <script src="../../js/auth/admin-guard.js"></script>
-  <script src="../../js/admin/sidebar.js"></script>
-  <script src="../../js/admin/admin-dashboard.js"></script>
-  <script src="../../js/admin/admin-students.js"></script>
-
-
-</body>
+    <script src="../../js/auth/admin-guard.js"></script>
+    <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/admin/admin-dashboard.js"></script>
+    <script src="../../js/admin/admin-students.js"></script>
+  </body>
 </html>
+
+
+
+
 

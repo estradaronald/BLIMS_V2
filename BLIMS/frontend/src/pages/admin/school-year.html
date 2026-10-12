@@ -1,750 +1,886 @@
 <!-- frontend/src/pages/admin/school-year.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - School Year & Terms</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - School Year & Terms</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  >
 
-  <!-- Shared -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Page -->
-  <link rel="stylesheet" href="../../styles/admin/admin-school-year.css" />
-</head>
 
-<body data-page="school-year">
+    <!-- Shared -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
 
-  <div class="app">
+    <!-- Page -->
+    <link rel="stylesheet" href="../../styles/admin/admin-school-year.css" />
 
-    <div id="sidebar-mount"></div>
 
-    <main class="content">
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-      <!-- =====================================================
-           TOPBAR
-      ====================================================== -->
 
-      <header class="topbar">
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
 
-        <div class="topbar-right">
 
-          
-          <div class="tb-user" id="userbox">
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
 
+
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
+
+
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
+
+
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
+
+
+  <body data-page="school-year">
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
+
+
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
-
-            <div class="tb-meta">
-              <div class="tb-name">
-                Estrada, Ronald B.
-              </div>
-
-              <div class="tb-role">
-                Admin
-              </div>
-            </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-            >
-              ▾
-            </button>
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
-      </header>
-
-
-      <!-- =====================================================
-           PAGE
-      ====================================================== -->
-
-      <section class="sy-wrap">
-
-        <!-- PAGE HEADER -->
-
-        <div class="sy-head">
-
-          <div>
-
-            <h2 class="sy-title">
-              School Year & Terms
-            </h2>
-
-            <div class="sy-sub">
-              Define the academic timeline and manage term dates.
-            </div>
-
           </div>
 
 
-          <div class="sy-head-actions">
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
 
-            <button
-              class="sy-danger-head"
-              id="deleteSchoolYearBtn"
-              type="button"
-              disabled
-            >
-              Delete School Year
-            </button>
 
-            <button
-              class="sy-primary"
-              id="addSchoolYearBtn"
-              type="button"
-            >
-              Create School Year
-              <span class="sy-plus">＋</span>
-            </button>
-
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
-
         </div>
 
 
         <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
+            >
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SECTIONS &amp; FACULTY </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SCHOOL YEAR &amp; TERMS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content">
+        <!-- =====================================================
+           TOPBAR
+      ====================================================== -->
+
+
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
+
+
+              <div class="tb-meta">
+                <div class="tb-name">Estrada, Ronald B.</div>
+
+
+                <div class="tb-role">Admin</div>
+              </div>
+
+
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <!-- =====================================================
+           PAGE
+      ====================================================== -->
+
+
+        <section class="sy-wrap">
+          <!-- PAGE HEADER -->
+
+
+          <div class="sy-head">
+            <div>
+              <h2 class="sy-title">School Year & Terms</h2>
+
+
+              <div class="sy-sub">
+                Define the academic timeline and manage term dates.
+              </div>
+            </div>
+
+
+            <div class="sy-head-actions">
+              <button
+                class="sy-danger-head"
+                id="deleteSchoolYearBtn"
+                type="button"
+                disabled
+              >
+                Delete School Year
+              </button>
+
+
+              <button class="sy-primary" id="addSchoolYearBtn" type="button">
+                Create School Year
+                <span class="sy-plus">＋</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- =====================================================
              MAIN GRID
         ====================================================== -->
 
-        <div class="sy-grid">
 
-
-          <!-- =================================================
+          <div class="sy-grid">
+            <!-- =================================================
                LEFT: SCHOOL YEAR LIST
           ================================================== -->
 
-          <aside class="card sy-left">
 
-            <div class="sy-left-head">
+            <aside class="card sy-left">
+              <div class="sy-left-head">
+                <div class="sy-left-title">School Years</div>
 
-              <div class="sy-left-title">
-                School Years
+
+                <div class="sy-left-hint">
+                  Select one to view terms and set Active.
+                </div>
               </div>
 
-              <div class="sy-left-hint">
-                Select one to view terms and set Active.
-              </div>
 
-            </div>
-
-            <div
-              id="syList"
-              class="sy-list"
-            ></div>
-
-          </aside>
+              <div id="syList" class="sy-list"></div>
+            </aside>
 
 
-          <!-- =================================================
+            <!-- =================================================
                RIGHT: SCHOOL YEAR DETAILS
           ================================================== -->
 
-          <section class="card sy-right">
 
-            <div class="sy-right-head">
+            <section class="card sy-right">
+              <div class="sy-right-head">
+                <div>
+                  <div class="sy-right-title" id="selectedSYTitle">—</div>
 
-              <div>
 
-                <div
-                  class="sy-right-title"
-                  id="selectedSYTitle"
-                >
-                  —
+                  <div class="sy-right-sub" id="selectedSYSub">
+                    Select a school year to view details.
+                  </div>
                 </div>
 
-                <div
-                  class="sy-right-sub"
-                  id="selectedSYSub"
-                >
-                  Select a school year to view details.
-                </div>
 
+                <div class="sy-actions">
+                  <button
+                    class="sy-ghost"
+                    id="setActiveBtn"
+                    type="button"
+                    disabled
+                  >
+                    Set as Active
+                  </button>
+
+
+                  <button
+                    class="sy-ghost"
+                    id="editTermsBtn"
+                    type="button"
+                    disabled
+                  >
+                    Edit Terms
+                  </button>
+                </div>
               </div>
 
 
-              <div class="sy-actions">
+              <!-- TERMS TABLE -->
 
-                <button
-                  class="sy-ghost"
-                  id="setActiveBtn"
-                  type="button"
-                  disabled
-                >
-                  Set as Active
-                </button>
 
-                <button
-                  class="sy-ghost"
-                  id="editTermsBtn"
-                  type="button"
-                  disabled
-                >
-                  Edit Terms
-                </button>
+              <div class="sy-table-wrap">
+                <table class="sy-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 90px">No.</th>
 
+
+                      <th>Term</th>
+
+
+                      <th style="width: 210px">Start</th>
+
+
+                      <th style="width: 210px">End</th>
+
+
+                      <th style="width: 160px; text-align: center">Status</th>
+                    </tr>
+                  </thead>
+
+
+                  <tbody id="termsTbody">
+                    <tr class="sy-empty">
+                      <td colspan="5">No terms to show.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-
-            </div>
-
-
-            <!-- TERMS TABLE -->
-
-            <div class="sy-table-wrap">
-
-              <table class="sy-table">
-
-                <thead>
-
-                  <tr>
-
-                    <th style="width:90px;">
-                      No.
-                    </th>
-
-                    <th>
-                      Term
-                    </th>
-
-                    <th style="width:210px;">
-                      Start
-                    </th>
-
-                    <th style="width:210px;">
-                      End
-                    </th>
-
-                    <th
-                      style="width:160px; text-align:center;"
-                    >
-                      Status
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-
-                <tbody id="termsTbody">
-
-                  <tr class="sy-empty">
-
-                    <td colspan="5">
-                      No terms to show.
-                    </td>
-
-                  </tr>
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </section>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
-
-
-  <!-- =========================================================
-       CREATE SCHOOL YEAR MODAL
-  ========================================================== -->
-
-  <div
-    id="createSYModal"
-    class="sy-modal hidden"
-    aria-hidden="true"
-  >
-
-    <div
-      class="sy-backdrop"
-      id="createSYBackdrop"
-    ></div>
-
-
-    <div
-      class="sy-dialog sy-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="createSYTitle"
-      tabindex="-1"
-    >
-
-
-      <!-- MODAL HEADER -->
-
-      <div class="sy-mhead">
-
-        <div>
-
-          <div
-            class="sy-mtitle"
-            id="createSYTitle"
-          >
-            Create School Year
+            </section>
           </div>
-
-          <div class="sy-msub">
-            Example: 2026–2027
-          </div>
-
-        </div>
-
-        <button
-          class="sy-x"
-          id="createSYCloseX"
-          type="button"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-
-      </div>
-
-
-      <!-- MODAL BODY -->
-
-      <div class="sy-mbody">
-
-        <div class="sy-form">
-
-
-          <!-- SCHOOL YEAR NAME -->
-
-          <div class="sy-field">
-
-            <label for="syNameInput">
-              School Year Name
-            </label>
-
-            <input
-              id="syNameInput"
-              class="sy-input"
-              type="text"
-              placeholder="e.g., 2026-2027"
-            />
-
-          </div>
-
-
-          <!-- START DATE -->
-
-          <div class="sy-field">
-
-            <label for="syStartInput">
-              Start Date
-            </label>
-
-            <input
-              id="syStartInput"
-              class="sy-input"
-              type="date"
-            />
-
-          </div>
-
-
-          <!-- END DATE -->
-
-          <div class="sy-field">
-
-            <label for="syEndInput">
-              End Date
-            </label>
-
-            <input
-              id="syEndInput"
-              class="sy-input"
-              type="date"
-            />
-
-          </div>
-
-
-          <!-- NUMBER OF TERMS -->
-
-          <div class="sy-field sy-wide">
-
-            <label for="numberOfTermsInput">
-              Number of Terms
-            </label>
-
-            <select
-              id="numberOfTermsInput"
-              class="sy-input"
-            >
-
-              <option value="1">
-                1 Term
-              </option>
-
-              <option value="2">
-                2 Terms
-              </option>
-
-              <option value="3" selected>
-                3 Terms
-              </option>
-
-              <option value="4">
-                4 Terms
-              </option>
-
-            </select>
-
-
-            <div class="sy-hint">
-              The school year will automatically create the selected number of terms.
-            </div>
-
-          </div>
-
-
-        </div>
-
-
-        <!-- CREATE ERROR -->
-
-        <div
-          id="createSYError"
-          class="sy-error hidden"
-        ></div>
-
-      </div>
-
-
-      <!-- MODAL FOOTER -->
-
-      <div class="sy-mfoot">
-
-        <button
-          class="sy-ghost"
-          id="createSYCancel"
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <div class="sy-foot-right">
-
-          <button
-            class="sy-save"
-            id="createSYSave"
-            type="button"
-          >
-            Create
-          </button>
-
-        </div>
-
-      </div>
-
+        </section>
+      </main>
     </div>
 
-  </div>
+
+    <!-- =========================================================
+     SUCCESS TOAST
+========================================================== -->
 
 
-  <!-- =========================================================
+    <div
+      id="successToast"
+      class="sy-success-toast hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span class="sy-success-icon" aria-hidden="true">✓</span>
+      <span id="successToastText" class="sy-success-text">
+        Changes saved successfully.
+      </span>
+    </div>
+
+
+    <!-- =========================================================
+     CREATE SCHOOL YEAR MODAL
+========================================================== -->
+
+
+    <div id="createSYModal" class="sy-modal hidden" aria-hidden="true">
+      <div class="sy-backdrop" id="createSYBackdrop"></div>
+
+
+      <div
+        class="sy-dialog sy-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="createSYTitle"
+        tabindex="-1"
+      >
+        <!-- MODAL HEADER -->
+
+
+        <div class="sy-mhead">
+          <div>
+            <div class="sy-mtitle" id="createSYTitle">Create School Year</div>
+
+
+            <div class="sy-msub">Example: 2026–2027</div>
+          </div>
+
+
+          <button
+            class="sy-x"
+            id="createSYCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+
+        <!-- MODAL BODY -->
+
+
+        <div class="sy-mbody">
+          <div class="sy-form">
+            <!-- SCHOOL YEAR NAME -->
+
+
+            <div class="sy-field">
+              <label for="syNameInput"> School Year Name </label>
+
+
+              <input
+                id="syNameInput"
+                class="sy-input"
+                type="text"
+                placeholder="e.g., 2026-2027"
+              />
+            </div>
+
+
+            <!-- START DATE -->
+
+
+            <div class="sy-field">
+              <label for="syStartInput"> Start Date </label>
+
+
+              <input id="syStartInput" class="sy-input" type="date" />
+            </div>
+
+
+            <!-- END DATE -->
+
+
+            <div class="sy-field">
+              <label for="syEndInput"> End Date </label>
+
+
+              <input id="syEndInput" class="sy-input" type="date" />
+            </div>
+
+
+            <!-- NUMBER OF TERMS -->
+
+
+            <div class="sy-field sy-wide">
+              <label for="numberOfTermsInput"> Number of Terms </label>
+
+
+              <select id="numberOfTermsInput" class="sy-input">
+                <option value="1">1 Term</option>
+
+
+                <option value="2">2 Terms</option>
+
+
+                <option value="3" selected>3 Terms</option>
+
+
+                <option value="4">4 Terms</option>
+              </select>
+
+
+              <div class="sy-hint">
+                The school year will automatically create the selected number of
+                terms.
+              </div>
+            </div>
+          </div>
+
+
+          <!-- CREATE ERROR -->
+
+
+          <div id="createSYError" class="sy-error hidden"></div>
+        </div>
+
+
+        <!-- MODAL FOOTER -->
+
+
+        <div class="sy-mfoot">
+          <button class="sy-ghost" id="createSYCancel" type="button">
+            Cancel
+          </button>
+
+
+          <div class="sy-foot-right">
+            <button class="sy-save" id="createSYSave" type="button">
+              Create
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================
        EDIT TERMS MODAL
   ========================================================== -->
 
-  <div
-    id="editTermsModal"
-    class="sy-modal hidden"
-    aria-hidden="true"
-  >
 
-    <div
-      class="sy-backdrop"
-      id="editTermsBackdrop"
-    ></div>
+    <div id="editTermsModal" class="sy-modal hidden" aria-hidden="true">
+      <div class="sy-backdrop" id="editTermsBackdrop"></div>
 
 
-    <div
-      class="sy-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="editTermsTitle"
-      tabindex="-1"
-    >
+      <div
+        class="sy-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editTermsTitle"
+        tabindex="-1"
+      >
+        <!-- MODAL HEADER -->
 
 
-      <!-- MODAL HEADER -->
+        <div class="sy-mhead">
+          <div>
+            <div class="sy-mtitle" id="editTermsTitle">Edit Terms</div>
 
-      <div class="sy-mhead">
 
-        <div>
-
-          <div
-            class="sy-mtitle"
-            id="editTermsTitle"
-          >
-            Edit Terms
+            <div class="sy-msub" id="editTermsSub">
+              Update term dates and lock finished terms.
+            </div>
           </div>
 
-          <div
-            class="sy-msub"
-            id="editTermsSub"
-          >
-            Update term dates and lock finished terms.
-          </div>
 
+          <button
+            class="sy-x"
+            id="editTermsCloseX"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
-        <button
-          class="sy-x"
-          id="editTermsCloseX"
-          type="button"
-          aria-label="Close"
-        >
-          ✕
-        </button>
 
-      </div>
+        <!-- MODAL BODY -->
 
 
-      <!-- MODAL BODY -->
+        <div class="sy-mbody">
+          <div class="sy-qwrap">
+            <div class="sy-qhead">
+              <div class="sy-qhint">
+                Terms for:
 
-      <div class="sy-mbody">
 
-        <div class="sy-qwrap">
+                <strong id="editTermsName"> — </strong>
+              </div>
 
-          <div class="sy-qhead">
 
-            <div class="sy-qhint">
-
-              Terms for:
-
-              <strong id="editTermsName">
-                —
-              </strong>
-
+              <div class="sy-hint">Maximum of 4 terms.</div>
             </div>
 
 
-            <div class="sy-hint">
-              Maximum of 4 terms.
-            </div>
+            <!-- TERMS EDITOR -->
 
+
+            <div id="termsEditor" class="sy-qeditor"></div>
           </div>
 
 
-          <!-- TERMS EDITOR -->
+          <!-- EDIT ERROR -->
 
-          <div
-            id="termsEditor"
-            class="sy-qeditor"
-          ></div>
 
+          <div id="editTermsError" class="sy-error hidden"></div>
         </div>
 
 
-        <!-- EDIT ERROR -->
-
-        <div
-          id="editTermsError"
-          class="sy-error hidden"
-        ></div>
-
-      </div>
+        <!-- MODAL FOOTER -->
 
 
-      <!-- MODAL FOOTER -->
-
-      <div class="sy-mfoot">
-
-        <button
-          class="sy-ghost"
-          id="editTermsCancel"
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <div class="sy-foot-right">
-
-          <button
-            class="sy-ghost"
-            id="editTermsReset"
-            type="button"
-          >
-            Reset
+        <div class="sy-mfoot">
+          <button class="sy-ghost" id="editTermsCancel" type="button">
+            Cancel
           </button>
 
-          <button
-            class="sy-save"
-            id="editTermsSave"
-            type="button"
-          >
-            Save Changes
-          </button>
 
+          <div class="sy-foot-right">
+            <button class="sy-ghost" id="editTermsReset" type="button">
+              Reset
+            </button>
+
+
+            <button class="sy-save" id="editTermsSave" type="button">
+              Save Changes
+            </button>
+          </div>
         </div>
-
       </div>
-
     </div>
 
-  </div>
 
-
-  <!-- =========================================================
+    <!-- =========================================================
        CONFIRM ACTION MODAL
   ========================================================== -->
 
-  <div
-    id="confirmModal"
-    class="sy-modal hidden"
-    aria-hidden="true"
-  >
 
-    <div
-      class="sy-backdrop"
-      id="confirmBackdrop"
-    ></div>
+    <div id="confirmModal" class="sy-modal hidden" aria-hidden="true">
+      <div class="sy-backdrop" id="confirmBackdrop"></div>
 
 
-    <div
-      class="sy-dialog sy-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirmTitle"
-      tabindex="-1"
-    >
+      <div
+        class="sy-dialog sy-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirmTitle"
+        tabindex="-1"
+      >
+        <div class="sy-mhead">
+          <div>
+            <div class="sy-mtitle" id="confirmTitle">Confirm Action</div>
 
-      <div class="sy-mhead">
 
-        <div>
-
-          <div
-            class="sy-mtitle"
-            id="confirmTitle"
-          >
-            Confirm Action
+            <div class="sy-msub" id="confirmSub">
+              Please confirm this action.
+            </div>
           </div>
 
-          <div
-            class="sy-msub"
-            id="confirmSub"
-          >
-            Please confirm this action.
-          </div>
-
-        </div>
-
-        <button
-          class="sy-x"
-          id="confirmCloseX"
-          type="button"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-
-      </div>
-
-
-      <div class="sy-mbody">
-
-        <div
-          class="sy-confirm"
-          id="confirmText"
-        >
-          Are you sure?
-        </div>
-
-      </div>
-
-
-      <div class="sy-mfoot">
-
-        <button
-          class="sy-ghost"
-          id="confirmCancel"
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <div class="sy-foot-right">
 
           <button
-            class="sy-danger"
-            id="confirmDelete"
+            class="sy-x"
+            id="confirmCloseX"
             type="button"
+            aria-label="Close"
           >
-            Confirm
+            ✕
           </button>
-
         </div>
 
-      </div>
 
+        <div class="sy-mbody">
+          <div class="sy-confirm" id="confirmText">Are you sure?</div>
+        </div>
+
+
+        <div class="sy-mfoot">
+          <button class="sy-ghost" id="confirmCancel" type="button">
+            Cancel
+          </button>
+
+
+          <div class="sy-foot-right">
+            <button class="sy-danger" id="confirmDelete" type="button">
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-  </div>
 
-
-  <!-- =========================================================
+    <!-- =========================================================
        SCRIPTS
   ========================================================== -->
 
-  <script src="../../js/auth/admin-guard.js"></script>
-  <script src="../../js/admin/sidebar.js"></script>
-  <script src="../../js/admin/admin-dashboard.js"></script>
-  <script src="../../js/admin/admin-school-year.js"></script>
 
-</body>
+    <script src="../../js/auth/admin-guard.js"></script>
+    <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/admin/admin-dashboard.js"></script>
+    <script src="../../js/admin/admin-school-year.js"></script>
+  </body>
 </html>
+
+
+

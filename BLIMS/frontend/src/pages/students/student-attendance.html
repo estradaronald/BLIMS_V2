@@ -1,464 +1,551 @@
 <!-- frontend/src/pages/student/student-attendance.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <head>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Student - Attendance</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        // Restore collapsed sidebar before first paint.
+        if (
+          isDesktop &&
+          localStorage.getItem("student_sidebar_collapsed_v1") === "1"
+        ) {
+          root.classList.add("sb-collapsed");
+        }
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  >
 
-  <!-- Baseline styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/sidebar.css"
-  />
+        // Restore My Learning dropdown before first paint.
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("student_sidebar_groups_v1") || "{}",
+          );
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  />
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin-announcements.css"
-  />
+          if (saved["my-learning"] === true) {
+            root.classList.add("sb-preopen-learning");
+          }
+        } catch {
+          // Ignore invalid saved sidebar state.
+        }
+      })();
+    </script>
 
-  <!-- Student Attendance styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/student/student-attendance.css"
-  />
-</head>
 
-<body data-page="attendance">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Floating sidebar toggle -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
 
-  <div class="app">
+    <title>Student - Attendance</title>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar-mount"></div>
 
-    <main class="content">
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-      <!-- ==========================================
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- Baseline styles -->
+    <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
+
+
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+    <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
+
+
+    <!-- Student Attendance styles -->
+    <link rel="stylesheet" href="../../styles/student/student-attendance.css" />
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="attendance">
+    <!-- Floating sidebar toggle -->
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="student">
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <nav class="sb-nav">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-dashboard.html"
+            data-nav="dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY LEARNING -->
+          <div
+            class="sb-group"
+            id="studentLearningGroup"
+            data-group="my-learning"
+          >
+            <button
+              class="sb-group-toggle"
+              id="studentLearningToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="studentLearningMenu"
+            >
+              <span class="sb-group-title">MY LEARNING</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
+            </button>
+
+
+            <div class="sb-submenu" id="studentLearningMenu">
+              <a
+                class="sb-item"
+                href="./student-schedule.html"
+                data-nav="schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-classwork.html"
+                data-nav="classwork"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/asess.svg" alt="" />
+                </span>
+                <span class="sb-text">ASSIGNMENT</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-subjects.html"
+                data-nav="subjects"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+                <span class="sb-text">SUBJECTS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-attendance.html"
+                data-nav="attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a class="sb-item" href="./student-grades.html" data-nav="grades">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY ACCOUNT -->
+          <div class="sb-section-title">MY ACCOUNT</div>
+
+
+          <a class="sb-item" href="./student-profile.html" data-nav="profile">
+            <span class="sb-ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span class="sb-text">PROFILE</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content page-animate">
+        <!-- ==========================================
            TOP BAR
       =========================================== -->
 
-      <header class="topbar">
 
-        <div class="topbar-right">
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
-          <div
-            class="tb-user"
-            id="userbox"
-          >
 
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            />
+              <div class="tb-meta">
+                <div class="tb-name">Student</div>
 
-            <div class="tb-meta">
 
-              <div class="tb-name">
-                Student
+                <div class="tb-role">Attendance</div>
               </div>
 
-              <div class="tb-role">
-                Attendance
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
               </div>
-
             </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-            >
-              ▾
-            </button>
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-            </div>
-
           </div>
+        </header>
 
-        </div>
 
-      </header>
-
-      <!-- ==========================================
+        <!-- ==========================================
            PAGE
       =========================================== -->
 
-      <section class="teachers-wrap">
 
-        <!-- PAGE HEADER -->
+        <section class="teachers-wrap">
+          <!-- PAGE HEADER -->
 
-        <div class="teachers-page-head">
 
-          <h2 class="teachers-title">
-            Attendance
-          </h2>
+          <div class="teachers-page-head reveal-item">
+            <h2 class="teachers-title">Attendance</h2>
+          </div>
 
-        </div>
 
-        <!-- ==========================================
+          <!-- ==========================================
              MAIN CARD
         =========================================== -->
 
-        <div class="card t-card att-card">
 
-          <!-- ========================================
+          <div class="card t-card att-card reveal-scale">
+            <!-- ========================================
                CARD HEADER
           ========================================= -->
 
-          <div class="t-card-head att-head">
 
-            <div class="att-left">
+            <div class="t-card-head att-head">
+              <div class="att-left">
+                <div class="t-subtitle">Attendance Record</div>
 
-              <div class="t-subtitle">
-                Attendance Record
+
+                <!-- Grade Level + Section -->
+
+
+                <div class="att-sub">
+                  <span id="attGradeSection"> Grade — </span>
+                </div>
               </div>
 
-              <!-- Grade Level + Section -->
 
-              <div class="att-sub">
-
-                <span id="attGradeSection">
-                  Grade —
-                </span>
-
-              </div>
-
-            </div>
-
-            <!-- ======================================
+              <!-- ======================================
                  FILTERS / VIEW TOGGLE
             ======================================= -->
 
-            <div class="att-actions">
 
-              <!-- Month -->
+              <div class="att-actions">
+                <!-- Month -->
 
-              <select
-                id="attMonthSelect"
-                class="t-filter"
-                aria-label="Select month"
-              >
 
-                <option value="all">
-                  Month: All
-                </option>
-
-                <option value="0">
-                  January
-                </option>
-
-                <option value="1">
-                  February
-                </option>
-
-                <option value="2">
-                  March
-                </option>
-
-                <option value="3">
-                  April
-                </option>
-
-                <option value="4">
-                  May
-                </option>
-
-                <option value="5">
-                  June
-                </option>
-
-                <option value="6">
-                  July
-                </option>
-
-                <option value="7">
-                  August
-                </option>
-
-                <option value="8">
-                  September
-                </option>
-
-                <option value="9">
-                  October
-                </option>
-
-                <option value="10">
-                  November
-                </option>
-
-                <option value="11">
-                  December
-                </option>
-
-              </select>
-
-              <!-- Table / Calendar -->
-
-              <div
-                class="att-toggle"
-                role="tablist"
-                aria-label="Attendance view toggle"
-              >
-
-                <button
-                  class="att-tab active"
-                  id="attTabTable"
-                  type="button"
-                  role="tab"
-                  aria-selected="true"
+                <select
+                  id="attMonthSelect"
+                  class="t-filter"
+                  aria-label="Select month"
                 >
-                  Table
-                </button>
+                  <option value="all">Month: All</option>
 
-                <button
-                  class="att-tab"
-                  id="attTabCalendar"
-                  type="button"
-                  role="tab"
-                  aria-selected="false"
+
+                  <option value="0">January</option>
+
+
+                  <option value="1">February</option>
+
+
+                  <option value="2">March</option>
+
+
+                  <option value="3">April</option>
+
+
+                  <option value="4">May</option>
+
+
+                  <option value="5">June</option>
+
+
+                  <option value="6">July</option>
+
+
+                  <option value="7">August</option>
+
+
+                  <option value="8">September</option>
+
+
+                  <option value="9">October</option>
+
+
+                  <option value="10">November</option>
+
+
+                  <option value="11">December</option>
+                </select>
+
+
+                <!-- Table / Calendar -->
+
+
+                <div
+                  class="att-toggle"
+                  role="tablist"
+                  aria-label="Attendance view toggle"
                 >
-                  Calendar
-                </button>
+                  <button
+                    class="att-tab active"
+                    id="attTabTable"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Table
+                  </button>
 
+
+                  <button
+                    class="att-tab"
+                    id="attTabCalendar"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Calendar
+                  </button>
+                </div>
               </div>
-
             </div>
 
-          </div>
 
-          <!-- ==========================================
+            <!-- ==========================================
                SUMMARY
           =========================================== -->
 
-          <div
-            class="att-summary"
-            id="attSummary"
-          >
 
-            <!-- Present -->
+            <div class="att-summary" id="attSummary">
+              <!-- Present -->
 
-            <div class="att-stat">
 
-              <div class="att-stat-k">
-                Present
+              <div class="att-stat">
+                <div class="att-stat-k">Present</div>
+
+
+                <div class="att-stat-v" id="attPresent">—</div>
               </div>
 
-              <div
-                class="att-stat-v"
-                id="attPresent"
-              >
-                —
+
+              <!-- Absent -->
+
+
+              <div class="att-stat">
+                <div class="att-stat-k">Absent</div>
+
+
+                <div class="att-stat-v" id="attAbsent">—</div>
               </div>
 
+
+              <!-- Late -->
+
+
+              <div class="att-stat">
+                <div class="att-stat-k">Late</div>
+
+
+                <div class="att-stat-v" id="attLate">—</div>
+              </div>
+
+
+              <!-- Attendance Rate -->
+
+
+              <div class="att-stat rate">
+                <div class="att-stat-k">Attendance Rate</div>
+
+
+                <div class="att-stat-v" id="attRate">—</div>
+              </div>
             </div>
 
-            <!-- Absent -->
 
-            <div class="att-stat">
-
-              <div class="att-stat-k">
-                Absent
-              </div>
-
-              <div
-                class="att-stat-v"
-                id="attAbsent"
-              >
-                —
-              </div>
-
-            </div>
-
-            <!-- Late -->
-
-            <div class="att-stat">
-
-              <div class="att-stat-k">
-                Late
-              </div>
-
-              <div
-                class="att-stat-v"
-                id="attLate"
-              >
-                —
-              </div>
-
-            </div>
-
-            <!-- Attendance Rate -->
-
-            <div class="att-stat rate">
-
-              <div class="att-stat-k">
-                Attendance Rate
-              </div>
-
-              <div
-                class="att-stat-v"
-                id="attRate"
-              >
-                —
-              </div>
-
-            </div>
-
-          </div>
-
-          <!-- ==========================================
+            <!-- ==========================================
                ATTENDANCE BODY
           =========================================== -->
 
-          <div class="att-body">
 
-            <!-- ========================================
+            <div class="att-body">
+              <!-- ========================================
                  TABLE VIEW
             ========================================= -->
 
-            <div id="attViewTable">
 
-              <div class="att-table-wrap">
+              <div id="attViewTable">
+                <div class="att-table-wrap">
+                  <table class="att-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 220px">Date</th>
 
-                <table class="att-table">
 
-                  <thead>
+                        <th style="width: 180px">Status</th>
+                      </tr>
+                    </thead>
 
-                    <tr>
 
-                      <th style="width: 220px;">
-                        Date
-                      </th>
-
-                      <th style="width: 180px;">
-                        Status
-                      </th>
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody id="attTbody">
-                    <!-- JS populates attendance records -->
-                  </tbody>
-
-                </table>
-
+                    <tbody id="attTbody">
+                      <!-- JS populates attendance records -->
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-            </div>
 
-            <!-- ========================================
+              <!-- ========================================
                  CALENDAR VIEW
             ========================================= -->
 
-            <div
-              id="attViewCalendar"
-              class="hidden"
-            >
 
-              <div class="att-cal">
-
-                <div class="att-cal-head">
-
-                  <div
-                    class="att-cal-title"
-                    id="attCalTitle"
-                  >
-                    Month
+              <div id="attViewCalendar" class="hidden">
+                <div class="att-cal">
+                  <div class="att-cal-head">
+                    <div class="att-cal-title" id="attCalTitle">Month</div>
                   </div>
 
-                </div>
 
-                <div
-                  class="att-cal-grid"
-                  id="attCalGrid"
-                >
-                  <!-- JS populates calendar -->
+                  <div class="att-cal-grid" id="attCalGrid">
+                    <!-- JS populates calendar -->
+                  </div>
                 </div>
-
               </div>
 
-            </div>
 
-            <!-- ========================================
+              <!-- ========================================
                  EMPTY STATE
             ========================================= -->
 
-            <div
-              id="attEmpty"
-              class="att-empty hidden"
-            >
-              No attendance record yet.
+
+              <div id="attEmpty" class="att-empty hidden">
+                No attendance record yet.
+              </div>
             </div>
-
           </div>
+        </section>
+      </main>
+    </div>
 
-        </div>
 
-      </section>
-
-    </main>
-
-  </div>
-
-  <!-- ==========================================
+    <!-- ==========================================
        STUDENT SCRIPTS
   =========================================== -->
 
-  <script src="../../js/student/student-sidebar.js"></script>
 
-  <script src="../../js/student/student-attendance.js"></script>
+    <script src="../../shared/js/page-animations.js"></script>
+    <script src="../../js/student/student-sidebar.js"></script>
 
-</body>
+
+    <script src="../../js/student/student-attendance.js"></script>
+  </body>
 </html>
+
+
+

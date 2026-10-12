@@ -1,9 +1,20 @@
 // frontend/src/js/admin/admin-grade-levels.js
+
 // Grade Levels & Sections (Admin) - Backend API CRUD (Express + MongoDB)
+
 // Dynamic grade levels from backend
+
 // CSRF is session-based: fetch from /api/csrf-token then send X-CSRF-Token.
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // =========================================================
+  // FRONTEND DEMO MODE
+  // Set to false when backend integration is ready to test.
+  // =========================================================
+
+  const DEMO_MODE = false;
+
   const $ = (id) => document.getElementById(id);
 
   const API_BASE = "/api/admin";
@@ -11,10 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // UI refs
   const gradeList = $("gradeList");
   const selectedGradeTitle = $("selectedGradeTitle");
+  const selectedGradeSub = $("selectedGradeSub");
   const sectionsTbody = $("sectionsTbody");
   const searchInput = $("searchInput");
   const capacityFilter = $("capacityFilter");
   const addSectionBtnTop = $("addSectionBtnTop");
+
+  const successToast = $("successToast");
+  const successToastText = $("successToastText");
 
   // modals
   const sectionModal = $("sectionModal");
@@ -50,6 +65,111 @@ document.addEventListener("DOMContentLoaded", () => {
   let summaryCounts = {};
   let gradeRows = [];
   let availableTeachers = [];
+  let successToastTimer = null;
+
+  // =========================================================
+  // FRONTEND DEMO DATA
+  // Used only while DEMO_MODE is true.
+  // This does NOT touch the backend or database.
+  // =========================================================
+
+  const DEMO_TEACHERS = [
+    {
+      id: "demo-teacher-1",
+      name: "Maria Santos",
+    },
+    {
+      id: "demo-teacher-2",
+      name: "Juan Dela Cruz",
+    },
+    {
+      id: "demo-teacher-3",
+      name: "Angela Reyes",
+    },
+    {
+      id: "demo-teacher-4",
+      name: "Daniel Cruz",
+    },
+    {
+      id: "demo-teacher-5",
+      name: "Sofia Garcia",
+    },
+  ];
+
+  let demoSections = [
+    {
+      id: "demo-1",
+      grade: "Grade 1",
+      section: "Emerald",
+      adviserId: "demo-teacher-1",
+      adviser: "Maria Santos",
+      capacity: 35,
+    },
+    {
+      id: "demo-2",
+      grade: "Grade 1",
+      section: "Ruby",
+      adviserId: "demo-teacher-2",
+      adviser: "Juan Dela Cruz",
+      capacity: 40,
+    },
+    {
+      id: "demo-3",
+      grade: "Grade 2",
+      section: "Diamond",
+      adviserId: "demo-teacher-3",
+      adviser: "Angela Reyes",
+      capacity: 35,
+    },
+    {
+      id: "demo-4",
+      grade: "Grade 2",
+      section: "Sapphire",
+      adviserId: "demo-teacher-4",
+      adviser: "Daniel Cruz",
+      capacity: 30,
+    },
+    {
+      id: "demo-5",
+      grade: "Grade 3",
+      section: "Emerald",
+      adviserId: "demo-teacher-5",
+      adviser: "Sofia Garcia",
+      capacity: 40,
+    },
+    {
+      id: "demo-6",
+      grade: "Grade 3",
+      section: "Ruby",
+      adviserId: "demo-teacher-1",
+      adviser: "Maria Santos",
+      capacity: 28,
+    },
+    {
+      id: "demo-7",
+      grade: "Grade 4",
+      section: "Diamond",
+      adviserId: "demo-teacher-2",
+      adviser: "Juan Dela Cruz",
+      capacity: 38,
+    },
+    {
+      id: "demo-8",
+      grade: "Grade 5",
+      section: "Sapphire",
+      adviserId: "demo-teacher-3",
+      adviser: "Angela Reyes",
+      capacity: 42,
+    },
+    {
+      id: "demo-9",
+      grade: "Grade 6",
+      section: "Emerald",
+      adviserId: "demo-teacher-4",
+      adviser: "Daniel Cruz",
+      capacity: 36,
+    },
+  ];
 
   // csrf
   let csrfToken = "";
@@ -63,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------------------------
   // API helper
   // --------------------------
+
   async function api(path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
     const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
@@ -86,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const text = await res.text();
     let data = null;
+
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
@@ -96,10 +218,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const msg =
         (data && (data.error || data.message)) ||
         `Request failed (${res.status})`;
+
       throw new Error(msg);
     }
 
-    if (data && typeof data === "object" && data.ok === true && "data" in data) {
+    if (
+      data &&
+      typeof data === "object" &&
+      data.ok === true &&
+      "data" in data
+    ) {
       return data.data;
     }
 
@@ -109,15 +237,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------------------------
   // UI helpers
   // --------------------------
+
   function openModal() {
     sectionModal.classList.remove("hidden");
     sectionModal.setAttribute("aria-hidden", "false");
+
     setTimeout(() => modalSection.focus(), 0);
   }
 
   function closeModal() {
     sectionModal.classList.add("hidden");
     sectionModal.setAttribute("aria-hidden", "true");
+
     hideError();
     editingId = null;
   }
@@ -125,12 +256,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function openConfirm() {
     confirmModal.classList.remove("hidden");
     confirmModal.setAttribute("aria-hidden", "false");
+
     setTimeout(() => confirmDeleteBtn.focus(), 0);
   }
 
   function closeConfirm() {
     confirmModal.classList.add("hidden");
     confirmModal.setAttribute("aria-hidden", "true");
+
     pendingDeleteId = null;
   }
 
@@ -144,16 +277,59 @@ document.addEventListener("DOMContentLoaded", () => {
     modalError.classList.add("hidden");
   }
 
+  function showSuccess(message) {
+    if (!successToast || !successToastText) return;
+
+    successToastText.textContent = message;
+    successToast.hidden = false;
+
+    clearTimeout(successToastTimer);
+
+    successToastTimer = setTimeout(() => {
+      successToast.hidden = true;
+    }, 3000);
+  }
+
+  function updateGradeControls() {
+    const hasGrade = Boolean(activeGrade);
+
+    if (addSectionBtnTop) {
+      addSectionBtnTop.disabled = !hasGrade;
+    }
+
+    if (searchInput) {
+      searchInput.disabled = !hasGrade;
+    }
+
+    if (capacityFilter) {
+      capacityFilter.disabled = !hasGrade;
+    }
+
+    if (selectedGradeTitle) {
+      selectedGradeTitle.textContent =
+        activeGrade || "Select a Grade Level";
+    }
+
+    if (selectedGradeSub) {
+      selectedGradeSub.textContent = activeGrade
+        ? "Sections assigned to this grade level."
+        : "Choose a grade level from the left to view and manage its sections.";
+    }
+  }
+
   function normalize(s) {
     return (s || "").toLowerCase().trim();
   }
 
   function matchesCapacity(cap, filter) {
     const n = Number(cap);
+
     if (!Number.isFinite(n)) return false;
+
     if (filter === "lt30") return n < 30;
     if (filter === "30to40") return n >= 30 && n <= 40;
     if (filter === "gt40") return n > 40;
+
     return true;
   }
 
@@ -171,6 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeGrade = "";
       return;
     }
+
     if (!grades.includes(activeGrade)) {
       activeGrade = grades[0];
     }
@@ -178,7 +355,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function fillGradeSelect() {
     modalGrade.innerHTML = grades
-      .map((g) => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`)
+      .map(
+        (g) =>
+          `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`,
+      )
       .join("");
 
     modalGrade.value = activeGrade || grades[0] || "";
@@ -188,38 +368,37 @@ document.addEventListener("DOMContentLoaded", () => {
     modalGrade.value = activeGrade || grades[0] || "";
     modalSection.value = "";
     modalCapacity.value = "";
+
     hideError();
     toggleRemoveTeacherBtn();
   }
 
   function toggleRemoveTeacherBtn() {
     if (!removeTeacherBtn) return;
-    removeTeacherBtn.style.display = modalAdviser.value ? "inline-block" : "none";
+
+    removeTeacherBtn.style.display = modalAdviser.value
+      ? "inline-block"
+      : "none";
   }
 
   // --------------------------
   // Teacher helpers
   // --------------------------
+
   function teacherIdOf(t) {
     return String(
-      t?.id ||
-      t?._id ||
-      t?.teacherId ||
-      t?.value ||
-      ""
+      t?.id || t?._id || t?.teacherId || t?.value || "",
     );
   }
 
   function teacherNameOf(t) {
     if (!t) return "";
 
-    if (typeof t.name === "string" && t.name.trim()) return t.name.trim();
+    if (typeof t.name === "string" && t.name.trim()) {
+      return t.name.trim();
+    }
 
-    const joined = [
-      t.firstName,
-      t.middleName,
-      t.lastName,
-    ]
+    const joined = [t.firstName, t.middleName, t.lastName]
       .filter(Boolean)
       .join(" ")
       .replace(/\s+/g, " ")
@@ -227,24 +406,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (joined) return joined;
 
-    if (typeof t.fullName === "string" && t.fullName.trim()) return t.fullName.trim();
-    if (typeof t.label === "string" && t.label.trim()) return t.label.trim();
-    if (typeof t.email === "string" && t.email.trim()) return t.email.trim();
+    if (typeof t.fullName === "string" && t.fullName.trim()) {
+      return t.fullName.trim();
+    }
+
+    if (typeof t.label === "string" && t.label.trim()) {
+      return t.label.trim();
+    }
+
+    if (typeof t.email === "string" && t.email.trim()) {
+      return t.email.trim();
+    }
 
     return "Unnamed Teacher";
   }
 
   function currentRowById(id) {
-    return (gradeRows || []).find((x) => String(x.id) === String(id));
+    return (gradeRows || []).find(
+      (x) => String(x.id) === String(id),
+    );
   }
 
-  function fillAdviserSelect(teachers, selectedId = "", fallbackName = "") {
+  function fillAdviserSelect(
+    teachers,
+    selectedId = "",
+    fallbackName = "",
+  ) {
     const selectedIdStr = String(selectedId || "");
     const list = Array.isArray(teachers) ? [...teachers] : [];
 
     const hasSelectedAlready =
       selectedIdStr &&
-      list.some((t) => String(teacherIdOf(t)) === selectedIdStr);
+      list.some(
+        (t) => String(teacherIdOf(t)) === selectedIdStr,
+      );
 
     if (!hasSelectedAlready && (selectedIdStr || fallbackName)) {
       list.unshift({
@@ -258,12 +453,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultOpt = document.createElement("option");
     defaultOpt.value = "";
     defaultOpt.textContent = "Unassigned";
+
     modalAdviser.appendChild(defaultOpt);
 
     list.forEach((teacher) => {
       const opt = document.createElement("option");
+
       opt.value = teacherIdOf(teacher);
       opt.textContent = teacherNameOf(teacher);
+
       modalAdviser.appendChild(opt);
     });
 
@@ -276,7 +474,22 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleRemoveTeacherBtn();
   }
 
-  async function loadAvailableTeachers(selectedTeacherId = "", selectedTeacherName = "") {
+  async function loadAvailableTeachers(
+    selectedTeacherId = "",
+    selectedTeacherName = "",
+  ) {
+    if (DEMO_MODE) {
+      availableTeachers = [...DEMO_TEACHERS];
+
+      fillAdviserSelect(
+        availableTeachers,
+        selectedTeacherId,
+        selectedTeacherName,
+      );
+
+      return;
+    }
+
     try {
       let path = "/teachers/unassigned";
 
@@ -287,6 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await api(path);
 
       let list = [];
+
       if (Array.isArray(data)) {
         list = data;
       } else if (data && Array.isArray(data.teachers)) {
@@ -296,46 +510,69 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       availableTeachers = list;
-      fillAdviserSelect(availableTeachers, selectedTeacherId, selectedTeacherName);
+
+      fillAdviserSelect(
+        availableTeachers,
+        selectedTeacherId,
+        selectedTeacherName,
+      );
     } catch (e) {
       availableTeachers = [];
-      fillAdviserSelect([], selectedTeacherId, selectedTeacherName);
-      console.warn("Failed to load unassigned teachers:", e);
+
+      fillAdviserSelect(
+        [],
+        selectedTeacherId,
+        selectedTeacherName,
+      );
+
+      console.warn(
+        "Failed to load unassigned teachers:",
+        e,
+      );
     }
   }
 
   // --------------------------
   // Render
   // --------------------------
+
   function buildGradeList() {
     gradeList.innerHTML = "";
 
     if (!grades.length) {
       gradeList.innerHTML = `
-        <div style="padding:12px; opacity:.7;">No grade levels found.</div>
+        <div style="padding:12px; opacity:.7;">
+          No grade levels found.
+        </div>
       `;
+
       return;
     }
 
     grades.forEach((g) => {
       const btn = document.createElement("button");
+
       btn.type = "button";
-      btn.className = "gl-grade-btn" + (g === activeGrade ? " active" : "");
+      btn.className =
+        "gl-grade-btn" + (g === activeGrade ? " active" : "");
 
       const left = document.createElement("span");
       left.textContent = g;
 
       const count = Number(summaryCounts[g] || 0);
+
       const pill = document.createElement("span");
       pill.className = "gl-grade-pill";
-      pill.textContent = `${count} section${count === 1 ? "" : "s"}`;
+      pill.textContent =
+        `${count} section${count === 1 ? "" : "s"}`;
 
       btn.appendChild(left);
       btn.appendChild(pill);
 
       btn.addEventListener("click", async () => {
         activeGrade = g;
-        selectedGradeTitle.textContent = g;
+
+        updateGradeControls();
         buildGradeList();
 
         sectionsTbody.innerHTML = `
@@ -351,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
           sectionsTbody.innerHTML = `
             <tr class="gl-empty">
               <td colspan="5">${escapeHtml(
-                e?.message || "Failed to load sections."
+                e?.message || "Failed to load sections.",
               )}</td>
             </tr>
           `;
@@ -364,31 +601,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderTable() {
     const rawRows = gradeRows || [];
+
     const q = normalize(searchInput.value);
     const capF = capacityFilter.value;
 
     const rows = rawRows.filter((r) => {
       const section = normalize(r.section);
       const adviser = normalize(r.adviser);
-      const hit = !q || section.includes(q) || adviser.includes(q);
+
+      const hit =
+        !q ||
+        section.includes(q) ||
+        adviser.includes(q);
+
       const capOk = matchesCapacity(r.capacity, capF);
+
       return hit && capOk;
     });
 
     if (!rows.length) {
+      const emptyMessage = activeGrade
+        ? "No sections yet for this grade."
+        : "Select a grade level to view its sections.";
+
       sectionsTbody.innerHTML = `
         <tr class="gl-empty">
-          <td colspan="5">No sections found for this grade.</td>
+          <td colspan="5">${emptyMessage}</td>
         </tr>
       `;
+
       return;
     }
 
     sectionsTbody.innerHTML = rows
       .map((r, idx) => {
         const safeSection = escapeHtml(r.section);
-        const safeAdviser = escapeHtml(r.adviser || "—");
-        const safeCap = escapeHtml(String(r.capacity ?? "—"));
+        const safeAdviser = escapeHtml(
+          r.adviser || "—",
+        );
+        const safeCap = escapeHtml(
+          String(r.capacity ?? "—"),
+        );
+
         return `
           <tr>
             <td>${idx + 1}</td>
@@ -397,8 +651,31 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${safeCap}</td>
             <td style="text-align:center;">
               <div class="gl-actions">
-                <button class="gl-icon-btn gl-edit" type="button" data-act="edit" data-id="${r.id}" title="Edit">✎</button>
-                <button class="gl-icon-btn gl-del" type="button" data-act="del" data-id="${r.id}" title="Delete">🗑</button>
+                <button
+                  class="gl-icon-btn gl-edit"
+                  type="button"
+                  data-act="edit"
+                  data-id="${r.id}"
+                  title="Edit"
+                >
+                  <img
+                    src="../../assets/icons/edit.svg"
+                    alt="Edit"
+                  />
+                </button>
+
+                <button
+                  class="gl-icon-btn gl-del"
+                  type="button"
+                  data-act="del"
+                  data-id="${r.id}"
+                  title="Delete"
+                >
+                  <img
+                    src="../../assets/icons/delete.svg"
+                    alt="Delete"
+                  />
+                </button>
               </div>
             </td>
           </tr>
@@ -406,36 +683,61 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .join("");
 
-    sectionsTbody.querySelectorAll("button[data-act]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-id");
-        const act = btn.getAttribute("data-act");
-        if (!id) return;
+    sectionsTbody
+      .querySelectorAll("button[data-act]")
+      .forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const act = btn.getAttribute("data-act");
 
-        if (act === "edit") startEdit(id);
-        if (act === "del") startDelete(id);
+          if (!id) return;
+
+          if (act === "edit") startEdit(id);
+          if (act === "del") startDelete(id);
+        });
       });
-    });
   }
 
   // --------------------------
   // Data loaders
   // --------------------------
+
   async function loadGradeLevels() {
+    if (DEMO_MODE) {
+      grades = [
+        "Kindergarten",
+        "Grade 1",
+        "Grade 2",
+        "Grade 3",
+        "Grade 4",
+        "Grade 5",
+        "Grade 6",
+      ];
+
+      ensureActiveGrade();
+
+      return;
+    }
+
     const data = await api("/grade-levels");
 
     let list = [];
+
     if (Array.isArray(data)) {
       list = data;
     } else if (data && Array.isArray(data.items)) {
       list = data.items;
-    } else if (data && Array.isArray(data.gradeLevels)) {
+    } else if (
+      data &&
+      Array.isArray(data.gradeLevels)
+    ) {
       list = data.gradeLevels;
     }
 
     grades = list
       .map((item) => {
         if (typeof item === "string") return item;
+
         return item?.grade || item?.name || "";
       })
       .filter(Boolean);
@@ -444,9 +746,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadSummary() {
+    if (DEMO_MODE) {
+      summaryCounts = {};
+
+      demoSections.forEach((section) => {
+        summaryCounts[section.grade] =
+          (summaryCounts[section.grade] || 0) + 1;
+      });
+
+      return;
+    }
+
     summaryCounts = await api("/sections/summary");
 
-    if (!summaryCounts || typeof summaryCounts !== "object") {
+    if (
+      !summaryCounts ||
+      typeof summaryCounts !== "object"
+    ) {
       summaryCounts = {};
     }
   }
@@ -459,7 +775,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    gradeRows = await api(`/sections?grade=${encodeURIComponent(activeGrade)}`);
+    if (DEMO_MODE) {
+      gradeRows = demoSections.filter(
+        (section) => section.grade === activeGrade,
+      );
+
+      return;
+    }
+
+    gradeRows = await api(
+      `/sections?grade=${encodeURIComponent(activeGrade)}`,
+    );
+
     if (!Array.isArray(gradeRows)) {
       gradeRows = [];
     }
@@ -469,43 +796,51 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadGradeLevels();
     await loadSummary();
 
-    Object.keys(summaryCounts || {}).forEach((g) => {
-      if (g && !grades.includes(g)) grades.push(g);
-    });
-
     ensureActiveGrade();
     await loadActiveGrade();
+
     buildGradeList();
-    selectedGradeTitle.textContent = activeGrade || "No Grade";
+    updateGradeControls();
     renderTable();
   }
 
   // --------------------------
   // Actions
   // --------------------------
+
   async function startAdd() {
     editingId = null;
+
     sectionModalTitle.textContent = "Add Section";
+
     sectionModalSub.textContent =
       "Create a section under the selected grade level.";
 
     fillGradeSelect();
     resetModalFields();
+
     await loadAvailableTeachers();
+
     openModal();
   }
 
   async function startEdit(id) {
     const item = currentRowById(id);
+
     if (!item) return;
 
     editingId = id;
+
     sectionModalTitle.textContent = "Edit Section";
+
     sectionModalSub.textContent =
       "Update section details for the selected grade level.";
 
     fillGradeSelect();
-    modalGrade.value = item.grade || activeGrade || "";
+
+    modalGrade.value =
+      item.grade || activeGrade || "";
+
     modalSection.value = item.section || "";
     modalCapacity.value = item.capacity ?? "";
 
@@ -513,7 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     await loadAvailableTeachers(
       item.adviserId || item.teacherId || "",
-      item.adviser || item.teacherName || ""
+      item.adviser || item.teacherName || "",
     );
 
     openModal();
@@ -521,10 +856,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function startDelete(id) {
     const item = currentRowById(id);
+
     if (!item) return;
 
     pendingDeleteId = id;
-    confirmText.textContent = `Delete section "${item.section}" under ${activeGrade}?`;
+
+    confirmText.textContent =
+      `Delete section "${item.section}" under ${activeGrade}?`;
+
     openConfirm();
   }
 
@@ -534,15 +873,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const capacity = Number(modalCapacity.value);
 
     const adviserId = modalAdviser.value || "";
+
     const adviser =
-      modalAdviser.options[modalAdviser.selectedIndex]?.textContent?.trim() || "";
+      modalAdviser.options[
+        modalAdviser.selectedIndex
+      ]?.textContent?.trim() || "";
 
     if (!grade || !grades.includes(grade)) {
-      return showError("Please select a valid grade level.");
+      return showError(
+        "Please select a valid grade level.",
+      );
     }
-    if (!section) return showError("Section name is required.");
+
+    if (!section) {
+      return showError(
+        "Section name is required.",
+      );
+    }
+
     if (!Number.isFinite(capacity) || capacity <= 0) {
-      return showError("Capacity must be a positive number.");
+      return showError(
+        "Capacity must be a positive number.",
+      );
     }
 
     const payload = {
@@ -553,107 +905,279 @@ document.addEventListener("DOMContentLoaded", () => {
       capacity,
     };
 
-    try {
+    // =========================================================
+    // FRONTEND DEMO MODE
+    // =========================================================
+
+    if (DEMO_MODE) {
+      const wasEditing = Boolean(editingId);
+
       if (editingId) {
-        await api(`/sections/${encodeURIComponent(editingId)}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
+        const index = demoSections.findIndex(
+          (item) =>
+            String(item.id) === String(editingId),
+        );
+
+        if (index !== -1) {
+          demoSections[index] = {
+            ...demoSections[index],
+            ...payload,
+          };
+        }
+      } else {
+        demoSections.push({
+          id: `demo-${Date.now()}`,
+          ...payload,
         });
+      }
+
+      activeGrade = grade;
+
+      closeModal();
+      await refreshAll();
+
+      showSuccess(
+        wasEditing
+          ? `Section "${section}" updated successfully.`
+          : `Section "${section}" added successfully.`,
+      );
+
+      return;
+    }
+
+    // =========================================================
+    // EXISTING BACKEND MODE
+    // =========================================================
+
+    try {
+      const wasEditing = Boolean(editingId);
+
+      if (editingId) {
+        await api(
+          `/sections/${encodeURIComponent(editingId)}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(payload),
+          },
+        );
       } else {
         await api("/sections", {
           method: "POST",
           body: JSON.stringify(payload),
         });
-
-        activeGrade = grade;
-        selectedGradeTitle.textContent = grade;
       }
+
+      activeGrade = grade;
 
       closeModal();
       await refreshAll();
+
+      showSuccess(
+        wasEditing
+          ? `Section "${section}" updated successfully.`
+          : `Section "${section}" added successfully.`,
+      );
     } catch (e) {
-      showError(e.message || "Failed to save section.");
+      showError(
+        e.message || "Failed to save section.",
+      );
     }
   }
 
   async function deletePending() {
     if (!pendingDeleteId) return;
 
-    try {
-      await api(`/sections/${encodeURIComponent(pendingDeleteId)}`, {
-        method: "DELETE",
-      });
+    const item = currentRowById(
+      pendingDeleteId,
+    );
+
+    const deletedSectionName =
+      item?.section || "Section";
+
+    // =========================================================
+    // FRONTEND DEMO MODE
+    // =========================================================
+
+    if (DEMO_MODE) {
+      demoSections = demoSections.filter(
+        (item) =>
+          String(item.id) !==
+          String(pendingDeleteId),
+      );
 
       closeConfirm();
       await refreshAll();
+
+      showSuccess(
+        `Section "${deletedSectionName}" deleted successfully.`,
+      );
+
+      return;
+    }
+
+    // =========================================================
+    // EXISTING BACKEND MODE
+    // =========================================================
+
+    try {
+      await api(
+        `/sections/${encodeURIComponent(
+          pendingDeleteId,
+        )}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      closeConfirm();
+      await refreshAll();
+
+      showSuccess(
+        `Section "${deletedSectionName}" deleted successfully.`,
+      );
     } catch (e) {
-      confirmText.textContent = e.message || "Failed to delete section.";
+      confirmText.textContent =
+        e.message ||
+        "Failed to delete section.";
     }
   }
 
   // --------------------------
   // Events
   // --------------------------
-  addSectionBtnTop.addEventListener("click", startAdd);
 
-  sectionModalBackdrop.addEventListener("click", closeModal);
-  sectionModalCloseX.addEventListener("click", closeModal);
-  modalCancelBtn.addEventListener("click", closeModal);
+  addSectionBtnTop.addEventListener(
+    "click",
+    startAdd,
+  );
 
-  modalResetBtn.addEventListener("click", async () => {
-    if (editingId) {
-      await startEdit(editingId);
-    } else {
-      resetModalFields();
-      await loadAvailableTeachers();
-      modalSection.focus();
-    }
-  });
+  sectionModalBackdrop.addEventListener(
+    "click",
+    closeModal,
+  );
 
-  modalSaveBtn.addEventListener("click", saveSection);
+  sectionModalCloseX.addEventListener(
+    "click",
+    closeModal,
+  );
+
+  modalCancelBtn.addEventListener(
+    "click",
+    closeModal,
+  );
+
+  modalResetBtn.addEventListener(
+    "click",
+    async () => {
+      if (editingId) {
+        await startEdit(editingId);
+      } else {
+        resetModalFields();
+
+        await loadAvailableTeachers();
+
+        modalSection.focus();
+      }
+    },
+  );
+
+  modalSaveBtn.addEventListener(
+    "click",
+    saveSection,
+  );
 
   if (removeTeacherBtn) {
-    removeTeacherBtn.addEventListener("click", () => {
-      modalAdviser.value = "";
-      toggleRemoveTeacherBtn();
-      hideError();
-    });
+    removeTeacherBtn.addEventListener(
+      "click",
+      () => {
+        modalAdviser.value = "";
+
+        toggleRemoveTeacherBtn();
+        hideError();
+      },
+    );
   }
 
   if (modalAdviser) {
-    modalAdviser.addEventListener("change", () => {
-      toggleRemoveTeacherBtn();
-      hideError();
-    });
+    modalAdviser.addEventListener(
+      "change",
+      () => {
+        toggleRemoveTeacherBtn();
+        hideError();
+      },
+    );
   }
 
-  confirmModalBackdrop.addEventListener("click", closeConfirm);
-  confirmCloseX.addEventListener("click", closeConfirm);
-  confirmCancelBtn.addEventListener("click", closeConfirm);
-  confirmDeleteBtn.addEventListener("click", deletePending);
+  confirmModalBackdrop.addEventListener(
+    "click",
+    closeConfirm,
+  );
 
-  searchInput.addEventListener("input", renderTable);
-  capacityFilter.addEventListener("change", renderTable);
+  confirmCloseX.addEventListener(
+    "click",
+    closeConfirm,
+  );
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!confirmModal.classList.contains("hidden")) return closeConfirm();
-    if (!sectionModal.classList.contains("hidden")) return closeModal();
-  });
+  confirmCancelBtn.addEventListener(
+    "click",
+    closeConfirm,
+  );
+
+  confirmDeleteBtn.addEventListener(
+    "click",
+    deletePending,
+  );
+
+  searchInput.addEventListener(
+    "input",
+    renderTable,
+  );
+
+  capacityFilter.addEventListener(
+    "change",
+    renderTable,
+  );
+
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") return;
+
+      if (
+        !confirmModal.classList.contains(
+          "hidden",
+        )
+      ) {
+        return closeConfirm();
+      }
+
+      if (
+        !sectionModal.classList.contains(
+          "hidden",
+        )
+      ) {
+        return closeModal();
+      }
+    },
+  );
 
   // init
-  selectedGradeTitle.textContent = activeGrade || "No Grade";
+  updateGradeControls();
   toggleRemoveTeacherBtn();
 
   (async () => {
     try {
-      await loadCsrfToken();
+      if (!DEMO_MODE) {
+        await loadCsrfToken();
+      }
+
       await refreshAll();
     } catch (e) {
       sectionsTbody.innerHTML = `
         <tr class="gl-empty">
           <td colspan="5">${escapeHtml(
-            e?.message || "Backend not reachable or API route missing."
+            e?.message ||
+              "Backend not reachable or API route missing.",
           )}</td>
         </tr>
       `;

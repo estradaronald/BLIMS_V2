@@ -1,544 +1,596 @@
 <!-- frontend/src/pages/student/student-announcements.html -->
 
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
-
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Student - Announcements</title>
+  <head>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
 
-  <!-- =====================================================
+        // Restore collapsed sidebar before first paint.
+        if (
+          isDesktop &&
+          localStorage.getItem("student_sidebar_collapsed_v1") === "1"
+        ) {
+          root.classList.add("sb-collapsed");
+        }
+
+
+        // Restore My Learning dropdown before first paint.
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("student_sidebar_groups_v1") || "{}",
+          );
+
+
+          if (saved["my-learning"] === true) {
+            root.classList.add("sb-preopen-learning");
+          }
+        } catch {
+          // Ignore invalid saved sidebar state.
+        }
+      })();
+    </script>
+
+
+    <meta charset="UTF-8" />
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    <title>Student - Announcements</title>
+
+
+    <!-- =====================================================
        FONTS
   ====================================================== -->
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  >
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
 
-  <!-- =====================================================
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- =====================================================
        SHARED STYLES
   ====================================================== -->
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/sidebar.css"
-  >
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  >
-
-  <link
-    rel="stylesheet"
-    href="../../shared/css/page-animations.css"
-  >
+    <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
 
 
-  <!-- =====================================================
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+
+
+    <!-- =====================================================
        STUDENT ANNOUNCEMENT STYLES
   ====================================================== -->
 
-  <link
-    rel="stylesheet"
-    href="../../styles/student/student-announcements.css"
-  >
 
-</head>
-
-
-<body data-page="announcements">
+    <link
+      rel="stylesheet"
+      href="../../styles/student/student-announcements.css"
+    />
+  </head>
 
 
-  <!-- =====================================================
+  <body data-page="announcements">
+    <!-- =====================================================
        SIDEBAR TOGGLE
   ====================================================== -->
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-  <!-- =====================================================
+    <!-- =====================================================
        APP
   ====================================================== -->
 
-  <div class="app">
 
-
-    <!-- ===================================================
+    <div class="app">
+      <!-- ===================================================
          STUDENT SIDEBAR
     ==================================================== -->
 
-    <div id="sidebar-mount"></div>
 
-
-    <!-- ===================================================
-         MAIN CONTENT
-    ==================================================== -->
-
-    <main class="content page-animate">
-
-
-      <!-- =================================================
-           TOPBAR
-      ================================================== -->
-
-      <header class="topbar reveal-soft">
-
-        <div class="topbar-right">
-
-
-
-          <!-- USER -->
-
-          <div
-            class="tb-user"
-            id="userbox"
-          >
-
+      <aside class="sidebar" id="sidebar" data-role="student">
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="Student avatar"
-            >
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
 
 
-            <div class="tb-meta">
-
-              <div
-                class="tb-name"
-                id="tbName"
-              >
-                Student
-              </div>
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
 
 
-              <div
-                class="tb-role"
-                id="tbRole"
-              >
-                Announcements
-              </div>
-
-            </div>
+        <nav class="sb-nav">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
 
 
+          <a
+            class="sb-item"
+            href="./student-dashboard.html"
+            data-nav="dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY LEARNING -->
+          <div
+            class="sb-group"
+            id="studentLearningGroup"
+            data-group="my-learning"
+          >
             <button
-              class="tb-drop"
-              id="userMenuBtn"
+              class="sb-group-toggle"
+              id="studentLearningToggle"
               type="button"
-              aria-label="Open user menu"
+              aria-expanded="false"
+              aria-controls="studentLearningMenu"
             >
-              ▾
+              <span class="sb-group-title">MY LEARNING</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
 
-            <!-- USER MENU -->
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
+            <div class="sb-submenu" id="studentLearningMenu">
+              <a
+                class="sb-item"
+                href="./student-schedule.html"
+                data-nav="schedule"
               >
-                Settings
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
 
 
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
+              <a
+                class="sb-item"
+                href="./student-classwork.html"
+                data-nav="classwork"
               >
-                Logout
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/asess.svg" alt="" />
+                </span>
+                <span class="sb-text">ASSIGNMENT</span>
+              </a>
 
+
+              <a
+                class="sb-item"
+                href="./student-subjects.html"
+                data-nav="subjects"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+                <span class="sb-text">SUBJECTS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-attendance.html"
+                data-nav="attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a class="sb-item" href="./student-grades.html" data-nav="grades">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
             </div>
-
           </div>
 
-        </div>
 
-      </header>
+          <div class="sb-divider"></div>
 
 
-      <!-- =================================================
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY ACCOUNT -->
+          <div class="sb-section-title">MY ACCOUNT</div>
+
+
+          <a class="sb-item" href="./student-profile.html" data-nav="profile">
+            <span class="sb-ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span class="sb-text">PROFILE</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <!-- ===================================================
+         MAIN CONTENT
+    ==================================================== -->
+
+
+      <main class="content page-animate">
+        <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <!-- USER -->
+
+
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="Student avatar"
+              />
+
+
+              <div class="tb-meta">
+                <div class="tb-name" id="tbName">Student</div>
+
+
+                <div class="tb-role" id="tbRole">Announcements</div>
+              </div>
+
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <!-- USER MENU -->
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <!-- =================================================
            ANNOUNCEMENTS PAGE
       ================================================== -->
 
-      <section class="student-announcements-page">
 
-
-        <!-- =================================================
-             PAGE HEADER
-        ================================================== -->
-
-        <section class="student-announcements-header reveal-soft">
-
-          <div>
-
-            <h1>
-              Announcements
-            </h1>
-
-            <p>
-              Stay updated with announcements from your school
-              and teachers.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- =================================================
-             TABS / SOURCE SUMMARY
-        ================================================== -->
-
-        <div class="student-announcement-tabs">
-
-          <div class="student-announcement-tab active">
-
-            <span class="student-tab-icon">
-              📢
-            </span>
-
-            <span>
-              All Announcements
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- =================================================
-             ANNOUNCEMENT CARD
-        ================================================== -->
-
-        <section class="student-announcement-card">
-
-
+        <section class="student-announcements-page">
           <!-- =================================================
-               CARD HEADER
-          ================================================== -->
+   PAGE HEADER
+================================================== -->
 
-          <div class="student-announcement-card-header">
 
-            <div>
-
-              <h2>
-                All Announcements
-              </h2>
-
-              <p>
-                View the latest announcements published
-                by administrators and teachers.
-              </p>
-
+          <section class="teachers-wrap">
+            <div class="teachers-page-head reveal-soft">
+              <h2 class="teachers-title">Announcements</h2>
             </div>
 
 
             <!-- =================================================
+             ANNOUNCEMENT CARD
+        ================================================== -->
+
+
+            <section class="student-announcement-card">
+              <!-- =================================================
+               CARD HEADER
+          ================================================== -->
+
+
+              <div class="student-announcement-card-header">
+                <div>
+                  <h2>All Announcements</h2>
+
+
+                  <p>
+                    View the latest announcements published by administrators
+                    and teachers.
+                  </p>
+                </div>
+
+
+                <!-- =================================================
                  FILTERS
             ================================================== -->
 
-            <div class="student-announcement-filters">
+
+                <div class="student-announcement-filters">
+                  <!-- SEARCH -->
 
 
-              <!-- SEARCH -->
+                  <div class="student-search-box">
+                    <span> 🔎 </span>
 
-              <div class="student-search-box">
 
-                <span>
-                  🔎
-                </span>
+                    <input
+                      type="search"
+                      id="annSearch"
+                      placeholder="Search announcements..."
+                      autocomplete="off"
+                      aria-label="Search announcements"
+                    />
+                  </div>
 
-                <input
-                  type="search"
-                  id="annSearch"
-                  placeholder="Search announcements..."
-                  autocomplete="off"
-                  aria-label="Search announcements"
-                >
 
+                  <!-- SOURCE -->
+
+
+                  <select
+                    id="sourceFilter"
+                    aria-label="Filter announcements by source"
+                  >
+                    <option value="all">Source: All</option>
+
+
+                    <option value="teacher">Teacher</option>
+
+
+                    <option value="admin">Admin</option>
+                  </select>
+
+
+                  <!-- CATEGORY -->
+
+
+                  <select
+                    id="catFilter"
+                    aria-label="Filter announcements by category"
+                  >
+                    <option value="all">Category: All</option>
+
+
+                    <option value="general">General Announcements</option>
+
+
+                    <option value="events">School Events</option>
+
+
+                    <option value="academic">Academic Notices</option>
+
+
+                    <option value="priority">Priority Alerts</option>
+                  </select>
+                </div>
               </div>
 
 
-              <!-- SOURCE -->
-
-              <select
-                id="sourceFilter"
-                aria-label="Filter announcements by source"
-              >
-
-                <option value="all">
-                  Source: All
-                </option>
-
-                <option value="teacher">
-                  Teacher
-                </option>
-
-                <option value="admin">
-                  Admin
-                </option>
-
-              </select>
-
-
-              <!-- CATEGORY -->
-
-              <select
-                id="catFilter"
-                aria-label="Filter announcements by category"
-              >
-
-                <option value="all">
-                  Category: All
-                </option>
-
-                <option value="general">
-                  General Announcements
-                </option>
-
-                <option value="events">
-                  School Events
-                </option>
-
-                <option value="academic">
-                  Academic Notices
-                </option>
-
-                <option value="priority">
-                  Priority Alerts
-                </option>
-
-              </select>
-
-            </div>
-
-          </div>
-
-
-          <!-- =================================================
+              <!-- =================================================
                FEED
           ================================================== -->
 
-          <div
-            id="annFeed"
-            class="student-announcement-feed"
-          >
-          </div>
+
+              <div id="annFeed" class="student-announcement-feed"></div>
 
 
-          <!-- =================================================
+              <!-- =================================================
                EMPTY
           ================================================== -->
 
-          <div
-            id="annEmpty"
-            class="student-announcement-empty hidden"
-          >
 
-            <div class="student-empty-icon">
-              📢
-            </div>
+              <div id="annEmpty" class="student-announcement-empty hidden">
+                <div class="student-empty-icon">📢</div>
 
-            <strong>
-              No announcements found
-            </strong>
 
-            <span>
-              There are currently no announcements matching
-              your filters.
-            </span>
+                <strong> No announcements found </strong>
 
-          </div>
 
+                <span>
+                  There are currently no announcements matching your filters.
+                </span>
+              </div>
+            </section>
+          </section>
         </section>
-
-      </section>
-
-    </main>
-
-  </div>
+      </main>
+    </div>
 
 
-  <!-- =====================================================
+    <!-- =====================================================
        VIEW ANNOUNCEMENT MODAL
   ====================================================== -->
 
-  <div
-    id="annViewModal"
-    class="student-announcement-modal hidden"
-    aria-hidden="true"
-  >
 
     <div
-      id="annViewBackdrop"
-      class="student-announcement-modal-backdrop"
+      id="annViewModal"
+      class="student-announcement-modal hidden"
+      aria-hidden="true"
     >
-    </div>
+      <div
+        id="annViewBackdrop"
+        class="student-announcement-modal-backdrop"
+      ></div>
 
 
-    <div
-      class="student-announcement-modal-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="annViewTitle"
-      tabindex="-1"
-    >
-
-
-      <!-- =================================================
+      <div
+        class="student-announcement-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="annViewTitle"
+        tabindex="-1"
+      >
+        <!-- =================================================
            MODAL HEADER
       ================================================== -->
 
-      <div class="student-announcement-modal-header">
 
-        <div>
+        <div class="student-announcement-modal-header">
+          <div>
+            <h2 id="annViewTitle">Announcement</h2>
 
-          <h2 id="annViewTitle">
-            Announcement
-          </h2>
 
-          <p id="annViewMeta">
-            —
-          </p>
+            <p id="annViewMeta">—</p>
+          </div>
 
+
+          <button
+            type="button"
+            id="annViewCloseX"
+            class="student-announcement-close"
+            aria-label="Close announcement"
+          >
+            ×
+          </button>
         </div>
 
 
-        <button
-          type="button"
-          id="annViewCloseX"
-          class="student-announcement-close"
-          aria-label="Close announcement"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <!-- =================================================
+        <!-- =================================================
            MODAL BODY
       ================================================== -->
 
-      <div class="student-announcement-modal-body">
+
+        <div class="student-announcement-modal-body">
+          <!-- BADGES -->
 
 
-        <!-- BADGES -->
-
-        <div class="student-announcement-view-badges">
-
-          <span
-            id="annViewSource"
-            class="student-source-pill admin"
-          >
-            Admin
-          </span>
+          <div class="student-announcement-view-badges">
+            <span id="annViewSource" class="student-source-pill admin">
+              Admin
+            </span>
 
 
-          <span
-            id="annViewPill"
-            class="student-category-pill"
-          >
-            General
-          </span>
+            <span id="annViewPill" class="student-category-pill">
+              General
+            </span>
+          </div>
 
+
+          <!-- TITLE -->
+
+
+          <h3 id="annViewH">Announcement</h3>
+
+
+          <!-- MESSAGE -->
+
+
+          <div id="annViewMsg" class="student-announcement-view-message"></div>
+
+
+          <!-- ATTACHMENTS -->
+
+
+          <div id="annViewFiles" class="student-announcement-view-files"></div>
         </div>
 
 
-        <!-- TITLE -->
-
-        <h3 id="annViewH">
-          Announcement
-        </h3>
-
-
-        <!-- MESSAGE -->
-
-        <div
-          id="annViewMsg"
-          class="student-announcement-view-message"
-        >
-        </div>
-
-
-        <!-- ATTACHMENTS -->
-
-        <div
-          id="annViewFiles"
-          class="student-announcement-view-files"
-        >
-        </div>
-
-      </div>
-
-
-      <!-- =================================================
+        <!-- =================================================
            MODAL FOOTER
       ================================================== -->
 
-      <div class="student-announcement-modal-footer">
 
-        <button
-          type="button"
-          id="annViewCloseBtn"
-          class="student-modal-close-btn"
-        >
-          Close
-        </button>
-
+        <div class="student-announcement-modal-footer">
+          <button
+            type="button"
+            id="annViewCloseBtn"
+            class="student-modal-close-btn"
+          >
+            Close
+          </button>
+        </div>
       </div>
-
     </div>
 
-  </div>
 
-
-  <!-- =====================================================
+    <!-- =====================================================
        JAVASCRIPT
   ====================================================== -->
 
-  <script src="../../shared/js/page-animations.js"></script>
 
-  <script src="../../js/student/student-sidebar.js"></script>
+    <script src="../../shared/js/page-animations.js"></script>
 
-  <script src="../../js/student/student-announcements.js"></script>
 
-</body>
+    <script src="../../js/student/student-sidebar.js"></script>
 
+
+    <script src="../../js/student/student-announcements.js"></script>
+  </body>
 </html>
+
+
+

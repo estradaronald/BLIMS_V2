@@ -1,324 +1,582 @@
 <!-- frontend/src/pages/admin/academic-records.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Academic Records</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Academic Records</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
 
-  <!-- Shared -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Page -->
-  <link rel="stylesheet" href="../../styles/admin/admin-academic-records.css" />
-</head>
 
-<body data-page="academic-records">
+    <!-- Shared -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
 
-  <div class="app">
+    <!-- Page -->
+    <link
+      rel="stylesheet"
+      href="../../styles/admin/admin-academic-records.css"
+    />
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-    <div id="sidebar-mount"></div>
 
-    <main class="content">
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
 
-      <!-- TOPBAR -->
-      <header class="topbar">
 
-        <div class="topbar-right">
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
 
-          
 
-          <div class="tb-user" id="userbox">
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
 
+
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
+
+
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
+
+
+  <body data-page="academic-records">
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
+
+
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
+          </div>
 
-            <div class="tb-meta">
-              <div class="tb-name">Estrada, Ronald B.</div>
-              <div class="tb-role">Admin</div>
-            </div>
 
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+
+
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
             <button
-              class="tb-drop"
-              id="userMenuBtn"
+              class="sb-group-toggle"
               type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
             >
-              ▾
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
 
-            <div class="tb-menu" id="userMenu">
 
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
 
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
 
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
             </div>
-
-          </div>
-
-        </div>
-
-      </header>
-
-
-      <!-- PAGE -->
-      <section class="ar-wrap">
-
-        <!-- PAGE HEADER -->
-        <div class="ar-head">
-
-          <div>
-
-            <h2 class="ar-title">
-              Academic Records
-            </h2>
-
-            <div class="ar-sub">
-              View and export student academic records.
-            </div>
-
           </div>
 
 
-          <div class="ar-head-actions">
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
 
-            <!-- EXPORT -->
-            <div class="ar-export">
 
-              <button
-                class="ar-primary"
-                id="exportBtn"
-                type="button"
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
               >
-                Export
-                <span class="ar-plus">▾</span>
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
 
 
-              <!-- EXPORT MENU -->
-              <div
-                class="ar-menu hidden"
-                id="exportMenu"
+                <span class="sb-text"> SECTIONS &amp; FACULTY </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
               >
-
-                <!-- Current View -->
-                <button
-                  class="ar-menu-item"
-                  id="exportClassBtn"
-                  type="button"
-                >
-                  Export Current View
-                </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
 
 
-                <!-- Selected Grade Level -->
-                <button
-                  class="ar-menu-item"
-                  id="exportGradeBtn"
-                  type="button"
-                >
-                  Export Grade Level
-                </button>
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
 
 
-                <!-- All Records -->
-                <button
-                  class="ar-menu-item"
-                  id="exportAllBtn"
-                  type="button"
-                >
-                  Export All Records
-                </button>
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
 
-              </div>
 
+                <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
+              </a>
             </div>
-
           </div>
 
-        </div>
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
 
 
-        <!-- ACADEMIC RECORDS CARD -->
-        <section class="card ar-card">
+          <div class="sb-divider"></div>
 
-          <!-- FILTERS -->
-          <div class="ar-tools">
 
-            <!-- GRADE LEVEL -->
-            <div class="ar-field">
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
 
-              <label>
-                Grade Level
-              </label>
 
-              <select
-                id="gradeSelect"
-                class="ar-input"
-              ></select>
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
 
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
             </div>
+          </div>
 
 
-            <!-- SECTION -->
-            <div class="ar-field">
-
-              <label>
-                Section
-              </label>
-
-              <select
-                id="sectionSelect"
-                class="ar-input"
-              ></select>
-
-            </div>
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
 
 
-            <!-- SEARCH -->
-            <div class="ar-search">
+          <div class="sb-divider"></div>
 
-              <span class="ar-search-ico">
-                🔎
-              </span>
 
-              <input
-                id="searchInput"
-                type="text"
-                placeholder="Search student name..."
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
               />
 
+
+              <div class="tb-meta">
+                <div class="tb-name">Estrada, Ronald B.</div>
+                <div class="tb-role">Admin</div>
+              </div>
+
+
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+
+        <!-- PAGE -->
+        <section class="teachers-wrap ar-wrap">
+          <!-- PAGE HEADER -->
+          <div class="teachers-page-head ar-head">
+            <div>
+              <h2 class="teachers-title ar-title">Academic Records</h2>
+
+
+              <div class="ar-sub">
+                View and export student academic records.
+              </div>
             </div>
 
 
-            <!-- SUMMARY -->
-            <div
-              class="ar-summary"
-              id="summaryLine"
-            >
-              —
+            <div class="teachers-head-actions ar-head-actions">
+              <!-- REFRESH -->
+              <button class="ar-refresh" id="refreshBtn" type="button">
+                Refresh
+              </button>
+
+
+              <!-- EXPORT -->
+              <div class="ar-export">
+                <button class="ar-primary" id="exportBtn" type="button">
+                  Export CSV
+                  <span class="ar-plus" aria-hidden="true">▾</span>
+                </button>
+
+
+                <!-- EXPORT MENU -->
+                <div class="ar-menu hidden" id="exportMenu">
+                  <button
+                    class="ar-menu-item"
+                    id="exportClassBtn"
+                    type="button"
+                  >
+                    Export Current View
+                  </button>
+                  <button
+                    class="ar-menu-item"
+                    id="exportGradeBtn"
+                    type="button"
+                  >
+                    Export Grade Level
+                  </button>
+                  <button class="ar-menu-item" id="exportAllBtn" type="button">
+                    Export All Records
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ACADEMIC RECORDS CARD -->
+          <section class="card ar-card">
+            <!-- FILTERS -->
+            <div class="ar-tools">
+              <!-- GRADE LEVEL -->
+              <div class="ar-field">
+                <label for="gradeSelect">Grade Level</label>
+
+
+                <select id="gradeSelect" class="ar-input"></select>
+              </div>
+
+
+              <!-- SECTION -->
+              <div class="ar-field">
+                <label for="sectionSelect">Section</label>
+
+
+                <select id="sectionSelect" class="ar-input"></select>
+              </div>
+
+
+              <!-- SEARCH -->
+              <div class="ar-search">
+                <span class="ar-search-ico" aria-hidden="true"></span>
+
+
+                <input
+                  id="searchInput"
+                  type="text"
+                  placeholder="Search student name..."
+                  autocomplete="off"
+                />
+              </div>
+
+
+              <!-- SUMMARY -->
+              <div class="ar-summary" id="summaryLine">—</div>
             </div>
 
-          </div>
+
+            <!-- TABLE -->
+            <div class="ar-table-wrap">
+              <table class="ar-table">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width: 70px">No.</th>
 
 
-          <!-- TABLE -->
-          <div class="ar-table-wrap">
-
-            <table class="ar-table">
-
-              <thead>
-
-                <tr>
-
-                  <th style="width:70px;">
-                    No.
-                  </th>
-
-                  <th>
-                    Student
-                  </th>
-
-                  <!--
-                    Term columns are dynamically generated
-                    by admin-academic-records.js
-                  -->
-
-                  <th style="width:90px; text-align:center;">
-                    Q1
-                  </th>
-
-                  <th style="width:90px; text-align:center;">
-                    Q2
-                  </th>
-
-                  <th style="width:90px; text-align:center;">
-                    Q3
-                  </th>
-
-                  <th style="width:90px; text-align:center;">
-                    Q4
-                  </th>
-
-                  <th style="width:130px; text-align:center;">
-                    Final Avg
-                  </th>
-
-                  <th style="width:140px; text-align:center;">
-                    Status
-                  </th>
-
-                </tr>
-
-              </thead>
+                    <th scope="col">Student</th>
 
 
-              <tbody id="recordsTbody">
+                    <!--
+    Term columns are dynamically generated
+    by admin-academic-records.js
+  -->
 
-                <tr class="ar-empty">
 
-                  <td colspan="8">
-                    No records found.
-                  </td>
+                    <th scope="col" style="width: 90px; text-align: center">
+                      Term 1
+                    </th>
 
-                </tr>
 
-              </tbody>
+                    <th scope="col" style="width: 90px; text-align: center">
+                      Term 2
+                    </th>
 
-            </table>
 
-          </div>
+                    <th scope="col" style="width: 90px; text-align: center">
+                      Term 3
+                    </th>
 
+
+                    <th scope="col" style="width: 130px; text-align: center">
+                      Final Avg
+                    </th>
+
+
+                    <th scope="col" style="width: 140px; text-align: center">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+
+
+                <tbody id="recordsTbody">
+                  <tr class="ar-empty">
+                    <td colspan="7">No records found.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </section>
-
-      </section>
-
-    </main>
-
-  </div>
+      </main>
+    </div>
 
 
-  <!-- SCRIPTS -->
+    <!-- SCRIPTS -->
 
-  <script src="../../js/auth/admin-guard.js"></script>
 
-  <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/auth/admin-guard.js"></script>
 
-  <script src="../../js/admin/admin-dashboard.js"></script>
 
-  <script src="../../js/admin/admin-academic-records.js"></script>
+    <script src="../../js/admin/sidebar.js"></script>
 
-</body>
+
+    <script src="../../js/admin/admin-dashboard.js"></script>
+
+
+    <script src="../../js/admin/admin-academic-records.js"></script>
+  </body>
 </html>
+
+
+

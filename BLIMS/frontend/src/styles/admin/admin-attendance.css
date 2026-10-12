@@ -1,191 +1,923 @@
-/* frontend/src/styles/admin-attendance.css */
-.hidden{ display:none !important; }
+/* =========================================================
+   BLIMS — ADMIN ATTENDANCE
 
-.att-wrap{ padding:0; margin:0; }
+   File: frontend/src/styles/admin-attendance.css
 
-.att-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 12px;
-  margin: 0 0 10px;
+   Matches the Faculty page styling and responsive behavior
+========================================================= */
+
+
+/* =========================================================
+   SHARED PAGE SPACING
+========================================================= */
+
+.hidden {
+  display: none !important;
 }
 
-.att-title{
-  margin:0;
+.topbar {
+  margin-bottom: 4px;
+}
+
+.teachers-wrap {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.teachers-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 0;
+  min-width: 0;
+}
+
+.att-heading {
+  min-width: 0;
+}
+
+.teachers-title {
+  margin: 0;
   font-size: 34px;
   font-weight: 1000;
-  color:#0b2c4a;
+  color: #0b2c4a;
   line-height: 1.15;
 }
 
-.att-sub{
+.att-sub {
   margin-top: 6px;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(11,44,74,.55);
+  line-height: 1.5;
+  color: rgba(11, 44, 74, 0.55);
 }
 
-.att-head-actions{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-}
-
-.att-primary{
-  height: 42px;
-  border:none;
-  border-radius: 12px;
-  background:#0b4d7a;
-  color:#fff;
-  font-weight: 1000;
-  padding: 0 14px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.10);
-}
-.att-plus{
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.18);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-weight: 1000;
-}
-
-.att-ghost{
-  height: 42px;
-  border:none;
-  border-radius: 999px;
-  padding: 0 16px;
-  background:#fff;
-  box-shadow: 0 10px 22px rgba(0,0,0,.08);
-  cursor:pointer;
-  font-weight: 900;
-  color:#0b2c4a;
-}
-
-.att-card{ padding:0; overflow:hidden; }
-
-.att-card-head{
-  padding: 14px 14px 10px;
-  border-bottom: 1px solid rgba(11,44,74,.10);
-}
-
-.att-filters{
-  display:flex;
+.teachers-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
-  align-items:flex-end;
+  min-width: 0;
 }
 
-.att-field label{
-  display:block;
-  font-size: 12px;
-  font-weight: 1000;
-  color:#0b2c4a;
-  margin-bottom: 6px;
-}
 
-.att-input{
-  height: 38px;
-  min-width: 170px;
-  border-radius: 10px;
-  border: 1px solid rgba(11,44,74,.10);
-  padding: 0 12px;
-  background:#fff;
-  outline:none;
-  font-size: 13px;
-}
+/* =========================================================
+   HEADER ACTION BUTTONS
+========================================================= */
 
-.att-search{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  background:#fff;
-  border-radius: 999px;
-  padding: 10px 14px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.08);
-  height: 42px;
-  border: 1px solid rgba(11,44,74,.06);
-  min-width: 280px;
-  flex: 1 1 280px;
-}
-.att-search input{
-  border:none;
-  outline:none;
-  width:100%;
-  font-size: 13px;
-  background: transparent;
-}
-
-.att-summary{
-  margin-top: 10px;
-  font-size: 11px;
-  font-weight: 900;
-  color: rgba(11,44,74,.65);
-}
-
-/* table */
-.att-table-wrap{ padding: 0 14px 14px; }
-.att-table{
-  width:100%;
-  border-collapse: collapse;
-  font-size: 13px;
+.att-primary,
+.att-ghost {
+  height: 46px;
+  padding: 0 16px;
   border-radius: 12px;
-  overflow:hidden;
-}
-.att-table thead th{
-  background:#0b4d7a;
-  color:#fff;
-  text-align:left;
-  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 900;
-}
-.att-table tbody td{
-  padding: 12px 14px;
-  border-bottom: 1px solid #eef3f9;
-  color:#0b2c4a;
-}
-.att-empty td{
-  color: rgba(11,44,74,.55);
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
-/* status pill */
-.att-status{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: 6px 10px;
+.att-primary {
+  border: 1px solid #0b4d7a;
+  background: #0b4d7a;
+  color: #ffffff;
+}
+
+.att-primary:hover {
+  background: #093f64;
+  border-color: #093f64;
+  box-shadow: 0 5px 12px rgba(11, 77, 122, 0.16);
+  transform: translateY(-1px);
+}
+
+.att-ghost {
+  border: 1px solid #dce5ed;
+  background: #ffffff;
+  color: #0b2c4a;
+  box-shadow: none;
+}
+
+.att-ghost:hover {
+  background: #f4f7fa;
+  border-color: #c7d5e1;
+  transform: translateY(-1px);
+}
+
+.att-primary:focus-visible,
+.att-ghost:focus-visible {
+  outline: 3px solid rgba(11, 77, 122, 0.2);
+  outline-offset: 2px;
+}
+
+.att-plus {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   ATTENDANCE CARD
+========================================================= */
+
+.att-card {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.att-card-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #edf1f5;
+  background: #ffffff;
+}
+
+.att-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(145px, 0.9fr)
+    minmax(145px, 1fr)
+    minmax(145px, 1fr)
+    minmax(125px, 0.8fr)
+    minmax(220px, 1.5fr);
+  gap: 10px;
+  align-items: end;
+  min-width: 0;
+}
+
+.att-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.att-field label {
+  display: block;
+  margin: 0;
+  color: #0b2c4a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.att-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dce5ed;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #243b53;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.att-input:hover {
+  border-color: #c4d3df;
+}
+
+.att-input:focus {
+  border-color: #0b4d7a;
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.1);
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.att-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: #ffffff;
+  border: 1px solid rgba(11, 44, 74, 0.08);
   border-radius: 999px;
-  font-weight: 1000;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.att-search:focus-within {
+  border-color: rgba(11, 77, 122, 0.25);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
+}
+
+.att-search-ico {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: block;
+  font-size: 0;
+}
+
+.att-search-ico::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 1px;
+  left: 1px;
+  border: 1.7px solid #0b4d7a;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.att-search-ico::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 1.7px;
+  left: 9px;
+  top: 10px;
+  border-radius: 999px;
+  background: #0b4d7a;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.att-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #243b53;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.att-search input::placeholder {
+  color: rgba(11, 44, 74, 0.48);
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.att-summary {
+  margin-top: 10px;
+  color: #718096;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   ATTENDANCE TABLE
+========================================================= */
+
+.att-table-wrap {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 10px 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  background: #ffffff;
+}
+
+.att-table {
+  width: 100%;
+  min-width: 760px;
+  border: 1px solid #e7edf3;
+  border-radius: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  color: #243b53;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.att-table thead th {
+  padding: 10px 14px;
+  background: #f7f9fb;
+  color: #526579;
+  border-bottom: 1px solid #e3eaf1;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.att-table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #edf1f5;
+  color: #354b60;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.att-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.att-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.att-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.att-empty td {
+  height: 60px;
+  padding: 14px !important;
+  border-bottom: 0;
+  color: #8795a5 !important;
+  font-size: 12px;
+  font-weight: 600 !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+/* =========================================================
+   STATUS PILLS
+========================================================= */
+
+.att-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   font-size: 11px;
-  background:#f1f4f8;
-  color: rgba(11,44,74,.75);
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
   text-transform: capitalize;
 }
-.att-status.present{ background: rgba(46,160,67,.14); color:#0b6b2a; }
-.att-status.absent{ background: rgba(224,90,90,.14); color:#a61b1b; }
-.att-status.late{ background: rgba(245,158,11,.18); color:#7a4b00; }
-.att-status.excused{ background: rgba(11,77,122,.14); color:#0b2c4a; }
 
-.att-foot{
-  padding: 10px 14px 14px;
-  border-top: 1px solid rgba(11,44,74,.10);
-  background: rgba(255,255,255,.45);
+.att-status.present {
+  background: #e9f7ed;
+  border-color: #d4efdc;
+  color: #23763b;
 }
-.att-foot-note{
+
+.att-status.absent {
+  background: #fff0f0;
+  border-color: #f8dada;
+  color: #b42323;
+}
+
+.att-status.late {
+  background: #fff6e5;
+  border-color: #f5e5bd;
+  color: #956000;
+}
+
+.att-status.excused {
+  background: #edf4fb;
+  border-color: #d9e8f6;
+  color: #0b4d7a;
+}
+
+
+/* =========================================================
+   CARD FOOTER
+========================================================= */
+
+.att-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  margin-top: 0;
+  padding: 9px 16px;
+  border-top: 1px solid #edf1f5;
+  background: #fbfcfd;
+}
+
+.att-foot-note {
+  min-width: 0;
+  color: #8795a5;
   font-size: 11px;
-  font-weight: 800;
-  color: rgba(11,44,74,.55);
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 980px){
-  .att-input{ min-width: 150px; }
-  .att-search{ min-width: 220px; }
+
+/* =========================================================
+   CONFIRMATION MODAL
+   Uses the same t-* classes as the Faculty page.
+========================================================= */
+
+.t-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.t-confirm-modal.hidden {
+  display: none !important;
+}
+
+.t-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.t-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border: 1px solid #e7edf2;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(11, 44, 74, 0.2);
+  outline: none;
+  animation: attModalIn 0.18s ease-out;
+}
+
+.t-confirm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.t-confirm-title {
+  color: #0b2c4a;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.t-confirm-sub {
+  margin-top: 5px;
+  color: #8795a5;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.t-confirm-x {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3eaf0;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #617487;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.t-confirm-x:hover {
+  background: #f2f5f8;
+}
+
+.t-confirm-body {
+  padding: 20px 22px;
+}
+
+.t-confirm-text {
+  color: #526579;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.t-confirm-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 22px 20px;
+  border-top: 1px solid #edf1f5;
+}
+
+.t-confirm-foot-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.t-ghost,
+.t-save {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.t-ghost {
+  border: 1px solid #dce5ed;
+  background: #ffffff;
+  color: #344b60;
+}
+
+.t-ghost:hover {
+  background: #f4f7fa;
+}
+
+.t-save {
+  border: 1px solid #0b4d7a;
+  background: #0b4d7a;
+  color: #ffffff;
+}
+
+.t-save:hover {
+  border-color: #093f64;
+  background: #093f64;
+}
+
+
+/* =========================================================
+   SUCCESS TOAST
+========================================================= */
+
+.t-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 14px 18px;
+  border: 1px solid #d4efdc;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #254b32;
+  box-shadow: 0 12px 34px rgba(11, 44, 74, 0.14);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  animation: attToastIn 0.2s ease-out;
+}
+
+.t-toast[hidden] {
+  display: none !important;
+}
+
+.t-toast-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #e5f6ea;
+  color: #23763b;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes attModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes attToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET / SMALL LAPTOP
+========================================================= */
+
+@media (max-width: 1100px) {
+  .teachers-page-head {
+    flex-wrap: wrap;
+  }
+
+  .teachers-head-actions {
+    flex-shrink: 0;
+  }
+
+  .att-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .att-search {
+    grid-column: span 2;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  .teachers-title {
+    font-size: 30px;
+  }
+
+  .att-card-head {
+    padding: 14px;
+  }
+
+  .att-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .att-search {
+    grid-column: 1 / -1;
+  }
+
+  .att-table-wrap {
+    padding: 0 10px 6px;
+  }
+
+  .att-foot {
+    padding: 9px 16px;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .teachers-page-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .teachers-title {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .att-sub {
+    max-width: 100%;
+    font-size: 12px;
+  }
+
+  .teachers-head-actions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .teachers-head-actions > button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .att-primary,
+  .att-ghost {
+    height: 42px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .att-plus {
+    width: 24px;
+    height: 24px;
+  }
+
+  .att-card-head {
+    padding: 12px 14px 10px;
+  }
+
+  .att-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .att-field {
+    min-width: 0;
+  }
+
+  .att-input {
+    height: 40px;
+    padding: 0 9px;
+    font-size: 12px;
+  }
+
+  .att-search {
+    grid-column: 1 / -1;
+    min-width: 0;
+    height: 40px;
+  }
+
+  .att-summary {
+    margin-top: 10px;
+  }
+
+  .att-table-wrap {
+    padding: 0 8px 6px;
+  }
+
+  .att-table {
+    min-width: 760px;
+  }
+
+  .att-table thead th,
+  .att-table tbody td {
+    padding: 10px;
+  }
+
+  .att-foot {
+    align-items: flex-start;
+    padding: 9px 14px;
+  }
+
+  .t-confirm-modal {
+    padding: 14px;
+  }
+
+  .t-confirm-head {
+    padding: 18px 18px 14px;
+  }
+
+  .t-confirm-body {
+    padding: 17px 18px;
+  }
+
+  .t-confirm-foot {
+    padding: 14px 18px 18px;
+  }
+
+  .t-toast {
+    right: 16px;
+    bottom: 16px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .teachers-title {
+    font-size: 25px;
+  }
+
+  .teachers-head-actions {
+    align-items: stretch;
+  }
+
+  .teachers-head-actions > button {
+    flex: 1 1 0;
+    white-space: normal;
+  }
+
+  .att-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .att-search {
+    grid-column: auto;
+  }
+
+  .att-input {
+    width: 100%;
+  }
+
+  .att-table {
+    min-width: 760px;
+  }
+
+  .t-confirm-dialog {
+    border-radius: 14px;
+  }
+
+  .t-confirm-title {
+    font-size: 16px;
+  }
+
+  .t-confirm-foot {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .t-confirm-foot-right {
+    width: 100%;
+  }
+
+  .t-confirm-foot .t-ghost,
+  .t-confirm-foot-right .t-save {
+    width: 100%;
+  }
+
+  .t-toast {
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100vw - 24px);
+    padding: 12px 14px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .att-primary,
+  .att-ghost,
+  .att-input,
+  .att-search,
+  .att-table tbody tr,
+  .t-ghost,
+  .t-save {
+    transition: none;
+  }
+
+  .t-confirm-dialog,
+  .t-toast {
+    animation: none;
+  }
 }

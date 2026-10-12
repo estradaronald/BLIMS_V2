@@ -2,13 +2,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) =>
     document.getElementById(id);
 
+
   const API_BASE =
     "/api/admin/announcements";
+
+
 
 
   // =========================================================
   // HELPERS
   // =========================================================
+
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -20,19 +24,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function nl2brSafe(value) {
     return escapeHtml(value)
       .replace(/\n/g, "<br>");
   }
 
 
+
+
   function clampText(value, max = 180) {
     const text =
       String(value ?? "").trim();
 
+
     if (text.length <= max) {
       return text;
     }
+
 
     return (
       text.slice(0, max).trim() +
@@ -41,13 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function fmtShort(value) {
     if (!value) {
       return "—";
     }
 
+
     const date =
       new Date(value);
+
 
     if (
       Number.isNaN(
@@ -56,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       return "—";
     }
+
 
     return date.toLocaleString(
       undefined,
@@ -70,17 +85,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function catLabel(category) {
     return (
       {
         general:
           "General Announcement",
 
+
         events:
           "School Event",
 
+
         academic:
           "Academic Notice",
+
 
         priority:
           "Priority Alert",
@@ -88,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "General Announcement"
     );
   }
+
+
 
 
   function catPillClass(category) {
@@ -100,6 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }[category] || ""
     );
   }
+
+
 
 
   // =========================================================
@@ -116,14 +140,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // There is NO "students_teachers"
   // =========================================================
 
+
   function audienceLabel(audience) {
     return (
       {
         all:
           "Students & Teachers",
 
+
         students:
           "Students Only",
+
 
         teachers:
           "Teachers Only",
@@ -133,20 +160,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function computeStatus(a) {
     if (a.archived) {
       return "archived";
     }
 
+
     if (a.draft) {
       return "draft";
     }
+
 
     if (a.publishAt) {
       const time =
         new Date(
           a.publishAt
         ).getTime();
+
 
       if (
         !Number.isNaN(time) &&
@@ -156,8 +188,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+
     return "published";
   }
+
+
 
 
   function statusLabel(status) {
@@ -166,11 +201,14 @@ document.addEventListener("DOMContentLoaded", () => {
         published:
           "Published",
 
+
         scheduled:
           "Scheduled",
 
+
         draft:
           "Draft",
+
 
         archived:
           "Archived",
@@ -180,13 +218,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function toLocalInputValue(value) {
     if (!value) {
       return "";
     }
 
+
     const date =
       new Date(value);
+
 
     if (
       Number.isNaN(
@@ -196,11 +238,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return "";
     }
 
+
     const pad = (n) =>
       String(n).padStart(
         2,
         "0"
       );
+
 
     return (
       `${date.getFullYear()}-` +
@@ -212,14 +256,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function debounce(
     fn,
     wait = 250
   ) {
     let timer = null;
 
+
     return (...args) => {
       clearTimeout(timer);
+
 
       timer = setTimeout(
         () => fn(...args),
@@ -229,140 +277,191 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // STATE
   // =========================================================
 
+
   let csrfToken = "";
+
 
   let announcements = [];
 
+
   let openMenuId = null;
+
 
   let editingId = null;
 
+
   let viewingId = null;
+
+
 
 
   // =========================================================
   // DOM
   // =========================================================
 
+
   const feed =
     $("annFeed");
+
 
   const empty =
     $("annEmpty");
 
+
   const search =
     $("annSearch");
+
 
   const typeFilter =
     $("typeFilter");
 
+
   const catFilter =
     $("catFilter");
+
 
   const createBtn =
     $("createAnnBtn");
 
 
+
+
   // Create/Edit
+
 
   const modal =
     $("annModal");
 
+
   const modalBackdrop =
     $("annModalBackdrop");
+
 
   const modalCloseX =
     $("annModalCloseX");
 
+
   const cancelBtn =
     $("annCancelBtn");
+
 
   const draftBtn =
     $("annDraftBtn");
 
+
   const publishBtn =
     $("annPublishBtn");
+
 
   const modalTitle =
     $("annModalTitle");
 
+
   const fTitle =
     $("annTitle");
+
 
   const fCat =
     $("annCategory");
 
+
   const fAudience =
     $("annAudience");
+
 
   const fMsg =
     $("annMessage");
 
+
   const fPublishNow =
     $("annPublishNow");
+
 
   const fScheduleLater =
     $("annScheduleLater");
 
+
   const scheduleFields =
     $("annScheduleFields");
+
 
   const fScheduleDate =
     $("annScheduleDate");
 
+
   const fScheduleTime =
     $("annScheduleTime");
+
 
   const formError =
     $("annFormError");
 
 
+
+
   // View
+
 
   const viewModal =
     $("annViewModal");
 
+
   const viewBackdrop =
     $("annViewBackdrop");
+
 
   const viewCloseX =
     $("annViewCloseX");
 
+
   const viewCloseBtn =
     $("annViewCloseBtn");
+
 
   const viewEditBtn =
     $("annViewEditBtn");
 
+
   const viewArchiveBtn =
     $("annViewArchiveBtn");
+
 
   const vMeta =
     $("annViewMeta");
 
+
   const vPill =
     $("annViewPill");
+
 
   const vStatus =
     $("annViewStatus");
 
+
   const vH =
     $("annViewH");
 
+
   const vAudience =
     $("annViewAudience");
+
 
   const vMsg =
     $("annViewMsg");
 
 
+
+
   // =========================================================
   // API
   // =========================================================
+
 
   async function fetchCsrfToken() {
     const response =
@@ -374,10 +473,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
+
     const data =
       await response
         .json()
         .catch(() => ({}));
+
 
     if (
       !response.ok ||
@@ -389,9 +490,12 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+
     csrfToken =
       data.csrfToken || "";
   }
+
+
 
 
   async function api(
@@ -404,10 +508,12 @@ document.addEventListener("DOMContentLoaded", () => {
         "GET"
       ).toUpperCase();
 
+
     const headers = {
       ...(options.headers ||
         {}),
     };
+
 
     if (
       method !== "GET" &&
@@ -418,6 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ] = csrfToken;
     }
 
+
     const response =
       await fetch(
         url,
@@ -425,16 +532,20 @@ document.addEventListener("DOMContentLoaded", () => {
           credentials:
             "include",
 
+
           ...options,
+
 
           headers,
         }
       );
 
+
     const data =
       await response
         .json()
         .catch(() => ({}));
+
 
     if (
       !response.ok ||
@@ -446,17 +557,22 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+
     return data;
   }
+
+
 
 
   // =========================================================
   // LOAD
   // =========================================================
 
+
   async function loadAnnouncements() {
     try {
       closeAllMenus();
+
 
       const params =
         new URLSearchParams({
@@ -466,19 +582,23 @@ document.addEventListener("DOMContentLoaded", () => {
               ""
             ).trim(),
 
+
           type:
             typeFilter.value ||
             "all",
+
 
           category:
             catFilter.value ||
             "all",
         });
 
+
       const data =
         await api(
           `${API_BASE}?${params.toString()}`
         );
+
 
       announcements =
         Array.isArray(
@@ -487,7 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
           ? data.data
           : [];
 
+
       render();
+
 
     } catch (error) {
       console.error(
@@ -495,9 +617,12 @@ document.addEventListener("DOMContentLoaded", () => {
         error
       );
 
+
       announcements = [];
 
+
       render();
+
 
       setFormError(
         error.message ||
@@ -505,6 +630,8 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
   }
+
+
 
 
   async function getAnnouncementById(
@@ -517,8 +644,11 @@ document.addEventListener("DOMContentLoaded", () => {
         )}`
       );
 
+
     return data.data;
   }
+
+
 
 
   async function createAnnouncement(
@@ -530,10 +660,12 @@ document.addEventListener("DOMContentLoaded", () => {
         {
           method: "POST",
 
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
 
           body:
             JSON.stringify(
@@ -542,8 +674,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
+
     return data.data;
   }
+
+
 
 
   async function updateAnnouncement(
@@ -558,10 +693,12 @@ document.addEventListener("DOMContentLoaded", () => {
         {
           method: "PUT",
 
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
 
           body:
             JSON.stringify(
@@ -570,8 +707,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
+
     return data.data;
   }
+
+
 
 
   async function archiveAnnouncement(
@@ -587,8 +727,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
+
     return data.data;
   }
+
+
 
 
   async function removeAnnouncement(
@@ -605,16 +748,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // EXPANDABLE CARD ACTIONS
   // =========================================================
 
+
   function closeAllMenus() {
     openMenuId = null;
+
 
     if (!feed) {
       return;
     }
+
 
     feed
       .querySelectorAll(
@@ -627,6 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
           )
       );
 
+
     feed
       .querySelectorAll(
         ".ann-kebab"
@@ -637,6 +786,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "is-open"
           );
 
+
           button.setAttribute(
             "aria-expanded",
             "false"
@@ -646,21 +796,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function toggleMenuForCard(
     card
   ) {
     const id =
       card.dataset.id;
 
+
     const menu =
       card.querySelector(
         ".ann-menu"
       );
 
+
     const button =
       card.querySelector(
         ".ann-kebab"
       );
+
 
     if (
       !id ||
@@ -670,24 +825,31 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+
     const alreadyOpen =
       openMenuId === id;
 
+
     closeAllMenus();
+
 
     if (alreadyOpen) {
       return;
     }
 
+
     openMenuId = id;
+
 
     menu.classList.remove(
       "hidden"
     );
 
+
     button.classList.add(
       "is-open"
     );
+
 
     button.setAttribute(
       "aria-expanded",
@@ -696,14 +858,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // RENDER
   // =========================================================
 
+
   function render() {
     closeAllMenus();
 
+
     feed.innerHTML = "";
+
 
     if (
       !announcements.length
@@ -712,12 +879,15 @@ document.addEventListener("DOMContentLoaded", () => {
         "hidden"
       );
 
+
       return;
     }
+
 
     empty.classList.add(
       "hidden"
     );
+
 
     announcements.forEach(
       (a) => {
@@ -726,39 +896,49 @@ document.addEventListener("DOMContentLoaded", () => {
           a.id ||
           "";
 
+
         const category =
           catLabel(
             a.category
           );
+
 
         const pillClass =
           catPillClass(
             a.category
           );
 
+
         const status =
           a.status ||
           computeStatus(a);
+
 
         const card =
           document.createElement(
             "article"
           );
 
+
         card.className =
           "ann-card";
+
 
         card.dataset.id =
           id;
 
+
         card.innerHTML = `
           <div class="ann-card-top">
 
+
             <div class="ann-card-left">
+
 
               <span class="ann-pill ${pillClass}">
                 ${escapeHtml(category)}
               </span>
+
 
               <h3
                 class="ann-title"
@@ -772,6 +952,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 )}
               </h3>
 
+
               <p class="ann-body">
                 ${nl2brSafe(
                   clampText(
@@ -780,6 +961,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   )
                 )}
               </p>
+
 
               ${
                 a.publishAt
@@ -803,9 +985,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   : ""
               }
 
+
             </div>
 
+
             <div class="ann-card-right">
+
 
               <button
                 class="ann-kebab"
@@ -816,14 +1001,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 ⋮
               </button>
 
+
             </div>
 
+
           </div>
+
 
           <div
             class="ann-menu hidden"
             role="group"
           >
+
 
             <button
               type="button"
@@ -832,12 +1021,14 @@ document.addEventListener("DOMContentLoaded", () => {
               View Details
             </button>
 
+
             <button
               type="button"
               data-act="edit"
             >
               Edit
             </button>
+
 
             <button
               type="button"
@@ -850,6 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             </button>
 
+
             <button
               type="button"
               data-act="delete"
@@ -858,8 +1050,10 @@ document.addEventListener("DOMContentLoaded", () => {
               Delete
             </button>
 
+
           </div>
         `;
+
 
         feed.appendChild(
           card
@@ -869,18 +1063,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // FORM
   // =========================================================
+
 
   function setPublicationMode() {
     const scheduled =
       fScheduleLater.checked;
 
+
     scheduleFields.classList.toggle(
       "hidden",
       !scheduled
     );
+
 
     publishBtn.textContent =
       scheduled
@@ -889,55 +1088,75 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function resetFormUI() {
     editingId = null;
+
 
     modalTitle.textContent =
       "Create New Announcement";
 
+
     draftBtn.textContent =
       "Save as Draft";
+
 
     publishBtn.textContent =
       "Publish";
 
+
     fTitle.value = "";
+
 
     fCat.value =
       "general";
+
 
     // Backend value:
     // all = Students & Teachers
     fAudience.value =
       "all";
 
+
     fMsg.value = "";
+
 
     fPublishNow.checked =
       true;
 
+
     fScheduleLater.checked =
       false;
+
 
     fScheduleDate.value =
       "";
 
+
     fScheduleTime.value =
       "";
+
 
     scheduleFields.classList.add(
       "hidden"
     );
 
+
     clearFormError();
   }
+
+
 
 
   function openCreate() {
     resetFormUI();
 
+
     openModal();
   }
+
+
 
 
   function openEdit(id) {
@@ -950,25 +1169,32 @@ document.addEventListener("DOMContentLoaded", () => {
           ) === id
       );
 
+
     if (!announcement) {
       return;
     }
 
+
     editingId = id;
+
 
     modalTitle.textContent =
       "Edit Announcement";
 
+
     draftBtn.textContent =
       "Save as Draft";
+
 
     fTitle.value =
       announcement.title ||
       "";
 
+
     fCat.value =
       announcement.category ||
       "general";
+
 
     /*
      * Use the backend value directly.
@@ -982,9 +1208,11 @@ document.addEventListener("DOMContentLoaded", () => {
       announcement.audience ||
       "all";
 
+
     fMsg.value =
       announcement.message ||
       "";
+
 
     if (
       announcement.publishAt
@@ -993,6 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         new Date(
           announcement.publishAt
         );
+
 
       if (
         !Number.isNaN(
@@ -1006,12 +1235,14 @@ document.addEventListener("DOMContentLoaded", () => {
               "0"
             );
 
+
         fScheduleDate.value =
           `${date.getFullYear()}-${pad(
             date.getMonth() + 1
           )}-${pad(
             date.getDate()
           )}`;
+
 
         fScheduleTime.value =
           `${pad(
@@ -1020,10 +1251,12 @@ document.addEventListener("DOMContentLoaded", () => {
             date.getMinutes()
           )}`;
 
+
         fScheduleLater.checked =
           computeStatus(
             announcement
           ) === "scheduled";
+
 
         fPublishNow.checked =
           !fScheduleLater.checked;
@@ -1032,16 +1265,22 @@ document.addEventListener("DOMContentLoaded", () => {
       fPublishNow.checked =
         true;
 
+
       fScheduleLater.checked =
         false;
     }
 
+
     setPublicationMode();
+
 
     clearFormError();
 
+
     openModal();
   }
+
+
 
 
   function validateForm() {
@@ -1051,29 +1290,35 @@ document.addEventListener("DOMContentLoaded", () => {
         ""
       ).trim();
 
+
     const message =
       (
         fMsg.value ||
         ""
       ).trim();
 
+
     if (!title) {
       return "Title is required.";
     }
+
 
     if (!message) {
       return "Message is required.";
     }
 
+
     // =======================================================
     // AUDIENCE VALIDATION
     // =======================================================
+
 
     const validAudiences = [
       "all",
       "students",
       "teachers",
     ];
+
 
     if (
       !validAudiences.includes(
@@ -1082,6 +1327,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       return "Please select a valid audience.";
     }
+
 
     if (
       fScheduleLater.checked
@@ -1092,6 +1338,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return "Please select a schedule date.";
       }
 
+
       if (
         !fScheduleTime.value
       ) {
@@ -1099,8 +1346,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+
     return null;
   }
+
+
 
 
   function buildPublishDate() {
@@ -1110,13 +1360,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
+
     const localValue =
       `${fScheduleDate.value}T${fScheduleTime.value}`;
+
 
     const date =
       new Date(
         localValue
       );
+
 
     if (
       Number.isNaN(
@@ -1126,8 +1379,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
+
     return date.toISOString();
   }
+
+
 
 
   async function saveAnnouncement(
@@ -1135,13 +1391,17 @@ document.addEventListener("DOMContentLoaded", () => {
   ) {
     clearFormError();
 
+
     const error =
       validateForm();
+
 
     if (error) {
       setFormError(error);
       return;
     }
+
+
 
 
     // =======================================================
@@ -1157,6 +1417,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // There is NO audience conversion.
     // =======================================================
 
+
     const payload = {
       title:
         (
@@ -1164,19 +1425,23 @@ document.addEventListener("DOMContentLoaded", () => {
           ""
         ).trim(),
 
+
       category:
         fCat.value ||
         "general",
 
+
       audience:
         fAudience.value ||
         "all",
+
 
       message:
         (
           fMsg.value ||
           ""
         ).trim(),
+
 
       /*
        * Publish Now:
@@ -1196,12 +1461,16 @@ document.addEventListener("DOMContentLoaded", () => {
           ? null
           : buildPublishDate(),
 
+
       draft:
         !!isDraft,
+
 
       archived:
         false,
     };
+
+
 
 
     console.log(
@@ -1212,6 +1481,8 @@ document.addEventListener("DOMContentLoaded", () => {
         2
       )
     );
+
+
 
 
     try {
@@ -1226,17 +1497,22 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       }
 
+
       closeModal();
+
 
       resetFormUI();
 
+
       await loadAnnouncements();
+
 
     } catch (error2) {
       console.error(
         "Save failed:",
         error2
       );
+
 
       setFormError(
         error2.message ||
@@ -1246,9 +1522,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // VIEW
   // =========================================================
+
 
   async function openView(id) {
     try {
@@ -1257,11 +1536,14 @@ document.addEventListener("DOMContentLoaded", () => {
           id
         );
 
+
       if (!announcement) {
         return;
       }
 
+
       viewingId = id;
+
 
       const status =
         announcement.status ||
@@ -1269,15 +1551,19 @@ document.addEventListener("DOMContentLoaded", () => {
           announcement
         );
 
+
       const label =
         catLabel(
           announcement.category
         );
 
+
       const pillClass =
         catPillClass(
           announcement.category
         );
+
+
 
 
       if (vMeta) {
@@ -1296,13 +1582,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
+
+
       if (vPill) {
         vPill.className =
           `ann-pill ${pillClass}`;
 
+
         vPill.textContent =
           label;
       }
+
+
 
 
       if (vStatus) {
@@ -1313,11 +1604,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
+
+
       if (vH) {
         vH.textContent =
           announcement.title ||
           "Untitled Announcement";
       }
+
+
 
 
       if (vAudience) {
@@ -1326,6 +1621,8 @@ document.addEventListener("DOMContentLoaded", () => {
             announcement.audience
           );
       }
+
+
 
 
       if (vMsg) {
@@ -1337,6 +1634,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
+
+
       if (viewArchiveBtn) {
         viewArchiveBtn.textContent =
           announcement.archived
@@ -1344,13 +1643,16 @@ document.addEventListener("DOMContentLoaded", () => {
             : "Archive";
       }
 
+
       openViewModal();
+
 
     } catch (error) {
       console.error(
         "Failed to open announcement:",
         error
       );
+
 
       alert(
         error.message ||
@@ -1360,23 +1662,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // MODAL OPEN/CLOSE
   // =========================================================
+
 
   function openModal() {
     modal.classList.remove(
       "hidden"
     );
 
+
     modal.setAttribute(
       "aria-hidden",
       "false"
     );
 
+
     document.body.style.overflow =
       "hidden";
   }
+
+
 
 
   function closeModal() {
@@ -1384,16 +1693,21 @@ document.addEventListener("DOMContentLoaded", () => {
       "hidden"
     );
 
+
     modal.setAttribute(
       "aria-hidden",
       "true"
     );
 
+
     document.body.style.overflow =
       "";
 
+
     clearFormError();
   }
+
+
 
 
   function openViewModal() {
@@ -1401,14 +1715,18 @@ document.addEventListener("DOMContentLoaded", () => {
       "hidden"
     );
 
+
     viewModal.setAttribute(
       "aria-hidden",
       "false"
     );
 
+
     document.body.style.overflow =
       "hidden";
   }
+
+
 
 
   function closeViewModal() {
@@ -1416,14 +1734,18 @@ document.addEventListener("DOMContentLoaded", () => {
       "hidden"
     );
 
+
     viewModal.setAttribute(
       "aria-hidden",
       "true"
     );
 
+
     document.body.style.overflow =
       "";
   }
+
+
 
 
   function setFormError(
@@ -1433,8 +1755,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+
     formError.textContent =
       message;
+
 
     formError.classList.remove(
       "hidden"
@@ -1442,13 +1766,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   function clearFormError() {
     if (!formError) {
       return;
     }
 
+
     formError.textContent =
       "";
+
 
     formError.classList.add(
       "hidden"
@@ -1456,9 +1784,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // ARCHIVE / DELETE
   // =========================================================
+
 
   async function toggleArchive(
     id
@@ -1468,7 +1799,9 @@ document.addEventListener("DOMContentLoaded", () => {
         id
       );
 
+
       await loadAnnouncements();
+
 
     } catch (error) {
       console.error(
@@ -1476,12 +1809,15 @@ document.addEventListener("DOMContentLoaded", () => {
         error
       );
 
+
       alert(
         error.message ||
           "Failed to update announcement."
       );
     }
   }
+
+
 
 
   async function deleteAnn(id) {
@@ -1494,9 +1830,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ) === id
       );
 
+
     if (!announcement) {
       return;
     }
+
 
     const confirmed =
       confirm(
@@ -1506,30 +1844,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }"? This cannot be undone.`
       );
 
+
     if (!confirmed) {
       return;
     }
+
 
     try {
       await removeAnnouncement(
         id
       );
 
+
       await loadAnnouncements();
+
 
       if (
         viewingId === id
       ) {
         viewingId = null;
 
+
         closeViewModal();
       }
+
 
     } catch (error) {
       console.error(
         "Delete failed:",
         error
       );
+
 
       alert(
         error.message ||
@@ -1539,9 +1884,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+
+
   // =========================================================
   // FEED EVENTS
   // =========================================================
+
 
   feed.addEventListener(
     "click",
@@ -1551,50 +1899,67 @@ document.addEventListener("DOMContentLoaded", () => {
           ".ann-card"
         );
 
+
       if (!card) {
         return;
       }
+
 
       const id =
         card.dataset.id;
 
 
+
+
       // Three dots
+
 
       const kebab =
         event.target.closest(
           ".ann-kebab"
         );
 
+
       if (kebab) {
         event.preventDefault();
 
+
         event.stopPropagation();
+
 
         toggleMenuForCard(
           card
         );
 
+
         return;
       }
 
 
+
+
       // Action buttons
+
 
       const action =
         event.target.closest(
           ".ann-menu button"
         );
 
+
       if (action) {
         event.preventDefault();
 
+
         event.stopPropagation();
+
 
         const act =
           action.dataset.act;
 
+
         closeAllMenus();
+
 
         if (
           act === "view"
@@ -1602,11 +1967,13 @@ document.addEventListener("DOMContentLoaded", () => {
           openView(id);
         }
 
+
         if (
           act === "edit"
         ) {
           openEdit(id);
         }
+
 
         if (
           act === "archive"
@@ -1614,27 +1981,35 @@ document.addEventListener("DOMContentLoaded", () => {
           toggleArchive(id);
         }
 
+
         if (
           act === "delete"
         ) {
           deleteAnn(id);
         }
 
+
         return;
       }
 
 
+
+
       // Click title
+
 
       const title =
         event.target.closest(
           ".ann-title"
         );
 
+
       if (title) {
         event.preventDefault();
 
+
         closeAllMenus();
+
 
         openView(id);
       }
@@ -1642,9 +2017,12 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   // =========================================================
   // TITLE KEYBOARD
   // =========================================================
+
 
   feed.addEventListener(
     "keydown",
@@ -1654,9 +2032,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ".ann-title"
         );
 
+
       if (!title) {
         return;
       }
+
 
       if (
         event.key ===
@@ -1665,14 +2045,17 @@ document.addEventListener("DOMContentLoaded", () => {
       ) {
         event.preventDefault();
 
+
         const card =
           title.closest(
             ".ann-card"
           );
 
+
         if (!card) {
           return;
         }
+
 
         openView(
           card.dataset.id
@@ -1682,19 +2065,25 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   // =========================================================
   // FORM EVENTS
   // =========================================================
+
 
   fPublishNow.addEventListener(
     "change",
     setPublicationMode
   );
 
+
   fScheduleLater.addEventListener(
     "change",
     setPublicationMode
   );
+
+
 
 
   createBtn.addEventListener(
@@ -1703,10 +2092,14 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   modalBackdrop.addEventListener(
     "click",
     closeModal
   );
+
+
 
 
   modalCloseX.addEventListener(
@@ -1715,10 +2108,14 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   cancelBtn.addEventListener(
     "click",
     closeModal
   );
+
+
 
 
   draftBtn.addEventListener(
@@ -1730,6 +2127,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   publishBtn.addEventListener(
     "click",
     () =>
@@ -1739,9 +2138,12 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   // =========================================================
   // SEARCH / FILTER
   // =========================================================
+
 
   const debouncedLoad =
     debounce(
@@ -1749,15 +2151,18 @@ document.addEventListener("DOMContentLoaded", () => {
       250
     );
 
+
   search.addEventListener(
     "input",
     debouncedLoad
   );
 
+
   typeFilter.addEventListener(
     "change",
     loadAnnouncements
   );
+
 
   catFilter.addEventListener(
     "change",
@@ -1765,9 +2170,12 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   // =========================================================
   // OUTSIDE CLICK
   // =========================================================
+
 
   document.addEventListener(
     "click",
@@ -1783,9 +2191,12 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   // =========================================================
   // ESCAPE
   // =========================================================
+
 
   document.addEventListener(
     "keydown",
@@ -1796,6 +2207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+
       if (
         !modal.classList.contains(
           "hidden"
@@ -1803,6 +2215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ) {
         closeModal();
       }
+
 
       if (
         !viewModal.classList.contains(
@@ -1812,19 +2225,25 @@ document.addEventListener("DOMContentLoaded", () => {
         closeViewModal();
       }
 
+
       closeAllMenus();
     }
   );
+
+
 
 
   // =========================================================
   // VIEW MODAL EVENTS
   // =========================================================
 
+
   viewBackdrop.addEventListener(
     "click",
     closeViewModal
   );
+
+
 
 
   viewCloseX.addEventListener(
@@ -1833,10 +2252,14 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
+
+
   viewCloseBtn.addEventListener(
     "click",
     closeViewModal
   );
+
+
 
 
   viewEditBtn.addEventListener(
@@ -1846,13 +2269,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+
       closeViewModal();
+
 
       openEdit(
         viewingId
       );
     }
   );
+
+
 
 
   viewArchiveBtn.addEventListener(
@@ -1862,33 +2289,42 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+
       const id =
         viewingId;
+
 
       await toggleArchive(
         id
       );
+
 
       closeViewModal();
     }
   );
 
 
+
+
   // =========================================================
   // INIT
   // =========================================================
+
 
   (async function init() {
     try {
       await fetchCsrfToken();
 
+
       await loadAnnouncements();
+
 
     } catch (error) {
       console.error(
         "Announcements init failed:",
         error
       );
+
 
       setFormError(
         error.message ||
@@ -1897,4 +2333,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
+
 });
+

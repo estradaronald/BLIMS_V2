@@ -2,524 +2,1177 @@
    frontend/src/styles/admin/admin-teachers.css
 ========================================================= */
 
+
 .hidden {
   display: none !important;
 }
 
+
 /* =========================================================
    TEACHERS PAGE WRAPPER
 ========================================================= */
+
 
 .teachers-wrap {
   padding: 0;
   margin: 0;
 }
 
+
 /* =========================================================
    PAGE HEADER
 ========================================================= */
 
+
 .teachers-page-head {
   display: flex;
+
+
   align-items: center;
+
+
   justify-content: space-between;
+
+
   gap: 12px;
+
+
   margin: 0 0 10px;
+
+
   padding: 0;
 }
 
+
 .teachers-title {
   margin: 0;
+
+
   font-size: 34px;
+
+
   font-weight: 1000;
+
+
   color: #0b2c4a;
+
+
   line-height: 1.15;
 }
 
-.t-add-btn {
-  height: 42px;
-  border: none;
-  border-radius: 12px;
-  background: #0b4d7a;
-  color: #fff;
-  font-weight: 900;
-  padding: 0 14px;
-  cursor: pointer;
 
+/* =========================================================
+   PAGE HEADER ACTIONS
+========================================================= */
+
+
+.teachers-head-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
 }
 
-.t-plus {
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
 
-  background: rgba(255, 255, 255, 0.18);
+/* Single-teacher form actions */
+.t-form-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* Keep the workflow actions visually separated */
+.t-form-header-actions + .t-bulk-btn {
+  margin-left: 4px;
+}
+
+
+/* =========================================================
+   BULK CREATE BUTTON
+========================================================= */
+
+
+.t-bulk-btn {
+  height: 46px;
+
+
+  padding: 0 18px;
+
+
+  border: 1px solid #0b4d7a;
+
+
+  border-radius: 12px;
+
+
+  background: #ffffff;
+
+
+  color: #0b4d7a;
+
+
+  font-family: inherit;
+
+
+  font-size: 14px;
+
+
+  font-weight: 900;
+
+
+  display: inline-flex;
+
+
+  align-items: center;
+
+
+  justify-content: center;
+
+
+  gap: 8px;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.t-bulk-btn:hover {
+  background: #0b4d7a;
+
+
+  color: #ffffff;
+
+
+  transform: translateY(-1px);
+}
+
+
+.t-add-btn {
+  height: 46px;
+
+
+  padding: 0 16px;
+
+
+  border: 1px solid #0b4d7a;
+  border-radius: 12px;
+
+
+  background: #0b4d7a;
+  color: #fff;
+
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+
+  box-shadow: 0 8px 18px rgba(11, 77, 122, 0.12);
+}
+
+
+.t-add-btn:hover {
+  background: #083b5e;
+  border-color: #083b5e;
+
+
+  transform: translateY(-1px);
+
+
+  box-shadow: 0 10px 22px rgba(11, 77, 122, 0.16);
+}
+
+
+.t-add-btn:active {
+  transform: translateY(0);
+}
+
+
+.t-plus {
+  width: 28px;
+  height: 28px;
+
+
+  border-radius: 8px;
+
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
+
+  font-size: 18px;
   font-weight: 900;
+  line-height: 1;
 }
+
 
 .t-view {
   margin-top: 2px;
 }
 
+
 /* =========================================================
    LIST VIEW CARD
 ========================================================= */
+
 
 .t-card {
   padding: 0;
   overflow: hidden;
 }
 
+
 .t-card-head {
-  padding: 14px 14px 10px;
+  padding: 14px 14px 12px;
+
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 12px;
+
+  gap: 18px;
 }
 
+
+.t-list-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+
 .t-subtitle {
+  margin: 0;
   font-size: 14px;
   font-weight: 1000;
   color: #0b2c4a;
+  line-height: 1.25;
+  white-space: nowrap;
 }
+
+
+.t-list-description {
+  margin: 0;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+
+.t-list-description::before {
+  content: "•";
+  margin-right: 10px;
+  color: rgba(11, 44, 74, 0.28);
+}
+
 
 .t-tools {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
+
 
 /* =========================================================
    SEARCH
 ========================================================= */
 
+
 .t-search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+
+
+  width: 320px;
+  min-width: 280px;
+  height: 40px;
+  box-sizing: border-box;
+
+
+  padding: 0 14px;
+
 
   background: #fff;
+  border: 1px solid rgba(11, 44, 74, 0.08);
   border-radius: 999px;
 
-  padding: 10px 14px;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
 
-  min-width: 320px;
-  height: 42px;
 
-  border: 1px solid rgba(11, 44, 74, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+
+.t-search:focus-within {
+  border-color: rgba(11, 77, 122, 0.25);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
+}
+
+
+/* Replace the emoji with a clean CSS magnifying-glass icon. */
+.t-search-ico {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: block;
+  font-size: 0;
+}
+
+
+.t-search-ico::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 1px;
+  left: 1px;
+  border: 1.7px solid #0b4d7a;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+
+.t-search-ico::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 1.7px;
+  left: 9px;
+  top: 10px;
+  border-radius: 999px;
+  background: #0b4d7a;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
 
 .t-search input {
   border: none;
   outline: none;
 
-  width: 100%;
 
-  font-size: 13px;
+  width: 100%;
+  min-width: 0;
+
+
+  background: transparent;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b2c4a;
 }
+
+
+.t-search input::placeholder {
+  color: rgba(11, 44, 74, 0.48);
+}
+
 
 /* =========================================================
    FILTER
 ========================================================= */
 
+
 .t-filter {
   height: 42px;
 
+
   border-radius: 999px;
+
 
   padding: 0 44px 0 14px;
 
+
   border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background-color: #fff;
 
+
   font-size: 13px;
+
 
   outline: none;
 
+
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+
 
   appearance: none;
 
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+
 
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 14px 14px;
 }
 
+
 .t-filter::-ms-expand {
   display: none;
 }
+
 
 /* =========================================================
    TABLE
 ========================================================= */
 
+
 .t-table-wrap {
   padding: 0 14px 14px;
+  overflow-x: auto;
 }
+
 
 .t-table {
   width: 100%;
-
-  border-collapse: collapse;
-
-  font-size: 13px;
-
-  border-radius: 12px;
-
+  min-width: 980px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 14px;
   overflow: hidden;
 }
 
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+
 .t-table thead th {
-  background: #0b4d7a;
-  color: #fff;
-
+  padding: 11px 14px;
+  background: #f8fafc;
+  color: rgba(11, 44, 74, 0.68);
   text-align: left;
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+  white-space: nowrap;
+}
 
-  padding: 12px 14px;
 
+.t-table thead th:first-child {
+  border-top-left-radius: 14px;
+}
+
+
+.t-table thead th:last-child {
+  border-top-right-radius: 14px;
+}
+
+
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
+
+.t-table tbody td {
+  padding: 13px 14px;
+  color: #0b2c4a;
+  vertical-align: middle;
+  border-bottom: 1px solid #eef3f9;
+  background: #ffffff;
+}
+
+
+.t-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+.t-table tbody tr {
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+
+.t-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   TABLE COLUMN ALIGNMENT
+========================================================= */
+
+
+.t-table th:first-child,
+.t-table td:first-child {
+  width: 52px;
+  text-align: center;
+  color: rgba(11, 44, 74, 0.48);
   font-weight: 900;
 }
 
-.t-table tbody td {
-  padding: 12px 14px;
 
-  border-bottom: 1px solid #eef3f9;
-
-  color: #0b2c4a;
+.t-table th:last-child,
+.t-table td:last-child {
+  width: 150px;
+  text-align: center;
 }
 
-.t-empty td {
-  color: rgba(11, 44, 74, 0.55);
 
+/* =========================================================
+   FACULTY MEMBER
+========================================================= */
+
+
+.t-teacher-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+}
+
+
+.t-teacher-avatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: #eef5fa;
+  color: #0b4d7a;
+  font-size: 11px;
+  font-weight: 1000;
+  border: 1px solid rgba(11, 77, 122, 0.1);
+}
+
+
+.t-teacher-info {
+  min-width: 0;
+}
+
+
+.t-teacher-name {
+  color: #0b2c4a;
+  font-size: 12px;
+  font-weight: 1000;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.t-teacher-id {
+  margin-top: 2px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 10px;
   font-weight: 800;
 }
+
+
+/* =========================================================
+   CONTACT DETAILS
+========================================================= */
+
+
+.t-contact-cell,
+.t-professional-cell,
+.t-employment-cell {
+  min-width: 150px;
+}
+
+
+.t-cell-primary {
+  color: #0b2c4a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+
+.t-cell-secondary {
+  margin-top: 2px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   PROFESSIONAL DETAILS
+========================================================= */
+
+
+.t-professional-cell .t-cell-primary {
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.t-professional-cell .t-cell-secondary {
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   EMPLOYMENT STATUS
+========================================================= */
+
+
+.t-employment-cell {
+  min-width: 130px;
+}
+
+
+.t-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef7f1;
+  color: #247a43;
+  border: 1px solid rgba(36, 122, 67, 0.12);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+
+.t-status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #28a745;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+
+.t-empty td {
+  padding: 34px 18px;
+  color: rgba(11, 44, 74, 0.55);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   TABLE RESPONSIVE SCROLL
+========================================================= */
+
+
+@media (max-width: 900px) {
+  .t-table-wrap {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+
+  .t-table {
+    min-width: 920px;
+  }
+}
+
 
 /* =========================================================
    TEACHER FORM LAYOUT
 =========================================================
 
+
+
+
    DESKTOP:
+
+
+
 
    LEFT:
    1. Basic Information
    2. Credentials
+
+
+
 
    RIGHT:
    1. Contact & Address
    2. Login / Account Details
    3. FORM BUTTONS — OUTSIDE ACCOUNT CARD
 
+
+
+
 ========================================================= */
+
 
 .t-form-grid {
   display: grid;
 
+
   grid-template-columns: 1.05fr 0.95fr;
+
 
   gap: 14px;
 
+
   align-items: start;
+
 
   grid-template-areas:
     "basic right"
     "creds right";
 }
 
+
 /* =========================================================
    LEFT SIDE
 ========================================================= */
+
 
 .t-basic-card {
   grid-area: basic;
 }
 
+
 .t-creds-card {
   grid-area: creds;
 }
 
+
 .t-left-col {
   display: flex;
 
+
   flex-direction: column;
+
 
   gap: 14px;
 }
+
 
 /* =========================================================
    RIGHT SIDE
 ========================================================= */
 
+
 .t-form-right {
   grid-area: right;
 
+
   display: flex;
+
 
   flex-direction: column;
 
+
   gap: 14px;
+
 
   min-width: 0;
 }
+
 
 /* =========================================================
    RIGHT SIDE ORDER
 ========================================================= */
 
+
 .t-form-right > .t-form-card:nth-child(1) {
   order: 1;
 }
+
 
 .t-form-right > .t-form-card:nth-child(2) {
   order: 2;
 }
 
+
 /* =========================================================
    FORM CARDS
 ========================================================= */
 
+
 .t-form-card {
   overflow: hidden;
 
-  background: #fff;
 
-  border-radius: 16px;
+  background: #f8fafc;
+
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 14px;
+
+
+  box-sizing: border-box;
 }
+
 
 /* =========================================================
    FORM CARD HEADER
 ========================================================= */
 
+
 .t-form-hd {
-  padding: 14px 18px;
+  padding: 16px 16px 12px;
 
-  font-size: 20px;
 
+  font-size: 16px;
   font-weight: 1000;
+
 
   color: #0b2c4a;
 
-  border-bottom: 1px solid rgba(11, 44, 74, 0.1);
+
+  background: #f8fafc;
+
+
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+
+
+  line-height: 1.25;
 }
+
 
 /* =========================================================
    FORM CARD BODY
 ========================================================= */
 
+
 .t-form-bd {
-  padding: 16px 18px;
+  padding: 16px;
+  background: #f8fafc;
 }
+
 
 /* =========================================================
    FORM ROWS
 ========================================================= */
 
+
 .t-row2 {
   display: grid;
-
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
+
+
+/* Basic Information name row */
+.t-row4 {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(0, 1.15fr)
+    minmax(0, 1.15fr)
+    minmax(90px, 0.55fr);
+  gap: 12px;
+}
+
 
 /* =========================================================
    FORM FIELDS
 ========================================================= */
 
+
 .t-field {
+  min-width: 0;
   margin-bottom: 12px;
 }
 
+
 .t-field label {
   display: block;
-
-  font-size: 12px;
-
-  font-weight: 1000;
-
-  color: #0b2c4a;
-
   margin-bottom: 6px;
+
+
+  font-size: 11px;
+  font-weight: 1000;
+  color: #0b2c4a;
 }
+
 
 .t-field input,
 .t-select {
   width: 100%;
-
   height: 38px;
 
-  border-radius: 10px;
-
-  border: 1px solid rgba(11, 44, 74, 0.1);
-
-  padding: 0 12px;
-
-  outline: none;
-
-  background: #fff;
 
   box-sizing: border-box;
+
+
+  padding: 0 10px;
+
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
+
+
+  outline: none;
+  background: #fff;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  color: #0b2c4a;
+
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+
+.t-field input::placeholder {
+  color: rgba(11, 44, 74, 0.42);
+}
+
 
 .t-field input:focus,
 .t-select:focus {
   border-color: rgba(11, 77, 122, 0.35);
 
+
   box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
+
 
 /* =========================================================
    SELECT DROPDOWNS
 ========================================================= */
+
 
 .t-select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 
+
   padding-right: 44px;
+
 
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
 
+
   background-repeat: no-repeat;
+
 
   background-position: right 12px center;
 
+
   background-size: 14px 14px;
+
 
   background-color: #fff;
 }
+
 
 .t-select::-ms-expand {
   display: none;
 }
 
+
 .t-select:disabled {
   background-color: #f3f5f7;
 
+
   color: #a8afb7;
+
 
   cursor: not-allowed;
 }
+
 
 /* =========================================================
    INLINE ELEMENTS
 ========================================================= */
 
+
 .t-inline {
   display: flex;
 
+
   gap: 8px;
+
 
   align-items: center;
 }
+
 
 .t-mini {
   width: 38px;
   height: 38px;
 
+
   flex: 0 0 38px;
+
 
   border-radius: 10px;
 
+
   border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #fff;
 
+
   cursor: pointer;
 
+
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+
 
   font-weight: 1000;
 }
 
+
 .t-hint {
   display: block;
 
+
   margin-top: 4px;
+
 
   color: rgba(11, 44, 74, 0.55);
 
+
   font-size: 11px;
 }
+
 
 /* =========================================================
    BASIC INFORMATION
 ========================================================= */
 
+
 .t-basic-card .t-form-bd {
   display: block;
 }
 
+
 .t-basic-left {
   width: 100%;
 
+
   min-width: 0;
 }
+
 
 /* =========================================================
    GENDER
 ========================================================= */
 
+
 .t-gender {
   display: flex;
 
+
   gap: 18px;
 
+
   align-items: center;
+
 
   padding-top: 2px;
 }
 
+
 .t-radio {
   display: flex;
 
+
   align-items: center;
+
 
   gap: 8px;
 
+
   font-size: 13px;
+
 
   font-weight: 900;
 
+
   color: #0b2c4a;
+
 
   cursor: pointer;
 
+
   user-select: none;
 }
+
 
 .t-radio input {
   width: 14px;
   height: 14px;
 
+
   accent-color: #0b4d7a;
 }
+
 
 /* =========================================================
    FORM ACTION BUTTONS
 =========================================================
 
+
+
+
    IMPORTANT:
    These buttons are OUTSIDE the Account Details card.
+
+
+
 
    They are:
    - below the Login / Account Details card
@@ -527,146 +1180,210 @@
    - on the page background
    - not part of the white Account Details card
 
+
+
+
 ========================================================= */
+
 
 .t-form-actions-bottom {
   display: flex;
 
+
   align-items: center;
+
 
   justify-content: flex-end;
 
+
   gap: 10px;
+
 
   width: 100%;
 
+
   margin-top: 0;
+
 
   padding: 0 0 8px;
 
+
   background: transparent;
+
 
   border: none;
 
+
   box-shadow: none;
+
 
   box-sizing: border-box;
 }
 
+
 /* Make sure the action container itself does not look like a card */
+
 
 .t-form-actions-bottom.card {
   background: transparent;
 
+
   box-shadow: none;
+
 
   border-radius: 0;
 
+
   overflow: visible;
 }
+
 
 /* =========================================================
    GHOST BUTTON
 ========================================================= */
 
+
 .t-ghost {
-  height: 36px;
+  height: 40px;
+  min-width: 120px;
 
-  border: none;
 
-  border-radius: 999px;
+  padding: 0 16px;
 
-  padding: 0 18px;
+
+  border: 1px solid rgba(11, 44, 74, 0.12);
+  border-radius: 10px;
+
 
   background: #fff;
+  color: #0b2c4a;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
 
   cursor: pointer;
 
-  font-weight: 900;
-
-  color: #0b2c4a;
 
   transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
 
 .t-ghost:hover {
-  transform: translateY(-1px);
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.2);
 
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.1);
+
+  transform: translateY(-1px);
 }
+
 
 .t-ghost.small {
   height: 34px;
 
+
   padding: 0 14px;
 }
+
 
 /* =========================================================
    SAVE BUTTON
 ========================================================= */
 
+
 .t-save {
-  height: 36px;
+  height: 40px;
+  min-width: 120px;
 
-  border: none;
 
-  border-radius: 999px;
+  padding: 0 16px;
 
-  padding: 0 22px;
+
+  border: 1px solid #0b4d7a;
+  border-radius: 10px;
+
 
   background: #0b4d7a;
-
   color: #fff;
 
-  font-weight: 1000;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
 
   cursor: pointer;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
 
   transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
 
 .t-save:hover {
+  background: #083b5e;
+  border-color: #083b5e;
+
+
   transform: translateY(-1px);
 
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+
+  box-shadow: 0 8px 18px rgba(11, 77, 122, 0.16);
 }
+
 
 /* =========================================================
    ERROR
 ========================================================= */
 
+
 .t-error {
   margin-top: 0;
 
+
   background: #ffecec;
+
 
   border: 1px solid #ffd1d1;
 
+
   color: #a61b1b;
+
 
   padding: 10px 12px;
 
+
   border-radius: 12px;
+
 
   font-weight: 900;
 
+
   font-size: 13px;
 }
+
 
 /* =========================================================
    TABLE ACTION BUTTONS
 ========================================================= */
 
+
 /*
    These classes match admin-teachers.js:
+
+
+
 
    .t-actions
    .t-icon-btn
@@ -674,161 +1391,165 @@
    .t-view
    .t-del
 
+
+
+
    The buttons intentionally match the Students page.
 */
 
+
+/* =========================================================
+   TABLE ACTION BUTTONS
+========================================================= */
+
+
 .t-actions {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  gap: 10px;
+  gap: 8px;
 }
 
-.t-icon-btn {
-  width: 42px;
-  height: 42px;
 
+.t-icon-btn {
+  width: 38px;
+  height: 38px;
   padding: 0;
 
-  border: 1px solid #e2e8f0;
 
-  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
 
   background: #ffffff;
 
+
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  cursor: pointer;
 
+  cursor: pointer;
   box-shadow: none;
+
 
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
 
 .t-icon-btn img {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+
 
   display: block;
-
   object-fit: contain;
 }
+
 
 /* =========================================================
    EDIT BUTTON
 ========================================================= */
 
-.t-icon-btn.t-edit:hover {
-  background: #f8fafc;
 
-  border-color: #cbd5e1;
+.t-icon-btn.t-edit:hover {
+  background: #f1f7fb;
+  border-color: rgba(11, 77, 122, 0.24);
+  box-shadow: 0 4px 10px rgba(11, 77, 122, 0.06);
 }
+
 
 /* =========================================================
    VIEW BUTTON
 ========================================================= */
 
-.t-icon-btn.t-view:hover {
-  background: #f8fafc;
 
-  border-color: #cbd5e1;
+.t-icon-btn.t-view:hover {
+  background: #f5f8fb;
+  border-color: rgba(11, 44, 74, 0.18);
+  box-shadow: 0 4px 10px rgba(11, 44, 74, 0.05);
 }
+
 
 /* =========================================================
    DELETE BUTTON
 ========================================================= */
 
+
 /*
-   IMPORTANT:
-   delete.svg is loaded through <img>, so:
-
-       .t-del {
-         color: red;
-       }
-
-   cannot recolor the external SVG.
-
-   The filter below forces the SVG to a black
-   base first, then converts it to red.
+   delete.svg is loaded through <img>, so the
+   external SVG is recolored with a filter.
 */
 
+
 .t-actions .t-icon-btn.t-del img {
-  filter:
-    brightness(0)
-    saturate(100%)
-    invert(18%)
-    sepia(96%)
-    saturate(6000%)
-    hue-rotate(350deg)
-    brightness(92%)
-    contrast(110%) !important;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(6000%)
+    hue-rotate(350deg) brightness(92%) contrast(110%) !important;
 }
+
 
 .t-actions .t-icon-btn.t-del:hover {
   background: #fff1f2;
-
   border-color: #fecdd3;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.06);
 }
+
 
 .t-actions .t-icon-btn.t-del:hover img {
-  filter:
-    brightness(0)
-    saturate(100%)
-    invert(14%)
-    sepia(98%)
-    saturate(7000%)
-    hue-rotate(350deg)
-    brightness(85%)
-    contrast(115%) !important;
+  filter: brightness(0) saturate(100%) invert(14%) sepia(98%) saturate(7000%)
+    hue-rotate(350deg) brightness(85%) contrast(115%) !important;
 }
+
 
 /* =========================================================
    ACTION BUTTON HOVER
 ========================================================= */
 
+
 .t-icon-btn:hover {
   transform: translateY(-1px);
 }
+
 
 /* =========================================================
    ACTION BUTTON ACTIVE
 ========================================================= */
 
+
 .t-icon-btn:active {
   transform: translateY(0);
 }
+
 
 /* =========================================================
    ACTION BUTTON FOCUS
 ========================================================= */
 
+
 .t-icon-btn:focus-visible {
   outline: 3px solid rgba(11, 77, 122, 0.22);
-
   outline-offset: 2px;
 }
+
 
 /* =========================================================
    ACTION HEADER
 ========================================================= */
 
+
 .t-table thead th:last-child {
   text-align: center;
 }
 
+
 /* =========================================================
    ACTION COLORS
 ========================================================= */
+
 
 /*
    These colors are useful for buttons/icons that use
@@ -836,304 +1557,1813 @@
    separately using the filter above.
 */
 
+
 .t-edit {
   color: #0b4d7a;
 }
+
 
 .t-view {
   color: #0b2c4a;
 }
 
+
 .t-del {
   color: #a61b1b;
 }
+
 
 /* =========================================================
    TEACHER PROFILE MODAL
 ========================================================= */
 
+
 .tmodal {
   position: fixed;
-
   inset: 0;
-
   z-index: 9999;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+  padding: 24px;
+
+
+  box-sizing: border-box;
 }
+
 
 .tmodal-backdrop {
   position: absolute;
-
   inset: 0;
 
-  background: rgba(0, 0, 0, 0.35);
+
+  background: rgba(11, 44, 74, 0.38);
+  backdrop-filter: blur(2px);
 }
+
+
+/* =========================================================
+   MODAL DIALOG
+========================================================= */
+
 
 .tmodal-dialog {
   position: relative;
 
-  width: min(920px, calc(100% - 28px));
 
-  margin: 34px auto;
+  width: min(960px, 100%);
+  max-height: calc(100vh - 48px);
 
-  background: #f7f7f7;
 
-  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+
+
+  background: #ffffff;
+
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 16px;
+
 
   overflow: hidden;
 
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.25);
+
+  box-shadow:
+    0 24px 70px rgba(11, 44, 74, 0.18),
+    0 6px 20px rgba(0, 0, 0, 0.08);
+
+
+  box-sizing: border-box;
 }
+
 
 /* =========================================================
    MODAL HEADER
 ========================================================= */
 
+
 .tmodal-head {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
+
+
+  gap: 16px;
+
 
   padding: 14px 16px;
 
-  background: #e9e9e9;
 
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: #f8fafc;
+
+
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+
+
+  flex-shrink: 0;
 }
+
 
 .tmodal-head-left {
   display: flex;
-
   align-items: center;
 
-  gap: 14px;
+
+  gap: 12px;
+
+
+  min-width: 0;
 }
 
-.tmodal-avatar {
-  width: 54px;
-  height: 54px;
 
-  border-radius: 16px;
+.tmodal-avatar {
+  width: 48px;
+  height: 48px;
+
+
+  flex: 0 0 48px;
+
+
+  border-radius: 12px;
+
 
   object-fit: cover;
 
-  border: 2px solid rgba(11, 77, 122, 0.25);
+
+  border: 1px solid rgba(11, 77, 122, 0.14);
+
+
+  background: #eef5fa;
 }
+
 
 .tmodal-title {
-  font-size: 16px;
+  margin: 0;
 
+
+  font-size: 16px;
   font-weight: 1000;
 
+
   color: #0b2c4a;
+
+
+  line-height: 1.25;
 }
+
 
 .tmodal-sub {
-  font-size: 12px;
-
-  color: rgba(11, 44, 74, 0.65);
-
   display: flex;
-
   align-items: center;
+  flex-wrap: wrap;
 
-  gap: 8px;
 
-  margin-top: 2px;
+  gap: 7px;
+
+
+  margin-top: 3px;
+
+
+  color: rgba(11, 44, 74, 0.52);
+
+
+  font-size: 10px;
+  font-weight: 800;
+
+
+  line-height: 1.35;
 }
+
 
 .tmodal-dot {
-  opacity: 0.6;
+  color: rgba(11, 44, 74, 0.28);
 }
+
 
 .tmodal-status {
   display: inline-flex;
-
   align-items: center;
 
-  gap: 6px;
+
+  gap: 5px;
+
+
+  color: #247a43;
+  font-weight: 900;
 }
 
+
 .tmodal-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
+
 
   border-radius: 999px;
 
+
   background: #28a745;
+
 
   display: inline-block;
 }
+
 
 /* =========================================================
    MODAL CLOSE
 ========================================================= */
 
+
 .tmodal-x {
   width: 36px;
   height: 36px;
 
-  border: none;
 
-  border-radius: 12px;
+  flex: 0 0 36px;
 
-  background: #fff;
+
+  padding: 0;
+
+
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 10px;
+
+
+  background: #ffffff;
+  color: #0b2c4a;
+
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
 
   cursor: pointer;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
 
-  font-weight: 1000;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+
+
+  box-shadow: none;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
+
+
+.tmodal-x:hover {
+  background: #f1f7fb;
+  border-color: rgba(11, 77, 122, 0.18);
+
+
+  transform: translateY(-1px);
+}
+
 
 /* =========================================================
    MODAL TABS
 ========================================================= */
 
+
 .tmodal-tabs {
   display: flex;
+  align-items: center;
 
-  gap: 10px;
 
-  padding: 10px 14px;
+  gap: 4px;
 
-  background: #f2f2f2;
 
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px 12px;
+
+
+  background: #ffffff;
+
+
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+
+
+  overflow-x: auto;
+
+
+  flex-shrink: 0;
 }
 
+
 .tmodal-tab {
-  border: none;
+  height: 34px;
+
+
+  padding: 0 12px;
+
+
+  border: 1px solid transparent;
+  border-radius: 9px;
+
 
   background: transparent;
 
-  cursor: pointer;
 
-  padding: 8px 10px;
+  color: rgba(11, 44, 74, 0.58);
 
-  border-radius: 10px;
 
+  font-family: inherit;
+  font-size: 11px;
   font-weight: 900;
 
-  font-size: 12px;
 
-  color: rgba(11, 44, 74, 0.65);
+  white-space: nowrap;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
+
+
+.tmodal-tab:hover {
+  background: #f8fafc;
+  color: #0b2c4a;
+}
+
 
 .tmodal-tab.active {
-  background: #fff;
+  background: #eef5fa;
 
-  color: #0b2c4a;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  border-color: rgba(11, 77, 122, 0.1);
+
+
+  color: #0b4d7a;
+
+
+  box-shadow: none;
 }
+
 
 /* =========================================================
    MODAL BODY
 ========================================================= */
 
+
 .tmodal-body {
-  padding: 14px;
+  padding: 16px;
+
+
+  background: #ffffff;
+
+
+  overflow-y: auto;
+
+
+  flex: 1;
+  min-height: 0;
 }
+
+
+.tmodal-panel {
+  width: 100%;
+}
+
+
+/* =========================================================
+   MODAL SECTION TITLES
+========================================================= */
+
+
+.tmodal-section-title {
+  margin: 18px 0 10px;
+
+
+  color: #0b2c4a;
+
+
+  font-size: 13px;
+  font-weight: 1000;
+
+
+  line-height: 1.3;
+}
+
+
+/* First section title in a panel should not have extra top space */
+.tmodal-panel > .tmodal-section-title:first-child {
+  margin-top: 0;
+}
+
+
+/* =========================================================
+   EMPLOYMENT SUMMARY
+========================================================= */
+
+
+.tmodal-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+
+
+  margin-top: 2px;
+}
+
+
+.tmodal-summary-item {
+  min-width: 0;
+
+
+  padding: 11px 12px;
+
+
+  background: #f8fafc;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 10px;
+}
+
+
+.tmodal-summary-item span {
+  display: block;
+
+
+  margin-bottom: 4px;
+
+
+  color: rgba(11, 44, 74, 0.52);
+
+
+  font-size: 9px;
+  font-weight: 800;
+
+
+  line-height: 1.3;
+}
+
+
+.tmodal-summary-item strong {
+  display: block;
+
+
+  color: #0b2c4a;
+
+
+  font-size: 11px;
+  font-weight: 1000;
+
+
+  line-height: 1.35;
+
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 .tmodal-grid {
   display: grid;
 
-  grid-template-columns: 1fr 1fr;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
 
   gap: 12px;
 }
 
+
+/* =========================================================
+   MODAL FIELDS
+========================================================= */
+
+
+.tmodal-field {
+  min-width: 0;
+}
+
+
 .tmodal-field label {
   display: block;
 
-  font-size: 12px;
 
-  font-weight: 1000;
+  margin-bottom: 6px;
+
 
   color: #0b2c4a;
 
-  margin-bottom: 6px;
+
+  font-size: 10px;
+  font-weight: 1000;
+
+
+  line-height: 1.25;
 }
+
 
 .tmodal-field input {
   width: 100%;
-
   height: 38px;
 
-  border-radius: 10px;
+
+  box-sizing: border-box;
+
+
+  padding: 0 10px;
+
 
   border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
 
-  padding: 0 12px;
 
-  background: #fff;
+  background: #f8fafc;
+
+
+  color: #0b2c4a;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+
 
   outline: none;
 
-  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
+
+
+.tmodal-field input:read-only {
+  cursor: default;
+}
+
+
+.tmodal-field input:focus {
+  border-color: rgba(11, 77, 122, 0.18);
+
+
+  background: #ffffff;
+
+
+  box-shadow: none;
+}
+
 
 /* =========================================================
    MODAL FOOTER
 ========================================================= */
 
+
 .tmodal-foot {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
-  padding: 12px 14px 14px;
 
-  background: #e9e9e9;
+  gap: 12px;
 
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  padding: 12px 16px;
+
+
+  background: #f8fafc;
+
+
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+
+
+  flex-shrink: 0;
 }
+
 
 .tmodal-foot-right {
   display: flex;
+  align-items: center;
 
-  gap: 10px;
+
+  gap: 8px;
 }
 
+
+/* Keep the destructive account action out of the profile footer. */
 .tmodal-danger {
-  height: 36px;
+  display: none !important;
+}
 
-  border: none;
 
-  border-radius: 12px;
+/* =========================================================
+   DELETE CONFIRMATION MODAL
+========================================================= */
 
-  padding: 0 16px;
 
-  background: #e05a5a;
+.t-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
 
-  color: #fff;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+
+.t-confirm-modal.hidden {
+  display: none;
+}
+
+
+.t-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+
+
+  background: rgba(11, 44, 74, 0.34);
+  backdrop-filter: blur(3px);
+}
+
+
+.t-confirm-dialog {
+  position: relative;
+  z-index: 1;
+
+
+  width: min(460px, 100%);
+
+
+  background: #fff;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 16px;
+
+
+  box-shadow: 0 24px 60px rgba(11, 44, 74, 0.18);
+
+
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CONFIRM HEADER
+========================================================= */
+
+
+.t-confirm-head {
+  padding: 18px 20px 16px;
+
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+
+  gap: 16px;
+
+
+  background: #ffffff;
+  border-bottom: 1px solid #eef3f9;
+}
+
+
+.t-confirm-title {
+  margin: 0;
+
+
+  color: #0b2c4a;
+  font-size: 16px;
   font-weight: 1000;
+  line-height: 1.25;
+}
+
+
+.t-confirm-sub {
+  margin-top: 4px;
+
+
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+
+.t-confirm-x {
+  width: 34px;
+  height: 34px;
+
+
+  padding: 0;
+
+
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+
+
+  background: #fff;
+  color: rgba(11, 44, 74, 0.62);
+
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
 
   cursor: pointer;
 
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
+
+
+.t-confirm-x:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.16);
+}
+
+
+/* =========================================================
+   CONFIRM BODY
+========================================================= */
+
+
+.t-confirm-body {
+  padding: 20px;
+}
+
+
+.t-confirm-text {
+  color: #0b2c4a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   CONFIRM FOOTER
+========================================================= */
+
+
+.t-confirm-foot {
+  padding: 14px 20px;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+
+  gap: 12px;
+
+
+  border-top: 1px solid #eef3f9;
+}
+
+
+.t-confirm-foot-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.t-confirm-foot .t-ghost {
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+}
+
+
+.t-confirm-foot .t-ghost:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.16);
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+========================================================= */
+
+
+.t-danger {
+  height: 40px;
+
+
+  padding: 0 16px;
+
+
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+
+
+  background: #fff1f2;
+  color: #a61b1b;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
+
+  cursor: pointer;
+
+
+  transition:
+  background-color 0.18s ease,
+  border-color 0.18s ease,
+  transform 0.18s ease;
+}
+
+
+.t-danger:hover {
+  background: #fee2e2;
+  border-color: #fda4af;
+
+
+  transform: translateY(-1px);
+}
+
+
+.t-danger:active {
+  transform: translateY(0);
+}
+
+
+.t-danger:focus-visible {
+  outline: 3px solid rgba(220, 38, 38, 0.2);
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   SUCCESS TOAST
+========================================================= */
+
+
+.t-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+
+
+  z-index: 10001;
+
+
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 48px));
+
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+
+  padding: 13px 16px;
+
+
+  background: #fff;
+  border: 1px solid #d7e9df;
+  border-radius: 12px;
+
+
+  color: #166534;
+
+
+  box-shadow: 0 16px 36px rgba(11, 44, 74, 0.14);
+
+
+  pointer-events: none;
+
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+
+.t-toast[hidden] {
+  display: none;
+}
+
+
+.t-toast-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+
+  border-radius: 50%;
+
+
+  background: #dcfce7;
+  color: #15803d;
+
+
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+
+/* =========================================================
+   DELETE MODAL RESPONSIVE
+========================================================= */
+
+
+@media (max-width: 480px) {
+  .t-confirm-modal {
+    padding: 12px;
+  }
+
+
+  .t-confirm-dialog {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+
+  .t-confirm-head {
+    padding: 12px;
+  }
+
+
+  .t-confirm-body {
+    padding: 16px 12px;
+  }
+
+
+  .t-confirm-foot {
+    padding: 10px 12px;
+  }
+
+
+  .t-confirm-foot .t-ghost,
+  .t-confirm-foot .t-danger {
+    min-width: 0;
+  }
+
+
+  .t-confirm-foot-right {
+    flex: 1;
+  }
+
+
+  .t-confirm-foot-right .t-danger {
+    width: 100%;
+  }
+
+
+  .t-confirm-foot > .t-ghost {
+    flex: 1;
+  }
+}
+
+
+@media (max-width: 360px) {
+  .t-confirm-foot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .t-confirm-foot > .t-ghost,
+  .t-confirm-foot-right,
+  .t-confirm-foot-right .t-danger {
+    width: 100%;
+  }
+}
+
+
+/* Profile modal buttons use the same sizing as the forms. */
+
+
+.tmodal-foot .t-ghost,
+.tmodal-foot .t-save {
+  min-width: 110px;
+  height: 40px;
+
+
+  border-radius: 10px;
+
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   MODAL RESPONSIVE
+========================================================= */
+
+
+@media (max-width: 700px) {
+  .tmodal {
+    padding: 14px;
+  }
+
+
+  .tmodal-dialog {
+    max-height: calc(100vh - 28px);
+    border-radius: 14px;
+  }
+
+
+  .tmodal-head {
+    padding: 12px;
+  }
+
+
+  .tmodal-avatar {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+
+
+    border-radius: 11px;
+  }
+
+
+  .tmodal-title {
+    font-size: 15px;
+  }
+
+
+  .tmodal-tabs {
+    padding: 7px 10px;
+  }
+
+
+  .tmodal-body {
+    padding: 14px;
+  }
+
+
+  .tmodal-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .tmodal-foot {
+    padding: 10px 12px;
+  }
+
+
+  .tmodal-foot-right {
+    flex: 1;
+  }
+
+
+  .tmodal-foot .t-ghost,
+  .tmodal-foot .t-save {
+    min-width: 0;
+  }
+
+
+  .tmodal-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 480px) {
+  .tmodal {
+    padding: 8px;
+  }
+
+
+  .tmodal-dialog {
+    max-height: calc(100vh - 16px);
+    border-radius: 12px;
+  }
+
+
+  .tmodal-head {
+    gap: 10px;
+  }
+
+
+  .tmodal-head-left {
+    gap: 9px;
+  }
+
+
+  .tmodal-avatar {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+
+  .tmodal-x {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+
+  .tmodal-foot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .tmodal-foot .t-ghost,
+  .tmodal-foot .t-save {
+    width: 100%;
+  }
+
+
+  .tmodal-foot-right {
+    width: 100%;
+  }
+
+
+  .tmodal-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 /* =========================================================
    STANDARD HEADER SPACING
 ========================================================= */
 
+
 .topbar {
   margin-bottom: 4px;
 }
 
+
+/* =========================================================
+   BULK CREATE TEACHERS
+========================================================= */
+
+
+.bulk-create-card {
+  padding: 22px;
+  overflow: hidden;
+}
+
+
+.bulk-create-header {
+  margin-bottom: 18px;
+}
+
+
+.bulk-create-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 1000;
+  color: #0b2c4a;
+  line-height: 1.2;
+}
+
+
+.bulk-create-subtitle {
+  margin: 5px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(11, 44, 74, 0.58);
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BULK IMPORT TOOLS
+========================================================= */
+
+
+.bulk-import-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+}
+
+
+.bulk-import-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+
+.bulk-tool-btn {
+  height: 38px;
+  padding: 0 15px;
+  border: 1px solid rgba(11, 44, 74, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.bulk-tool-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 77, 122, 0.25);
+  transform: translateY(-1px);
+}
+
+
+.bulk-upload-btn {
+  background: #0b4d7a;
+  border-color: #0b4d7a;
+  color: #fff;
+}
+
+
+.bulk-upload-btn:hover {
+  background: #083b5e;
+  border-color: #083b5e;
+  color: #fff;
+}
+
+
+.bulk-import-note {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: rgba(11, 44, 74, 0.55);
+}
+
+
+.bulk-import-status {
+  margin-bottom: 16px;
+}
+
+
+.bulk-error {
+  margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   TEACHER INFORMATION HEADER
+========================================================= */
+
+
+.bulk-entry-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+}
+
+
+.bulk-entry-label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 1000;
+  color: #0b2c4a;
+  line-height: 1.25;
+}
+
+
+.bulk-entry-note {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(11, 44, 74, 0.55);
+}
+
+
+.bulk-row-generator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+
+.bulk-row-generator-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: #0b2c4a;
+  white-space: nowrap;
+}
+
+
+.bulk-row-generator-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+#bulkTeacherCount {
+  width: 68px;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid rgba(11, 44, 74, 0.12);
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+#bulkTeacherCount:focus {
+  border-color: #0b4d7a;
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+
+.bulk-generate-btn {
+  height: 38px;
+  padding: 0 15px;
+  border: none;
+  border-radius: 10px;
+  background: #0b4d7a;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.bulk-generate-btn:hover {
+  background: #083b5e;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(11, 77, 122, 0.16);
+}
+
+
+/* =========================================================
+   BULK TEACHER ROWS
+========================================================= */
+
+
+.bulk-teachers-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+
+.bulk-teacher-row {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+
+.bulk-teacher-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+
+.bulk-teacher-number {
+  font-size: 13px;
+  font-weight: 1000;
+  color: #0b2c4a;
+}
+
+
+.bulk-teacher-remove {
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 4px 0;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.bulk-teacher-remove:hover {
+  color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   BULK TEACHER FIELDS
+========================================================= */
+
+
+.bulk-teacher-row-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+
+.bulk-teacher-field {
+  min-width: 0;
+}
+
+
+.bulk-teacher-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 1000;
+  color: #0b2c4a;
+}
+
+
+.bulk-teacher-field input,
+.bulk-teacher-field select {
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  color: #0b2c4a;
+}
+
+
+.bulk-teacher-field input:focus,
+.bulk-teacher-field select:focus {
+  border-color: rgba(11, 77, 122, 0.35);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+
+/* =========================================================
+   BULK TEACHER PHONE
+========================================================= */
+
+
+.bulk-phone-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.bulk-phone-wrap:focus-within {
+  border-color: rgba(11, 77, 122, 0.35);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+
+
+.bulk-phone-prefix {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid rgba(11, 44, 74, 0.08);
+  color: #0b2c4a;
+  font-size: 12px;
+  font-weight: 900;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+
+.bulk-phone-wrap input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 10px !important;
+  outline: none;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+
+/* =========================================================
+   BULK CREATE ACTIONS
+========================================================= */
+
+
+.bulk-create-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+}
+
+
+.bulk-create-actions .t-ghost,
+.bulk-create-actions .t-save {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.bulk-create-actions .t-ghost {
+  border: 1px solid rgba(11, 44, 74, 0.12);
+  background: #fff;
+  color: #0b2c4a;
+}
+
+
+.bulk-create-actions .t-ghost:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.2);
+  transform: translateY(-1px);
+}
+
+
+.bulk-create-actions .t-save {
+  border: 1px solid #0b4d7a;
+  background: #0b4d7a;
+  color: #fff;
+}
+
+
+.bulk-create-actions .t-save:hover {
+  background: #083b5e;
+  border-color: #083b5e;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(11, 77, 122, 0.16);
+}
+
+
+.bulk-create-actions .t-ghost:active,
+.bulk-create-actions .t-save:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   ADD ANOTHER TEACHER
+========================================================= */
+
+
+.bulk-add-row-btn {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 4px;
+  padding: 0 16px;
+
+
+  border: 1px dashed rgba(11, 77, 122, 0.28);
+  border-radius: 10px;
+
+
+  background: #fff;
+  color: #0b4d7a;
+
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+
+  cursor: pointer;
+
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.bulk-add-row-btn:hover {
+  background: #f8fafc;
+  border-color: #0b4d7a;
+  color: #083b5e;
+  transform: translateY(-1px);
+}
+
+
+.bulk-add-row-btn:active {
+  transform: translateY(0);
+}
+
+
+#saveBulkTeachersBtn {
+  min-width: 130px;
+}
+
+
+/* =========================================================
+   BULK CREATE RESPONSIVE
+========================================================= */
+
+
+@media (max-width: 1200px) {
+  .bulk-teacher-row-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 900px) {
+  .bulk-import-tools {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+
+  .bulk-import-left {
+    width: 100%;
+  }
+
+
+  .bulk-import-note {
+    width: 100%;
+    text-align: left;
+  }
+
+
+  .bulk-entry-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .bulk-row-generator {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+
+  .bulk-teacher-row-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 650px) {
+  .bulk-create-card {
+    padding: 16px;
+  }
+
+
+  .bulk-import-left {
+    flex-direction: column;
+  }
+
+
+  .bulk-tool-btn {
+    width: 100%;
+  }
+
+
+  .bulk-row-generator {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .bulk-row-generator-controls {
+    width: 100%;
+  }
+
+
+  #bulkTeacherCount {
+    flex: 1;
+  }
+
+
+  .bulk-teacher-row {
+    padding: 14px;
+  }
+
+
+  .bulk-teacher-row-fields {
+    grid-template-columns: 1fr;
+  }
+
+
+  .bulk-create-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .bulk-create-actions .t-ghost,
+  .bulk-create-actions .t-save {
+    width: 100%;
+  }
+}
+
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
-
 @media (max-width: 1100px) {
   .t-form-grid {
     grid-template-columns: 1fr;
+
 
     grid-template-areas:
       "basic"
@@ -1141,57 +3371,162 @@
       "right";
   }
 
+
   .t-search {
     min-width: 220px;
   }
+
+
+  /* Keep list-page header actions inside the viewport */
+  .teachers-page-head {
+    flex-wrap: wrap;
+  }
+
+
+  .teachers-head-actions {
+    flex-shrink: 0;
+  }
+
+
+  .teachers-head-actions > .t-bulk-btn,
+  .teachers-head-actions > .t-add-btn {
+    padding-left: 10px;
+    padding-right: 10px;
+    gap: 6px;
+  }
 }
 
+
 @media (max-width: 700px) {
-  .t-row2 {
+  .t-row2,
+  .t-row4 {
     grid-template-columns: 1fr;
   }
+
 
   .tmodal-grid {
     grid-template-columns: 1fr;
   }
 
+
+  /* Keep the page header inside the viewport */
+  .teachers-page-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 0;
+  }
+
+
+  .teachers-title {
+    min-width: 0;
+  }
+
+
+  .teachers-head-actions {
+    width: 100%;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+
+  .teachers-head-actions > .t-bulk-btn,
+  .teachers-head-actions > .t-add-btn {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+
+  .t-form-header-actions {
+    flex-wrap: wrap;
+  }
+
+
   .t-search {
     min-width: 0;
-
     width: 100%;
   }
+
 
   .t-tools {
     width: 100%;
+    min-width: 0;
   }
+
 
   .t-card-head {
     flex-direction: column;
-
     align-items: stretch;
+    min-width: 0;
   }
+
 
   .t-form-actions-bottom {
     justify-content: flex-end;
-
     width: 100%;
   }
 }
+
 
 @media (max-width: 650px) {
   .t-actions {
     gap: 6px;
   }
 
+
   .t-icon-btn {
     width: 38px;
     height: 38px;
 
+
     border-radius: 10px;
   }
+
 
   .t-icon-btn img {
     width: 18px;
     height: 18px;
   }
+
+
+  .teachers-head-actions {
+    gap: 8px;
+  }
+
+
+  .t-form-header-actions {
+    width: 100%;
+  }
+
+
+  .t-form-header-actions .t-ghost,
+  .t-form-header-actions .t-save {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+
+  .teachers-head-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+
+  .teachers-head-actions > .t-bulk-btn,
+  .teachers-head-actions > .t-add-btn {
+    flex: 1 1 auto;
+  }
+
+
+  .t-table-wrap {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
+
+
+
+
+

@@ -7,10 +7,13 @@
 // - Delete school year
 // - Reusable confirm modal
 
+
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
 
+
   const API_BASE = "/api/admin/school-years";
+
 
   let csrfToken = "";
 
@@ -19,136 +22,140 @@ document.addEventListener("DOMContentLoaded", () => {
      UI
   ========================================================= */
 
-  const syList =
-    $("syList");
 
-  const selectedSYTitle =
-    $("selectedSYTitle");
+  const syList = $("syList");
 
-  const selectedSYSub =
-    $("selectedSYSub");
 
-  const termsTbody =
-    $("termsTbody");
+  const selectedSYTitle = $("selectedSYTitle");
 
-  const addSchoolYearBtn =
-    $("addSchoolYearBtn");
 
-  const deleteSchoolYearBtn =
-    $("deleteSchoolYearBtn");
+  const selectedSYSub = $("selectedSYSub");
 
-  const setActiveBtn =
-    $("setActiveBtn");
 
-  const editTermsBtn =
-    $("editTermsBtn");
+  const termsTbody = $("termsTbody");
+
+
+  const addSchoolYearBtn = $("addSchoolYearBtn");
+
+
+  const deleteSchoolYearBtn = $("deleteSchoolYearBtn");
+
+
+  const setActiveBtn = $("setActiveBtn");
+
+
+  const editTermsBtn = $("editTermsBtn");
 
 
   /* =========================================================
      CREATE SCHOOL YEAR MODAL
   ========================================================= */
 
-  const createSYModal =
-    $("createSYModal");
 
-  const createSYBackdrop =
-    $("createSYBackdrop");
+  const createSYModal = $("createSYModal");
 
-  const createSYCloseX =
-    $("createSYCloseX");
 
-  const createSYCancel =
-    $("createSYCancel");
+  const createSYBackdrop = $("createSYBackdrop");
 
-  const createSYSave =
-    $("createSYSave");
 
-  const syNameInput =
-    $("syNameInput");
+  const createSYCloseX = $("createSYCloseX");
 
-  const syStartInput =
-    $("syStartInput");
 
-  const syEndInput =
-    $("syEndInput");
+  const createSYCancel = $("createSYCancel");
 
-  const numberOfTermsInput =
-    $("numberOfTermsInput");
 
-  const createSYError =
-    $("createSYError");
+  const createSYSave = $("createSYSave");
+
+
+  const syNameInput = $("syNameInput");
+
+
+  const syStartInput = $("syStartInput");
+
+
+  const syEndInput = $("syEndInput");
+
+
+  const numberOfTermsInput = $("numberOfTermsInput");
+
+
+  const createSYError = $("createSYError");
 
 
   /* =========================================================
      EDIT TERMS MODAL
   ========================================================= */
 
-  const editTermsModal =
-    $("editTermsModal");
 
-  const editTermsBackdrop =
-    $("editTermsBackdrop");
+  const editTermsModal = $("editTermsModal");
 
-  const editTermsCloseX =
-    $("editTermsCloseX");
 
-  const editTermsCancel =
-    $("editTermsCancel");
+  const editTermsBackdrop = $("editTermsBackdrop");
 
-  const editTermsSave =
-    $("editTermsSave");
 
-  const editTermsReset =
-    $("editTermsReset");
+  const editTermsCloseX = $("editTermsCloseX");
 
-  const editTermsName =
-    $("editTermsName");
 
-  const termsEditor =
-    $("termsEditor");
+  const editTermsCancel = $("editTermsCancel");
 
-  const editTermsError =
-    $("editTermsError");
+
+  const editTermsSave = $("editTermsSave");
+
+
+  const editTermsReset = $("editTermsReset");
+
+
+  const editTermsName = $("editTermsName");
+
+
+  const termsEditor = $("termsEditor");
+
+
+  const editTermsError = $("editTermsError");
 
 
   /* =========================================================
      CONFIRM MODAL
   ========================================================= */
 
-  const confirmModal =
-    $("confirmModal");
 
-  const confirmBackdrop =
-    $("confirmBackdrop");
+  const confirmModal = $("confirmModal");
 
-  const confirmCloseX =
-    $("confirmCloseX");
 
-  const confirmCancel =
-    $("confirmCancel");
+  const confirmBackdrop = $("confirmBackdrop");
 
-  const confirmDelete =
-    $("confirmDelete");
 
-  const confirmTitle =
-    $("confirmTitle");
+  const confirmCloseX = $("confirmCloseX");
 
-  const confirmSub =
-    $("confirmSub");
 
-  const confirmText =
-    $("confirmText");
+  const confirmCancel = $("confirmCancel");
+
+
+  const confirmDelete = $("confirmDelete");
+
+
+  const confirmTitle = $("confirmTitle");
+
+
+  const confirmSub = $("confirmSub");
+
+
+  const confirmText = $("confirmText");
 
 
   /* =========================================================
      STATE
   ========================================================= */
 
+
   let selectedId = null;
+
 
   let confirmAction = null;
 
+
   let termsDraft = null;
+
 
   let store = {
     activeId: null,
@@ -160,9 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
      CONSTANTS
   ========================================================= */
 
+
   const DEFAULT_TERMS = 3;
 
+
   const MIN_TERMS = 1;
+
 
   const MAX_TERMS = 4;
 
@@ -171,40 +181,19 @@ document.addEventListener("DOMContentLoaded", () => {
      HELPERS
   ========================================================= */
 
+
   function uid() {
-    return (
-      "tmp-" +
-      Math.random()
-        .toString(16)
-        .slice(2) +
-      "-" +
-      Date.now()
-    );
+    return "tmp-" + Math.random().toString(16).slice(2) + "-" + Date.now();
   }
 
 
   function esc(value) {
     return String(value ?? "")
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
 
@@ -213,22 +202,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return "";
     }
 
-    const date =
-      new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
-      return String(
-        value
-      ).slice(0, 10);
+    const date = new Date(value);
+
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value).slice(0, 10);
     }
 
-    return date
-      .toISOString()
-      .slice(0, 10);
+
+    return date.toISOString().slice(0, 10);
   }
 
 
@@ -237,20 +220,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return "—";
     }
 
-    const date =
-      new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    const date = new Date(value);
+
+
+    if (Number.isNaN(date.getTime())) {
       return String(value);
     }
 
-    return date
-      .toISOString()
-      .slice(0, 10);
+
+    return date.toISOString().slice(0, 10);
   }
 
 
@@ -258,69 +237,47 @@ document.addEventListener("DOMContentLoaded", () => {
      NORMALIZE SCHOOL YEAR
   ========================================================= */
 
+
   function normalizeSchoolYear(item) {
     return {
-      id:
-        item._id,
+      id: item._id,
 
-      name:
-        item.name || "",
 
-      start:
-        formatDateForInput(
-          item.start
-        ),
+      name: item.name || "",
 
-      end:
-        formatDateForInput(
-          item.end
-        ),
 
-      createdAt:
-        item.createdAt
-          ? new Date(
-              item.createdAt
-            ).getTime()
-          : 0,
+      start: formatDateForInput(item.start),
 
-      isActive:
-        !!item.isActive,
 
-      terms:
-        Array.isArray(
-          item.terms
-        )
-          ? item.terms.map(
-              (term, index) => ({
-                id:
-                  term._id ||
-                  uid(),
+      end: formatDateForInput(item.end),
 
-                order:
-                  term.order ??
-                  index + 1,
 
-                name:
-                  term.name ||
-                  `Term ${
-                    index + 1
-                  }`,
+      createdAt: item.createdAt ? new Date(item.createdAt).getTime() : 0,
 
-                start:
-                  formatDateForInput(
-                    term.start
-                  ),
 
-                end:
-                  formatDateForInput(
-                    term.end
-                  ),
+      isActive: !!item.isActive,
 
-                locked:
-                  !!term.locked,
-              })
-            )
-          : [],
+
+      terms: Array.isArray(item.terms)
+        ? item.terms.map((term, index) => ({
+            id: term._id || uid(),
+
+
+            order: term.order ?? index + 1,
+
+
+            name: term.name || `Term ${index + 1}`,
+
+
+            start: formatDateForInput(term.start),
+
+
+            end: formatDateForInput(term.end),
+
+
+            locked: !!term.locked,
+          }))
+        : [],
     };
   }
 
@@ -329,22 +286,15 @@ document.addEventListener("DOMContentLoaded", () => {
      STORE
   ========================================================= */
 
+
   function syncStore(items) {
-    store.items =
-      items.map(
-        normalizeSchoolYear
-      );
+    store.items = items.map(normalizeSchoolYear);
 
-    const active =
-      store.items.find(
-        (item) =>
-          item.isActive
-      );
 
-    store.activeId =
-      active
-        ? active.id
-        : null;
+    const active = store.items.find((item) => item.isActive);
+
+
+    store.activeId = active ? active.id : null;
   }
 
 
@@ -352,19 +302,17 @@ document.addEventListener("DOMContentLoaded", () => {
      MODAL HELPERS
   ========================================================= */
 
+
   function openModal(element) {
     if (!element) {
       return;
     }
 
-    element.classList.remove(
-      "hidden"
-    );
 
-    element.setAttribute(
-      "aria-hidden",
-      "false"
-    );
+    element.classList.remove("hidden");
+
+
+    element.setAttribute("aria-hidden", "false");
   }
 
 
@@ -373,31 +321,24 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    element.classList.add(
-      "hidden"
-    );
 
-    element.setAttribute(
-      "aria-hidden",
-      "true"
-    );
+    element.classList.add("hidden");
+
+
+    element.setAttribute("aria-hidden", "true");
   }
 
 
-  function showErr(
-    element,
-    message
-  ) {
+  function showErr(element, message) {
     if (!element) {
       return;
     }
 
-    element.textContent =
-      message;
 
-    element.classList.remove(
-      "hidden"
-    );
+    element.textContent = message;
+
+
+    element.classList.remove("hidden");
   }
 
 
@@ -406,12 +347,49 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    element.textContent =
-      "";
 
-    element.classList.add(
-      "hidden"
-    );
+    element.textContent = "";
+
+
+    element.classList.add("hidden");
+  }
+
+
+  /* =========================================================
+   SUCCESS TOAST
+========================================================= */
+
+
+  let successToastTimer = null;
+
+
+  function showSuccess(message) {
+    const toast = document.querySelector(".sy-success-toast");
+    const text = toast?.querySelector(".sy-success-text");
+
+
+    if (!toast || !text) {
+      return;
+    }
+
+
+    text.textContent = message;
+
+
+    toast.classList.remove("hidden");
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+
+
+    if (successToastTimer) {
+      clearTimeout(successToastTimer);
+    }
+
+
+    successToastTimer = setTimeout(() => {
+      toast.classList.add("hidden");
+      successToastTimer = null;
+    }, 3000);
   }
 
 
@@ -419,42 +397,35 @@ document.addEventListener("DOMContentLoaded", () => {
      API
   ========================================================= */
 
-  async function fetchJson(
-    url,
-    options = {}
-  ) {
-    const response =
-      await fetch(
-        url,
-        {
-          credentials:
-            "include",
 
-          ...options,
+  async function fetchJson(url, options = {}) {
+    const response = await fetch(url, {
+      credentials: "include",
 
-          headers: {
-            ...(options.headers ||
-              {}),
-          },
-        }
-      );
+
+      ...options,
+
+
+      headers: {
+        ...(options.headers || {}),
+      },
+    });
+
 
     let data = {};
 
+
     try {
-      data =
-        await response.json();
+      data = await response.json();
     } catch {
       data = {};
     }
 
+
     if (!response.ok) {
-      throw new Error(
-        data.message ||
-          data.error ||
-          "Request failed."
-      );
+      throw new Error(data.message || data.error || "Request failed.");
     }
+
 
     return data;
   }
@@ -465,27 +436,22 @@ document.addEventListener("DOMContentLoaded", () => {
       return csrfToken;
     }
 
-    const data =
-      await fetchJson(
-        "/api/csrf-token"
-      );
 
-    csrfToken =
-      data.csrfToken || "";
+    const data = await fetchJson("/api/csrf-token");
+
+
+    csrfToken = data.csrfToken || "";
+
 
     return csrfToken;
   }
 
 
   async function loadSchoolYears() {
-    const data =
-      await fetchJson(
-        API_BASE
-      );
+    const data = await fetchJson(API_BASE);
 
-    syncStore(
-      data.items || []
-    );
+
+    syncStore(data.items || []);
   }
 
 
@@ -493,17 +459,17 @@ document.addEventListener("DOMContentLoaded", () => {
      RENDER SCHOOL YEAR LIST
   ========================================================= */
 
+
   function renderSYList() {
     if (!syList) {
       return;
     }
 
-    syList.innerHTML =
-      "";
 
-    if (
-      !store.items.length
-    ) {
+    syList.innerHTML = "";
+
+
+    if (!store.items.length) {
       syList.innerHTML = `
         <div
           style="
@@ -518,147 +484,98 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+
       return;
     }
 
+
     store.items
       .slice()
-      .sort(
-        (a, b) =>
-          (b.createdAt || 0) -
-          (a.createdAt || 0)
-      )
-      .forEach(
-        (schoolYear) => {
-          const button =
-            document.createElement(
-              "button"
-            );
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .forEach((schoolYear) => {
+        const button = document.createElement("button");
 
-          button.type =
-            "button";
 
-          button.className =
-            "sy-item" +
-            (
-              schoolYear.id ===
-              selectedId
-                ? " active"
-                : ""
-            );
+        button.type = "button";
 
-          const left =
-            document.createElement(
-              "div"
-            );
 
-          left.className =
-            "sy-item-left";
+        button.className =
+          "sy-item" + (schoolYear.id === selectedId ? " active" : "");
 
-          left.innerHTML = `
+
+        const left = document.createElement("div");
+
+
+        left.className = "sy-item-left";
+
+
+        left.innerHTML = `
             <div class="sy-name">
-              ${esc(
-                schoolYear.name
-              )}
+              ${esc(schoolYear.name)}
             </div>
 
+
             <div class="sy-dates">
-              ${esc(
-                niceDate(
-                  schoolYear.start
-                )
-              )}
+              ${esc(niceDate(schoolYear.start))}
               →
-              ${esc(
-                niceDate(
-                  schoolYear.end
-                )
-              )}
+              ${esc(niceDate(schoolYear.end))}
             </div>
           `;
 
 
-          const badges =
-            document.createElement(
-              "div"
-            );
-
-          badges.className =
-            "sy-badges";
+        const badges = document.createElement("div");
 
 
-          if (
-            store.activeId ===
-            schoolYear.id
-          ) {
-            const activeBadge =
-              document.createElement(
-                "span"
-              );
-
-            activeBadge.className =
-              "sy-pill active";
-
-            activeBadge.textContent =
-              "Active";
-
-            badges.appendChild(
-              activeBadge
-            );
-          }
+        badges.className = "sy-badges";
 
 
-          const count =
-            document.createElement(
-              "span"
-            );
-
-          count.className =
-            "sy-pill";
-
-          const numberOfTerms =
-            (
-              schoolYear.terms ||
-              []
-            ).length;
-
-          count.textContent =
-            `${numberOfTerms} term${
-              numberOfTerms === 1
-                ? ""
-                : "s"
-            }`;
-
-          badges.appendChild(
-            count
-          );
+        if (store.activeId === schoolYear.id) {
+          const activeBadge = document.createElement("span");
 
 
-          button.appendChild(
-            left
-          );
-
-          button.appendChild(
-            badges
-          );
+          activeBadge.className = "sy-pill active";
 
 
-          button.addEventListener(
-            "click",
-            () => {
-              selectedId =
-                schoolYear.id;
-
-              render();
-            }
-          );
+          activeBadge.textContent = "Active";
 
 
-          syList.appendChild(
-            button
-          );
+          badges.appendChild(activeBadge);
         }
-      );
+
+
+        const count = document.createElement("span");
+
+
+        count.className = "sy-pill";
+
+
+        const numberOfTerms = (schoolYear.terms || []).length;
+
+
+        count.textContent = `${numberOfTerms} term${
+          numberOfTerms === 1 ? "" : "s"
+        }`;
+
+
+        badges.appendChild(count);
+
+
+        button.appendChild(left);
+
+
+        button.appendChild(badges);
+
+
+        button.addEventListener("click", () => {
+          selectedId = schoolYear.id;
+
+
+          render();
+        });
+
+
+        syList.appendChild(button);
+      });
   }
 
 
@@ -666,43 +583,32 @@ document.addEventListener("DOMContentLoaded", () => {
      RENDER SCHOOL YEAR DETAILS
   ========================================================= */
 
+
   function renderDetails() {
-    if (
-      !selectedSYTitle ||
-      !selectedSYSub ||
-      !termsTbody
-    ) {
+    if (!selectedSYTitle || !selectedSYSub || !termsTbody) {
       return;
     }
 
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
-      selectedSYTitle.textContent =
-        "—";
-
-      selectedSYSub.textContent =
-        "Select a school year to view details.";
+      selectedSYTitle.textContent = "—";
 
 
-      if (
-        deleteSchoolYearBtn
-      ) {
-        deleteSchoolYearBtn.disabled =
-          true;
+      selectedSYSub.textContent = "Select a school year to view details.";
+
+
+      if (deleteSchoolYearBtn) {
+        deleteSchoolYearBtn.disabled = true;
       }
 
-      setActiveBtn.disabled =
-        true;
 
-      editTermsBtn.disabled =
-        true;
+      setActiveBtn.disabled = true;
+
+
+      editTermsBtn.disabled = true;
 
 
       termsTbody.innerHTML = `
@@ -713,45 +619,31 @@ document.addEventListener("DOMContentLoaded", () => {
         </tr>
       `;
 
+
       return;
     }
 
 
-    selectedSYTitle.textContent =
-      schoolYear.name;
+    selectedSYTitle.textContent = schoolYear.name;
 
 
-    selectedSYSub.textContent =
-      `Timeline: ${niceDate(
-        schoolYear.start
-      )} → ${niceDate(
-        schoolYear.end
-      )}`;
+    selectedSYSub.textContent = `Timeline: ${niceDate(
+      schoolYear.start,
+    )} → ${niceDate(schoolYear.end)}`;
 
 
-    if (
-      deleteSchoolYearBtn
-    ) {
-      deleteSchoolYearBtn.disabled =
-        false;
+    if (deleteSchoolYearBtn) {
+      deleteSchoolYearBtn.disabled = false;
     }
 
 
-    setActiveBtn.disabled =
-      store.activeId ===
-      schoolYear.id;
+    setActiveBtn.disabled = store.activeId === schoolYear.id;
 
 
-    editTermsBtn.disabled =
-      false;
+    editTermsBtn.disabled = false;
 
 
-    const terms =
-      Array.isArray(
-        schoolYear.terms
-      )
-        ? schoolYear.terms
-        : [];
+    const terms = Array.isArray(schoolYear.terms) ? schoolYear.terms : [];
 
 
     if (!terms.length) {
@@ -764,64 +656,46 @@ document.addEventListener("DOMContentLoaded", () => {
         </tr>
       `;
 
+
       return;
     }
 
 
-    termsTbody.innerHTML =
-      terms
-        .slice()
-        .sort(
-          (a, b) =>
-            (a.order || 0) -
-            (b.order || 0)
-        )
-        .map(
-          (term, index) => {
-            const statusClass =
-              term.locked
-                ? "locked"
-                : "open";
-
-            const statusText =
-              term.locked
-                ? "Locked"
-                : "Open";
+    termsTbody.innerHTML = terms
+      .slice()
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((term, index) => {
+        const statusClass = term.locked ? "locked" : "open";
 
 
-            return `
+        const statusText = term.locked ? "Locked" : "Open";
+
+
+        return `
               <tr>
+
 
                 <td>
                   ${index + 1}
                 </td>
 
+
                 <td>
                   <strong>
-                    ${esc(
-                      term.name ||
-                      `Term ${
-                        index + 1
-                      }`
-                    )}
+                    ${esc(term.name || `Term ${index + 1}`)}
                   </strong>
                 </td>
 
-                <td>
-                  ${esc(
-                    niceDate(
-                      term.start
-                    )
-                  )}
-                </td>
 
                 <td>
-                  ${esc(
-                    niceDate(
-                      term.end
-                    )
-                  )}
+                  ${esc(niceDate(term.start))}
                 </td>
+
+
+                <td>
+                  ${esc(niceDate(term.end))}
+                </td>
+
 
                 <td
                   style="
@@ -831,17 +705,15 @@ document.addEventListener("DOMContentLoaded", () => {
                   <span
                     class="sy-status ${statusClass}"
                   >
-                    ${esc(
-                      statusText
-                    )}
+                    ${esc(statusText)}
                   </span>
                 </td>
 
+
               </tr>
             `;
-          }
-        )
-        .join("");
+      })
+      .join("");
   }
 
 
@@ -849,36 +721,21 @@ document.addEventListener("DOMContentLoaded", () => {
      RENDER
   ========================================================= */
 
+
   function render() {
-    if (
-      !selectedId &&
-      store.items.length
-    ) {
-      selectedId =
-        store.activeId ||
-        store.items[0].id;
+    if (!selectedId && store.items.length) {
+      selectedId = store.activeId || store.items[0].id;
     }
 
 
-    if (
-      selectedId &&
-      !store.items.some(
-        (item) =>
-          item.id ===
-          selectedId
-      )
-    ) {
+    if (selectedId && !store.items.some((item) => item.id === selectedId)) {
       selectedId =
-        store.activeId ||
-        (
-          store.items[0]
-            ? store.items[0].id
-            : null
-        );
+        store.activeId || (store.items[0] ? store.items[0].id : null);
     }
 
 
     renderSYList();
+
 
     renderDetails();
   }
@@ -888,86 +745,62 @@ document.addEventListener("DOMContentLoaded", () => {
      CREATE SCHOOL YEAR
   ========================================================= */
 
+
   function openCreateSY() {
-    hideErr(
-      createSYError
-    );
-
-    syNameInput.value =
-      "";
-
-    syStartInput.value =
-      "";
-
-    syEndInput.value =
-      "";
+    hideErr(createSYError);
 
 
-    if (
-      numberOfTermsInput
-    ) {
-      numberOfTermsInput.value =
-        String(
-          DEFAULT_TERMS
-        );
+    syNameInput.value = "";
+
+
+    syStartInput.value = "";
+
+
+    syEndInput.value = "";
+
+
+    if (numberOfTermsInput) {
+      numberOfTermsInput.value = String(DEFAULT_TERMS);
     }
 
 
-    openModal(
-      createSYModal
-    );
+    openModal(createSYModal);
 
 
-    setTimeout(
-      () =>
-        syNameInput.focus(),
-      0
-    );
+    setTimeout(() => syNameInput.focus(), 0);
   }
 
 
   function closeCreateSY() {
-    closeModal(
-      createSYModal
-    );
+    closeModal(createSYModal);
 
-    hideErr(
-      createSYError
-    );
+
+    hideErr(createSYError);
   }
 
 
   async function saveCreateSY() {
-    const name =
-      syNameInput.value.trim();
-
-    const start =
-      syStartInput.value ||
-      "";
-
-    const end =
-      syEndInput.value ||
-      "";
+    const name = syNameInput.value.trim();
 
 
-    const numberOfTerms =
-      Number(
-        numberOfTermsInput
-          ? numberOfTermsInput
-              .value
-          : DEFAULT_TERMS
-      );
+    const start = syStartInput.value || "";
+
+
+    const end = syEndInput.value || "";
+
+
+    const numberOfTerms = Number(
+      numberOfTermsInput ? numberOfTermsInput.value : DEFAULT_TERMS,
+    );
 
 
     /* -----------------------------------------------------
        VALIDATE NAME
     ----------------------------------------------------- */
 
+
     if (!name) {
-      return showErr(
-        createSYError,
-        "School year name is required."
-      );
+      return showErr(createSYError, "School year name is required.");
     }
 
 
@@ -975,18 +808,15 @@ document.addEventListener("DOMContentLoaded", () => {
        VALIDATE NUMBER OF TERMS
     ----------------------------------------------------- */
 
+
     if (
-      !Number.isInteger(
-        numberOfTerms
-      ) ||
-      numberOfTerms <
-        MIN_TERMS ||
-      numberOfTerms >
-        MAX_TERMS
+      !Number.isInteger(numberOfTerms) ||
+      numberOfTerms < MIN_TERMS ||
+      numberOfTerms > MAX_TERMS
     ) {
       return showErr(
         createSYError,
-        `Number of terms must be between ${MIN_TERMS} and ${MAX_TERMS}.`
+        `Number of terms must be between ${MIN_TERMS} and ${MAX_TERMS}.`,
       );
     }
 
@@ -995,98 +825,73 @@ document.addEventListener("DOMContentLoaded", () => {
        VALIDATE DATES
     ----------------------------------------------------- */
 
-    if (
-      start &&
-      end &&
-      start > end
-    ) {
-      return showErr(
-        createSYError,
-        "End date must be after start date."
-      );
+
+    if (start && end && start > end) {
+      return showErr(createSYError, "End date must be after start date.");
     }
 
 
     try {
-      hideErr(
-        createSYError
-      );
+      hideErr(createSYError);
 
-      createSYSave.disabled =
-        true;
+
+      createSYSave.disabled = true;
 
 
       await ensureCsrfToken();
 
 
-      await fetchJson(
-        API_BASE,
-        {
-          method:
-            "POST",
+      await fetchJson(API_BASE, {
+        method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
 
-            "x-csrf-token":
-              csrfToken,
-          },
+        headers: {
+          "Content-Type": "application/json",
 
-          body:
-            JSON.stringify({
-              name,
 
-              start:
-                start ||
-                null,
+          "x-csrf-token": csrfToken,
+        },
 
-              end:
-                end ||
-                null,
 
-              numberOfTerms,
-            }),
-        }
-      );
+        body: JSON.stringify({
+          name,
+
+
+          start: start || null,
+
+
+          end: end || null,
+
+
+          numberOfTerms,
+        }),
+      });
 
 
       await loadSchoolYears();
 
 
-      const created =
-        store.items.find(
-          (item) =>
-            item.name
-              .trim()
-              .toLowerCase() ===
-            name
-              .toLowerCase()
-        );
+      const created = store.items.find(
+        (item) => item.name.trim().toLowerCase() === name.toLowerCase(),
+      );
 
 
       if (created) {
-        selectedId =
-          created.id;
+        selectedId = created.id;
       }
 
 
       closeCreateSY();
 
+
       render();
 
+
+      showSuccess("School year created successfully.");
     } catch (error) {
-
-      showErr(
-        createSYError,
-        error.message ||
-          "Failed to create school year."
-      );
-
+      showErr(createSYError, error.message || "Failed to create school year.");
     } finally {
-
-      createSYSave.disabled =
-        false;
+      createSYSave.disabled = false;
     }
   }
 
@@ -1095,13 +900,9 @@ document.addEventListener("DOMContentLoaded", () => {
      DELETE SCHOOL YEAR
   ========================================================= */
 
+
   async function deleteSelectedSchoolYear() {
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
@@ -1110,90 +911,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     try {
-
-      if (
-        deleteSchoolYearBtn
-      ) {
-        deleteSchoolYearBtn.disabled =
-          true;
+      if (deleteSchoolYearBtn) {
+        deleteSchoolYearBtn.disabled = true;
       }
 
-      setActiveBtn.disabled =
-        true;
 
-      editTermsBtn.disabled =
-        true;
+      setActiveBtn.disabled = true;
+
+
+      editTermsBtn.disabled = true;
 
 
       await ensureCsrfToken();
 
 
-      await fetchJson(
-        `${API_BASE}/${schoolYear.id}`,
-        {
-          method:
-            "DELETE",
+      await fetchJson(`${API_BASE}/${schoolYear.id}`, {
+        method: "DELETE",
 
-          headers: {
-            "x-csrf-token":
-              csrfToken,
-          },
-        }
-      );
+
+        headers: {
+          "x-csrf-token": csrfToken,
+        },
+      });
 
 
       await loadSchoolYears();
 
 
       if (store.activeId) {
-
-        selectedId =
-          store.activeId;
-
-      } else if (
-        store.items.length
-      ) {
-
-        selectedId =
-          store.items[0].id;
-
+        selectedId = store.activeId;
+      } else if (store.items.length) {
+        selectedId = store.items[0].id;
       } else {
-
-        selectedId =
-          null;
+        selectedId = null;
       }
 
 
       render();
 
+
+      showSuccess("School year deleted successfully.");
     } catch (error) {
-
-      alert(
-        error.message ||
-          "Failed to delete school year."
-      );
+      alert(error.message || "Failed to delete school year.");
 
 
-      await loadSchoolYears()
-        .catch(() => {});
+      await loadSchoolYears().catch(() => {});
 
 
       render();
-
     } finally {
-
-      if (
-        deleteSchoolYearBtn
-      ) {
-        deleteSchoolYearBtn.disabled =
-          false;
+      if (deleteSchoolYearBtn) {
+        deleteSchoolYearBtn.disabled = false;
       }
 
-      setActiveBtn.disabled =
-        false;
 
-      editTermsBtn.disabled =
-        false;
+      setActiveBtn.disabled = false;
+
+
+      editTermsBtn.disabled = false;
     }
   }
 
@@ -1202,13 +977,9 @@ document.addEventListener("DOMContentLoaded", () => {
      SET ACTIVE SCHOOL YEAR
   ========================================================= */
 
+
   async function setSelectedActive() {
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
@@ -1217,43 +988,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     try {
-
-      setActiveBtn.disabled =
-        true;
+      setActiveBtn.disabled = true;
 
 
       await ensureCsrfToken();
 
 
-      await fetchJson(
-        `${API_BASE}/${schoolYear.id}/active`,
-        {
-          method:
-            "PATCH",
+      await fetchJson(`${API_BASE}/${schoolYear.id}/active`, {
+        method: "PATCH",
 
-          headers: {
-            "x-csrf-token":
-              csrfToken,
-          },
-        }
-      );
+
+        headers: {
+          "x-csrf-token": csrfToken,
+        },
+      });
 
 
       await loadSchoolYears();
 
 
-      selectedId =
-        schoolYear.id;
+      selectedId = schoolYear.id;
 
 
       render();
 
-    } catch (error) {
 
-      alert(
-        error.message ||
-          "Failed to set active school year."
-      );
+      showSuccess("School year set as active successfully.");
+    } catch (error) {
+      alert(error.message || "Failed to set active school year.");
+
 
       render();
     }
@@ -1264,9 +1027,8 @@ document.addEventListener("DOMContentLoaded", () => {
      DEFAULT TERMS
   ========================================================= */
 
-  function makeDefaultTerms(
-    count = DEFAULT_TERMS
-  ) {
+
+  function makeDefaultTerms(count = DEFAULT_TERMS) {
     return Array.from(
       {
         length: count,
@@ -1274,23 +1036,21 @@ document.addEventListener("DOMContentLoaded", () => {
       (_, index) => ({
         id: uid(),
 
-        order:
-          index + 1,
 
-        name:
-          `Term ${
-            index + 1
-          }`,
+        order: index + 1,
 
-        start:
-          "",
 
-        end:
-          "",
+        name: `Term ${index + 1}`,
 
-        locked:
-          false,
-      })
+
+        start: "",
+
+
+        end: "",
+
+
+        locked: false,
+      }),
     );
   }
 
@@ -1299,13 +1059,9 @@ document.addEventListener("DOMContentLoaded", () => {
      OPEN EDIT TERMS
   ========================================================= */
 
+
   function openEditTerms() {
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
@@ -1313,102 +1069,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    hideErr(
-      editTermsError
-    );
+    hideErr(editTermsError);
 
 
-    editTermsName.textContent =
-      schoolYear.name;
+    editTermsName.textContent = schoolYear.name;
 
 
-    termsDraft =
-      (schoolYear.terms || [])
-        .slice()
-        .sort(
-          (a, b) =>
-            (a.order || 0) -
-            (b.order || 0)
-        )
-        .map(
-          (term, index) => ({
-            id:
-              term.id ||
-              uid(),
-
-            order:
-              term.order ??
-              index + 1,
-
-            name:
-              term.name ||
-              `Term ${
-                index + 1
-              }`,
-
-            start:
-              term.start ||
-              "",
-
-            end:
-              term.end ||
-              "",
-
-            locked:
-              !!term.locked,
-          })
-        );
+    termsDraft = (schoolYear.terms || [])
+      .slice()
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((term, index) => ({
+        id: term.id || uid(),
 
 
-    if (
-      !termsDraft.length
-    ) {
-      termsDraft =
-        makeDefaultTerms();
+        order: term.order ?? index + 1,
+
+
+        name: term.name || `Term ${index + 1}`,
+
+
+        start: term.start || "",
+
+
+        end: term.end || "",
+
+
+        locked: !!term.locked,
+      }));
+
+
+    if (!termsDraft.length) {
+      termsDraft = makeDefaultTerms();
     }
 
 
-    termsDraft =
-      termsDraft.slice(
-        0,
-        MAX_TERMS
-      );
+    termsDraft = termsDraft.slice(0, MAX_TERMS);
 
 
     buildTermsEditor();
 
 
-    openModal(
-      editTermsModal
-    );
+    openModal(editTermsModal);
 
 
     setTimeout(() => {
+      const first = termsEditor.querySelector("input, select, button");
 
-      const first =
-        termsEditor.querySelector(
-          "input, select, button"
-        );
 
       if (first) {
         first.focus();
       }
-
     }, 0);
   }
 
 
   function closeEditTerms() {
-    closeModal(
-      editTermsModal
-    );
+    closeModal(editTermsModal);
 
-    hideErr(
-      editTermsError
-    );
 
-    termsDraft =
-      null;
+    hideErr(editTermsError);
+
+
+    termsDraft = null;
   }
 
 
@@ -1416,105 +1138,106 @@ document.addEventListener("DOMContentLoaded", () => {
      BUILD TERMS EDITOR
   ========================================================= */
 
+
   function buildTermsEditor() {
     if (!termsEditor) {
       return;
     }
 
 
-    termsEditor.innerHTML =
-      "";
+    termsEditor.innerHTML = "";
 
 
-    (
-      termsDraft || []
-    ).forEach(
-      (term, index) => {
-
-        const row =
-          document.createElement(
-            "div"
-          );
+    (termsDraft || []).forEach((term, index) => {
+      const row = document.createElement("div");
 
 
-        row.className =
-          "sy-qrow";
+      row.className = "sy-qrow";
 
 
-        row.dataset.id =
-          term.id;
+      row.dataset.id = term.id;
 
 
-        row.innerHTML = `
+      row.innerHTML = `
           <div>
+
 
             <strong>
               Term
             </strong>
 
+
             <input
               class="sy-mini"
               type="text"
               data-k="name"
-              value="${esc(
-                term.name
-              )}"
+              value="${esc(term.name)}"
             />
+
 
           </div>
 
 
+
+
           <div>
+
 
             <strong>
               Start
             </strong>
 
+
             <input
               class="sy-mini"
               type="date"
               data-k="start"
-              value="${esc(
-                term.start
-              )}"
+              value="${esc(term.start)}"
             />
+
 
           </div>
 
 
+
+
           <div>
+
 
             <strong>
               End
             </strong>
 
+
             <input
               class="sy-mini"
               type="date"
               data-k="end"
-              value="${esc(
-                term.end
-              )}"
+              value="${esc(term.end)}"
             />
+
 
           </div>
 
 
+
+
           <label class="sy-lock">
+
 
             <input
               type="checkbox"
               data-k="locked"
-              ${
-                term.locked
-                  ? "checked"
-                  : ""
-              }
+              ${term.locked ? "checked" : ""}
             />
+
 
             Lock
 
+
           </label>
+
+
 
 
           <button
@@ -1528,151 +1251,88 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
 
-        row
-          .querySelectorAll(
-            "[data-k]"
-          )
-          .forEach(
-            (element) => {
-
-              element.addEventListener(
-                "input",
-                () => {
-
-                  const id =
-                    row.dataset.id;
-
-                  const key =
-                    element.getAttribute(
-                      "data-k"
-                    );
+      row.querySelectorAll("[data-k]").forEach((element) => {
+        element.addEventListener("input", () => {
+          const id = row.dataset.id;
 
 
-                  const item =
-                    termsDraft.find(
-                      (termItem) =>
-                        termItem.id ===
-                        id
-                    );
+          const key = element.getAttribute("data-k");
 
 
-                  if (
-                    !item ||
-                    !key
-                  ) {
-                    return;
-                  }
+          const item = termsDraft.find((termItem) => termItem.id === id);
 
 
-                  if (
-                    element.type ===
-                    "checkbox"
-                  ) {
-
-                    item[key] =
-                      element.checked;
-
-                  } else {
-
-                    item[key] =
-                      element.value;
-                  }
-                }
-              );
-
-
-              element.addEventListener(
-                "change",
-                () => {
-
-                  if (
-                    element.type !==
-                    "checkbox"
-                  ) {
-                    return;
-                  }
-
-
-                  const id =
-                    row.dataset.id;
-
-
-                  const item =
-                    termsDraft.find(
-                      (termItem) =>
-                        termItem.id ===
-                        id
-                    );
-
-
-                  if (item) {
-                    item.locked =
-                      element.checked;
-                  }
-                }
-              );
-            }
-          );
-
-
-        const deleteBtn =
-          row.querySelector(
-            "[data-act='del']"
-          );
-
-
-        deleteBtn.addEventListener(
-          "click",
-          () => {
-
-            confirmActionModal(
-              {
-                title:
-                  "Remove Term",
-
-                sub:
-                  "This term will be removed from the draft.",
-
-                text:
-                  `Remove "${term.name}"?`,
-
-                confirmLabel:
-                  "Remove",
-
-                confirmClass:
-                  "sy-danger",
-              },
-
-              () => {
-
-                termsDraft =
-                  termsDraft.filter(
-                    (item) =>
-                      item.id !==
-                      term.id
-                  );
-
-
-                termsDraft.forEach(
-                  (item, index) => {
-                    item.order =
-                      index + 1;
-                  }
-                );
-
-
-                buildTermsEditor();
-              }
-            );
+          if (!item || !key) {
+            return;
           }
-        );
 
 
-        termsEditor.appendChild(
-          row
+          if (element.type === "checkbox") {
+            item[key] = element.checked;
+          } else {
+            item[key] = element.value;
+          }
+        });
+
+
+        element.addEventListener("change", () => {
+          if (element.type !== "checkbox") {
+            return;
+          }
+
+
+          const id = row.dataset.id;
+
+
+          const item = termsDraft.find((termItem) => termItem.id === id);
+
+
+          if (item) {
+            item.locked = element.checked;
+          }
+        });
+      });
+
+
+      const deleteBtn = row.querySelector("[data-act='del']");
+
+
+      deleteBtn.addEventListener("click", () => {
+        confirmActionModal(
+          {
+            title: "Remove Term",
+
+
+            sub: "This term will be removed from the draft.",
+
+
+            text: `Remove "${term.name}"?`,
+
+
+            confirmLabel: "Remove",
+
+
+            confirmClass: "sy-danger",
+          },
+
+
+          () => {
+            termsDraft = termsDraft.filter((item) => item.id !== term.id);
+
+
+            termsDraft.forEach((item, index) => {
+              item.order = index + 1;
+            });
+
+
+            buildTermsEditor();
+          },
         );
-      }
-    );
+      });
+
+
+      termsEditor.appendChild(row);
+    });
 
 
     /*
@@ -1690,13 +1350,9 @@ document.addEventListener("DOMContentLoaded", () => {
      RESET TERMS
   ========================================================= */
 
+
   function resetTerms() {
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
@@ -1704,71 +1360,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    termsDraft =
-      (schoolYear.terms || [])
-        .slice()
-        .sort(
-          (a, b) =>
-            (a.order || 0) -
-            (b.order || 0)
-        )
-        .map(
-          (term, index) => ({
-            id:
-              term.id ||
-              uid(),
-
-            order:
-              term.order ??
-              index + 1,
-
-            name:
-              term.name ||
-              `Term ${
-                index + 1
-              }`,
-
-            start:
-              term.start ||
-              "",
-
-            end:
-              term.end ||
-              "",
-
-            locked:
-              !!term.locked,
-          })
-        );
+    termsDraft = (schoolYear.terms || [])
+      .slice()
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((term, index) => ({
+        id: term.id || uid(),
 
 
-    if (
-      !termsDraft.length
-    ) {
-      termsDraft =
-        makeDefaultTerms();
+        order: term.order ?? index + 1,
+
+
+        name: term.name || `Term ${index + 1}`,
+
+
+        start: term.start || "",
+
+
+        end: term.end || "",
+
+
+        locked: !!term.locked,
+      }));
+
+
+    if (!termsDraft.length) {
+      termsDraft = makeDefaultTerms();
     }
 
 
-    termsDraft =
-      termsDraft.slice(
-        0,
-        MAX_TERMS
-      );
+    termsDraft = termsDraft.slice(0, MAX_TERMS);
 
 
     buildTermsEditor();
 
 
-    hideErr(
-      editTermsError
-    );
+    hideErr(editTermsError);
   }
 
 
   /* =========================================================
      SAVE TERMS
   ========================================================= */
+
 
   async function saveTerms() {
     if (!termsDraft) {
@@ -1780,15 +1413,11 @@ document.addEventListener("DOMContentLoaded", () => {
        VALIDATE TERM COUNT
     ----------------------------------------------------- */
 
-    if (
-      termsDraft.length <
-        MIN_TERMS ||
-      termsDraft.length >
-        MAX_TERMS
-    ) {
+
+    if (termsDraft.length < MIN_TERMS || termsDraft.length > MAX_TERMS) {
       return showErr(
         editTermsError,
-        `A school year must have between ${MIN_TERMS} and ${MAX_TERMS} terms.`
+        `A school year must have between ${MIN_TERMS} and ${MAX_TERMS} terms.`,
       );
     }
 
@@ -1797,19 +1426,12 @@ document.addEventListener("DOMContentLoaded", () => {
        VALIDATE TERM DATES
     ----------------------------------------------------- */
 
-    for (
-      const term of termsDraft
-    ) {
 
-      if (
-        term.start &&
-        term.end &&
-        term.start >
-          term.end
-      ) {
+    for (const term of termsDraft) {
+      if (term.start && term.end && term.start > term.end) {
         return showErr(
           editTermsError,
-          `End date must be after start date for "${term.name}".`
+          `End date must be after start date for "${term.name}".`,
         );
       }
     }
@@ -1819,12 +1441,8 @@ document.addEventListener("DOMContentLoaded", () => {
        GET SCHOOL YEAR
     ----------------------------------------------------- */
 
-    const schoolYear =
-      store.items.find(
-        (item) =>
-          item.id ===
-          selectedId
-      );
+
+    const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
     if (!schoolYear) {
@@ -1833,74 +1451,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     try {
-
-      hideErr(
-        editTermsError
-      );
+      hideErr(editTermsError);
 
 
-      editTermsSave.disabled =
-        true;
+      editTermsSave.disabled = true;
 
 
       await ensureCsrfToken();
 
 
-      await fetchJson(
-        `${API_BASE}/${schoolYear.id}/terms`,
-        {
-          method:
-            "PUT",
+      await fetchJson(`${API_BASE}/${schoolYear.id}/terms`, {
+        method: "PUT",
 
-          headers: {
-            "Content-Type":
-              "application/json",
 
-            "x-csrf-token":
-              csrfToken,
-          },
+        headers: {
+          "Content-Type": "application/json",
 
-          body:
-            JSON.stringify({
-              terms:
-                termsDraft.map(
-                  (
-                    term,
-                    index
-                  ) => ({
-                    order:
-                      index + 1,
 
-                    name:
-                      (
-                        term.name ||
-                        `Term ${
-                          index + 1
-                        }`
-                      ).trim(),
+          "x-csrf-token": csrfToken,
+        },
 
-                    start:
-                      term.start ||
-                      null,
 
-                    end:
-                      term.end ||
-                      null,
+        body: JSON.stringify({
+          terms: termsDraft.map((term, index) => ({
+            order: index + 1,
 
-                    locked:
-                      !!term.locked,
-                  })
-                ),
-            }),
-        }
-      );
+
+            name: (term.name || `Term ${index + 1}`).trim(),
+
+
+            start: term.start || null,
+
+
+            end: term.end || null,
+
+
+            locked: !!term.locked,
+          })),
+        }),
+      });
 
 
       await loadSchoolYears();
 
 
-      selectedId =
-        schoolYear.id;
+      selectedId = schoolYear.id;
 
 
       closeEditTerms();
@@ -1908,18 +1503,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       render();
 
+
+      showSuccess("Terms saved successfully.");
     } catch (error) {
-
-      showErr(
-        editTermsError,
-        error.message ||
-          "Failed to save terms."
-      );
-
+      showErr(editTermsError, error.message || "Failed to save terms.");
     } finally {
-
-      editTermsSave.disabled =
-        false;
+      editTermsSave.disabled = false;
     }
   }
 
@@ -1928,142 +1517,101 @@ document.addEventListener("DOMContentLoaded", () => {
      CONFIRM MODAL
   ========================================================= */
 
-  function confirmActionModal(
-    config,
-    onYes
-  ) {
 
+  function confirmActionModal(config, onYes) {
     const {
-      title =
-        "Confirm Action",
+      title = "Confirm Action",
 
-      sub =
-        "Please confirm this action.",
 
-      text =
-        "Are you sure?",
+      sub = "Please confirm this action.",
 
-      confirmLabel =
-        "Confirm",
 
-      confirmClass =
-        "sy-danger",
+      text = "Are you sure?",
 
-    } =
-      config || {};
+
+      confirmLabel = "Confirm",
+
+
+      confirmClass = "sy-danger",
+    } = config || {};
 
 
     if (confirmTitle) {
-      confirmTitle.textContent =
-        title;
+      confirmTitle.textContent = title;
     }
 
 
     if (confirmSub) {
-      confirmSub.textContent =
-        sub;
+      confirmSub.textContent = sub;
     }
 
 
     if (confirmText) {
-      confirmText.textContent =
-        text;
+      confirmText.textContent = text;
     }
 
 
     if (confirmDelete) {
-
-      confirmDelete.textContent =
-        confirmLabel;
+      confirmDelete.textContent = confirmLabel;
 
 
-      confirmDelete.classList.remove(
-        "sy-danger",
-        "sy-save",
-        "sy-ghost"
-      );
+      confirmDelete.classList.remove("sy-danger", "sy-save", "sy-ghost");
 
 
-      confirmDelete.classList.add(
-        confirmClass
-      );
+      confirmDelete.classList.add(confirmClass);
     }
 
 
-    confirmAction =
-      onYes;
+    confirmAction = onYes;
 
 
-    openModal(
-      confirmModal
-    );
+    openModal(confirmModal);
 
 
     setTimeout(() => {
-
       if (confirmDelete) {
         confirmDelete.focus();
       }
-
     }, 0);
   }
 
 
   function closeConfirm() {
-
-    closeModal(
-      confirmModal
-    );
+    closeModal(confirmModal);
 
 
-    confirmAction =
-      null;
+    confirmAction = null;
 
 
     if (confirmTitle) {
-      confirmTitle.textContent =
-        "Confirm Action";
+      confirmTitle.textContent = "Confirm Action";
     }
 
 
     if (confirmSub) {
-      confirmSub.textContent =
-        "Please confirm this action.";
+      confirmSub.textContent = "Please confirm this action.";
     }
 
 
     if (confirmText) {
-      confirmText.textContent =
-        "Are you sure?";
+      confirmText.textContent = "Are you sure?";
     }
 
 
     if (confirmDelete) {
-
-      confirmDelete.textContent =
-        "Confirm";
+      confirmDelete.textContent = "Confirm";
 
 
-      confirmDelete.classList.remove(
-        "sy-danger",
-        "sy-save",
-        "sy-ghost"
-      );
+      confirmDelete.classList.remove("sy-danger", "sy-save", "sy-ghost");
 
 
-      confirmDelete.classList.add(
-        "sy-danger"
-      );
+      confirmDelete.classList.add("sy-danger");
     }
   }
 
 
   function yesConfirm() {
-
-    if (
-      typeof confirmAction ===
-      "function"
-    ) {
+    if (typeof confirmAction === "function") {
       confirmAction();
     }
 
@@ -2076,259 +1624,156 @@ document.addEventListener("DOMContentLoaded", () => {
      EVENTS
   ========================================================= */
 
-  if (
-    addSchoolYearBtn
-  ) {
-    addSchoolYearBtn.addEventListener(
-      "click",
-      openCreateSY
-    );
+
+  if (addSchoolYearBtn) {
+    addSchoolYearBtn.addEventListener("click", openCreateSY);
   }
 
 
-  if (
-    deleteSchoolYearBtn
-  ) {
-
-    deleteSchoolYearBtn.addEventListener(
-      "click",
-      () => {
-
-        const schoolYear =
-          store.items.find(
-            (item) =>
-              item.id ===
-              selectedId
-          );
+  if (deleteSchoolYearBtn) {
+    deleteSchoolYearBtn.addEventListener("click", () => {
+      const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
-        if (!schoolYear) {
-          return;
-        }
-
-
-        confirmActionModal(
-          {
-            title:
-              "Delete School Year",
-
-            sub:
-              "This action cannot be undone.",
-
-            text:
-              `Delete school year "${schoolYear.name}"?`,
-
-            confirmLabel:
-              "Delete",
-
-            confirmClass:
-              "sy-danger",
-          },
-
-          deleteSelectedSchoolYear
-        );
+      if (!schoolYear) {
+        return;
       }
-    );
+
+
+      confirmActionModal(
+        {
+          title: "Delete School Year",
+
+
+          sub: "This action cannot be undone.",
+
+
+          text: `Delete school year "${schoolYear.name}"?`,
+
+
+          confirmLabel: "Delete",
+
+
+          confirmClass: "sy-danger",
+        },
+
+
+        deleteSelectedSchoolYear,
+      );
+    });
   }
 
 
-  if (
-    createSYBackdrop
-  ) {
-    createSYBackdrop.addEventListener(
-      "click",
-      closeCreateSY
-    );
+  if (createSYBackdrop) {
+    createSYBackdrop.addEventListener("click", closeCreateSY);
   }
 
 
-  if (
-    createSYCloseX
-  ) {
-    createSYCloseX.addEventListener(
-      "click",
-      closeCreateSY
-    );
+  if (createSYCloseX) {
+    createSYCloseX.addEventListener("click", closeCreateSY);
   }
 
 
-  if (
-    createSYCancel
-  ) {
-    createSYCancel.addEventListener(
-      "click",
-      closeCreateSY
-    );
+  if (createSYCancel) {
+    createSYCancel.addEventListener("click", closeCreateSY);
   }
 
 
-  if (
-    createSYSave
-  ) {
-    createSYSave.addEventListener(
-      "click",
-      saveCreateSY
-    );
+  if (createSYSave) {
+    createSYSave.addEventListener("click", saveCreateSY);
   }
 
 
   if (syNameInput) {
-
-    syNameInput.addEventListener(
-      "keydown",
-      (event) => {
-
-        if (
-          event.key ===
-          "Enter"
-        ) {
-          saveCreateSY();
-        }
+    syNameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        saveCreateSY();
       }
-    );
+    });
   }
 
 
   if (setActiveBtn) {
-
-    setActiveBtn.addEventListener(
-      "click",
-      () => {
-
-        const schoolYear =
-          store.items.find(
-            (item) =>
-              item.id ===
-              selectedId
-          );
+    setActiveBtn.addEventListener("click", () => {
+      const schoolYear = store.items.find((item) => item.id === selectedId);
 
 
-        if (!schoolYear) {
-          return;
-        }
-
-
-        confirmActionModal(
-          {
-            title:
-              "Set Active School Year",
-
-            sub:
-              "This will make the selected school year the active one.",
-
-            text:
-              `Set "${schoolYear.name}" as the active school year?`,
-
-            confirmLabel:
-              "Set Active",
-
-            confirmClass:
-              "sy-save",
-          },
-
-          setSelectedActive
-        );
+      if (!schoolYear) {
+        return;
       }
-    );
+
+
+      confirmActionModal(
+        {
+          title: "Set Active School Year",
+
+
+          sub: "This will make the selected school year the active one.",
+
+
+          text: `Set "${schoolYear.name}" as the active school year?`,
+
+
+          confirmLabel: "Set Active",
+
+
+          confirmClass: "sy-save",
+        },
+
+
+        setSelectedActive,
+      );
+    });
   }
 
 
   if (editTermsBtn) {
-
-    editTermsBtn.addEventListener(
-      "click",
-      openEditTerms
-    );
+    editTermsBtn.addEventListener("click", openEditTerms);
   }
 
 
-  if (
-    editTermsBackdrop
-  ) {
-    editTermsBackdrop.addEventListener(
-      "click",
-      closeEditTerms
-    );
+  if (editTermsBackdrop) {
+    editTermsBackdrop.addEventListener("click", closeEditTerms);
   }
 
 
-  if (
-    editTermsCloseX
-  ) {
-    editTermsCloseX.addEventListener(
-      "click",
-      closeEditTerms
-    );
+  if (editTermsCloseX) {
+    editTermsCloseX.addEventListener("click", closeEditTerms);
   }
 
 
-  if (
-    editTermsCancel
-  ) {
-    editTermsCancel.addEventListener(
-      "click",
-      closeEditTerms
-    );
+  if (editTermsCancel) {
+    editTermsCancel.addEventListener("click", closeEditTerms);
   }
 
 
-  if (
-    editTermsSave
-  ) {
-    editTermsSave.addEventListener(
-      "click",
-      saveTerms
-    );
+  if (editTermsSave) {
+    editTermsSave.addEventListener("click", saveTerms);
   }
 
 
-  if (
-    editTermsReset
-  ) {
-    editTermsReset.addEventListener(
-      "click",
-      resetTerms
-    );
+  if (editTermsReset) {
+    editTermsReset.addEventListener("click", resetTerms);
   }
 
 
-  if (
-    confirmBackdrop
-  ) {
-    confirmBackdrop.addEventListener(
-      "click",
-      closeConfirm
-    );
+  if (confirmBackdrop) {
+    confirmBackdrop.addEventListener("click", closeConfirm);
   }
 
 
-  if (
-    confirmCloseX
-  ) {
-    confirmCloseX.addEventListener(
-      "click",
-      closeConfirm
-    );
+  if (confirmCloseX) {
+    confirmCloseX.addEventListener("click", closeConfirm);
   }
 
 
-  if (
-    confirmCancel
-  ) {
-    confirmCancel.addEventListener(
-      "click",
-      closeConfirm
-    );
+  if (confirmCancel) {
+    confirmCancel.addEventListener("click", closeConfirm);
   }
 
 
-  if (
-    confirmDelete
-  ) {
-    confirmDelete.addEventListener(
-      "click",
-      yesConfirm
-    );
+  if (confirmDelete) {
+    confirmDelete.addEventListener("click", yesConfirm);
   }
 
 
@@ -2336,73 +1781,48 @@ document.addEventListener("DOMContentLoaded", () => {
      ESCAPE
   ========================================================= */
 
-  document.addEventListener(
-    "keydown",
-    (event) => {
 
-      if (
-        event.key !==
-        "Escape"
-      ) {
-        return;
-      }
-
-
-      if (
-        confirmModal &&
-        !confirmModal.classList.contains(
-          "hidden"
-        )
-      ) {
-        return closeConfirm();
-      }
-
-
-      if (
-        editTermsModal &&
-        !editTermsModal.classList.contains(
-          "hidden"
-        )
-      ) {
-        return closeEditTerms();
-      }
-
-
-      if (
-        createSYModal &&
-        !createSYModal.classList.contains(
-          "hidden"
-        )
-      ) {
-        return closeCreateSY();
-      }
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
     }
-  );
+
+
+    if (confirmModal && !confirmModal.classList.contains("hidden")) {
+      return closeConfirm();
+    }
+
+
+    if (editTermsModal && !editTermsModal.classList.contains("hidden")) {
+      return closeEditTerms();
+    }
+
+
+    if (createSYModal && !createSYModal.classList.contains("hidden")) {
+      return closeCreateSY();
+    }
+  });
 
 
   /* =========================================================
      INIT
   ========================================================= */
 
+
   async function init() {
-
     try {
-
       await ensureCsrfToken();
+
 
       await loadSchoolYears();
 
+
       render();
-
     } catch (error) {
-
-      console.error(
-        error
-      );
+      console.error(error);
 
 
       if (syList) {
-
         syList.innerHTML = `
           <div
             style="
@@ -2422,3 +1842,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   init();
 });
+
+
+

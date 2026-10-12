@@ -8,10 +8,12 @@
    GLOBAL
 ========================================================= */
 
+
 .hidden,
 [hidden] {
   display: none !important;
 }
+
 
 * {
   box-sizing: border-box;
@@ -22,14 +24,17 @@
    PAGE STRUCTURE
 ========================================================= */
 
+
 .as-page {
   width: 100%;
   padding: 0;
 }
 
+
 .as-page-head {
   margin: 0 0 12px;
 }
+
 
 .as-title {
   margin: 0;
@@ -40,6 +45,7 @@
   color: #0b2c4a;
 }
 
+
 .as-page-sub {
   display: none;
 }
@@ -48,6 +54,7 @@
 /* =========================================================
    SUBJECTS PANEL
 ========================================================= */
+
 
 .as-subjects-shell {
   width: 100%;
@@ -63,28 +70,40 @@
    SUBJECT HEADER
 ========================================================= */
 
+
 .as-subjects-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 18px;
+  margin: -20px -20px 0;
+  padding: 20px;
+  border-bottom: 1px solid #e7edf3;
+  background: #ffffff;
+  border-radius: 22px 22px 0 0;
 }
+
 
 .as-subjects-copy {
   min-width: 0;
 }
 
+
 .as-section-title {
-  font-size: 18px;
-  font-weight: 900;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.4;
   color: #0b2c4a;
 }
 
+
 .as-section-sub {
-  margin-top: 3px;
+  margin: 5px 0 0;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1.5;
   color: rgba(11, 44, 74, 0.55);
 }
 
@@ -93,19 +112,102 @@
    SEARCH BAR
 ========================================================= */
 
+
 .as-subjects-tools {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-width: 0;
 }
 
+
 .as-search {
-  flex: 0 0 320px;
-  min-width: 320px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+
+  flex: 0 1 320px;
+  width: 320px;
+  min-width: 0;
+  max-width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 14px;
+
+
+  background: #ffffff;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+
+.as-search:focus-within {
+  border-color: rgba(11, 77, 122, 0.25);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
+}
+
+
+.as-search .t-search-ico {
+  position: relative;
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  font-size: 0;
+}
+
+
+.as-search .t-search-ico::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border: 1.7px solid #0b4d7a;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+
+.as-search .t-search-ico::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 9px;
+  width: 6px;
+  height: 1.7px;
+  border-radius: 999px;
+  background: #0b4d7a;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
 
 .as-search input {
   width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b2c4a;
+}
+
+
+.as-search input::placeholder {
+  color: rgba(11, 44, 74, 0.48);
 }
 
 
@@ -113,12 +215,10 @@
    SUBJECT CARD GRID
 ========================================================= */
 
+
 .as-subject-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(240px, 1fr)
-  );
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 18px;
 }
 
@@ -127,29 +227,39 @@
    SUBJECT CARDS
 ========================================================= */
 
+
 .as-subject-card {
   position: relative;
 
+
   min-height: 180px;
 
+
   width: 100%;
+
 
   border-radius: 18px;
   overflow: hidden;
 
+
   cursor: pointer;
+
 
   border: 1px solid rgba(255, 255, 255, 0.25);
 
+
   color: #ffffff;
+
 
   transform: translateZ(0);
   will-change: transform;
+
 
   transition:
     transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
     filter 0.22s ease;
+
 
   text-align: left;
 }
@@ -159,52 +269,34 @@
    SUBJECT CARD COLORS
 ========================================================= */
 
+
 .as-subject-card:nth-child(1) {
-  background: linear-gradient(
-    135deg,
-    #2f7cf6 0%,
-    #5b9df9 100%
-  );
+  background: linear-gradient(135deg, #2f7cf6 0%, #5b9df9 100%);
 }
+
 
 .as-subject-card:nth-child(2) {
-  background: linear-gradient(
-    135deg,
-    #3fb97a 0%,
-    #65c995 100%
-  );
+  background: linear-gradient(135deg, #3fb97a 0%, #65c995 100%);
 }
+
 
 .as-subject-card:nth-child(3) {
-  background: linear-gradient(
-    135deg,
-    #8b5cf6 0%,
-    #a78bfa 100%
-  );
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
 }
+
 
 .as-subject-card:nth-child(4) {
-  background: linear-gradient(
-    135deg,
-    #f59e0b 0%,
-    #fbbf24 100%
-  );
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
 }
+
 
 .as-subject-card:nth-child(5) {
-  background: linear-gradient(
-    135deg,
-    #ef6c8f 0%,
-    #f58ba5 100%
-  );
+  background: linear-gradient(135deg, #ef6c8f 0%, #f58ba5 100%);
 }
 
+
 .as-subject-card:nth-child(6) {
-  background: linear-gradient(
-    135deg,
-    #14b8a6 0%,
-    #38cfc0 100%
-  );
+  background: linear-gradient(135deg, #14b8a6 0%, #38cfc0 100%);
 }
 
 
@@ -212,44 +304,59 @@
    SUBJECT CARD DECORATION
 ========================================================= */
 
+
 .as-subject-card::before {
   content: "";
 
+
   position: absolute;
+
 
   width: 170px;
   height: 170px;
 
+
   top: -80px;
   right: -55px;
 
+
   background: rgba(255, 255, 255, 0.13);
+
 
   border-radius: 50%;
 
+
   pointer-events: none;
+
 
   transition:
     transform 0.3s ease,
     opacity 0.3s ease;
 }
 
+
 .as-subject-card::after {
   content: "→";
 
+
   position: absolute;
+
 
   right: 18px;
   bottom: 15px;
 
+
   font-size: 20px;
   font-weight: 900;
 
+
   color: rgba(255, 255, 255, 0.92);
+
 
   transition:
     transform 0.2s ease,
     opacity 0.2s ease;
+
 
   z-index: 3;
 }
@@ -259,19 +366,23 @@
    SUBJECT CARD HOVER
 ========================================================= */
 
+
 .as-subject-card:hover {
   transform: translateY(-7px);
 
-  box-shadow:
-    0 20px 35px rgba(15, 23, 42, 0.18);
+
+  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.18);
+
 
   filter: brightness(1.04);
 }
+
 
 .as-subject-card:hover::before {
   transform: scale(1.15);
   opacity: 0.85;
 }
+
 
 .as-subject-card:hover::after {
   transform: translateX(5px);
@@ -282,6 +393,7 @@
    SUBJECT CARD ACTIVE
 ========================================================= */
 
+
 .as-subject-card:active {
   transform: translateY(-2px) scale(0.99);
 }
@@ -291,8 +403,10 @@
    SUBJECT CARD FOCUS
 ========================================================= */
 
+
 .as-subject-card:focus-visible {
   outline: none;
+
 
   box-shadow:
     0 0 0 4px rgba(47, 124, 246, 0.18),
@@ -304,63 +418,84 @@
    SUBJECT CARD CONTENT
 ========================================================= */
 
+
 .as-subject-card-content {
   position: relative;
   z-index: 2;
 
+
   padding: 20px;
 }
+
 
 .as-subject-card-icon {
   position: relative;
   z-index: 2;
 
+
   width: 46px;
   height: 46px;
 
+
   margin-bottom: 20px;
+
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+
   border-radius: 50%;
+
 
   background: rgba(255, 255, 255, 0.22);
 
+
   color: #ffffff;
+
 
   font-size: 20px;
   font-weight: 900;
 }
 
+
 .as-subject-card-title {
   position: relative;
   z-index: 2;
 
+
   max-width: calc(100% - 35px);
+
 
   font-size: 18px;
   line-height: 1.2;
   font-weight: 900;
 
+
   word-break: break-word;
+
 
   color: #ffffff;
 }
+
 
 .as-subject-card-sub {
   position: relative;
   z-index: 2;
 
+
   margin-top: 7px;
 
+
   max-width: calc(100% - 20px);
+
 
   font-size: 12px;
   line-height: 1.35;
 
+
   font-weight: 700;
+
 
   color: rgba(255, 255, 255, 0.9);
 }
@@ -370,6 +505,7 @@
    LEGACY SUBJECT SUPPORT
 ========================================================= */
 
+
 .as-subject-name,
 .as-subject-code,
 .as-subject-meta {
@@ -378,12 +514,14 @@
   color: #ffffff;
 }
 
+
 .as-subject-name {
   font-size: 18px;
   line-height: 1.2;
   font-weight: 900;
   word-break: break-word;
 }
+
 
 .as-subject-code {
   margin-top: 5px;
@@ -394,29 +532,37 @@
   word-break: break-word;
 }
 
+
 .as-subject-meta {
   font-size: 13px;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.9);
 }
 
+
 .as-subject-banner {
   min-height: 88px;
 
+
   padding: 14px 16px;
+
 
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
 
+
   color: #ffffff;
 
+
   font-weight: 900;
+
 
   transition:
     transform 0.25s ease,
     filter 0.25s ease;
 }
+
 
 .as-subject-card:hover .as-subject-banner {
   transform: scale(1.03);
@@ -428,21 +574,25 @@
    EMPTY SUBJECT STATE
 ========================================================= */
 
+
 .as-empty-state {
   text-align: center;
   padding: 40px;
 }
+
 
 .as-empty-icon {
   font-size: 26px;
   margin-bottom: 6px;
 }
 
+
 .as-empty-title {
   font-weight: 900;
   margin-bottom: 4px;
   color: #0b2c4a;
 }
+
 
 .as-empty-text {
   font-size: 12px;
@@ -455,25 +605,34 @@
    SUBJECT DETAIL VIEW
 ========================================================= */
 
+
 .as-detail-top {
   margin-bottom: 12px;
 }
 
+
 .as-chip-btn {
   background: #ffffff;
 
+
   border: 1px solid rgba(11, 44, 74, 0.12);
+
 
   border-radius: 999px;
 
+
   padding: 8px 14px;
+
 
   font-size: 12px;
   font-weight: 900;
 
+
   color: #0b2c4a;
 
+
   cursor: pointer;
+
 
   transition:
     transform 0.15s ease,
@@ -481,14 +640,15 @@
     border-color 0.15s ease;
 }
 
+
 .as-chip-btn:hover {
   transform: translateY(-1px);
 
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.06);
 
-  border-color:
-    rgba(47, 124, 246, 0.16);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+
+
+  border-color: rgba(47, 124, 246, 0.16);
 }
 
 
@@ -496,37 +656,42 @@
    HERO SECTION
 ========================================================= */
 
+
 .as-hero {
   overflow: hidden;
   margin-bottom: 20px;
   padding: 0 !important;
 }
 
+
 .as-hero-cover {
   display: flex;
+
 
   justify-content: space-between;
   align-items: center;
 
+
   min-height: 158px;
+
 
   padding: 28px;
 
+
   border-radius: 14px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #2f7cf6,
-      #3fb97a
-    );
+
+  background: linear-gradient(135deg, #2f7cf6, #3fb97a);
+
 
   color: #ffffff;
 }
 
+
 .as-hero-main {
   min-width: 0;
 }
+
 
 .as-hero-kicker {
   font-size: 12px;
@@ -534,45 +699,60 @@
   opacity: 0.95;
 }
 
+
 .as-hero-title {
   margin: 8px 0 0;
+
 
   font-size: 26px;
   font-weight: 900;
 
+
   line-height: 1.15;
 
+
   color: #ffffff;
+
 
   word-break: break-word;
 }
 
+
 .as-hero-meta {
   margin-top: 8px;
+
 
   font-size: 12px;
   font-weight: 700;
 
+
   opacity: 0.92;
 }
+
 
 .as-meta-dot {
   margin: 0 6px;
 }
 
+
 .as-hero-avatar {
   flex: 0 0 auto;
+
 
   width: 58px;
   height: 58px;
 
+
   border-radius: 50%;
 
+
   background: rgba(255, 255, 255, 0.28);
+
 
   display: flex;
   align-items: center;
   justify-content: center;
+
 
   font-weight: 900;
   font-size: 21px;
@@ -583,14 +763,18 @@
    DETAIL GRID
 ========================================================= */
 
+
 .as-detail-grid {
   display: grid;
+
 
   grid-template-columns:
     minmax(240px, 260px)
     minmax(0, 1fr);
 
+
   gap: 18px;
+
 
   width: 100%;
 }
@@ -600,23 +784,29 @@
    SIDE PANEL
 ========================================================= */
 
+
 .as-upcoming {
   min-width: 0;
 
+
   padding: 18px;
+
 
   border-radius: 18px;
 }
 
+
 .as-side-head {
   min-width: 0;
 }
+
 
 .as-side-title {
   font-size: 14px;
   font-weight: 900;
   color: #0b2c4a;
 }
+
 
 .as-side-sub {
   font-size: 11px;
@@ -629,32 +819,42 @@
    OVERVIEW
 ========================================================= */
 
+
 .as-overview-list {
   margin-top: 14px;
+
 
   display: flex;
   flex-direction: column;
 
+
   gap: 9px;
 }
+
 
 .as-overview-item {
   display: flex;
 
+
   justify-content: space-between;
   align-items: center;
 
+
   gap: 12px;
+
 
   font-size: 12px;
   font-weight: 700;
 
+
   color: #0b2c4a;
 }
+
 
 .as-overview-item span {
   min-width: 0;
 }
+
 
 .as-overview-item b {
   flex: 0 0 auto;
@@ -665,48 +865,65 @@
    UPCOMING
 ========================================================= */
 
+
 .as-upcoming-box {
   margin-top: 18px;
 
+
   padding: 12px;
+
 
   border-radius: 12px;
 
+
   background: #f4f7fb;
 }
+
 
 .as-upcoming-title {
   font-size: 12px;
   font-weight: 900;
 
+
   margin-bottom: 4px;
+
 
   color: #0b2c4a;
 }
+
 
 .as-upcoming-copy {
   font-size: 12px;
   font-weight: 700;
 
+
   color: rgba(11, 44, 74, 0.6);
 
+
   line-height: 1.45;
+
 
   word-break: break-word;
 }
 
+
 .as-link-btn {
   margin-top: 8px;
+
 
   background: none;
   border: none;
 
+
   padding: 0;
+
 
   color: #2f7cf6;
 
+
   font-weight: 900;
   font-size: 12px;
+
 
   cursor: pointer;
 }
@@ -716,21 +933,27 @@
    ASSIGNMENT STREAM
 ========================================================= */
 
+
 .as-stream {
   min-width: 0;
   width: 100%;
   border-radius: 18px;
 }
 
+
 .as-stream-toolbar {
   display: flex;
+
 
   justify-content: space-between;
   align-items: center;
 
+
   gap: 14px;
 
+
   margin-bottom: 14px;
+
 
   min-width: 0;
 }
@@ -740,25 +963,35 @@
    CREATE ASSIGNMENT BUTTON
 ========================================================= */
 
+
 .as-primary-pill {
   flex: 0 0 auto;
 
+
   background: #0b2c4a;
+
 
   color: #ffffff;
 
+
   border: none;
+
 
   border-radius: 999px;
 
+
   padding: 10px 16px;
+
 
   font-size: 12px;
   font-weight: 900;
 
+
   cursor: pointer;
 
+
   white-space: nowrap;
+
 
   transition:
     transform 0.15s ease,
@@ -766,11 +999,12 @@
     opacity 0.15s ease;
 }
 
+
 .as-primary-pill:hover {
   transform: translateY(-1px);
 
-  box-shadow:
-    0 10px 20px rgba(11, 44, 74, 0.18);
+
+  box-shadow: 0 10px 20px rgba(11, 44, 74, 0.18);
 }
 
 
@@ -778,48 +1012,63 @@
    FILTERS
 ========================================================= */
 
+
 .as-stream-filters {
   display: flex;
+
 
   justify-content: flex-end;
   align-items: center;
 
+
   gap: 10px;
 
+
   flex-wrap: wrap;
+
 
   min-width: 0;
 }
 
+
 .as-select {
   height: 38px;
 
+
   border-radius: 10px;
+
 
   border: 1px solid rgba(11, 44, 74, 0.12);
 
+
   padding: 0 12px;
+
 
   font-size: 12px;
   font-weight: 700;
 
+
   background: #ffffff;
+
 
   color: #0b2c4a;
 
+
   outline: none;
 
+
   cursor: pointer;
+
 
   min-width: 120px;
 }
 
-.as-select:focus {
-  border-color:
-    rgba(47, 124, 246, 0.35);
 
-  box-shadow:
-    0 0 0 4px rgba(47, 124, 246, 0.1);
+.as-select:focus {
+  border-color: rgba(47, 124, 246, 0.35);
+
+
+  box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.1);
 }
 
 
@@ -827,31 +1076,42 @@
    ASSIGNMENT TABLE CONTAINER
 ========================================================= */
 
+
 .as-table-wrap {
   width: 100%;
 
+
   min-width: 0;
+
 
   overflow: hidden;
 
+
   padding: 0 !important;
+
 
   border-radius: 18px;
 
+
   background: #ffffff;
+
 
   border: 1px solid rgba(11, 44, 74, 0.06);
 
-  box-shadow:
-    0 12px 28px rgba(15, 23, 42, 0.06);
+
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
+
 
 .as-table-scroll {
   width: 100%;
 
+
   overflow-x: auto;
 
+
   overflow-y: visible;
+
 
   -webkit-overflow-scrolling: touch;
 }
@@ -861,15 +1121,20 @@
    ASSIGNMENT TABLE
 ========================================================= */
 
+
 .as-assignment-table {
   width: 100%;
 
+
   min-width: 760px;
+
 
   border-collapse: separate;
   border-spacing: 0;
 
+
   table-layout: fixed;
+
 
   background: #ffffff;
 }
@@ -879,25 +1144,31 @@
    TABLE COLUMN WIDTHS
 ========================================================= */
 
+
 .as-assignment-table th:nth-child(1) {
   width: 30%;
 }
+
 
 .as-assignment-table th:nth-child(2) {
   width: 12%;
 }
 
+
 .as-assignment-table th:nth-child(3) {
   width: 18%;
 }
+
 
 .as-assignment-table th:nth-child(4) {
   width: 10%;
 }
 
+
 .as-assignment-table th:nth-child(5) {
   width: 13%;
 }
+
 
 .as-assignment-table th:nth-child(6) {
   width: 17%;
@@ -908,24 +1179,23 @@
    TABLE HEADER
 ========================================================= */
 
+
 .as-assignment-table thead {
-  background: #f7f9fc;
+  background: #f8fafc;
 }
 
+
 .as-assignment-table th {
-  padding: 16px 14px;
-
+  padding: 11px 14px;
+  background: #f8fafc;
+  color: rgba(11, 44, 74, 0.68);
   text-align: left;
-
-  font-size: 12px;
-  font-weight: 900;
-
-  color: #0b2c4a;
-
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
   white-space: nowrap;
-
-  border-bottom:
-    1px solid rgba(11, 44, 74, 0.08);
 }
 
 
@@ -933,34 +1203,42 @@
    TABLE BODY
 ========================================================= */
 
+
 .as-assignment-table tbody {
   background: #ffffff;
 }
 
+
 .as-assignment-table tbody tr {
-  transition:
-    background 0.15s ease;
+  transition: background 0.15s ease;
 }
+
 
 .as-assignment-table tbody tr:hover {
   background: #f9fbfe;
 }
 
+
 .as-assignment-table td {
   padding: 15px 14px;
 
+
   vertical-align: middle;
+
 
   font-size: 12px;
   font-weight: 700;
 
+
   color: #0b2c4a;
 
-  border-bottom:
-    1px solid rgba(11, 44, 74, 0.07);
+
+  border-bottom: 1px solid rgba(11, 44, 74, 0.07);
+
 
   overflow-wrap: anywhere;
 }
+
 
 .as-assignment-table tbody tr:last-child td {
   border-bottom: none;
@@ -971,33 +1249,44 @@
    ASSIGNMENT CELL
 ========================================================= */
 
+
 .as-assignment-table td:first-child {
   font-weight: 800;
 }
+
 
 .as-assignment-table td:first-child strong,
 .as-assignment-title {
   display: block;
 
+
   font-size: 13px;
   font-weight: 900;
 
+
   line-height: 1.3;
 
+
   color: #0b2c4a;
+
 
   word-break: break-word;
 }
 
+
 .as-assignment-sub {
   display: block;
 
+
   margin-top: 4px;
+
 
   font-size: 11px;
   font-weight: 700;
 
+
   line-height: 1.35;
+
 
   color: rgba(11, 44, 74, 0.55);
 }
@@ -1007,25 +1296,32 @@
    DATE CELL
 ========================================================= */
 
+
 .as-due-date {
   display: flex;
   flex-direction: column;
 
+
   gap: 2px;
+
 
   line-height: 1.3;
 }
+
 
 .as-due-date-main {
   font-size: 12px;
   font-weight: 800;
 
+
   color: #0b2c4a;
 }
+
 
 .as-due-date-time {
   font-size: 11px;
   font-weight: 700;
+
 
   color: rgba(11, 44, 74, 0.55);
 }
@@ -1035,9 +1331,11 @@
    POINTS
 ========================================================= */
 
+
 .as-points {
   font-size: 12px;
   font-weight: 900;
+
 
   color: #0b2c4a;
 }
@@ -1047,35 +1345,46 @@
    STATUS BADGES
 ========================================================= */
 
+
 .as-status {
   display: inline-flex;
+
 
   align-items: center;
   justify-content: center;
 
+
   min-height: 28px;
+
 
   padding: 5px 9px;
 
+
   border-radius: 999px;
+
 
   font-size: 10px;
   font-weight: 900;
 
+
   line-height: 1;
+
 
   white-space: nowrap;
 }
+
 
 .as-status-published {
   color: #166534;
   background: #dcfce7;
 }
 
+
 .as-status-draft {
   color: #92400e;
   background: #fef3c7;
 }
+
 
 .as-status-archived {
   color: #475569;
@@ -1087,33 +1396,46 @@
    TABLE ACTIONS
 ========================================================= */
 
+
 .as-table-actions {
   display: flex;
 
+
   align-items: center;
 
+
   gap: 6px;
+
 
   flex-wrap: wrap;
 }
 
+
 .as-table-action {
   border: 1px solid rgba(11, 44, 74, 0.1);
 
+
   background: #ffffff;
+
 
   color: #0b2c4a;
 
+
   border-radius: 8px;
 
+
   padding: 6px 9px;
+
 
   font-size: 10px;
   font-weight: 900;
 
+
   cursor: pointer;
 
+
   white-space: nowrap;
+
 
   transition:
     transform 0.15s ease,
@@ -1121,13 +1443,15 @@
     border-color 0.15s ease;
 }
 
+
 .as-table-action:hover {
   transform: translateY(-1px);
 
+
   background: #f4f7fb;
 
-  border-color:
-    rgba(47, 124, 246, 0.18);
+
+  border-color: rgba(47, 124, 246, 0.18);
 }
 
 
@@ -1136,19 +1460,26 @@
    PREVENT OLD CARD STYLING FROM BREAKING TABLE ROWS
 ========================================================= */
 
+
 .as-assignment-table .as-activity-item {
   display: table-row;
 
+
   padding: 0;
+
 
   border: none;
 
+
   border-radius: 0;
+
 
   background: transparent;
 
+
   box-shadow: none;
 }
+
 
 .as-assignment-table .as-activity-item:hover {
   background: #f9fbfe;
@@ -1159,15 +1490,20 @@
    EMPTY ASSIGNMENT STATE
 ========================================================= */
 
+
 .as-empty-feed {
   padding: 38px 22px;
 
+
   text-align: center;
+
 
   border-radius: 16px;
 
+
   background: #ffffff;
 }
+
 
 .as-empty-feed .as-empty-icon {
   font-size: 28px;
@@ -1179,52 +1515,71 @@
    MODAL
 ========================================================= */
 
+
 .as-modal {
   position: fixed;
 
+
   inset: 0;
 
+
   display: flex;
+
 
   align-items: center;
   justify-content: center;
 
+
   z-index: 1000;
+
 
   padding: 20px;
 }
+
 
 .as-modal-backdrop {
   position: absolute;
 
+
   inset: 0;
 
+
   background: rgba(5, 20, 35, 0.48);
+
 
   backdrop-filter: blur(3px);
 }
 
+
 .as-modal-dialog {
   position: relative;
 
+
   z-index: 2;
+
 
   width: 640px;
 
+
   max-width: 100%;
+
 
   max-height: calc(100vh - 40px);
 
+
   overflow-y: auto;
+
 
   padding: 20px;
 
+
   border-radius: 18px;
+
 
   background: #ffffff;
 
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.2);
+
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -1232,59 +1587,79 @@
    MODAL HEADER
 ========================================================= */
 
+
 .as-modal-head {
   display: flex;
+
 
   justify-content: space-between;
   align-items: flex-start;
 
+
   gap: 14px;
+
 
   margin-bottom: 18px;
 }
+
 
 .as-modal-title {
   font-size: 18px;
   font-weight: 900;
 
+
   color: #0b2c4a;
 }
+
 
 .as-modal-sub {
   margin-top: 3px;
 
+
   font-size: 12px;
   font-weight: 700;
+
 
   color: rgba(11, 44, 74, 0.55);
 }
 
+
 .as-icon-btn {
   flex: 0 0 auto;
 
+
   width: 34px;
   height: 34px;
+
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+
   border: none;
+
 
   border-radius: 50%;
 
+
   background: #f4f7fb;
+
 
   font-size: 16px;
 
+
   color: #0b2c4a;
 
+
   cursor: pointer;
+
 
   transition:
     background 0.15s ease,
     transform 0.15s ease;
 }
+
 
 .as-icon-btn:hover {
   background: #eaf0f7;
@@ -1296,30 +1671,37 @@
    MODAL BODY
 ========================================================= */
 
+
 .as-modal-body {
   margin-bottom: 18px;
 }
 
+
 .as-form-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(12, 1fr);
+
+  grid-template-columns: repeat(12, 1fr);
+
 
   gap: 14px;
 }
+
 
 .as-field {
   min-width: 0;
 }
 
+
 .col-12 {
   grid-column: span 12;
 }
 
+
 .col-6 {
   grid-column: span 6;
 }
+
 
 .col-3 {
   grid-column: span 3;
@@ -1330,14 +1712,19 @@
    FORM LABELS
 ========================================================= */
 
+
 .as-label {
   font-size: 11px;
 
+
   font-weight: 900;
+
 
   margin-bottom: 5px;
 
+
   display: block;
+
 
   color: #0b2c4a;
 }
@@ -1347,46 +1734,60 @@
    FORM INPUTS
 ========================================================= */
 
+
 .as-input,
 .as-textarea {
   width: 100%;
 
+
   border: 1px solid rgba(11, 44, 74, 0.12);
+
 
   border-radius: 10px;
 
+
   padding: 10px 12px;
+
 
   font-size: 12px;
 
+
   font-weight: 700;
+
 
   color: #0b2c4a;
 
+
   background: #ffffff;
+
 
   outline: none;
 
+
   font-family: inherit;
+
 
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 
+
 .as-input:focus,
 .as-textarea:focus {
-  border-color:
-    rgba(47, 124, 246, 0.35);
+  border-color: rgba(47, 124, 246, 0.35);
 
-  box-shadow:
-    0 0 0 4px rgba(47, 124, 246, 0.1);
+
+  box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.1);
 }
+
 
 .as-textarea {
   resize: vertical;
 
+
   min-height: 120px;
+
 
   line-height: 1.5;
 }
@@ -1396,14 +1797,19 @@
    MODAL FOOTER
 ========================================================= */
 
+
 .as-modal-foot {
   display: flex;
 
+
   justify-content: flex-end;
+
 
   align-items: center;
 
+
   gap: 10px;
+
 
   padding-top: 4px;
 }
@@ -1413,15 +1819,20 @@
    MODAL BUTTONS
 ========================================================= */
 
+
 .as-btn {
   padding: 10px 14px;
 
+
   border-radius: 10px;
+
 
   font-size: 12px;
   font-weight: 900;
 
+
   cursor: pointer;
+
 
   transition:
     transform 0.15s ease,
@@ -1429,30 +1840,36 @@
     opacity 0.15s ease;
 }
 
+
 .as-btn:hover {
   transform: translateY(-1px);
 }
 
+
 .as-btn-primary {
   background: #0b2c4a;
 
+
   color: #ffffff;
+
 
   border: none;
 }
 
+
 .as-btn-primary:hover {
-  box-shadow:
-    0 10px 20px rgba(11, 44, 74, 0.18);
+  box-shadow: 0 10px 20px rgba(11, 44, 74, 0.18);
 }
+
 
 .as-btn-ghost {
   background: #ffffff;
 
+
   color: #0b2c4a;
 
-  border:
-    1px solid rgba(11, 44, 74, 0.12);
+
+  border: 1px solid rgba(11, 44, 74, 0.12);
 }
 
 
@@ -1460,17 +1877,19 @@
    RESPONSIVE — BELOW 1100
 ========================================================= */
 
-@media (max-width: 1100px) {
 
+@media (max-width: 1100px) {
   .as-detail-grid {
     grid-template-columns:
       230px
       minmax(0, 1fr);
   }
 
+
   .as-assignment-table {
     min-width: 720px;
   }
+
 
   .as-assignment-table th,
   .as-assignment-table td {
@@ -1484,35 +1903,38 @@
    RESPONSIVE — BELOW 900
 ========================================================= */
 
-@media (max-width: 900px) {
 
+@media (max-width: 900px) {
   .as-detail-grid {
     grid-template-columns: 1fr;
   }
 
+
   .as-subject-grid {
-    grid-template-columns:
-      repeat(
-        auto-fill,
-        minmax(200px, 1fr)
-      );
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
+
 
   .as-stream-toolbar {
     flex-direction: column;
 
+
     align-items: stretch;
   }
+
 
   .as-primary-pill {
     width: fit-content;
   }
 
+
   .as-stream-filters {
     width: 100%;
 
+
     justify-content: flex-start;
   }
+
 
   .as-stream-filters .as-select {
     flex: 1 1 180px;
@@ -1524,57 +1946,71 @@
    TABLET / MOBILE — BELOW 700
 ========================================================= */
 
-@media (max-width: 700px) {
 
+@media (max-width: 700px) {
   .as-title {
     font-size: 28px;
   }
+
 
   .as-subjects-shell {
     padding: 16px;
   }
 
+
   .as-subjects-top {
     flex-direction: column;
 
+
     align-items: stretch;
   }
+
 
   .as-search-wrap {
     min-width: 0;
     width: 100%;
   }
 
+
   .as-search {
     min-width: 0;
     width: 100%;
   }
 
+
   .as-subject-grid {
     grid-template-columns: 1fr;
   }
+
 
   .as-subject-card {
     min-height: 160px;
   }
 
+
   .as-hero-cover {
     flex-direction: column;
 
+
     align-items: flex-start;
+
 
     gap: 16px;
 
+
     padding: 22px;
   }
+
 
   .as-hero-title {
     font-size: 22px;
   }
 
+
   .as-form-grid {
     grid-template-columns: 1fr;
   }
+
 
   .col-12,
   .col-6,
@@ -1582,9 +2018,11 @@
     grid-column: auto;
   }
 
+
   .as-modal {
     padding: 12px;
   }
+
 
   .as-modal-dialog {
     max-height: calc(100vh - 24px);
@@ -1596,77 +2034,111 @@
    SMALL MOBILE — BELOW 480
 ========================================================= */
 
-@media (max-width: 480px) {
 
+@media (max-width: 480px) {
   .as-subjects-shell {
     padding: 14px;
   }
+
 
   .as-subject-grid {
     gap: 12px;
   }
 
+
   .as-subject-card {
     min-height: 145px;
 
+
     border-radius: 16px;
   }
+
 
   .as-subject-card-content {
     padding: 17px;
   }
 
+
   .as-subject-card-title {
     font-size: 16px;
   }
+
 
   .as-subject-name {
     font-size: 16px;
   }
 
+
   .as-subject-code {
     font-size: 11px;
   }
 
+
   .as-subject-meta {
     font-size: 12px;
   }
+
 
   .as-stream-filters {
     flex-direction: column;
     align-items: stretch;
   }
 
+
   .as-stream-filters .as-select {
     width: 100%;
   }
 
+
   .as-primary-pill {
     width: 100%;
 
+
     text-align: center;
   }
+
 
   .as-hero-avatar {
     width: 52px;
     height: 52px;
   }
 
+
   .as-modal-dialog {
     width: 100%;
 
+
     padding: 16px;
+
 
     border-radius: 16px;
   }
 
+
   .as-modal-foot {
     flex-direction: column;
 
+
     align-items: stretch;
   }
+
 
   .as-btn {
     width: 100%;
   }
 }
+
+
+/* MAIN CONTENT — RESERVE SPACE FOR FIXED SIDEBAR */
+.content {
+  margin: 14px 14px 14px 288px;
+  transition: margin-left 0.18s ease;
+}
+
+
+html.sb-collapsed .content {
+  margin-left: 114px;
+}
+
+
+

@@ -1,1027 +1,1070 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 
-  <title>Admin Dashboard</title>
+    <title>Admin Dashboard</title>
 
 
-  <!-- Plus Jakarta Sans -->
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
 
-  <!-- Shared styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/sidebar.css"
-  />
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
 
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
 
-  <style>
-    .topbar {
-      margin-bottom: 4px;
-    }
+    <style>
+      .topbar {
+        margin-bottom: 4px;
+      }
 
 
-    .ms-page {
-      padding: 0;
-    }
-  </style>
-</head>
+      .ms-page {
+        padding: 0;
+      }
+    </style>
 
 
-<body data-page="dashboard">
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
 
-  <!-- SIDEBAR TOGGLE -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
 
 
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
 
 
-  <div class="app">
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
 
 
-    <!-- SIDEBAR -->
-    <div id="sidebar-mount"></div>
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
 
 
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
 
 
-    <main class="content ms-page">
+  <body data-page="dashboard">
+    <!-- SIDEBAR TOGGLE -->
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-      <!-- =====================================================
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
+
+
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+
+
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
+            >
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SECTIONS &amp; FACULTY </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text">GRADE LEVELS &amp; SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content ms-page">
+        <!-- =====================================================
            TOPBAR
       ====================================================== -->
 
 
-      <header class="topbar">
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
 
-        <div class="topbar-right">
+              <div class="tb-meta">
+                <div class="tb-name">Estrada, Ronald B.</div>
 
 
-         
-
-
-
-
-          <div
-            class="tb-user"
-            id="userbox"
-          >
-
-
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            />
-
-
-
-
-            <div class="tb-meta">
-
-
-              <div class="tb-name">
-                Estrada, Ronald B.
+                <div class="tb-role">Admin</div>
               </div>
 
 
-              <div class="tb-role">
-                Admin
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
               </div>
-
-
             </div>
-
-
-
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-            >
-              ▾
-            </button>
-
-
-
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-
-
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-
-            </div>
-
-
           </div>
+        </header>
 
 
-        </div>
-
-
-      </header>
-
-
-
-
-
-
-      <!-- =====================================================
+        <!-- =====================================================
            DASHBOARD
       ====================================================== -->
 
 
-      <section class="dash-grid">
-
-
-        <!-- ===================================================
+        <section class="dash-grid">
+          <!-- ===================================================
              HERO
         ==================================================== -->
 
 
-        <div class="card hero" style="grid-area: hero;">
+          <div class="card hero" style="grid-area: hero">
+            <div class="hero-left">
+              <div class="hero-eyebrow">Bolosan Elementary School</div>
 
 
-          <div class="hero-left">
+              <h2>Welcome, Estrada, Ronald B.</h2>
 
 
-            <div class="hero-eyebrow">Bolosan Elementary School</div>
+              <p>
+                Manage your school operations with ease. Stay updated on
+                learners, attendance, academics, announcements, and school
+                activities—all in one place.
+              </p>
+            </div>
 
 
-            <h2>
-              Welcome, Estrada, Ronald B.
-            </h2>
-
-
-            <p>
-              Manage your school operations with ease. Stay updated on
-              learners, attendance, academics, announcements, and school
-              activities—all in one place.
-            </p>
-
-
+            <div class="hero-date">
+              <span class="hero-date-label">Today</span>
+              <strong id="dashboardToday">September 18, 2026</strong>
+              <span class="hero-date-sub">Have a productive day, Admin!</span>
+            </div>
           </div>
 
 
-          <div class="hero-date">
-            <span class="hero-date-label">Today</span>
-            <strong id="dashboardToday">September 18, 2026</strong>
-            <span class="hero-date-sub">Have a productive day, Admin!</span>
-          </div>
-
-
-        </div>
-
-
-
-
-        <!-- ===================================================
+          <!-- ===================================================
              KPI STATS
         ==================================================== -->
 
 
-        <div class="stats-row" style="grid-area: stats;">
+          <div class="stats-row" style="grid-area: stats">
+            <!-- TOTAL LEARNERS -->
+            <a href="./students.html" class="stat-link">
+              <div class="stat blue">
+                <div class="stat-ico learners-icon" aria-hidden="true">
+                  <span>♟</span>
+                </div>
 
 
-          <!-- TOTAL LEARNERS -->
-          <a href="./students.html" class="stat-link">
+                <div class="stat-mid">
+                  <div class="stat-label">Total Learners</div>
 
 
-            <div class="stat blue">
+                  <div class="stat-value" id="statStudents">0</div>
 
 
-              <div class="stat-ico learners-icon" aria-hidden="true"><span>♟</span></div>
-
-
-              <div class="stat-mid">
-
-
-                <div class="stat-label">Total Learners</div>
-
-
-                <div class="stat-value" id="statStudents">0</div>
-
-
-                <div class="stat-helper">Currently enrolled</div>
-
-
+                  <div class="stat-helper">Currently enrolled</div>
+                </div>
               </div>
+            </a>
 
 
-            </div>
+            <!-- TOTAL FACULTY -->
+            <a href="./teachers.html" class="stat-link">
+              <div class="stat green">
+                <div class="stat-ico faculty-icon" aria-hidden="true">
+                  <span>★</span>
+                </div>
 
 
-          </a>
+                <div class="stat-mid">
+                  <div class="stat-label">Total Faculty</div>
 
 
+                  <div class="stat-value" id="statTeachers">0</div>
 
 
-          <!-- TOTAL FACULTY -->
-          <a href="./teachers.html" class="stat-link">
-
-
-            <div class="stat green">
-
-
-              <div class="stat-ico faculty-icon" aria-hidden="true"><span>★</span></div>
-
-
-              <div class="stat-mid">
-
-
-                <div class="stat-label">Total Faculty</div>
-
-
-                <div class="stat-value" id="statTeachers">0</div>
-
-
-                <div class="stat-helper">Active faculty</div>
-
-
+                  <div class="stat-helper">Active faculty</div>
+                </div>
               </div>
+            </a>
 
 
-            </div>
+            <!-- TODAY'S ATTENDANCE -->
+            <a href="./attendance.html" class="stat-link">
+              <div class="stat teal">
+                <div class="stat-ico attendance-icon" aria-hidden="true">
+                  <span>✓</span>
+                </div>
 
 
-          </a>
+                <div class="stat-mid">
+                  <div class="stat-label">Today's Attendance</div>
 
 
+                  <div class="stat-value" id="statAttendance">—</div>
 
 
-          <!-- TODAY'S ATTENDANCE -->
-          <a href="./attendance.html" class="stat-link">
-
-
-            <div class="stat teal">
-
-
-              <div class="stat-ico attendance-icon" aria-hidden="true"><span>✓</span></div>
-
-
-              <div class="stat-mid">
-
-
-                <div class="stat-label">Today's Attendance</div>
-
-
-                <div class="stat-value" id="statAttendance">—</div>
-
-
-                <div class="stat-helper" id="statAttendanceHelper">Attendance rate</div>
-
-
+                  <div class="stat-helper" id="statAttendanceHelper">
+                    Attendance rate
+                  </div>
+                </div>
               </div>
+            </a>
 
 
-            </div>
+            <!-- ACTIVE ANNOUNCEMENTS -->
+            <a href="./announcements.html" class="stat-link">
+              <div class="stat pink">
+                <div class="stat-ico announcements-icon" aria-hidden="true">
+                  <span>⌁</span>
+                </div>
 
 
-          </a>
+                <div class="stat-mid">
+                  <div class="stat-label">Active Announcements</div>
 
 
+                  <div class="stat-value" id="statAnnouncements">0</div>
 
 
-          <!-- ACTIVE ANNOUNCEMENTS -->
-          <a href="./announcements.html" class="stat-link">
-
-
-            <div class="stat pink">
-
-
-              <div class="stat-ico announcements-icon" aria-hidden="true"><span>⌁</span></div>
-
-
-              <div class="stat-mid">
-
-
-                <div class="stat-label">Active Announcements</div>
-
-
-                <div class="stat-value" id="statAnnouncements">0</div>
-
-
-                <div class="stat-helper">Non-archived announcements</div>
-
-
+                  <div class="stat-helper">Non-archived announcements</div>
+                </div>
               </div>
+            </a>
+          </div>
 
 
-            </div>
-
-
-          </a>
-
-
-        </div>
-
-
-
-
-        <!-- ===================================================
+          <!-- ===================================================
              ANALYTICS ROW
         ==================================================== -->
 
 
-        <div class="analytics-grid" style="grid-area: analytics;">
-
-
-          <!-- ENROLLMENT TREND -->
-          <section class="card analytics-card">
-
-
-            <div class="analytics-head">
-
-
-              <div>
-                <div class="analytics-kicker">Enrollment</div>
-                <h3>Enrollment Trend</h3>
-                <p>Number of enrolled learners across recent school years.</p>
-              </div>
-
-
-              <select class="analytics-select" id="enrollmentRange" aria-label="Enrollment range">
-                <option>Last 5 Years</option>
-                <option>Last 10 Years</option>
-              </select>
-
-
-            </div>
-
-
-            <div
-              class="chart-preview enrollment-preview"
-              id="enrollmentChart"
-              aria-label="Enrollment trend chart"
-            >
-
-
-              <div class="chart-y-labels" id="enrollmentYAxis"></div>
-
-
-              <div class="line-chart-stage">
-
-
-                <div class="chart-grid-lines" id="enrollmentGridLines">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
+          <div class="analytics-grid" style="grid-area: analytics">
+            <!-- ENROLLMENT TREND -->
+            <section class="card analytics-card">
+              <div class="analytics-head">
+                <div>
+                  <div class="analytics-kicker">Enrollment</div>
+                  <h3>Enrollment Trend</h3>
+                  <p>Number of enrolled learners across recent school years.</p>
                 </div>
 
 
-                <svg
-                  class="line-chart-svg"
-                  id="enrollmentChartSvg"
-                  viewBox="0 0 560 190"
-                  preserveAspectRatio="none"
-                  role="img"
-                  aria-label="Enrollment trend"
+                <select
+                  class="analytics-select"
+                  id="enrollmentRange"
+                  aria-label="Enrollment range"
                 >
-                  <defs>
-                    <linearGradient id="enrollmentFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stop-opacity=".20"></stop>
-                      <stop offset="100%" stop-opacity="0"></stop>
-                    </linearGradient>
-                  </defs>
-
-
-                  <path class="chart-area-fill" id="enrollmentArea"></path>
-                  <polyline class="chart-line" id="enrollmentLine"></polyline>
-                  <g id="enrollmentPoints"></g>
-                </svg>
-
-
-                <div class="chart-x-labels" id="enrollmentXAxis"></div>
-
-
-                <div class="chart-tooltip" id="enrollmentTooltip" role="status" aria-live="polite">
-                  <span class="chart-tooltip-year"></span>
-                  <strong class="chart-tooltip-value"></strong>
-                  <small>enrolled learners</small>
-                </div>
-
-
+                  <option>Last 5 Years</option>
+                  <option>Last 10 Years</option>
+                </select>
               </div>
-
-
-            </div>
-
-
-            <div class="chart-summary" id="enrollmentSummary">
-              <span>Current school year</span>
-              <strong>—</strong>
-            </div>
-
-
-            <div class="chart-note">Demo data for frontend development. Historical values will later come from BLIMS enrollment records.</div>
-
-
-          </section>
-
-
-
-
-          <!-- ATTENDANCE OVERVIEW -->
-          <section class="card analytics-card">
-
-
-            <div class="analytics-head">
-
-
-              <div>
-                <div class="analytics-kicker">Attendance</div>
-                <h3>Attendance Overview</h3>
-                <p>Present and absent learners for the selected period.</p>
-              </div>
-
-
-              <select class="analytics-select" id="attendancePeriod" aria-label="Attendance period">
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
-
-
-            </div>
-
-
-            <div class="attendance-preview" id="attendancePreview">
-
-
-              <div class="donut-placeholder" id="attendanceDonut" aria-hidden="true">
-                <div class="donut-center">
-                  <strong id="attendanceCenterRate">—</strong>
-                  <span>Attendance Rate</span>
-                </div>
-              </div>
-
-
-              <div class="attendance-legend">
-
-
-                <div class="attendance-row">
-                  <span class="legend-dot present"></span>
-                  <span>Present</span>
-                  <strong id="attendancePresent">—</strong>
-                </div>
-
-
-                <div class="attendance-row">
-                  <span class="legend-dot absent"></span>
-                  <span>Absent</span>
-                  <strong id="attendanceAbsent">—</strong>
-                </div>
-
-
-                <div class="attendance-row total">
-                  <span class="legend-dot total-dot"></span>
-                  <span>Total</span>
-                  <strong id="attendanceTotal">—</strong>
-                </div>
-
-
-              </div>
-
-
-            </div>
-
-
-            <div class="chart-note" id="attendanceNote">Demo attendance data for frontend development. The API can replace this dataset later.</div>
-
-
-          </section>
-
-
-
-
-          <!-- LEARNERS BY GRADE -->
-          <section class="card analytics-card grade-card">
-
-
-            <div class="analytics-head">
-
-
-              <div>
-                <div class="analytics-kicker">Learner Distribution</div>
-                <h3>Learners by Grade Level</h3>
-                <p>Current learner count across Grade 1 to Grade 6.</p>
-              </div>
-
-
-              <select class="analytics-select" id="gradeSchoolYear" aria-label="Grade level school year">
-                <option>S.Y. 2025–2026</option>
-              </select>
-
-
-            </div>
-
-
-            <div class="bar-chart-preview" id="gradeChart" aria-label="Learners by grade level">
-
-
-              <div class="bar-grid">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-
-
-              <div class="bars" id="gradeBars"></div>
-
-
-            </div>
-
-
-            <div class="chart-note" id="gradeNote">Demo enrollment distribution for frontend development. Current counts will later come from BLIMS enrollment records.</div>
-
-
-          </section>
-
-
-
-
-          <!-- RECENT ANNOUNCEMENTS -->
-          <section class="card list-card">
-
-
-            <div class="section-head">
-
-
-              <div>
-                <div class="analytics-kicker">Communication</div>
-                <h3>Recent Announcements</h3>
-              </div>
-
-
-              <a href="./announcements.html" class="view-all">View All</a>
-
-
-            </div>
-
-
-            <div class="dashboard-list" id="recentAnnouncementsList">
-
-
-              <div class="dashboard-list-item">
-                <span class="list-pill priority">Priority</span>
-                <div class="list-main">
-                  <strong>Recent announcement</strong>
-                  <span>Announcement details will appear here.</span>
-                </div>
-                <span class="list-arrow">›</span>
-              </div>
-
-
-              <div class="dashboard-list-item">
-                <span class="list-pill academic">Academic</span>
-                <div class="list-main">
-                  <strong>Academic notice</strong>
-                  <span>Latest academic announcements.</span>
-                </div>
-                <span class="list-arrow">›</span>
-              </div>
-
-
-              <div class="dashboard-list-item">
-                <span class="list-pill event">Event</span>
-                <div class="list-main">
-                  <strong>School event</strong>
-                  <span>Upcoming school activity.</span>
-                </div>
-                <span class="list-arrow">›</span>
-              </div>
-
-
-            </div>
-
-
-          </section>
-
-
-
-
-          <!-- UPCOMING EVENTS -->
-          <section class="card list-card">
-
-
-            <div class="section-head">
-
-
-              <div>
-                <div class="analytics-kicker">School Activities</div>
-                <h3>Upcoming Events</h3>
-              </div>
-
-
-              <a href="./events.html" class="view-all">View All</a>
-
-
-            </div>
-
-
-            <div class="event-list" id="upcomingEventsList">
-
-
-              <div class="event-list-item">
-                <div class="event-date">
-                  <strong>—</strong>
-                  <span>DATE</span>
-                </div>
-                <div class="list-main">
-                  <strong>Upcoming school event</strong>
-                  <span>Event schedule and location will appear here.</span>
-                </div>
-              </div>
-
-
-              <div class="event-list-item">
-                <div class="event-date">
-                  <strong>—</strong>
-                  <span>DATE</span>
-                </div>
-                <div class="list-main">
-                  <strong>Upcoming activity</strong>
-                  <span>Event details will appear here.</span>
-                </div>
-              </div>
-
-
-              <div class="event-list-item">
-                <div class="event-date">
-                  <strong>—</strong>
-                  <span>DATE</span>
-                </div>
-                <div class="list-main">
-                  <strong>School calendar item</strong>
-                  <span>Schedule details will appear here.</span>
-                </div>
-              </div>
-
-
-            </div>
-
-
-          </section>
-
-
-
-
-          <!-- SCHOOL CALENDAR -->
-          <div class="card calendar" style="grid-area: calendar;">
-
-
-            <!-- CALENDAR TOOLBAR -->
-            <div class="calendar-toolbar">
 
 
               <div
-                class="calendar-view-switch"
-                role="group"
-                aria-label="Calendar view"
+                class="chart-preview enrollment-preview"
+                id="enrollmentChart"
+                aria-label="Enrollment trend chart"
               >
+                <div class="chart-y-labels" id="enrollmentYAxis"></div>
 
 
-                <button
-                  type="button"
-                  id="calendarMonthBtn"
-                  class="calendar-view-btn active"
-                >
-                  Month
-                </button>
+                <div class="line-chart-stage">
+                  <div class="chart-grid-lines" id="enrollmentGridLines">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
 
 
-                <button
-                  type="button"
-                  id="calendarWeekBtn"
-                  class="calendar-view-btn"
-                >
-                  Week
-                </button>
+                  <svg
+                    class="line-chart-svg"
+                    id="enrollmentChartSvg"
+                    viewBox="0 0 560 190"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Enrollment trend"
+                  >
+                    <defs>
+                      <linearGradient
+                        id="enrollmentFill"
+                        x1="0"
+                        x2="0"
+                        y1="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stop-opacity=".20"></stop>
+                        <stop offset="100%" stop-opacity="0"></stop>
+                      </linearGradient>
+                    </defs>
 
 
+                    <path class="chart-area-fill" id="enrollmentArea"></path>
+                    <polyline class="chart-line" id="enrollmentLine"></polyline>
+                    <g id="enrollmentPoints"></g>
+                  </svg>
+
+
+                  <div class="chart-x-labels" id="enrollmentXAxis"></div>
+
+
+                  <div
+                    class="chart-tooltip"
+                    id="enrollmentTooltip"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <span class="chart-tooltip-year"></span>
+                    <strong class="chart-tooltip-value"></strong>
+                    <small>enrolled learners</small>
+                  </div>
+                </div>
               </div>
 
 
-              <div class="cal-title" id="calTitle">
-                August 2026
+              <div class="chart-summary" id="enrollmentSummary">
+                <span>Current school year</span>
+                <strong>—</strong>
               </div>
 
 
-              <div class="calendar-nav-group">
+              <div class="chart-note">
+                Demo data for frontend development. Historical values will later
+                come from BLIMS enrollment records.
+              </div>
+            </section>
 
 
-                <button
-                  class="cal-nav"
-                  id="calPrev"
-                  type="button"
-                  aria-label="Previous"
+            <!-- ATTENDANCE OVERVIEW -->
+            <section class="card analytics-card">
+              <div class="analytics-head">
+                <div>
+                  <div class="analytics-kicker">Attendance</div>
+                  <h3>Attendance Overview</h3>
+                  <p>Present and absent learners for the selected period.</p>
+                </div>
+
+
+                <select
+                  class="analytics-select"
+                  id="attendancePeriod"
+                  aria-label="Attendance period"
                 >
-                  ‹
-                </button>
-
-
-                <button
-                  class="cal-nav"
-                  id="calNext"
-                  type="button"
-                  aria-label="Next"
-                >
-                  ›
-                </button>
-
-
+                  <option>Today</option>
+                  <option>This Week</option>
+                  <option>This Month</option>
+                </select>
               </div>
 
 
+              <div class="attendance-preview" id="attendancePreview">
+                <div
+                  class="donut-placeholder"
+                  id="attendanceDonut"
+                  aria-hidden="true"
+                >
+                  <div class="donut-center">
+                    <strong id="attendanceCenterRate">—</strong>
+                    <span>Attendance Rate</span>
+                  </div>
+                </div>
+
+
+                <div class="attendance-legend">
+                  <div class="attendance-row">
+                    <span class="legend-dot present"></span>
+                    <span>Present</span>
+                    <strong id="attendancePresent">—</strong>
+                  </div>
+
+
+                  <div class="attendance-row">
+                    <span class="legend-dot absent"></span>
+                    <span>Absent</span>
+                    <strong id="attendanceAbsent">—</strong>
+                  </div>
+
+
+                  <div class="attendance-row total">
+                    <span class="legend-dot total-dot"></span>
+                    <span>Total</span>
+                    <strong id="attendanceTotal">—</strong>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="chart-note" id="attendanceNote">
+                Demo attendance data for frontend development. The API can
+                replace this dataset later.
+              </div>
+            </section>
+
+
+            <!-- LEARNERS BY GRADE -->
+            <section class="card analytics-card grade-card">
+              <div class="analytics-head">
+                <div>
+                  <div class="analytics-kicker">Learner Distribution</div>
+                  <h3>Learners by Grade Level</h3>
+                  <p>Current learner count across Grade 1 to Grade 6.</p>
+                </div>
+
+
+                <select
+                  class="analytics-select"
+                  id="gradeSchoolYear"
+                  aria-label="Grade level school year"
+                >
+                  <option>S.Y. 2025–2026</option>
+                </select>
+              </div>
+
+
+              <div
+                class="bar-chart-preview"
+                id="gradeChart"
+                aria-label="Learners by grade level"
+              >
+                <div class="bar-grid">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+
+
+                <div class="bars" id="gradeBars"></div>
+              </div>
+
+
+              <div class="chart-note" id="gradeNote">
+                Demo enrollment distribution for frontend development. Current
+                counts will later come from BLIMS enrollment records.
+              </div>
+            </section>
+
+
+            <!-- RECENT ANNOUNCEMENTS -->
+            <section class="card list-card">
+              <div class="section-head">
+                <div>
+                  <div class="analytics-kicker">Communication</div>
+                  <h3>Recent Announcements</h3>
+                </div>
+
+
+                <a href="./announcements.html" class="view-all">View All</a>
+              </div>
+
+
+              <div class="dashboard-list" id="recentAnnouncementsList">
+                <div class="dashboard-list-item">
+                  <span class="list-pill priority">Priority</span>
+                  <div class="list-main">
+                    <strong>Recent announcement</strong>
+                    <span>Announcement details will appear here.</span>
+                  </div>
+                  <span class="list-arrow">›</span>
+                </div>
+
+
+                <div class="dashboard-list-item">
+                  <span class="list-pill academic">Academic</span>
+                  <div class="list-main">
+                    <strong>Academic notice</strong>
+                    <span>Latest academic announcements.</span>
+                  </div>
+                  <span class="list-arrow">›</span>
+                </div>
+
+
+                <div class="dashboard-list-item">
+                  <span class="list-pill event">Event</span>
+                  <div class="list-main">
+                    <strong>School event</strong>
+                    <span>Upcoming school activity.</span>
+                  </div>
+                  <span class="list-arrow">›</span>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- UPCOMING EVENTS -->
+            <section class="card list-card">
+              <div class="section-head">
+                <div>
+                  <div class="analytics-kicker">School Activities</div>
+                  <h3>Upcoming Events</h3>
+                </div>
+
+
+                <a href="./events.html" class="view-all">View All</a>
+              </div>
+
+
+              <div class="event-list" id="upcomingEventsList">
+                <div class="event-list-item">
+                  <div class="event-date">
+                    <strong>—</strong>
+                    <span>DATE</span>
+                  </div>
+                  <div class="list-main">
+                    <strong>Upcoming school event</strong>
+                    <span>Event schedule and location will appear here.</span>
+                  </div>
+                </div>
+
+
+                <div class="event-list-item">
+                  <div class="event-date">
+                    <strong>—</strong>
+                    <span>DATE</span>
+                  </div>
+                  <div class="list-main">
+                    <strong>Upcoming activity</strong>
+                    <span>Event details will appear here.</span>
+                  </div>
+                </div>
+
+
+                <div class="event-list-item">
+                  <div class="event-date">
+                    <strong>—</strong>
+                    <span>DATE</span>
+                  </div>
+                  <div class="list-main">
+                    <strong>School calendar item</strong>
+                    <span>Schedule details will appear here.</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- SCHOOL CALENDAR -->
+            <div class="card calendar" style="grid-area: calendar">
+              <!-- CALENDAR TOOLBAR -->
+              <div class="calendar-toolbar">
+                <div
+                  class="calendar-view-switch"
+                  role="group"
+                  aria-label="Calendar view"
+                >
+                  <button
+                    type="button"
+                    id="calendarMonthBtn"
+                    class="calendar-view-btn active"
+                  >
+                    Month
+                  </button>
+
+
+                  <button
+                    type="button"
+                    id="calendarWeekBtn"
+                    class="calendar-view-btn"
+                  >
+                    Week
+                  </button>
+                </div>
+
+
+                <div class="cal-title" id="calTitle">August 2026</div>
+
+
+                <div class="calendar-nav-group">
+                  <button
+                    class="cal-nav"
+                    id="calPrev"
+                    type="button"
+                    aria-label="Previous"
+                  >
+                    ‹
+                  </button>
+
+
+                  <button
+                    class="cal-nav"
+                    id="calNext"
+                    type="button"
+                    aria-label="Next"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+
+
+              <!-- CALENDAR DAYS -->
+              <div class="cal-days" id="calDays">
+                <div>SUN</div>
+                <div>MON</div>
+                <div>TUE</div>
+                <div>WED</div>
+                <div>THU</div>
+                <div>FRI</div>
+                <div>SAT</div>
+              </div>
+
+
+              <!-- CALENDAR GRID -->
+              <div class="cal-grid" id="calGrid"></div>
             </div>
-
-
-            <!-- CALENDAR DAYS -->
-            <div class="cal-days" id="calDays">
-              <div>SUN</div>
-              <div>MON</div>
-              <div>TUE</div>
-              <div>WED</div>
-              <div>THU</div>
-              <div>FRI</div>
-              <div>SAT</div>
-            </div>
-
-
-            <!-- CALENDAR GRID -->
-            <div class="cal-grid" id="calGrid"></div>
-
-
           </div>
+        </section>
+      </main>
+    </div>
 
 
-        </div>
-
-
-      </section>
-
-
-    </main>
-
-
-  </div>
-
-
-
-
-
-
-  <!-- =====================================================
+    <!-- =====================================================
        CALENDAR DETAILS MODAL
   ====================================================== -->
 
 
-  <div
-    class="calendar-details-modal hidden"
-    id="calendarDetailsModal"
-    aria-hidden="true"
-  >
-
-
     <div
-      class="calendar-details-backdrop"
-      id="calendarDetailsBackdrop"
-    ></div>
-
-
-
-
-    <div
-      class="calendar-details-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="calendarDetailsTitle"
+      class="calendar-details-modal hidden"
+      id="calendarDetailsModal"
+      aria-hidden="true"
     >
+      <div class="calendar-details-backdrop" id="calendarDetailsBackdrop"></div>
 
 
-      <div class="calendar-details-header">
+      <div
+        class="calendar-details-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendarDetailsTitle"
+      >
+        <div class="calendar-details-header">
+          <div>
+            <div class="calendar-details-category" id="calendarDetailsCategory">
+              Announcement
+            </div>
 
 
-        <div>
-
-
-          <div
-            class="calendar-details-category"
-            id="calendarDetailsCategory"
-          >
-            Announcement
+            <h2 id="calendarDetailsTitle">Announcement</h2>
           </div>
 
 
-          <h2
-            id="calendarDetailsTitle"
+          <button
+            type="button"
+            class="calendar-details-close"
+            id="calendarDetailsClose"
+            aria-label="Close"
           >
-            Announcement
-          </h2>
-
-
+            ×
+          </button>
         </div>
 
 
+        <div class="calendar-details-meta" id="calendarDetailsMeta"></div>
 
 
-        <button
-          type="button"
-          class="calendar-details-close"
-          id="calendarDetailsClose"
-          aria-label="Close"
-        >
-          ×
-        </button>
-
-
+        <div class="calendar-details-body" id="calendarDetailsBody"></div>
       </div>
-
-
-
-
-      <div
-        class="calendar-details-meta"
-        id="calendarDetailsMeta"
-      ></div>
-
-
-
-
-      <div
-        class="calendar-details-body"
-        id="calendarDetailsBody"
-      ></div>
-
-
     </div>
 
 
-  </div>
-
-
-
-
-
-
-  <!-- =====================================================
+    <!-- =====================================================
        MULTIPLE ITEMS MODAL
   ====================================================== -->
 
 
-  <div
-    class="calendar-details-modal hidden"
-    id="calendarDayDetailsModal"
-    aria-hidden="true"
-  >
-
-
     <div
-      class="calendar-details-backdrop"
-      id="calendarDayDetailsBackdrop"
-    ></div>
-
-
-
-
-    <div
-      class="calendar-details-dialog calendar-day-dialog"
-      role="dialog"
-      aria-modal="true"
+      class="calendar-details-modal hidden"
+      id="calendarDayDetailsModal"
+      aria-hidden="true"
     >
-
-
-      <div class="calendar-details-header">
-
-
-        <div>
-
-
-          <div class="calendar-details-category">
-            Calendar
-          </div>
-
-
-          <h2>
-            Items for this day
-          </h2>
-
-
-        </div>
-
-
-
-
-        <button
-          type="button"
-          class="calendar-details-close"
-          id="calendarDayDetailsClose"
-          aria-label="Close"
-        >
-          ×
-        </button>
-
-
-      </div>
-
-
-
-
       <div
-        class="calendar-day-details-list"
-        id="calendarDayDetailsList"
+        class="calendar-details-backdrop"
+        id="calendarDayDetailsBackdrop"
       ></div>
 
 
+      <div
+        class="calendar-details-dialog calendar-day-dialog"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="calendar-details-header">
+          <div>
+            <div class="calendar-details-category">Calendar</div>
+
+
+            <h2>Items for this day</h2>
+          </div>
+
+
+          <button
+            type="button"
+            class="calendar-details-close"
+            id="calendarDayDetailsClose"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+
+        <div
+          class="calendar-day-details-list"
+          id="calendarDayDetailsList"
+        ></div>
+      </div>
     </div>
 
 
-  </div>
-
-
-
-
-
-
-  <!-- =====================================================
+    <!-- =====================================================
        SCRIPTS
   ====================================================== -->
 
 
-  <script src="../../js/auth/admin-guard.js"></script>
+    <script src="../../js/auth/admin-guard.js"></script>
 
 
-  <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/admin/sidebar.js"></script>
 
 
-  <script src="../../js/admin/admin-dashboard.js"></script>
-  <script src="../../js/admin/admin-dashboard-phase2.js"></script>
-
-
-</body>
+    <script src="../../js/admin/admin-dashboard.js"></script>
+    <script src="../../js/admin/admin-dashboard-phase2.js"></script>
+  </body>
 </html>
+
+
 

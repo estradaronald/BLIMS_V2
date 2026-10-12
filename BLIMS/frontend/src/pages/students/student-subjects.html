@@ -1,192 +1,362 @@
 <!-- frontend/src/pages/student/student-subjects.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student - Subjects</title>
+  <head>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  >
 
-  <!-- Same baseline styles -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../styles/admin-announcements.css" />
+        // Restore collapsed sidebar before first paint.
+        if (
+          isDesktop &&
+          localStorage.getItem("student_sidebar_collapsed_v1") === "1"
+        ) {
+          root.classList.add("sb-collapsed");
+        }
 
-  <!-- Student Subjects styles -->
-  <link rel="stylesheet" href="../../styles/student/student-subjects.css" />
-</head>
 
-<body data-page="subjects">
+        // Restore My Learning dropdown before first paint.
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("student_sidebar_groups_v1") || "{}",
+          );
 
-  <!-- Floating toggle -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
 
-  <div class="app">
+          if (saved["my-learning"] === true) {
+            root.classList.add("sb-preopen-learning");
+          }
+        } catch {
+          // Ignore invalid saved sidebar state.
+        }
+      })();
+    </script>
 
-    <div id="sidebar-mount"></div>
 
-    <main class="content">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student - Subjects</title>
 
-      <!-- TOP BAR -->
-      <header class="topbar">
-        <div class="topbar-right">
 
-          <div class="tb-user" id="userbox">
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
+
+    <!-- Same baseline styles -->
+    <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
+
+
+    <!-- Student Subjects styles -->
+    <link rel="stylesheet" href="../../styles/student/student-subjects.css" />
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="subjects">
+    <!-- Floating toggle -->
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <aside class="sidebar" id="sidebar" data-role="student">
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
+          </div>
 
-            <div class="tb-meta">
-              <div class="tb-name">Student</div>
-              <div class="tb-role">Subjects</div>
-            </div>
 
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <nav class="sb-nav">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-dashboard.html"
+            data-nav="dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY LEARNING -->
+          <div
+            class="sb-group"
+            id="studentLearningGroup"
+            data-group="my-learning"
+          >
             <button
-              class="tb-drop"
-              id="userMenuBtn"
+              class="sb-group-toggle"
+              id="studentLearningToggle"
               type="button"
+              aria-expanded="false"
+              aria-controls="studentLearningMenu"
             >
-              ▾
+              <span class="sb-group-title">MY LEARNING</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-            <div class="tb-menu" id="userMenu">
-              <button class="tb-item" type="button">
-                Settings
-              </button>
 
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
+            <div class="sb-submenu" id="studentLearningMenu">
+              <a
+                class="sb-item"
+                href="./student-schedule.html"
+                data-nav="schedule"
               >
-                Logout
-              </button>
-            </div>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
 
-          </div>
 
-        </div>
-      </header>
-
-      <!-- PAGE -->
-      <section class="teachers-wrap">
-
-        <div class="teachers-page-head">
-          <h2 class="teachers-title">Subjects</h2>
-        </div>
-
-        <!-- MAIN CARD -->
-        <div class="card t-card subj-card">
-
-          <!-- CARD HEADER -->
-          <div class="t-card-head subj-head">
-
-            <div class="subj-left">
-
-              <div class="t-subtitle">
-                My Subjects
-              </div>
-
-              <!-- Grade Level only -->
-              <div class="subj-sub">
-                
-              </div>
-
-            </div>
-
-            <div class="subj-actions">
-
-              <!-- Current / Archive toggle -->
-              <div
-                class="subj-toggle"
-                role="tablist"
-                aria-label="Subjects view toggle"
+              <a
+                class="sb-item"
+                href="./student-classwork.html"
+                data-nav="classwork"
               >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/asess.svg" alt="" />
+                </span>
+                <span class="sb-text">ASSIGNMENT</span>
+              </a>
 
-                <button
-                  class="subj-tab active"
-                  id="tabCurrent"
-                  type="button"
-                  role="tab"
-                  aria-selected="true"
-                >
-                  Current
-                </button>
 
-                <button
-                  class="subj-tab"
-                  id="tabArchive"
-                  type="button"
-                  role="tab"
-                  aria-selected="false"
-                >
-                  Archive
-                </button>
+              <a
+                class="sb-item"
+                href="./student-subjects.html"
+                data-nav="subjects"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+                <span class="sb-text">SUBJECTS</span>
+              </a>
 
-              </div>
 
-              <!-- Search -->
-              <div class="t-search subj-search">
-                <span class="t-search-ico">🔎</span>
+              <a
+                class="sb-item"
+                href="./student-attendance.html"
+                data-nav="attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
 
-                <input
-                  id="subjSearch"
-                  type="text"
-                  placeholder="Search subject"
-                />
-              </div>
 
+              <a class="sb-item" href="./student-grades.html" data-nav="grades">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
             </div>
-
           </div>
 
-          <!-- SUBJECT BODY -->
-          <div class="subj-body">
 
-            <!-- Subject list -->
-            <div
-              class="subj-list"
-              id="subjList"
-            ></div>
+          <div class="sb-divider"></div>
 
-            <!-- Empty state -->
-            <div
-              id="subjEmpty"
-              class="subj-empty hidden"
-            >
-              No subjects to display.
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUCEMENTS</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY ACCOUNT -->
+          <div class="sb-section-title">MY ACCOUNT</div>
+
+
+          <a class="sb-item" href="./student-profile.html" data-nav="profile">
+            <span class="sb-ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span class="sb-text">PROFILES</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content page-animate">
+        <!-- TOP BAR -->
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
+
+
+              <div class="tb-meta">
+                <div class="tb-name">Student</div>
+                <div class="tb-role">Subjects</div>
+              </div>
+
+
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
             </div>
+          </div>
+        </header>
 
+
+        <!-- PAGE -->
+        <section class="teachers-wrap">
+          <div class="teachers-page-head reveal-item">
+            <h2 class="teachers-title">Subjects</h2>
           </div>
 
-        </div>
 
-      </section>
+          <!-- MAIN CARD -->
+          <div class="card t-card subj-card reveal-scale">
+            <!-- CARD HEADER -->
+            <div class="t-card-head subj-head">
+              <div class="subj-left">
+                <div class="t-subtitle">My Subjects</div>
 
-    </main>
 
-  </div>
+                <!-- Grade Level only -->
+                <div class="subj-sub"></div>
+              </div>
 
-  <!-- Student scripts -->
-  <script src="../../js/student/student-sidebar.js"></script>
-  <script src="../../js/student/student-subjects.js"></script>
 
-</body>
+              <div class="subj-actions">
+                <!-- Current / Archive toggle -->
+                <div
+                  class="subj-toggle"
+                  role="tablist"
+                  aria-label="Subjects view toggle"
+                >
+                  <button
+                    class="subj-tab active"
+                    id="tabCurrent"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Current
+                  </button>
+
+
+                  <button
+                    class="subj-tab"
+                    id="tabArchive"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Archive
+                  </button>
+                </div>
+
+
+                <!-- Search -->
+                <div class="t-search subj-search">
+                  <span class="t-search-ico">🔎</span>
+
+
+                  <input
+                    id="subjSearch"
+                    type="text"
+                    placeholder="Search subject"
+                  />
+                </div>
+              </div>
+            </div>
+
+
+            <!-- SUBJECT BODY -->
+            <div class="subj-body">
+              <!-- Subject list -->
+              <div class="subj-list" id="subjList"></div>
+
+
+              <!-- Empty state -->
+              <div id="subjEmpty" class="subj-empty hidden">
+                No subjects to display.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+
+    <!-- Student scripts -->
+    <script src="../../shared/js/page-animations.js"></script>
+    <script src="../../js/student/student-sidebar.js"></script>
+    <script src="../../js/student/student-subjects.js"></script>
+  </body>
 </html>
+
+
+

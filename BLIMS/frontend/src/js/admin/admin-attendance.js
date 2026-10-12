@@ -1,796 +1,390 @@
 // frontend/src/js/admin-attendance.js
-// ============================================================
-// BLIMS ADMIN ATTENDANCE MONITORING
-// ============================================================
-//
-// Backend:
-//   GET /api/admin/grade-levels
-//   GET /api/admin/sections?grade=...
-//   GET /api/admin/sections/summary
-//   GET /api/admin/attendance
-//
-// Attendance MongoDB structure:
-//
-// {
-//   date: "2026-08-15",
-//   className: "Kindergarten",
-//   sectionName: "Everlasting",
-//   teacherId: "...",
-//   schoolYearId: "...",
-//   schoolYearName: "2025-2026",
-//   records: [
-//     {
-//       studentId: "STD-0020",
-//       status: "present"
-//     }
-//   ]
-// }
-//
-// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  const $ = (id) => document.getElementById(id);
 
-  const $ = (id) =>
-    document.getElementById(id);
+  const API_BASE = "/api/admin";
 
-
-  const API_BASE =
-    "/api/admin";
-
-
-  /* =========================================================
-     STATE
-  ========================================================= */
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
   let attendanceRows = [];
-
   let grades = [];
-
   let sectionRows = [];
-
   let sectionsCache = {};
-
   let loadingAttendance = false;
 
+  // ==========================================================
+  // DOM
+  // ==========================================================
 
-  /* =========================================================
-     DOM
-  ========================================================= */
+  const dateInput = $("dateInput");
+  const gradeSelect = $("gradeSelect");
+  const sectionSelect = $("sectionSelect");
+  const statusSelect = $("statusSelect");
+  const searchInput = $("searchInput");
 
-  const dateInput =
-    $("dateInput");
+  const attTbody = $("attTbody");
+  const exportCsvBtn = $("exportCsvBtn");
+  const refreshBtn = $("refreshBtn");
 
-  const gradeSelect =
-    $("gradeSelect");
+  const summaryLine = $("summaryLine");
+  const dataSourceNote = $("dataSourceNote");
 
-  const sectionSelect =
-    $("sectionSelect");
+  const confirmModal = $("attConfirmModal");
+  const confirmBackdrop = $("attConfirmBackdrop");
+  const confirmTitle = $("attConfirmTitle");
+  const confirmSub = $("attConfirmSub");
+  const confirmText = $("attConfirmText");
+  const confirmCloseX = $("attConfirmCloseX");
+  const confirmCancelBtn = $("attConfirmCancelBtn");
+  const confirmActionBtn = $("attConfirmActionBtn");
 
-  const statusSelect =
-    $("statusSelect");
+  const successToast = $("attSuccessToast");
+  const successToastText = $("attSuccessToastText");
 
-  const searchInput =
-    $("searchInput");
-
-  const attTbody =
-    $("attTbody");
-
-  const exportCsvBtn =
-    $("exportCsvBtn");
-
-  const refreshBtn =
-    $("refreshBtn");
-
-  const summaryLine =
-    $("summaryLine");
-
-  const dataSourceNote =
-    $("dataSourceNote");
-
-
-  /* =========================================================
-     CSRF
-  ========================================================= */
+  // ==========================================================
+  // CSRF
+  // ==========================================================
 
   let csrfToken = "";
 
-
   async function loadCsrfToken() {
-
     try {
+      const response = await fetch("/api/csrf-token", {
+        credentials: "include",
+      });
 
-      const response =
-        await fetch(
-          "/api/csrf-token",
-          {
-            credentials:
-              "include",
-          }
-        );
+      const data = await response.json().catch(() => ({}));
 
-
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-
-      csrfToken =
-        data?.csrfToken ||
-        "";
-
+      csrfToken = data?.csrfToken || "";
     } catch (error) {
-
       console.warn(
         "CSRF token could not be loaded:",
-        error
+        error,
       );
-
     }
   }
 
+  // ==========================================================
+  // API HELPER
+  // ==========================================================
 
-  /* =========================================================
-     API HELPER
-  ========================================================= */
-
-  async function api(
-    path,
-    options = {}
-  ) {
-
-    const method =
-      (
-        options.method ||
-        "GET"
-      )
-        .toUpperCase();
-
+  async function api(path, options = {}) {
+    const method = (
+      options.method || "GET"
+    ).toUpperCase();
 
     const headers = {
-
-      Accept:
-        "application/json",
-
+      Accept: "application/json",
       ...(options.headers || {}),
     };
-
 
     if (
       options.body &&
       !headers["Content-Type"]
     ) {
-
       headers["Content-Type"] =
         "application/json";
     }
-
 
     if (
       method !== "GET" &&
       method !== "HEAD" &&
       method !== "OPTIONS"
     ) {
-
       if (!csrfToken) {
-
         await loadCsrfToken();
-
       }
 
-
       if (csrfToken) {
-
-        headers[
-          "X-CSRF-Token"
-        ] =
+        headers["X-CSRF-Token"] =
           csrfToken;
-
       }
     }
 
+    const response = await fetch(
+      `${API_BASE}${path}`,
+      {
+        ...options,
+        credentials: "include",
+        headers,
+      },
+    );
 
-    const response =
-      await fetch(
-        `${API_BASE}${path}`,
-        {
-          ...options,
-
-          credentials:
-            "include",
-
-          headers,
-        }
-      );
-
-
-    const text =
-      await response.text();
-
+    const text = await response.text();
 
     let data = null;
 
-
     try {
-
-      data =
-        text
-          ? JSON.parse(text)
-          : null;
-
+      data = text
+        ? JSON.parse(text)
+        : null;
     } catch {
-
       data = text;
-
     }
-
 
     if (!response.ok) {
-
       throw new Error(
         data?.message ||
-        data?.error ||
-        `Request failed (${response.status})`
+          data?.error ||
+          `Request failed (${response.status})`,
       );
-
     }
 
-
-    /*
-     * Existing Admin API response:
-     *
-     * {
-     *   ok: true,
-     *   data: ...
-     * }
-     */
-
+    // Backend response:
+    // { ok: true, data: ... }
     if (
       data &&
       typeof data === "object" &&
       data.ok === true &&
       "data" in data
     ) {
-
       return data.data;
-
     }
-
 
     return data;
   }
 
-
-  /* =========================================================
-     HELPERS
-  ========================================================= */
+  // ==========================================================
+  // HELPERS
+  // ==========================================================
 
   function esc(value) {
-
-    return String(
-      value ?? ""
-    )
-
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
-
 
   function normalize(value) {
-
-    return String(
-      value ?? ""
-    )
-      .trim();
+    return String(value ?? "").trim();
   }
-
 
   function norm(value) {
-
-    return normalize(
-      value
-    )
-
+    return normalize(value)
       .toLowerCase()
-
-      .replace(
-        /\s+/g,
-        " "
-      );
+      .replace(/\s+/g, " ");
   }
 
-
   function todayISO() {
+    const date = new Date();
 
-    const date =
-      new Date();
+    const yyyy = date.getFullYear();
 
+    const mm = String(
+      date.getMonth() + 1,
+    ).padStart(2, "0");
 
-    const yyyy =
-      date.getFullYear();
-
-
-    const mm =
-      String(
-        date.getMonth() + 1
-      )
-        .padStart(
-          2,
-          "0"
-        );
-
-
-    const dd =
-      String(
-        date.getDate()
-      )
-        .padStart(
-          2,
-          "0"
-        );
-
+    const dd = String(
+      date.getDate(),
+    ).padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
   }
 
-
-  function formatDate(
-    value
-  ) {
-
+  function formatDate(value) {
     if (!value) {
-
       return "—";
-
     }
 
+    const date = new Date(
+      `${String(value).slice(0, 10)}T00:00:00`,
+    );
 
-    const date =
-      new Date(
-        `${String(value).slice(
-          0,
-          10
-        )}T00:00:00`
-      );
-
-
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
-
+    if (Number.isNaN(date.getTime())) {
       return value;
-
     }
-
 
     return date.toLocaleDateString(
       undefined,
       {
-        year:
-          "numeric",
-
-        month:
-          "short",
-
-        day:
-          "2-digit",
-      }
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      },
     );
   }
 
-
-  function fullName(
-    person
-  ) {
-
+  function fullName(person) {
     if (!person) {
-
       return "";
-
     }
 
-
     return [
-
       person.firstName,
-
       person.middleName,
-
       person.lastName,
-
       person.suffix,
-
     ]
-
       .filter(Boolean)
-
       .join(" ")
-
-      .replace(
-        /\s+/g,
-        " "
-      )
-
+      .replace(/\s+/g, " ")
       .trim();
   }
 
+  // ==========================================================
+  // STATUS
+  // ==========================================================
 
-  /* =========================================================
-     STATUS
-  ========================================================= */
-
-  function normalizeStatus(
-    value
-  ) {
-
-    return normalize(
-      value
-    )
-      .toLowerCase();
+  function normalizeStatus(value) {
+    return normalize(value).toLowerCase();
   }
 
-
-  function statusLabel(
-    value
-  ) {
-
-    const status =
-      normalizeStatus(
-        value
-      );
-
+  function statusLabel(value) {
+    const status = normalizeStatus(value);
 
     const labels = {
-
-      present:
-        "Present",
-
-      absent:
-        "Absent",
-
-      late:
-        "Late",
-
-      excused:
-        "Excused",
+      present: "Present",
+      absent: "Absent",
+      late: "Late",
+      excused: "Excused",
     };
 
-
-    return (
-      labels[status] ||
-      value ||
-      "—"
-    );
+    return labels[status] || value || "—";
   }
 
-
-  function statusPill(
-    value
-  ) {
-
-    const status =
-      normalizeStatus(
-        value
-      );
-
+  function statusPill(value) {
+    const status = normalizeStatus(value);
 
     const allowed = [
-
       "present",
-
       "absent",
-
       "late",
-
       "excused",
-
     ];
 
-
     const className =
-      allowed.includes(
-        status
-      )
+      allowed.includes(status)
         ? status
         : "";
 
-
     return `
       <span class="att-status ${className}">
-        ${esc(
-          statusLabel(
-            value
-          )
-        )}
+        ${esc(statusLabel(value))}
       </span>
     `;
   }
 
-
-  /* =========================================================
-     GRADE LEVELS
-  ========================================================= */
+  // ==========================================================
+  // GRADE LEVELS
+  // ==========================================================
 
   async function loadGradeLevels() {
-
-    /*
-     * Existing Admin endpoint:
-     *
-     * GET /api/admin/grade-levels
-     */
-
-    const data =
-      await api(
-        "/grade-levels"
-      );
-
+    const data = await api(
+      "/grade-levels",
+    );
 
     let list = [];
 
-
-    if (
-      Array.isArray(data)
-    ) {
-
-      list =
-        data;
-
+    if (Array.isArray(data)) {
+      list = data;
     } else if (
       data &&
-      Array.isArray(
-        data.items
-      )
+      Array.isArray(data.items)
     ) {
-
-      list =
-        data.items;
-
+      list = data.items;
     } else if (
       data &&
-      Array.isArray(
-        data.gradeLevels
-      )
+      Array.isArray(data.gradeLevels)
     ) {
-
-      list =
-        data.gradeLevels;
-
+      list = data.gradeLevels;
     }
 
+    grades = list
+      .map((item) => {
+        if (typeof item === "string") {
+          return item;
+        }
 
-    grades =
-      list
+        return (
+          item?.grade ||
+          item?.name ||
+          ""
+        );
+      })
+      .filter(Boolean);
 
-        .map(
-          (item) => {
-
-            if (
-              typeof item ===
-              "string"
-            ) {
-
-              return item;
-
-            }
-
-
-            return (
-              item?.grade ||
-              item?.name ||
-              ""
-            );
-
-          }
-        )
-
-        .filter(Boolean);
-
-
-    /*
-     * Sort exactly like the
-     * existing Admin page.
-     */
-
-    grades.sort(
-      (a, b) =>
-        String(a).localeCompare(
-          String(b),
-          undefined,
-          {
-            numeric:
-              true,
-
-            sensitivity:
-              "base",
-          }
-        )
+    grades.sort((a, b) =>
+      String(a).localeCompare(
+        String(b),
+        undefined,
+        {
+          numeric: true,
+          sensitivity: "base",
+        },
+      ),
     );
-
 
     buildGradeSelect();
   }
 
-
-  /* =========================================================
-     SECTION SUMMARY
-  ========================================================= */
-
-  async function loadSectionSummary() {
-
-    /*
-     * Existing endpoint:
-     *
-     * GET /api/admin/sections/summary
-     */
-
-    const data =
-      await api(
-        "/sections/summary"
-      );
-
-
-    if (
-      !data ||
-      typeof data !==
-        "object"
-    ) {
-
-      return {};
-
-    }
-
-
-    return data;
-  }
-
-
-  /* =========================================================
-     FETCH REAL SECTIONS
-  ========================================================= */
+  // ==========================================================
+  // FETCH REAL SECTIONS
+  // ==========================================================
 
   async function loadSectionsForGrade(
-    grade
+    grade,
   ) {
-
     const cleanGrade =
-      normalize(
-        grade
-      );
-
+      normalize(grade);
 
     if (!cleanGrade) {
-
       return [];
-
     }
-
-
-    /*
-     * Use cache if already fetched.
-     */
 
     if (
       Array.isArray(
-        sectionsCache[
-          cleanGrade
-        ]
+        sectionsCache[cleanGrade],
       )
     ) {
-
       return sectionsCache[
         cleanGrade
       ];
-
     }
 
-
-    /*
-     * Fetch REAL sections
-     * for this grade.
-     *
-     * Existing backend:
-     *
-     * GET /api/admin/sections?grade=Kindergarten
-     */
-
-    const data =
-      await api(
-        `/sections?grade=${encodeURIComponent(
-          cleanGrade
-        )}`
-      );
-
+    const data = await api(
+      `/sections?grade=${encodeURIComponent(
+        cleanGrade,
+      )}`,
+    );
 
     let rows = [];
 
-
-    if (
-      Array.isArray(data)
-    ) {
-
-      rows =
-        data;
-
+    if (Array.isArray(data)) {
+      rows = data;
     } else if (
       data &&
-      Array.isArray(
-        data.items
-      )
+      Array.isArray(data.items)
     ) {
-
-      rows =
-        data.items;
-
+      rows = data.items;
     } else if (
       data &&
-      Array.isArray(
-        data.sections
-      )
+      Array.isArray(data.sections)
     ) {
-
-      rows =
-        data.sections;
-
+      rows = data.sections;
     }
 
-
-    /*
-     * Store actual backend
-     * section objects.
-     */
-
-    sectionsCache[
-      cleanGrade
-    ] =
+    sectionsCache[cleanGrade] =
       rows;
-
 
     return rows;
   }
 
-
-  /* =========================================================
-     BUILD GRADE SELECT
-  ========================================================= */
+  // ==========================================================
+  // BUILD GRADE SELECT
+  // ==========================================================
 
   function buildGradeSelect() {
-
     if (!gradeSelect) {
-
       return;
-
     }
-
 
     const previous =
       gradeSelect.value;
-
 
     gradeSelect.innerHTML = `
       <option value="">
@@ -798,79 +392,43 @@ document.addEventListener("DOMContentLoaded", () => {
       </option>
     `;
 
-
-    grades.forEach(
-      (grade) => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-
-        option.value =
-          grade;
-
-
-        option.textContent =
-          grade;
-
-
-        gradeSelect.appendChild(
-          option
+    grades.forEach((grade) => {
+      const option =
+        document.createElement(
+          "option",
         );
 
-      }
-    );
+      option.value = grade;
+      option.textContent = grade;
 
-
-    /*
-     * Preserve previous
-     * selection if possible.
-     */
+      gradeSelect.appendChild(
+        option,
+      );
+    });
 
     if (
       previous &&
-      grades.includes(
-        previous
-      )
+      grades.includes(previous)
     ) {
-
       gradeSelect.value =
         previous;
-
     } else {
-
-      /*
-       * Select the first REAL
-       * grade instead of inventing
-       * a default grade.
-       */
-
       gradeSelect.value =
-        grades[0] ||
-        "";
-
+        grades[0] || "";
     }
   }
 
-
-  /* =========================================================
-     BUILD SECTION SELECT
-  ========================================================= */
+  // ==========================================================
+  // BUILD SECTION SELECT
+  // ==========================================================
 
   async function buildSectionSelect() {
-
     if (!sectionSelect) {
-
-      return;
-
+      return false;
     }
-
 
     const previous =
       sectionSelect.value;
-
 
     sectionSelect.innerHTML = `
       <option value="">
@@ -878,201 +436,110 @@ document.addEventListener("DOMContentLoaded", () => {
       </option>
     `;
 
-
     const selectedGrade =
       normalize(
-        gradeSelect?.value
+        gradeSelect?.value,
       );
 
-
     try {
-
       let rows = [];
 
-
-      /*
-       * If a grade is selected,
-       * fetch ONLY its sections.
-       */
-
-      if (
-        selectedGrade
-      ) {
-
+      if (selectedGrade) {
         rows =
           await loadSectionsForGrade(
-            selectedGrade
+            selectedGrade,
           );
-
       } else {
-
-        /*
-         * "All Grade Levels"
-         *
-         * Fetch real sections
-         * for every real grade.
-         */
-
         const allRows = [];
 
-
-        for (
-          const grade
-          of grades
-        ) {
-
+        for (const grade of grades) {
           const gradeRows =
             await loadSectionsForGrade(
-              grade
+              grade,
             );
 
-
-          allRows.push(
-            ...gradeRows
-          );
-
+          allRows.push(...gradeRows);
         }
 
-
-        rows =
-          allRows;
+        rows = allRows;
       }
 
+      sectionRows = rows;
 
-      sectionRows =
-        rows;
+      const sectionNames = [
+        ...new Set(
+          rows
+            .map((row) => {
+              if (
+                typeof row ===
+                "string"
+              ) {
+                return normalize(row);
+              }
 
+              return normalize(
+                row?.section ||
+                  row?.sectionName ||
+                  row?.name ||
+                  "",
+              );
+            })
+            .filter(Boolean),
+        ),
+      ].sort((a, b) =>
+        a.localeCompare(
+          b,
+          undefined,
+          {
+            numeric: true,
+            sensitivity: "base",
+          },
+        ),
+      );
 
-      /*
-       * Extract REAL section names
-       * returned by backend.
-       */
-
-      const sectionNames =
-        [
-
-          ...new Set(
-
-            rows
-
-              .map(
-                (row) => {
-
-                  if (
-                    typeof row ===
-                    "string"
-                  ) {
-
-                    return normalize(
-                      row
-                    );
-
-                  }
-
-
-                  return normalize(
-                    row?.section ||
-                    row?.sectionName ||
-                    row?.name ||
-                    ""
-                  );
-
-                }
-              )
-
-              .filter(Boolean)
-
-          ),
-
-        ]
-
-          .sort(
-            (a, b) =>
-              a.localeCompare(
-                b,
-                undefined,
-                {
-                  numeric:
-                    true,
-
-                  sensitivity:
-                    "base",
-                }
-              )
-          );
-
-
+      // Empty value means:
+      // ALL SECTIONS
       sectionSelect.innerHTML = `
         <option value="">
           All Sections
         </option>
       `;
 
-
       sectionNames.forEach(
         (section) => {
-
           const option =
             document.createElement(
-              "option"
+              "option",
             );
 
-
-          option.value =
-            section;
-
-
+          option.value = section;
           option.textContent =
             section;
 
-
           sectionSelect.appendChild(
-            option
+            option,
           );
-
-        }
+        },
       );
-
-
-      /*
-       * Restore previous section
-       * if it still exists.
-       */
 
       if (
         previous &&
         sectionNames.includes(
-          previous
+          previous,
         )
       ) {
-
         sectionSelect.value =
           previous;
-
       } else {
-
-        sectionSelect.value =
-          "";
-
+        sectionSelect.value = "";
       }
-
-
     } catch (error) {
-
       console.error(
         "Failed to fetch sections:",
-        error
+        error,
       );
 
-
-      sectionRows =
-        [];
-
-
-      /*
-       * Do not expose backend
-       * error messages to the user.
-       */
+      sectionRows = [];
 
       sectionSelect.innerHTML = `
         <option value="">
@@ -1080,524 +547,490 @@ document.addEventListener("DOMContentLoaded", () => {
         </option>
       `;
 
+      return false;
     }
+
+    return true;
   }
 
-
-  /* =========================================================
-     LOAD ATTENDANCE
-  ========================================================= */
+  // ==========================================================
+  // LOAD ATTENDANCE
+  // ==========================================================
 
   async function loadAttendance() {
-
-    if (
-      loadingAttendance
-    ) {
-
-      return;
-
+    if (loadingAttendance) {
+      return false;
     }
 
-
-    loadingAttendance =
-      true;
-
+    loadingAttendance = true;
 
     try {
-
-      /*
-       * Show loading state
-       * while fetching.
-       */
-
       renderMessage(
-        "Loading attendance records..."
+        "Loading attendance records...",
       );
 
+      const params =
+        new URLSearchParams();
 
-      /*
-       * Attendance comes from
-       * MongoDB through the
-       * Admin attendance endpoint.
-       */
-
-      const data =
-        await api(
-          "/attendance"
+      const selectedDate =
+        normalize(
+          dateInput?.value,
         );
 
+      const selectedGrade =
+        normalize(
+          gradeSelect?.value,
+        );
+
+      const selectedSection =
+        normalize(
+          sectionSelect?.value,
+        );
+
+      const selectedStatus =
+        normalizeStatus(
+          statusSelect?.value,
+        );
+
+      if (selectedDate) {
+        params.set(
+          "date",
+          selectedDate,
+        );
+      }
+
+      if (
+        selectedGrade &&
+        selectedGrade !== "all" &&
+        selectedGrade !== "All"
+      ) {
+        params.set(
+          "grade",
+          selectedGrade,
+        );
+      }
+
+      if (
+        selectedSection &&
+        selectedSection !== "all" &&
+        selectedSection !== "All" &&
+        selectedSection !==
+          "All Sections"
+      ) {
+        params.set(
+          "section",
+          selectedSection,
+        );
+      }
+
+      if (
+        selectedStatus &&
+        selectedStatus !== "all" &&
+        selectedStatus !== "All"
+      ) {
+        params.set(
+          "status",
+          selectedStatus,
+        );
+      }
+
+      const query =
+        params.toString();
+
+      const endpoint = query
+        ? `/attendance?${query}`
+        : "/attendance";
+
+      console.log(
+        "📥 Loading attendance:",
+        endpoint,
+      );
+
+      const data =
+        await api(endpoint);
 
       let rows = [];
 
-
-      if (
-        Array.isArray(data)
+      if (Array.isArray(data)) {
+        rows = data;
+      } else if (
+        data &&
+        Array.isArray(data.items)
       ) {
-
-        rows =
-          data;
-
+        rows = data.items;
+      } else if (
+        data &&
+        Array.isArray(data.rows)
+      ) {
+        rows = data.rows;
       } else if (
         data &&
         Array.isArray(
-          data.items
+          data.attendance,
         )
       ) {
-
-        rows =
-          data.items;
-
-      } else if (
-        data &&
-        Array.isArray(
-          data.rows
-        )
-      ) {
-
-        rows =
-          data.rows;
-
-      } else if (
-        data &&
-        Array.isArray(
-          data.attendance
-        )
-      ) {
-
         rows =
           data.attendance;
-
       }
 
+      console.log(
+        "📋 Attendance records received:",
+        rows,
+      );
 
       attendanceRows =
         normalizeAttendanceRows(
-          rows
+          rows,
         );
 
+      console.log(
+        "✅ Normalized attendance rows:",
+        attendanceRows,
+      );
 
-      if (
-        dataSourceNote
-      ) {
-
+      if (dataSourceNote) {
         dataSourceNote.textContent =
           "Data source: MongoDB Attendance";
-
       }
-
 
       render();
 
-
+      return true;
     } catch (error) {
-
-      /*
-       * IMPORTANT:
-       *
-       * Log the real error for
-       * development/debugging.
-       *
-       * But DO NOT show the
-       * backend error to admins.
-       */
-
       console.error(
-        "Failed to load attendance:",
-        error
+        "❌ Failed to load attendance:",
+        error,
       );
 
+      attendanceRows = [];
 
-      attendanceRows =
-        [];
-
-
-      if (
-        dataSourceNote
-      ) {
-
+      if (dataSourceNote) {
         dataSourceNote.textContent =
           "Data source: MongoDB Attendance";
-
       }
 
-
-      /*
-       * Show the normal empty state
-       * instead of:
-       *
-       * "API route not found."
-       *
-       * or another backend error.
-       */
-
-      renderMessage(
-        "No attendance yet. No attendance records have been submitted for the selected class and date."
-      );
-
-
-      if (
-        summaryLine
-      ) {
-
+      if (summaryLine) {
         summaryLine.textContent =
           "No attendance records yet.";
-
       }
 
+      renderMessage(
+        "No attendance yet. No attendance records have been submitted for the selected class and date.",
+      );
 
+      return false;
     } finally {
-
-      loadingAttendance =
-        false;
-
+      loadingAttendance = false;
     }
   }
 
-
-  /* =========================================================
-     NORMALIZE ATTENDANCE
-  ========================================================= */
+  // ==========================================================
+  // NORMALIZE ATTENDANCE
+  // ==========================================================
 
   function normalizeAttendanceRows(
-    rows
+    rows,
   ) {
-
     const output = [];
 
+    if (!Array.isArray(rows)) {
+      return output;
+    }
 
-    rows.forEach(
-      (session) => {
+    rows.forEach((row) => {
+      if (
+        !row ||
+        typeof row !== "object"
+      ) {
+        return;
+      }
 
-        /*
-         * If backend already returns
-         * flat attendance records.
-         */
+      // ======================================================
+      // FLAT BACKEND RECORD
+      //
+      // Example:
+      //
+      // {
+      //   studentId: "STD-0010",
+      //   date: "2026-10-12",
+      //   grade: "Kindergarten",
+      //   section: "Sunflower",
+      //   status: "present"
+      // }
+      // ======================================================
 
-        if (
-          session &&
-          (
-            session.student ||
-            session.studentName
-          ) &&
-          (
-            session.status ||
-            session.attendanceStatus
-          )
-        ) {
-
-          output.push(
-            normalizeFlatAttendance(
-              session
-            )
-          );
-
-
-          return;
-
-        }
-
-
-        /*
-         * Normal MongoDB structure:
-         *
-         * Attendance document
-         * contains records[].
-         */
-
-        const date =
-          normalize(
-            session?.date
-          )
-            .slice(
-              0,
-              10
-            );
-
-
-        const grade =
-          normalize(
-            session?.className ||
-            session?.grade ||
-            session?.gradeLevel
-          );
-
-
-        const section =
-          normalize(
-            session?.sectionName ||
-            session?.section ||
-            session?.classSection
-          );
-
-
-        const teacher =
-          resolvePersonName(
-            session?.teacher ||
-            session?.teacherName ||
-            session?.adviser
-          );
-
-
-        const teacherId =
-          normalize(
-            session?.teacherId
-          );
-
-
-        const records =
-          Array.isArray(
-            session?.records
-          )
-            ? session.records
-            : [];
-
-
-        records.forEach(
-          (record) => {
-
-            const studentId =
-              normalize(
-                record?.studentId
-              );
-
-
-            const studentName =
-              resolvePersonName(
-                record?.student ||
-                record?.studentName ||
-                record?.name
-              );
-
-
-            output.push({
-
-              id:
-                String(
-                  session?._id ||
-                  `${date}-${grade}-${section}-${studentId}`
-                ),
-
-              date,
-
-              grade,
-
-              section,
-
-              student:
-                studentName ||
-                studentId ||
-                "—",
-
-              studentId,
-
-              status:
-                normalizeStatus(
-                  record?.status
-                ),
-
-              teacher:
-                teacher ||
-                "—",
-
-              teacherId,
-
-              remarks:
-                normalize(
-                  record?.remarks ||
-                  record?.note ||
-                  record?.notes ||
-                  session?.remarks
-                ),
-
-              schoolYearName:
-                normalize(
-                  session?.schoolYearName
-                ),
-
-              createdAt:
-                session?.createdAt ||
-                "",
-
-              updatedAt:
-                session?.updatedAt ||
-                "",
-
-            });
-
-          }
+      if (
+        row.studentId &&
+        (
+          row.status ||
+          row.attendanceStatus
+        )
+      ) {
+        output.push(
+          normalizeFlatAttendance(
+            row,
+          ),
         );
 
+        return;
       }
-    );
 
+      // ======================================================
+      // MONGODB ATTENDANCE DOCUMENT
+      // ======================================================
+
+      const date = normalize(
+        row.date,
+      ).slice(0, 10);
+
+      const grade = normalize(
+        row.className ||
+          row.grade ||
+          row.gradeLevel,
+      );
+
+      const section = normalize(
+        row.sectionName ||
+          row.section ||
+          row.classSection,
+      );
+
+      const teacher =
+        resolvePersonName(
+          row.teacher ||
+            row.teacherName ||
+            row.adviser,
+        );
+
+      const teacherId =
+        normalize(
+          row.teacherId,
+        );
+
+      const records =
+        Array.isArray(
+          row.records,
+        )
+          ? row.records
+          : [];
+
+      records.forEach(
+        (record) => {
+          const studentId =
+            normalize(
+              record?.studentId,
+            );
+
+          const studentName =
+            resolvePersonName(
+              record?.student ||
+                record?.studentName ||
+                record?.name,
+            );
+
+          output.push({
+            id: String(
+              row._id ||
+                row.id ||
+                `${date}-${grade}-${section}-${studentId}`,
+            ),
+
+            attendanceId:
+              String(
+                row._id ||
+                  row.attendanceId ||
+                  "",
+              ),
+
+            date,
+
+            grade,
+
+            section,
+
+            student:
+              studentName ||
+              studentId ||
+              "—",
+
+            studentId,
+
+            status:
+              normalizeStatus(
+                record?.status,
+              ),
+
+            teacher:
+              teacher || "—",
+
+            teacherId,
+
+            remarks:
+              normalize(
+                record?.remarks ||
+                  record?.remark ||
+                  record?.note ||
+                  record?.notes ||
+                  row.remarks,
+              ),
+
+            schoolYearName:
+              normalize(
+                row.schoolYearName,
+              ),
+
+            createdAt:
+              row.createdAt || "",
+
+            updatedAt:
+              row.updatedAt || "",
+          });
+        },
+      );
+    });
 
     return output;
   }
 
-
-  /* =========================================================
-     FLAT ATTENDANCE
-  ========================================================= */
+  // ==========================================================
+  // FLAT ATTENDANCE
+  // ==========================================================
 
   function normalizeFlatAttendance(
-    row
+    row,
   ) {
-
     const student =
       row?.student;
 
-
-    let studentName =
-      "";
-
+    let studentName = "";
 
     if (
       typeof student ===
       "string"
     ) {
-
-      studentName =
-        student;
-
+      studentName = student;
     } else if (
       student &&
       typeof student ===
         "object"
     ) {
-
       studentName =
-        fullName(
-          student
-        ) ||
+        fullName(student) ||
         student.fullName ||
         student.name ||
         "";
-
     } else {
-
       studentName =
         row?.studentName ||
         row?.name ||
         "";
-
     }
 
-
     return {
-
-      id:
-        String(
-          row?._id ||
+      id: String(
+        row?._id ||
           row?.id ||
-          `${row?.date || ""}-${row?.studentId || ""}`
+          `${row?.date || ""}-${row?.studentId || ""}`,
+      ),
+
+      attendanceId:
+        String(
+          row?.attendanceId ||
+            row?._id ||
+            "",
         ),
 
-      date:
-        normalize(
-          row?.date ||
-          row?.attDate
-        )
-          .slice(
-            0,
-            10
-          ),
+      date: normalize(
+        row?.date ||
+          row?.attDate,
+      ).slice(0, 10),
 
-      grade:
-        normalize(
-          row?.className ||
+      grade: normalize(
+        row?.className ||
           row?.grade ||
-          row?.gradeLevel
-        ),
+          row?.gradeLevel,
+      ),
 
-      section:
-        normalize(
-          row?.sectionName ||
+      section: normalize(
+        row?.sectionName ||
           row?.section ||
-          row?.classSection
-        ),
+          row?.classSection,
+      ),
 
       student:
+        normalize(studentName) ||
         normalize(
-          studentName
-        ) ||
-        normalize(
-          row?.studentId
+          row?.studentId,
         ) ||
         "—",
 
       studentId:
         normalize(
-          row?.studentId
+          row?.studentId,
         ),
 
       status:
         normalizeStatus(
           row?.status ||
-          row?.attendanceStatus
+            row?.attendanceStatus,
         ),
 
       teacher:
         resolvePersonName(
           row?.teacher ||
-          row?.teacherName ||
-          row?.adviser
-        ) ||
-        "—",
+            row?.teacherName ||
+            row?.adviser,
+        ) || "—",
 
       teacherId:
         normalize(
-          row?.teacherId
+          row?.teacherId,
         ),
 
-      remarks:
-        normalize(
-          row?.remarks ||
+      remarks: normalize(
+        row?.remarks ||
+          row?.remark ||
           row?.note ||
-          row?.notes
-        ),
+          row?.notes,
+      ),
 
       schoolYearName:
         normalize(
-          row?.schoolYearName
+          row?.schoolYearName,
         ),
+
+      createdAt:
+        row?.createdAt || "",
+
+      updatedAt:
+        row?.updatedAt || "",
     };
   }
 
-
-  /* =========================================================
-     PERSON NAME
-  ========================================================= */
+  // ==========================================================
+  // PERSON NAME
+  // ==========================================================
 
   function resolvePersonName(
-    value
+    value,
   ) {
-
     if (!value) {
-
       return "";
-
     }
-
 
     if (
       typeof value ===
       "string"
     ) {
-
       return value.trim();
-
     }
-
 
     if (
       typeof value ===
       "object"
     ) {
-
       return (
-        fullName(
-          value
-        ) ||
+        fullName(value) ||
         value.fullName ||
         value.name ||
         value.label ||
@@ -1606,912 +1039,792 @@ document.addEventListener("DOMContentLoaded", () => {
       )
         .toString()
         .trim();
-
     }
-
 
     return "";
   }
 
+  // ==========================================================
+  // FILTERS
+  // ==========================================================
 
-  /* =========================================================
-     FILTERS
-  ========================================================= */
-
-  function applyFilters(
-    rows
-  ) {
-
+  function applyFilters(rows) {
     const selectedDate =
       normalize(
-        dateInput?.value
+        dateInput?.value,
       );
-
 
     const selectedGrade =
       normalize(
-        gradeSelect?.value
+        gradeSelect?.value,
       );
-
 
     const selectedSection =
       normalize(
-        sectionSelect?.value
+        sectionSelect?.value,
       );
-
 
     const selectedStatus =
       normalizeStatus(
-        statusSelect?.value
+        statusSelect?.value,
       );
 
-
-    const query =
-      norm(
-        searchInput?.value
-      );
-
-
-    let result =
-      rows.slice();
-
-
-    /*
-     * DATE
-     */
-
-    if (
-      selectedDate
-    ) {
-
-      result =
-        result.filter(
-          (row) =>
-            normalize(
-              row.date
-            ).slice(
-              0,
-              10
-            ) ===
-            selectedDate
-        );
-
-    }
-
-
-    /*
-     * GRADE
-     */
-
-    if (
-      selectedGrade
-    ) {
-
-      result =
-        result.filter(
-          (row) =>
-            norm(
-              row.grade
-            ) ===
-            norm(
-              selectedGrade
-            )
-        );
-
-    }
-
-
-    /*
-     * SECTION
-     */
-
-    if (
-      selectedSection
-    ) {
-
-      result =
-        result.filter(
-          (row) =>
-            norm(
-              row.section
-            ) ===
-            norm(
-              selectedSection
-            )
-        );
-
-    }
-
-
-    /*
-     * STATUS
-     */
-
-    if (
-      selectedStatus &&
-      selectedStatus !==
-        "all"
-    ) {
-
-      result =
-        result.filter(
-          (row) =>
-            normalizeStatus(
-              row.status
-            ) ===
-            selectedStatus
-        );
-
-    }
-
-
-    /*
-     * SEARCH
-     */
-
-    if (query) {
-
-      result =
-        result.filter(
-          (row) => {
-
-            const searchable =
-              [
-
-                row.date,
-
-                row.grade,
-
-                row.section,
-
-                row.student,
-
-                row.studentId,
-
-                row.status,
-
-                row.teacher,
-
-                row.remarks,
-
-                row.schoolYearName,
-
-              ]
-
-                .filter(Boolean)
-
-                .join(" ");
-
-
-            return norm(
-              searchable
-            )
-              .includes(
-                query
-              );
-
-          }
-        );
-
-    }
-
-
-    /*
-     * SORT
-     */
-
-    result.sort(
-      (a, b) => {
-
-        const dateCompare =
-          String(
-            b.date || ""
-          )
-            .localeCompare(
-              String(
-                a.date || ""
-              )
-            );
-
-
-        if (
-          dateCompare !== 0
-        ) {
-
-          return dateCompare;
-
-        }
-
-
-        return String(
-          a.student || ""
-        )
-          .localeCompare(
-            String(
-              b.student || ""
-            )
-          );
-
-      }
+    const query = norm(
+      searchInput?.value,
     );
 
+    let result = rows.slice();
+
+    // DATE
+    if (selectedDate) {
+      result = result.filter(
+        (row) =>
+          normalize(
+            row.date,
+          ).slice(0, 10) ===
+          selectedDate,
+      );
+    }
+
+    // GRADE
+    if (
+      selectedGrade &&
+      selectedGrade !== "all" &&
+      selectedGrade !== "All"
+    ) {
+      result = result.filter(
+        (row) =>
+          norm(row.grade) ===
+          norm(selectedGrade),
+      );
+    }
+
+    // SECTION
+    if (
+      selectedSection &&
+      selectedSection !== "all" &&
+      selectedSection !== "All" &&
+      selectedSection !==
+        "All Sections"
+    ) {
+      result = result.filter(
+        (row) =>
+          norm(row.section) ===
+          norm(selectedSection),
+      );
+    }
+
+    // STATUS
+    if (
+      selectedStatus &&
+      selectedStatus !== "all" &&
+      selectedStatus !== "All"
+    ) {
+      result = result.filter(
+        (row) =>
+          normalizeStatus(
+            row.status,
+          ) === selectedStatus,
+      );
+    }
+
+    // SEARCH
+    if (query) {
+      result = result.filter(
+        (row) => {
+          const searchable = [
+            row.date,
+            row.grade,
+            row.section,
+            row.student,
+            row.studentId,
+            row.status,
+            row.schoolYearName,
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return norm(
+            searchable,
+          ).includes(query);
+        },
+      );
+    }
+
+    // SORT
+    result.sort((a, b) => {
+      const dateCompare =
+        String(
+          b.date || "",
+        ).localeCompare(
+          String(a.date || ""),
+        );
+
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+
+      return String(
+        a.student || "",
+      ).localeCompare(
+        String(
+          b.student || "",
+        ),
+      );
+    });
 
     return result;
   }
 
+  // ==========================================================
+  // SUMMARY
+  // ==========================================================
 
-  /* =========================================================
-     SUMMARY
-  ========================================================= */
-
-  function renderSummary(
-    rows
-  ) {
-
+  function renderSummary(rows) {
     if (!summaryLine) {
-
       return;
-
     }
 
-
-    const date =
-      dateInput?.value
-        ? formatDate(
-            dateInput.value
-          )
-        : "Any date";
-
+    const date = dateInput?.value
+      ? formatDate(
+          dateInput.value,
+        )
+      : "Any date";
 
     const grade =
       gradeSelect?.value ||
       "All grades";
-
 
     const section =
       sectionSelect?.value
         ? `Section ${sectionSelect.value}`
         : "All sections";
 
-
     const status =
       statusSelect?.value &&
       statusSelect.value !==
         "all"
-
         ? statusLabel(
-            statusSelect.value
+            statusSelect.value,
           )
-
         : "All statuses";
-
 
     summaryLine.textContent =
       `Showing: ${date} • ${grade} • ${section} • ${status} • ${rows.length} record(s)`;
   }
 
+  // ==========================================================
+  // TABLE
+  // ==========================================================
 
-  /* =========================================================
-     TABLE
-  ========================================================= */
-
-  function renderTable(
-    rows
-  ) {
-
+  function renderTable(rows) {
     if (!attTbody) {
-
       return;
-
     }
-
-
-    /*
-     * IMPORTANT:
-     *
-     * No attendance is NOT an error.
-     *
-     * If there are zero records after
-     * applying the filters, display the
-     * normal empty state.
-     */
 
     if (!rows.length) {
-
       renderMessage(
-        "No attendance yet. No attendance records have been submitted for the selected class and date."
+        "No attendance yet. No attendance records have been submitted for the selected class and date.",
       );
-
 
       return;
     }
-
 
     attTbody.innerHTML =
       rows
-
         .map(
-          (row, index) => {
+          (row, index) => `
+        <tr>
+          <td>
+            ${index + 1}
+          </td>
 
-            return `
-              <tr>
+          <td>
+            ${esc(
+              formatDate(
+                row.date,
+              ),
+            )}
+          </td>
 
-                <td>
-                  ${index + 1}
-                </td>
+          <td>
+            <strong>
+              ${esc(
+                row.grade ||
+                  "—",
+              )}
+            </strong>
 
-                <td>
-                  ${esc(
-                    formatDate(
-                      row.date
-                    )
-                  )}
-                </td>
+            <span>•</span>
 
-                <td>
-                  <strong>
+            ${esc(
+              row.section ||
+                "—",
+            )}
+          </td>
+
+          <td>
+            <strong>
+              ${esc(
+                row.student ||
+                  "—",
+              )}
+            </strong>
+
+            ${
+              row.studentId
+                ? `
+                  <div
+                    style="
+                      font-size:11px;
+                      opacity:.65;
+                      margin-top:2px;
+                    "
+                  >
                     ${esc(
-                      row.grade ||
-                      "—"
+                      row.studentId,
                     )}
-                  </strong>
+                  </div>
+                `
+                : ""
+            }
+          </td>
 
-                  <span>
-                    •
-                  </span>
-
-                  ${esc(
-                    row.section ||
-                    "—"
-                  )}
-                </td>
-
-                <td>
-
-                  <strong>
-                    ${esc(
-                      row.student ||
-                      "—"
-                    )}
-                  </strong>
-
-                  ${
-                    row.studentId
-                      ? `
-                        <div
-                          style="
-                            font-size:11px;
-                            opacity:.65;
-                            margin-top:2px;
-                          "
-                        >
-                          ${esc(
-                            row.studentId
-                          )}
-                        </div>
-                      `
-                      : ""
-                  }
-
-                </td>
-
-                <td>
-                  ${statusPill(
-                    row.status
-                  )}
-                </td>
-
-                <td>
-                  ${esc(
-                    row.teacher ||
-                    "—"
-                  )}
-                </td>
-
-                <td>
-                  ${esc(
-                    row.remarks ||
-                    "—"
-                  )}
-                </td>
-
-              </tr>
-            `;
-
-          }
+          <td>
+            ${statusPill(
+              row.status,
+            )}
+          </td>
+        </tr>
+      `,
         )
-
         .join("");
   }
 
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   function render() {
-
     const filtered =
       applyFilters(
-        attendanceRows
+        attendanceRows,
       );
 
-
     renderSummary(
-      filtered
+      filtered,
     );
 
-
     renderTable(
-      filtered
+      filtered,
     );
   }
 
-
-  /* =========================================================
-     EMPTY / MESSAGE
-  ========================================================= */
+  // ==========================================================
+  // EMPTY / MESSAGE
+  // ==========================================================
 
   function renderMessage(
-    message
+    message,
   ) {
-
     if (!attTbody) {
-
       return;
-
     }
-
 
     attTbody.innerHTML = `
       <tr class="att-empty">
-        <td colspan="7">
-          ${esc(
-            message
-          )}
+        <td colspan="5">
+          ${esc(message)}
         </td>
       </tr>
     `;
   }
 
+  // ==========================================================
+  // CSV
+  // ==========================================================
 
-  /* =========================================================
-     CSV
-  ========================================================= */
-
-  function csvEscape(
-    value
-  ) {
-
-    const text =
-      String(
-        value ?? ""
-      );
-
+  function csvEscape(value) {
+    const text = String(
+      value ?? "",
+    );
 
     const escaped =
       text.replaceAll(
         '"',
-        '""'
+        '""',
       );
-
 
     if (
       /[",\n]/.test(
-        text
+        text,
       )
     ) {
-
       return `"${escaped}"`;
-
     }
-
 
     return escaped;
   }
 
-
   function exportCSV() {
-
     const filtered =
       applyFilters(
-        attendanceRows
+        attendanceRows,
       );
-
 
     if (!filtered.length) {
-
       alert(
-        "There are no attendance records to export."
+        "There are no attendance records to export.",
       );
 
-
-      return;
+      return false;
     }
 
-
     const headers = [
-
       "No.",
-
       "Date",
-
       "Grade Level",
-
       "Section",
-
       "Student",
-
       "Student ID",
-
       "Status",
-
-      "Teacher",
-
-      "Remarks",
-
     ];
-
 
     const lines = [
-
       headers.join(","),
-
     ];
-
 
     filtered.forEach(
       (row, index) => {
-
         lines.push(
-
           [
-
             index + 1,
-
             row.date || "",
-
             row.grade || "",
-
             row.section || "",
-
             row.student || "",
-
             row.studentId || "",
-
             statusLabel(
-              row.status
+              row.status,
             ),
-
-            row.teacher || "",
-
-            row.remarks || "",
-
           ]
-
-            .map(
-              csvEscape
-            )
-
-            .join(",")
-
+            .map(csvEscape)
+            .join(","),
         );
-
-      }
+      },
     );
 
-
-    const blob =
-      new Blob(
-        [
-          lines.join(
-            "\n"
-          ),
-        ],
-        {
-          type:
-            "text/csv;charset=utf-8",
-        }
-      );
-
+    const blob = new Blob(
+      [lines.join("\n")],
+      {
+        type: "text/csv;charset=utf-8",
+      },
+    );
 
     const url =
       URL.createObjectURL(
-        blob
+        blob,
       );
-
 
     const date =
       dateInput?.value ||
       todayISO();
 
-
     const grade =
       gradeSelect?.value ||
       "AllGrades";
-
 
     const section =
       sectionSelect?.value ||
       "AllSections";
 
-
     const safeGrade =
       grade
-
         .replace(
           /\s+/g,
-          "_"
+          "_",
         )
-
         .replace(
           /[^a-zA-Z0-9_-]/g,
-          ""
+          "",
         );
-
 
     const safeSection =
       section
-
         .replace(
           /\s+/g,
-          "_"
+          "_",
         )
-
         .replace(
           /[^a-zA-Z0-9_-]/g,
-          ""
+          "",
         );
-
 
     const filename =
       `attendance_${date}_${safeGrade}_${safeSection}.csv`;
 
-
     const link =
       document.createElement(
-        "a"
+        "a",
       );
 
-
-    link.href =
-      url;
-
-
+    link.href = url;
     link.download =
       filename;
 
-
     document.body.appendChild(
-      link
+      link,
     );
-
 
     link.click();
 
-
     link.remove();
 
+    setTimeout(() => {
+      URL.revokeObjectURL(
+        url,
+      );
+    }, 1200);
 
-    setTimeout(
-      () => {
-
-        URL.revokeObjectURL(
-          url
-        );
-
-      },
-      1200
-    );
+    return true;
   }
 
-
-  /* =========================================================
-     REFRESH
-  ========================================================= */
+  // ==========================================================
+  // REFRESH
+  // ==========================================================
 
   async function refresh() {
-
     try {
-
-      /*
-       * Clear section cache so
-       * newly-created/edited sections
-       * are fetched again.
-       */
-
       sectionsCache = {};
-
 
       await loadGradeLevels();
 
-
       await buildSectionSelect();
 
+      const attendanceLoaded =
+        await loadAttendance();
 
-      await loadAttendance();
-
-
+      return (
+        attendanceLoaded ===
+        true
+      );
     } catch (error) {
-
-      /*
-       * Keep actual errors in
-       * the console only.
-       */
-
       console.error(
         "Attendance refresh failed:",
-        error
+        error,
       );
 
+      return false;
     }
   }
 
+  // ==========================================================
+  // CONFIRMATION MODAL + SUCCESS TOAST
+  // ==========================================================
 
-  /* =========================================================
-     EVENTS
-  ========================================================= */
+  let confirmResolver =
+    null;
+
+  let successToastTimer =
+    null;
+
+  function openConfirmation({
+    title,
+    sub,
+    message,
+    actionLabel,
+  }) {
+    if (
+      !confirmModal ||
+      !confirmTitle ||
+      !confirmSub ||
+      !confirmText ||
+      !confirmActionBtn
+    ) {
+      return Promise.resolve(
+        false,
+      );
+    }
+
+    if (confirmResolver) {
+      return Promise.resolve(
+        false,
+      );
+    }
+
+    confirmTitle.textContent =
+      title;
+
+    confirmSub.textContent =
+      sub;
+
+    confirmText.textContent =
+      message;
+
+    confirmActionBtn.textContent =
+      actionLabel;
+
+    confirmModal.classList.remove(
+      "hidden",
+    );
+
+    confirmModal.setAttribute(
+      "aria-hidden",
+      "false",
+    );
+
+    confirmModal
+      .querySelector(
+        ".t-confirm-dialog",
+      )
+      ?.focus();
+
+    return new Promise(
+      (resolve) => {
+        confirmResolver =
+          resolve;
+      },
+    );
+  }
+
+  function closeConfirmation(
+    confirmed = false,
+  ) {
+    if (!confirmResolver) {
+      return;
+    }
+
+    const resolve =
+      confirmResolver;
+
+    confirmResolver = null;
+
+    confirmModal.classList.add(
+      "hidden",
+    );
+
+    confirmModal.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    resolve(confirmed);
+  }
+
+  function showSuccessToast(
+    message,
+  ) {
+    if (
+      !successToast ||
+      !successToastText
+    ) {
+      return;
+    }
+
+    clearTimeout(
+      successToastTimer,
+    );
+
+    successToastText.textContent =
+      message;
+
+    successToast.hidden =
+      false;
+
+    successToastTimer =
+      setTimeout(() => {
+        successToast.hidden =
+          true;
+      }, 3000);
+  }
+
+  confirmCloseX?.addEventListener(
+    "click",
+    () => {
+      closeConfirmation(
+        false,
+      );
+    },
+  );
+
+  confirmCancelBtn?.addEventListener(
+    "click",
+    () => {
+      closeConfirmation(
+        false,
+      );
+    },
+  );
+
+  confirmBackdrop?.addEventListener(
+    "click",
+    () => {
+      closeConfirmation(
+        false,
+      );
+    },
+  );
+
+  confirmActionBtn?.addEventListener(
+    "click",
+    () => {
+      closeConfirmation(
+        true,
+      );
+    },
+  );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key ===
+          "Escape" &&
+        confirmResolver
+      ) {
+        closeConfirmation(
+          false,
+        );
+      }
+    },
+  );
+
+  // ==========================================================
+  // EVENTS
+  // ==========================================================
 
   exportCsvBtn?.addEventListener(
     "click",
-    exportCSV
-  );
+    async () => {
+      const confirmed =
+        await openConfirmation({
+          title:
+            "Export Attendance Report?",
+          sub:
+            "Download a CSV file.",
+          message:
+            "Export the attendance records matching your current filters?",
+          actionLabel:
+            "Export CSV",
+        });
 
+      if (!confirmed) {
+        return;
+      }
+
+      const exported =
+        exportCSV();
+
+      if (exported) {
+        showSuccessToast(
+          "Attendance report exported successfully.",
+        );
+      }
+    },
+  );
 
   refreshBtn?.addEventListener(
     "click",
-    refresh
+    async () => {
+      await refresh();
+    },
   );
 
-
+  // DATE
+  // Reload attendance from MongoDB.
   dateInput?.addEventListener(
     "change",
-    render
+    async () => {
+      await loadAttendance();
+    },
   );
 
-
-  /*
-   * When grade changes,
-   * fetch that grade's REAL
-   * sections.
-   */
-
+  // GRADE
+  // Reload sections and attendance.
   gradeSelect?.addEventListener(
     "change",
     async () => {
-
       try {
-
         await buildSectionSelect();
 
-
-        render();
-
+        await loadAttendance();
       } catch (error) {
-
         console.error(
           "Failed to update sections:",
-          error
+          error,
         );
-
       }
-
-    }
+    },
   );
 
-
+  // SECTION
   sectionSelect?.addEventListener(
     "change",
-    render
+    async () => {
+      await loadAttendance();
+    },
   );
 
-
+  // STATUS
   statusSelect?.addEventListener(
     "change",
-    render
+    async () => {
+      await loadAttendance();
+    },
   );
 
-
+  // SEARCH
+  // Search locally.
   searchInput?.addEventListener(
     "input",
-    render
+    render,
   );
 
-
-  /* =========================================================
-     INIT
-  ========================================================= */
+  // ==========================================================
+  // INIT
+  // ==========================================================
 
   async function init() {
-
     try {
-
       if (
         dateInput &&
         !dateInput.value
       ) {
-
         dateInput.value =
           todayISO();
-
       }
 
-
-      /*
-       * 1. Fetch REAL grades.
-       */
-
+      // 1. Fetch real grades.
       await loadGradeLevels();
 
-
-      /*
-       * 2. Fetch REAL sections.
-       *
-       * This calls:
-       *
-       * /api/admin/sections?grade=...
-       */
-
+      // 2. Fetch real sections.
       await buildSectionSelect();
 
-
-      /*
-       * 3. Fetch REAL attendance.
-       */
-
+      // 3. Fetch real attendance.
       await loadAttendance();
-
-
     } catch (error) {
-
-      /*
-       * Log technical error only.
-       */
-
       console.error(
         "Admin attendance initialization failed:",
-        error
+        error,
       );
 
+      attendanceRows = [];
 
-      /*
-       * Never expose backend/API
-       * error messages to the admin.
-       */
-
-      attendanceRows =
-        [];
-
-
-      if (
-        dataSourceNote
-      ) {
-
+      if (dataSourceNote) {
         dataSourceNote.textContent =
           "Data source: MongoDB Attendance";
-
       }
 
-
-      if (
-        summaryLine
-      ) {
-
+      if (summaryLine) {
         summaryLine.textContent =
           "No attendance records yet.";
-
       }
 
-
       renderMessage(
-        "No attendance yet. No attendance records have been submitted for the selected class and date."
+        "No attendance yet. No attendance records have been submitted for the selected class and date.",
       );
-
     }
-
   }
 
-
   init();
-
 });

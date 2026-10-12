@@ -1,953 +1,824 @@
 <!-- frontend/src/pages/teachers/teacher-dashboard.html -->
 
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Teacher - Dashboard</title>
 
-  <!-- =====================================================
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
+
+
+        /* Sidebar navigation group state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
+          );
+
+
+          if (saved["classroom"] === true) {
+            document.documentElement.classList.add("sb-preopen-classroom");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    <title>Teacher - Dashboard</title>
+
+
+    <!-- =====================================================
        FONT
   ====================================================== -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
 
-  <!-- =====================================================
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- =====================================================
        TEACHER STYLES
        No Admin CSS dependency
   ====================================================== -->
 
-  <!-- Teacher Sidebar -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-sidebar.css"
-  />
 
-  <!-- Teacher Dashboard -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-dashboard.css"
-  />
+    <!-- Teacher Sidebar -->
+    <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-  <!-- Shared Page Animations -->
-  <link
-    rel="stylesheet"
-    href="../../shared/css/page-animations.css"
-  />
-</head>
 
-<body data-page="teacher-dashboard">
+    <!-- Teacher Dashboard -->
+    <link rel="stylesheet" href="../../styles/teacher/teacher-dashboard.css" />
 
-  <!-- =====================================================
+
+    <!-- Shared Page Animations -->
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="teacher-dashboard">
+    <!-- =====================================================
        SIDEBAR FLOAT TOGGLE
   ====================================================== -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
-  <!-- =====================================================
+
+    <!-- =====================================================
        APP
   ====================================================== -->
-  <div class="app">
+    <div class="app">
+      <!-- TEACHER SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <!-- SCHOOL HEADER -->
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
 
-    <!-- ===================================================
-         TEACHER SIDEBAR
-         Loaded by teacher-sidebar.js
-    ==================================================== -->
-    <div id="sidebar-mount"></div>
 
-    <!-- ===================================================
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <nav class="sb-nav" aria-label="Teacher navigation">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-dashboard.html"
+            data-nav="teacher-dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- CLASSROOM -->
+          <div class="sb-group" data-group="classroom">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbTeacherClassroom"
+            >
+              <span class="sb-group-title">CLASSROOM</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbTeacherClassroom">
+              <a
+                class="sb-item"
+                href="./teacher-my-schedule.html"
+                data-nav="teacher-my-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-students.html"
+                data-nav="teacher-students"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+                <span class="sb-text">LEARNERS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-attendance.html"
+                data-nav="teacher-attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-grades.html"
+                data-nav="teacher-grades"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-promotion.html"
+                data-nav="teacher-promotion"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/promotion.svg" alt="" />
+                </span>
+                <span class="sb-text">PROMOTION</span>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="sb-divider"></div>
+
+
+          <div class="sb-section-title">LEARNING ACTIVITIES</div>
+
+
+          <!-- ASSIGNMENT -->
+
+
+          <a
+            class="sb-item"
+            href="./teacher-assessment.html"
+            data-nav="teacher-assessment"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/asess.svg" alt="" />
+            </span>
+            <span class="sb-text">ASSIGNMENT</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <!-- ANNOUNCEMENTS -->
+
+
+          <a
+            class="sb-item"
+            href="./teacher-announcements.html"
+            data-nav="teacher-announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <!-- ===================================================
          MAIN CONTENT
     ==================================================== -->
-    <main class="content page-animate">
-
-      <!-- =================================================
+      <main class="content page-animate">
+        <!-- =================================================
            TOPBAR
       ================================================== -->
-      <header class="topbar reveal-soft">
-
-        <div class="topbar-right">
-
-         
-
-          <!-- User -->
-          <div class="tb-user" id="userbox">
-
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="Teacher avatar"
-            />
-
-            <div class="tb-meta">
-
-              <div class="tb-name">
-                Bruan, Alvin
-              </div>
-
-              <div class="tb-role">
-                 Faculty
-              </div>
-
-            </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-            >
-              ▾
-            </button>
-
-            <!-- User Menu -->
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </header>
-
-      <!-- =================================================
-           TEACHER DASHBOARD GRID
-      ================================================== -->
-      <section class="t-dash">
-
-        <!-- =================================================
-             HERO
-        ================================================== -->
-        <div class="card t-hero reveal-scale">
-
-          <div class="t-hero-left reveal-item">
-
-            <h2>
-              Welcome back  Bruan, Alvin 
-            </h2>
-
-            <div class="t-hero-meta">
-
-              <div>
-                <b>Class :</b>
-                <span id="teacherClassSection">Loading...</span>
-              </div>
-
-              <div>
-                <b>Today :</b>
-                Monday, September 9
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="t-hero-right reveal-item"
-            aria-hidden="true"
-          >
-
-            <div class="t-hero-illus">
-
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <!-- User -->
+            <div class="tb-user" id="userbox">
               <img
-                src="../../assets/images/hero-img.png"
-                alt="Teacher illustration"
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="Teacher avatar"
               />
 
+
+              <div class="tb-meta">
+                <div class="tb-name">Bruan, Alvin</div>
+
+
+                <div class="tb-role">Faculty</div>
+              </div>
+
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <!-- User Menu -->
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
             </div>
-
           </div>
+        </header>
 
-        </div>
 
         <!-- =================================================
+           TEACHER DASHBOARD GRID
+      ================================================== -->
+        <section class="t-dash">
+          <!-- =================================================
+             HERO
+        ================================================== -->
+
+
+          <div class="card t-hero reveal-scale">
+            <div class="t-hero-left reveal-item">
+              <div class="t-hero-eyebrow">TEACHER DASHBOARD</div>
+
+
+              <h2>Welcome back Bruan, Alvin</h2>
+
+
+              <div class="t-hero-meta">
+                <div>
+                  <b>Class:</b>
+                  <span id="teacherClassSection">Loading...</span>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="t-hero-date reveal-item">
+              <span class="t-hero-date-label">TODAY</span>
+              <strong id="teacherTodayDate">Monday, September 9</strong>
+              <span class="t-hero-date-sub">Have a productive day!</span>
+            </div>
+          </div>
+
+
+          <!-- =================================================
              QUICK ACTIONS
         ================================================== -->
-        <div class="card t-quick reveal-scale">
+          <div class="card t-quick reveal-scale">
+            <div class="t-quick-title reveal-item">Quick Actions</div>
 
-          <div class="t-quick-title reveal-item">
-            Quick Actions
+
+            <div class="t-quick-actions">
+              <!-- Attendance -->
+              <button
+                class="t-qa t-qa-green reveal-item"
+                id="qaAttendance"
+                type="button"
+              >
+                <span class="t-qa-ico">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="5" y="4" width="14" height="17" rx="2" />
+                    <path d="M9 4.5h6" />
+                    <path d="m8.5 13 2.2 2.2 4.8-5" />
+                  </svg>
+                </span>
+
+
+                <span class="t-qa-text"> Take Attendance </span>
+              </button>
+
+
+              <!-- Assignment -->
+              <button
+                class="t-qa t-qa-blue reveal-item"
+                id="qaAssessment"
+                type="button"
+              >
+                <span class="t-qa-ico">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"
+                    />
+                    <path d="M13 3v6h6" />
+                    <path d="M13 3l6 6" />
+                    <path d="M15 15h6" />
+                    <path d="M18 12v6" />
+                  </svg>
+                </span>
+
+
+                <span class="t-qa-text"> Add Assignment </span>
+              </button>
+
+
+              <!-- Announcement -->
+              <button
+                class="t-qa t-qa-purple reveal-item"
+                id="qaAnnouncements"
+                type="button"
+              >
+                <span class="t-qa-ico">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m3 11 18-5v12L3 13z" />
+                    <path d="M11 15.2 13 21h-4l-2-7" />
+                    <path d="M21 10v4" />
+                  </svg>
+                </span>
+
+
+                <span class="t-qa-text"> Post Announcement </span>
+              </button>
+
+
+              <!-- Grades -->
+              <button
+                class="t-qa t-qa-pink reveal-item"
+                id="qaGrades"
+                type="button"
+              >
+                <span class="t-qa-ico">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M13 3H6a2 2 0 0 0-2 2v16h12" />
+                    <path d="M13 3v6h6" />
+                    <path d="M13 3l6 6" />
+                    <path d="m15 19 4.5-4.5a2.1 2.1 0 0 1 3 3L18 22h-3z" />
+                  </svg>
+                </span>
+
+
+                <span class="t-qa-text"> Enter Grades </span>
+              </button>
+            </div>
           </div>
 
-          <div class="t-quick-actions">
 
-            <!-- Attendance -->
-            <button
-              class="t-qa t-qa-green reveal-item"
-              id="qaAttendance"
-              type="button"
-            >
-
-              <span class="t-qa-ico">
-                ✅
-              </span>
-
-              <span class="t-qa-text">
-                Take Attendance
-              </span>
-
-            </button>
-
-            <!-- Assignment -->
-            <button
-              class="t-qa t-qa-blue reveal-item"
-              id="qaAssessment"
-              type="button"
-            >
-
-              <span class="t-qa-ico">
-                ➕
-              </span>
-
-              <span class="t-qa-text">
-                Add Assignment
-              </span>
-
-            </button>
-
-            <!-- Announcement -->
-            <button
-              class="t-qa t-qa-purple reveal-item"
-              id="qaAnnouncements"
-              type="button"
-            >
-
-              <span class="t-qa-ico">
-                📣
-              </span>
-
-              <span class="t-qa-text">
-                Post Announcement
-              </span>
-
-            </button>
-
-            <!-- Grades -->
-            <button
-              class="t-qa t-qa-pink reveal-item"
-              id="qaGrades"
-              type="button"
-            >
-
-              <span class="t-qa-ico">
-                📝
-              </span>
-
-              <span class="t-qa-text">
-                Enter Grades
-              </span>
-
-            </button>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================
+          <!-- =================================================
              STATS
         ================================================== -->
-        <div class="t-stats">
-
-          <!-- Total Learners -->
-          <div class="t-stat card reveal-scale">
-
-            <div class="t-stat-ico reveal-item">
-              👥
-            </div>
-
-            <div class="t-stat-mid reveal-item">
-
-              <div class="t-stat-label">
-                Total Learners
-              </div>
-
-              <div class="t-stat-value">
-                45
-              </div>
-
-            </div>
-
-          </div>
-
-          <!-- Attendance -->
-          <div class="t-stat card reveal-scale">
-
-            <div class="t-stat-ico t-ico-green reveal-item">
-              ✅
-            </div>
-
-            <div class="t-stat-mid reveal-item">
-
-              <div class="t-stat-label">
-                Attendance Rate
-              </div>
-
-              <div class="t-stat-value">
-                40
-              </div>
-
-            </div>
-
-          </div>
-
-          <!-- Announcements -->
-          <div class="t-stat card reveal-scale">
-
-            <div class="t-stat-ico t-ico-pink reveal-item">
-              📣
-            </div>
-
-            <div class="t-stat-mid reveal-item">
-
-              <div class="t-stat-label">
-                Announcements
-              </div>
-
-              <div class="t-stat-value">
-                5
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================
-             TODAY'S SCHEDULE
-        ================================================== -->
-        <div class="card t-panel t-schedule reveal-scale">
-
-          <div class="t-panel-head reveal-item">
-
-            <div class="t-panel-title">
-
-              <span class="t-mini">
-                📅
-              </span>
-
-              Today's Schedule
-
-            </div>
-
-          </div>
-
-          <div class="t-sched">
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  Mathematics
-                </div>
-
-                <div class="t-sched-sub">
-                  8:00am - 9:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-blue">
-                Current
-              </span>
-
-            </div>
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  Science
-                </div>
-
-                <div class="t-sched-sub">
-                  9:00am - 10:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-gray">
-                Next
-              </span>
-
-            </div>
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  Science
-                </div>
-
-                <div class="t-sched-sub">
-                  9:00am - 10:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-gray">
-                Next
-              </span>
-
-            </div>
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  Science
-                </div>
-
-                <div class="t-sched-sub">
-                  9:00am - 10:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-gray">
-                Next
-              </span>
-
-            </div>
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  Science
-                </div>
-
-                <div class="t-sched-sub">
-                  9:00am - 10:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-gray">
-                Next
-              </span>
-
-            </div>
-
-            <div class="t-sched-row reveal-item">
-
-              <div class="t-sched-main">
-
-                <div class="t-sched-title">
-                  History
-                </div>
-
-                <div class="t-sched-sub">
-                  10:00am - 11:00am
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-gray">
-                Next
-              </span>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================
-             RECENT ACTIVITY
-        ================================================== -->
-        <div class="card t-panel t-activity-panel reveal-scale">
-
-          <div class="t-panel-head reveal-item">
-
-            <div class="t-panel-title">
-
-              <span class="t-mini">
-                🔔
-              </span>
-
-              Recent Activity
-
-            </div>
-
-          </div>
-
-          <div class="t-activity">
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Science Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 minute ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-            <div class="t-act-row reveal-item">
-
-              <div class="t-act-ico">
-                ✅
-              </div>
-
-              <div class="t-act-body">
-
-                <div class="t-act-title">
-                  Attendance for Mathematics Class 1 - A
-                </div>
-
-                <div class="t-act-sub">
-                  1 hour ago
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================
-             SCHEDULED ASSESSMENTS
-        ================================================== -->
-        <div class="card t-panel t-assessments reveal-scale">
-
-          <div class="t-panel-head reveal-item">
-
-            <div class="t-panel-title">
-
-              <span class="t-mini">
-                🗂️
-              </span>
-
-              Scheduled Assessments
-
-            </div>
-
-          </div>
-
-          <div class="t-list">
-
-            <div class="t-list-row reveal-item">
-
-              <div>
-
-                <div class="t-list-title">
-                  Math Activity
-                </div>
-
-                <div class="t-list-sub">
-                  Feb 1
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-blue">
-                Scheduled
-              </span>
-
-              <button
-                class="t-ghost"
-                type="button"
-              >
-                Edit
-              </button>
-
-            </div>
-
-            <div class="t-list-row reveal-item">
-
-              <div>
-
-                <div class="t-list-title">
-                  Science Quiz - Biology
-                </div>
-
-                <div class="t-list-sub">
-                  Jan 30
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-green">
-                Published
-              </span>
-
-              <button
-                class="t-ghost"
-                type="button"
-              >
-                View
-              </button>
-
-            </div>
-
-            <div class="t-list-row reveal-item">
-
-              <div>
-
-                <div class="t-list-title">
-                  Science Quiz - Biology
-                </div>
-
-                <div class="t-list-sub">
-                  Jan 30
-                </div>
-
-              </div>
-
-              <span class="t-badge t-badge-orange">
-                Draft
-              </span>
-
-              <button
-                class="t-ghost"
-                type="button"
-              >
-                Publish
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =================================================
-             ANNOUNCEMENTS
-        ================================================== -->
-        <div class="card t-panel t-announcements reveal-scale">
-
-          <div class="t-panel-head reveal-item">
-
-            <div class="t-panel-title">
-
-              <span class="t-mini">
-                📣
-              </span>
-
-              Announcements
-
-            </div>
-
+          <div class="t-stats">
+            <!-- Total Learners -->
             <a
-              class="t-view"
-              href="./teacher-announcements.html"
+              class="t-stat card reveal-scale"
+              href="./teacher-students.html"
+              aria-label="View learners"
             >
-              View All
+              <div class="t-stat-ico t-ico-blue reveal-item" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="9" cy="8" r="3" />
+                  <path d="M3.5 19v-1.5a5.5 5.5 0 0 1 11 0V19z" />
+                  <path d="M16 5.5a3 3 0 0 1 0 5.8" />
+                  <path d="M17 14a4.5 4.5 0 0 1 3.5 4.4V19h-4" />
+                </svg>
+              </div>
+
+
+              <div class="t-stat-mid reveal-item">
+                <div class="t-stat-label">Total Learners</div>
+                <div class="t-stat-value">45</div>
+              </div>
             </a>
 
+
+            <!-- Attendance -->
+            <a
+              class="t-stat card reveal-scale"
+              href="./teacher-attendance.html"
+              aria-label="View attendance"
+            >
+              <div
+                class="t-stat-ico t-ico-green reveal-item"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="4" y="3" width="16" height="18" rx="2" />
+                  <path d="m8 12 2.5 2.5L16 9" />
+                </svg>
+              </div>
+
+
+              <div class="t-stat-mid reveal-item">
+                <div class="t-stat-label">Attendance Rate</div>
+                <div class="t-stat-value">40</div>
+              </div>
+            </a>
+
+
+            <!-- Announcements -->
+            <a
+              class="t-stat card reveal-scale"
+              href="./teacher-announcements.html"
+              aria-label="View announcements"
+            >
+              <div class="t-stat-ico t-ico-pink reveal-item" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m3 11 18-5v12L3 13z" />
+                  <path d="M11 15.2 13 21h-4l-2-7" />
+                  <path d="M21 10v4" />
+                </svg>
+              </div>
+
+
+              <div class="t-stat-mid reveal-item">
+                <div class="t-stat-label">Announcements</div>
+                <div class="t-stat-value">5</div>
+              </div>
+            </a>
           </div>
 
-          <div class="t-ann">
 
-            <div class="t-ann-item reveal-item">
-
-              <div class="t-ann-title">
-                Faculty Meeting
-              </div>
-
-              <div class="t-ann-meta">
-
-                <span>
-                  Date: Wed, Feb 14
-                </span>
-
-                <span>
-                  Time: 12:00pm - 1:00pm
-                </span>
-
-              </div>
-
-              <div class="t-ann-meta">
-                Venue: AVR Room
-              </div>
-
+          <!-- =================================================
+             TODAY'S SCHEDULE
+        ================================================== -->
+          <div class="card t-panel t-schedule reveal-scale">
+            <div class="t-panel-head reveal-item">
+              <div class="t-panel-title">Today's Schedule</div>
+              <a class="t-view" href="./teacher-my-schedule.html"
+                >View Schedule</a
+              >
             </div>
 
-            <div class="t-ann-item reveal-item">
 
-              <div class="t-ann-title">
-                Math Competition
+            <div class="t-sched">
+              <div class="t-sched-row reveal-item">
+                <div class="t-sched-main">
+                  <div class="t-sched-title">Mathematics</div>
+
+
+                  <div class="t-sched-sub">8:00am - 9:00am</div>
+                </div>
+
+
+                <span class="t-badge t-badge-blue"> Current </span>
               </div>
 
-              <div class="t-ann-meta">
 
-                <span>
-                  Date: Thu, Feb 15
-                </span>
+              <div class="t-sched-row reveal-item">
+                <div class="t-sched-main">
+                  <div class="t-sched-title">Science</div>
 
-                <span>
-                  Time: 8:00am - 12:00pm
-                </span>
 
+                  <div class="t-sched-sub">9:00am - 10:00am</div>
+                </div>
+
+
+                <span class="t-badge t-badge-gray"> Next </span>
               </div>
 
-              <div class="t-ann-meta">
-                Venue: Bolosan Elementary School
+
+              <div class="t-sched-row reveal-item">
+                <div class="t-sched-main">
+                  <div class="t-sched-title">English</div>
+
+
+                  <div class="t-sched-sub">10:00am - 11:00am</div>
+                </div>
+
+
+                <span class="t-badge t-badge-gray"> Next </span>
               </div>
 
+
+              <div class="t-sched-row reveal-item">
+                <div class="t-sched-main">
+                  <div class="t-sched-title">History</div>
+
+
+                  <div class="t-sched-sub">11:00am - 12:00pm</div>
+                </div>
+
+
+                <span class="t-badge t-badge-gray"> Next </span>
+              </div>
             </div>
-
-            <div class="t-ann-item reveal-item">
-
-              <div class="t-ann-title">
-                Math Competition
-              </div>
-
-              <div class="t-ann-meta">
-
-                <span>
-                  Date: Thu, Feb 15
-                </span>
-
-                <span>
-                  Time: 8:00am - 12:00pm
-                </span>
-
-              </div>
-
-              <div class="t-ann-meta">
-                Venue: Bolosan Elementary School
-              </div>
-
-            </div>
-
-            <div class="t-ann-item reveal-item">
-
-              <div class="t-ann-title">
-                Math Competition
-              </div>
-
-              <div class="t-ann-meta">
-
-                <span>
-                  Date: Thu, Feb 15
-                </span>
-
-                <span>
-                  Time: 8:00am - 12:00pm
-                </span>
-
-              </div>
-
-              <div class="t-ann-meta">
-                Venue: Bolosan Elementary School
-              </div>
-
-            </div>
-
-            <div class="t-ann-item reveal-item">
-
-              <div class="t-ann-title">
-                Math Competition
-              </div>
-
-              <div class="t-ann-meta">
-
-                <span>
-                  Date: Thu, Feb 15
-                </span>
-
-                <span>
-                  Time: 8:00am - 12:00pm
-                </span>
-
-              </div>
-
-              <div class="t-ann-meta">
-                Venue: Bolosan Elementary School
-              </div>
-
-            </div>
-
-            <div class="t-ann-item reveal-item">
-
-              <div class="t-ann-title">
-                Math Competition
-              </div>
-
-              <div class="t-ann-meta">
-
-                <span>
-                  Date: Thu, Feb 15
-                </span>
-
-                <span>
-                  Time: 8:00am - 12:00pm
-                </span>
-
-              </div>
-
-              <div class="t-ann-meta">
-                Venue: Bolosan Elementary School
-              </div>
-
-            </div>
-
           </div>
 
-        </div>
 
-      </section>
+          <!-- =================================================
+             RECENT ACTIVITY
+        ================================================== -->
+          <div class="card t-panel t-activity-panel reveal-scale">
+            <div class="t-panel-head reveal-item">
+              <div class="t-panel-title">Recent Activity</div>
+              <a class="t-view" href="./teacher-attendance.html">View All</a>
+            </div>
 
-    </main>
 
-  </div>
+            <div class="t-activity">
+              <div class="t-act-row reveal-item">
+                <div class="t-act-body">
+                  <div class="t-act-title">
+                    Attendance for Science Class 1 - A
+                  </div>
 
-  <!-- =====================================================
+
+                  <div class="t-act-sub">1 minute ago</div>
+                </div>
+              </div>
+
+
+              <div class="t-act-row reveal-item">
+                <div class="t-act-body">
+                  <div class="t-act-title">
+                    Attendance for Mathematics Class 1 - A
+                  </div>
+
+
+                  <div class="t-act-sub">1 hour ago</div>
+                </div>
+              </div>
+
+
+              <div class="t-act-row reveal-item">
+                <div class="t-act-body">
+                  <div class="t-act-title">
+                    Attendance for Mathematics Class 1 - A
+                  </div>
+
+
+                  <div class="t-act-sub">1 hour ago</div>
+                </div>
+              </div>
+
+
+              <div class="t-act-row reveal-item">
+                <div class="t-act-body">
+                  <div class="t-act-title">
+                    Attendance for Mathematics Class 1 - A
+                  </div>
+
+
+                  <div class="t-act-sub">1 hour ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- =================================================
+             SCHEDULED ASSESSMENTS
+        ================================================== -->
+          <div class="card t-panel t-assessments reveal-scale">
+            <div class="t-panel-head reveal-item">
+              <div class="t-panel-title">Scheduled Assessments</div>
+              <a class="t-view" href="./teacher-assessment.html">View All</a>
+            </div>
+
+
+            <div class="t-list">
+              <div class="t-list-row reveal-item">
+                <div>
+                  <div class="t-list-title">Math Activity</div>
+
+
+                  <div class="t-list-sub">Feb 1</div>
+                </div>
+
+
+                <span class="t-badge t-badge-blue"> Scheduled </span>
+
+
+                <button class="t-ghost" type="button">Edit</button>
+              </div>
+
+
+              <div class="t-list-row reveal-item">
+                <div>
+                  <div class="t-list-title">Science Quiz - Biology</div>
+
+
+                  <div class="t-list-sub">Jan 30</div>
+                </div>
+
+
+                <span class="t-badge t-badge-green"> Published </span>
+
+
+                <button class="t-ghost" type="button">View</button>
+              </div>
+
+
+              <div class="t-list-row reveal-item">
+                <div>
+                  <div class="t-list-title">Science Quiz - Biology</div>
+
+
+                  <div class="t-list-sub">Jan 30</div>
+                </div>
+
+
+                <span class="t-badge t-badge-orange"> Draft </span>
+
+
+                <button class="t-ghost" type="button">Publish</button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- =================================================
+             ANNOUNCEMENTS
+        ================================================== -->
+          <div class="card t-panel t-announcements reveal-scale">
+            <div class="t-panel-head reveal-item">
+              <div class="t-panel-title">Announcements</div>
+
+
+              <a class="t-view" href="./teacher-announcements.html">
+                View All
+              </a>
+            </div>
+
+
+            <div class="t-ann">
+              <div class="t-ann-item reveal-item">
+                <div class="t-ann-title">Faculty Meeting</div>
+
+
+                <div class="t-ann-meta">
+                  <span> Date: Wed, Feb 14 </span>
+
+
+                  <span> Time: 12:00pm - 1:00pm </span>
+                </div>
+
+
+                <div class="t-ann-meta">Venue: AVR Room</div>
+              </div>
+
+
+              <div class="t-ann-item reveal-item">
+                <div class="t-ann-title">Math Competition</div>
+
+
+                <div class="t-ann-meta">
+                  <span> Date: Thu, Feb 15 </span>
+
+
+                  <span> Time: 8:00am - 12:00pm </span>
+                </div>
+
+
+                <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+              </div>
+
+
+              <div class="t-ann-item reveal-item">
+                <div class="t-ann-title">Math Competition</div>
+
+
+                <div class="t-ann-meta">
+                  <span> Date: Thu, Feb 15 </span>
+
+
+                  <span> Time: 8:00am - 12:00pm </span>
+                </div>
+
+
+                <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+
+    <!-- =====================================================
        TEACHER SCRIPTS
   ====================================================== -->
-  <script src="../../shared/js/page-animations.js"></script>
-  <script src="../../js/teacher/teacher-sidebar.js"></script>
-  <script src="../../js/teacher/teacher-dashboard.js"></script>
-
-</body>
+    <script src="../../shared/js/page-animations.js"></script>
+    <script src="../../js/teacher/teacher-sidebar.js"></script>
+    <script src="../../js/teacher/teacher-dashboard.js"></script>
+  </body>
 </html>
+
+
+

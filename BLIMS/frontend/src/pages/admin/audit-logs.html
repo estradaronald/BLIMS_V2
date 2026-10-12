@@ -1,442 +1,682 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Admin - Audit Logs</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-    rel="stylesheet"
-  >
+    <title>Admin - Audit Logs</title>
 
-  <!-- Shared styles -->
-  <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
-  <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-  <!-- Page styles -->
-  <link rel="stylesheet" href="../../styles/admin/admin-audit-logs.css" />
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
-  <style>
-    .topbar {
-      margin-bottom: 4px;
-    }
 
-    .ms-page {
-      padding: 0;
-    }
-  </style>
-</head>
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-<body data-page="audit-logs">
 
-  <!-- =====================================================
+    <!-- Page styles -->
+    <link rel="stylesheet" href="../../styles/admin/admin-audit-logs.css" />
+
+
+    <style>
+      .topbar {
+        margin-bottom: 4px;
+      }
+
+
+      .ms-page {
+        padding: 0;
+      }
+    </style>
+
+
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
+
+
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("admin_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
+
+
+        /* Sidebar dropdown state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("admin_sidebar_groups_v1") || "{}",
+          );
+
+
+          if (saved["user-management"] === true) {
+            document.documentElement.classList.add(
+              "sb-preopen-user-management",
+            );
+          }
+
+
+          if (saved["academic-setup"] === true) {
+            document.documentElement.classList.add("sb-preopen-academic-setup");
+          }
+
+
+          if (saved["records"] === true) {
+            document.documentElement.classList.add("sb-preopen-records");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+  </head>
+
+
+  <body data-page="audit-logs">
+    <!-- =====================================================
        SIDEBAR FLOATING TOGGLE
   ====================================================== -->
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
 
-  <div class="app">
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
-    <div id="sidebar-mount"></div>
 
-    <main class="content ms-page">
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar" data-role="admin">
+        <!-- =====================================================
+       SCHOOL HEADER
+  ====================================================== -->
 
-      <!-- =================================================
+
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+
+
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+
+        <nav class="sb-nav">
+          <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> DASHBOARD </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         USER MANAGEMENT
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="user-management">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbUserManagement"
+            >
+              <span class="sb-group-title"> USER MANAGEMENT </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbUserManagement">
+              <a class="sb-item" href="./students.html" data-nav="students">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> LEARNERS </span>
+              </a>
+
+
+              <a class="sb-item" href="./teachers.html" data-nav="teachers">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/faculty.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> FACULTY </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         ACADEMIC SETUP
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="academic-setup">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbAcademicSetup"
+            >
+              <span class="sb-group-title"> ACADEMIC SETUP </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbAcademicSetup">
+              <a
+                class="sb-item"
+                href="./grade-levels.html"
+                data-nav="grade-levels"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text">  SECTIONS &amp; FACULTY </span>
+              </a>
+
+
+              <a class="sb-item" href="./subjects.html" data-nav="subjects">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./class-schedule.html"
+                data-nav="class-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/classsched.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> CLASS SCHEDULE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./school-year.html"
+                data-nav="school-year"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/schoolyear.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         RECORDS
+    ==================================================== -->
+
+
+          <div class="sb-group" data-group="records">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbRecords"
+            >
+              <span class="sb-group-title"> RECORDS </span>
+
+
+              <span class="sb-chevron" aria-hidden="true"> ˅ </span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbRecords">
+              <a class="sb-item" href="./attendance.html" data-nav="attendance">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ATTENDANCE </span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./academic-records.html"
+                data-nav="academic-records"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/academicrecord.svg" alt="" />
+                </span>
+
+
+                <span class="sb-text"> ACADEMIC RECORDS </span>
+              </a>
+            </div>
+          </div>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         COMMUNICATION
+    ==================================================== -->
+
+
+          <div class="sb-section-title">COMMUNICATION</div>
+
+
+          <a
+            class="sb-item"
+            href="./announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> ANNOUNCEMENTS </span>
+          </a>
+
+
+          <!-- ===================================================
+         DIVIDER
+    ==================================================== -->
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- ===================================================
+         SYSTEM
+    ==================================================== -->
+
+
+          <div class="sb-section-title">SYSTEM</div>
+
+
+          <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
+            <span class="sb-ico">
+              <img src="../../assets/icons/auditlogs.svg" alt="" />
+            </span>
+
+
+            <span class="sb-text"> AUDIT LOGS </span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content ms-page">
+        <!-- =================================================
            TOPBAR
       ================================================== -->
 
-      <header class="topbar">
 
-        <div class="topbar-right">
+        <header class="topbar">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
-          
 
-          <div class="tb-user" id="userbox">
+              <div class="tb-meta">
+                <div class="tb-name" id="tbName">Estrada, Ronald B.</div>
 
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            >
 
-            <div class="tb-meta">
-
-              <div
-                class="tb-name"
-                id="tbName"
-              >
-                Estrada, Ronald B.
+                <div class="tb-role">Admin</div>
               </div>
 
-              <div class="tb-role">
-                Admin
+
+              <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
               </div>
-
             </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-            >
-              ▾
-            </button>
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-            </div>
-
           </div>
-
-        </div>
-
-      </header>
+        </header>
 
 
-      <!-- =================================================
+        <!-- =================================================
            AUDIT LOG PAGE
       ================================================== -->
 
-      <section class="audit-wrap">
 
-        <div class="card audit-card">
-
-          <!-- =================================================
+        <section class="audit-wrap">
+          <div class="card audit-card">
+            <!-- =================================================
                PAGE TITLE
           ================================================== -->
 
-          <div class="audit-page-title">
 
-            <div class="audit-title-icon">
-              🧾
+            <div class="audit-page-title">
+              <div class="audit-title-icon">🧾</div>
+
+
+              <div>
+                <h1>Audit Logs</h1>
+
+
+                <p>
+                  Track important activities, user actions, and system events
+                  for security and monitoring purposes.
+                </p>
+              </div>
             </div>
 
-            <div>
 
-              <h1>
-                Audit Logs
-              </h1>
-
-              <p>
-                Track important activities, user actions, and system events for security and monitoring purposes.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <!-- =================================================
+            <!-- =================================================
                FILTER BAR
           ================================================== -->
 
-          <div class="audit-controls">
 
-            <!-- Search -->
+            <div class="audit-controls">
+              <!-- Search -->
 
-            <div class="audit-search">
 
-              <span class="audit-search-icon">
-                🔍
-              </span>
+              <div class="audit-search">
+                <span class="audit-search-icon"> 🔍 </span>
 
-              <input
-                id="qInput"
-                class="audit-input"
-                type="search"
-                placeholder="Search username, action, message, IP..."
-              >
 
-            </div>
+                <input
+                  id="qInput"
+                  class="audit-input"
+                  type="search"
+                  placeholder="Search username, action, message, IP..."
+                />
+              </div>
 
 
-            <!-- Action -->
+              <!-- Action -->
 
-            <select
-              id="actionSelect"
-              class="audit-select"
-            >
 
-              <option value="">
-                All Actions
-              </option>
+              <select id="actionSelect" class="audit-select">
+                <option value="">All Actions</option>
 
-              <option value="AUTH_LOGIN_SUCCESS">
-                AUTH_LOGIN_SUCCESS
-              </option>
 
-              <option value="AUTH_LOGIN_FAIL">
-                AUTH_LOGIN_FAIL
-              </option>
+                <option value="AUTH_LOGIN_SUCCESS">AUTH_LOGIN_SUCCESS</option>
 
-              <option value="AUTH_LOGOUT">
-                AUTH_LOGOUT
-              </option>
 
-              <option value="AUTH_PASSWORD_CHANGED">
-                AUTH_PASSWORD_CHANGED
-              </option>
+                <option value="AUTH_LOGIN_FAIL">AUTH_LOGIN_FAIL</option>
 
-              <option value="AUTH_MFA_OTP_SENT">
-                AUTH_MFA_OTP_SENT
-              </option>
 
-              <option value="AUTH_MFA_VERIFY_SUCCESS">
-                AUTH_MFA_VERIFY_SUCCESS
-              </option>
+                <option value="AUTH_LOGOUT">AUTH_LOGOUT</option>
 
-            </select>
 
-
-            <!-- Outcome -->
-
-            <select
-              id="outcomeSelect"
-              class="audit-select"
-            >
-
-              <option value="">
-                All Outcomes
-              </option>
-
-              <option value="SUCCESS">
-                SUCCESS
-              </option>
-
-              <option value="FAIL">
-                FAIL
-              </option>
-
-              <option value="INFO">
-                INFO
-              </option>
-
-            </select>
-
-
-            <!-- Start Date -->
-
-            <div class="audit-date">
-
-              <span>
-                📅
-              </span>
-
-              <input
-                id="startDate"
-                type="date"
-                aria-label="Start Date"
-              >
-
-            </div>
-
-
-            <!-- End Date -->
-
-            <div class="audit-date">
-
-              <span>
-                📅
-              </span>
-
-              <input
-                id="endDate"
-                type="date"
-                aria-label="End Date"
-              >
-
-            </div>
-
-
-            <!-- Apply -->
-
-            <button
-              id="applyBtn"
-              class="audit-btn primary"
-              type="button"
-            >
-              Apply
-            </button>
-
-
-            <!-- Clear -->
-
-            <button
-              id="clearBtn"
-              class="audit-btn ghost"
-              type="button"
-            >
-              Clear
-            </button>
-
-          </div>
-
-
-          <!-- =================================================
-               TABLE
-          ================================================== -->
-
-          <div class="table-wrap audit-table-wrap">
-
-            <table class="table audit-table">
-
-              <thead>
-
-                <tr>
-
-                  <th class="audit-number">
-                    #
-                  </th>
-
-                  <th>
-                    Date & Time
-                  </th>
-
-                  <th>
-                    User
-                  </th>
-
-                  <th>
-                    Role
-                  </th>
-
-                  <th>
-                    Action
-                  </th>
-
-                  <th>
-                    Outcome
-                  </th>
-
-                  <th>
-                    Message
-                  </th>
-
-                  <th>
-                    IP Address
-                  </th>
-
-                </tr>
-
-              </thead>
-
-              <tbody id="auditBody"></tbody>
-
-            </table>
-
-          </div>
-
-
-          <!-- =================================================
-               FOOTER / PAGINATION
-          ================================================== -->
-
-          <div class="audit-foot">
-
-            <div
-              class="audit-meta"
-              id="auditMeta"
-            >
-              Loading…
-            </div>
-
-
-            <div class="audit-pager">
-
-              <button
-                id="prevBtn"
-                class="audit-page-btn"
-                type="button"
-                aria-label="Previous page"
-              >
-                ‹
-              </button>
-
-
-              <div
-                class="audit-page-numbers"
-                id="pageNumbers"
-              ></div>
-
-
-              <button
-                id="nextBtn"
-                class="audit-page-btn"
-                type="button"
-                aria-label="Next page"
-              >
-                ›
-              </button>
-
-
-              <select
-                id="limitSelect"
-                class="audit-limit"
-                aria-label="Logs per page"
-              >
-                <option value="10">
-                  10 / page
+                <option value="AUTH_PASSWORD_CHANGED">
+                  AUTH_PASSWORD_CHANGED
                 </option>
 
-                <option value="25">
-                  25 / page
-                </option>
 
-                <option value="50">
-                  50 / page
+                <option value="AUTH_MFA_OTP_SENT">AUTH_MFA_OTP_SENT</option>
+
+
+                <option value="AUTH_MFA_VERIFY_SUCCESS">
+                  AUTH_MFA_VERIFY_SUCCESS
                 </option>
               </select>
 
+
+              <!-- Outcome -->
+
+
+              <select id="outcomeSelect" class="audit-select">
+                <option value="">All Outcomes</option>
+
+
+                <option value="SUCCESS">SUCCESS</option>
+
+
+                <option value="FAIL">FAIL</option>
+
+
+                <option value="INFO">INFO</option>
+              </select>
+
+
+              <!-- Start Date -->
+
+
+              <div class="audit-date">
+                <span> 📅 </span>
+
+
+                <input id="startDate" type="date" aria-label="Start Date" />
+              </div>
+
+
+              <!-- End Date -->
+
+
+              <div class="audit-date">
+                <span> 📅 </span>
+
+
+                <input id="endDate" type="date" aria-label="End Date" />
+              </div>
+
+
+              <!-- Apply -->
+
+
+              <button id="applyBtn" class="audit-btn primary" type="button">
+                Apply
+              </button>
+
+
+              <!-- Clear -->
+
+
+              <button id="clearBtn" class="audit-btn ghost" type="button">
+                Clear
+              </button>
             </div>
 
+
+            <!-- =================================================
+               TABLE
+          ================================================== -->
+
+
+            <div class="table-wrap audit-table-wrap">
+              <table class="table audit-table">
+                <thead>
+                  <tr>
+                    <th class="audit-number">#</th>
+
+
+                    <th>Date & Time</th>
+
+
+                    <th>User</th>
+
+
+                    <th>Role</th>
+
+
+                    <th>Action</th>
+
+
+                    <th>Outcome</th>
+
+
+                    <th>Message</th>
+
+
+                    <th>IP Address</th>
+                  </tr>
+                </thead>
+
+
+                <tbody id="auditBody"></tbody>
+              </table>
+            </div>
+
+
+            <!-- =================================================
+               FOOTER / PAGINATION
+          ================================================== -->
+
+
+            <div class="audit-foot">
+              <div class="audit-meta" id="auditMeta">Loading…</div>
+
+
+              <div class="audit-pager">
+                <button
+                  id="prevBtn"
+                  class="audit-page-btn"
+                  type="button"
+                  aria-label="Previous page"
+                >
+                  ‹
+                </button>
+
+
+                <div class="audit-page-numbers" id="pageNumbers"></div>
+
+
+                <button
+                  id="nextBtn"
+                  class="audit-page-btn"
+                  type="button"
+                  aria-label="Next page"
+                >
+                  ›
+                </button>
+
+
+                <select
+                  id="limitSelect"
+                  class="audit-limit"
+                  aria-label="Logs per page"
+                >
+                  <option value="10">10 / page</option>
+
+
+                  <option value="25">25 / page</option>
+
+
+                  <option value="50">50 / page</option>
+                </select>
+              </div>
+            </div>
           </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
+        </section>
+      </main>
+    </div>
 
 
-  <!-- =====================================================
+    <!-- =====================================================
        SCRIPTS
   ====================================================== -->
 
-  <script src="../../js/auth/admin-guard.js"></script>
 
-  <script src="../../js/admin/sidebar.js"></script>
+    <script src="../../js/auth/admin-guard.js"></script>
 
-  <script src="../../js/admin/admin-audit-logs.js"></script>
 
-</body>
+    <script src="../../js/admin/sidebar.js"></script>
+
+
+    <script src="../../js/admin/admin-audit-logs.js"></script>
+  </body>
 </html>
+
+
+

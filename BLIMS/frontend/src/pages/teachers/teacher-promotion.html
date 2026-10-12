@@ -1,567 +1,574 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <script>
+      (() => {
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
 
-  <title>Teacher - Promotion</title>
+        /* Sidebar collapsed state */
+        if (
+          isDesktop &&
+          localStorage.getItem("teacher_sidebar_collapsed_v1") === "1"
+        ) {
+          document.documentElement.classList.add("sb-collapsed");
+        }
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+        /* Sidebar navigation group state */
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
+          );
 
-  <!-- Shared styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-sidebar.css"
-  />
 
-  
+          if (saved["classroom"] === true) {
+            document.documentElement.classList.add("sb-preopen-classroom");
+          }
+        } catch {
+          /* Ignore invalid saved sidebar state */
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Teacher Promotion -->
-  <link
-    rel="stylesheet"
-    href="../../styles/teacher/teacher-promotion.css"
-  />
 
-  <!-- Page Animations -->
-  <link
-    rel="stylesheet"
-    href="../../shared/css/page-animations.css"
-  />
-</head>
+    <title>Teacher - Promotion</title>
 
-<body data-page="teacher-promotion">
 
-  <!-- =========================================================
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
+
+
+    <!-- Teacher Promotion -->
+    <link rel="stylesheet" href="../../styles/teacher/teacher-promotion.css" />
+
+
+    <!-- Page Animations -->
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="teacher-promotion">
+    <!-- =========================================================
        FLOATING SIDEBAR TOGGLE
   ========================================================== -->
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-  <div class="app">
+    <div class="app">
+      <!-- TEACHER SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <!-- SCHOOL HEADER -->
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
 
-    <!-- =======================================================
-         SIDEBAR
-    ======================================================== -->
 
-    <div id="sidebar-mount"></div>
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
 
 
-    <!-- =======================================================
+        <nav class="sb-nav" aria-label="Teacher navigation">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-dashboard.html"
+            data-nav="teacher-dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- CLASSROOM -->
+          <div class="sb-group" data-group="classroom">
+            <button
+              class="sb-group-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sbTeacherClassroom"
+            >
+              <span class="sb-group-title">CLASSROOM</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
+            </button>
+
+
+            <div class="sb-submenu" id="sbTeacherClassroom">
+              <a
+                class="sb-item"
+                href="./teacher-my-schedule.html"
+                data-nav="teacher-my-schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-students.html"
+                data-nav="teacher-students"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/learner.svg" alt="" />
+                </span>
+                <span class="sb-text">LEARNERS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-attendance.html"
+                data-nav="teacher-attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-grades.html"
+                data-nav="teacher-grades"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./teacher-promotion.html"
+                data-nav="teacher-promotion"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/promotion.svg" alt="" />
+                </span>
+                <span class="sb-text">PROMOTION</span>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- LEARNING ACTIVITIES -->
+          <div class="sb-section-title">LEARNING ACTIVITIES</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-assessment.html"
+            data-nav="teacher-assessment"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/asess.svg" alt="" />
+            </span>
+            <span class="sb-text">ASSIGNMENT</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./teacher-announcements.html"
+            data-nav="teacher-announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <!-- =======================================================
          MAIN CONTENT
     ======================================================== -->
 
-    <main class="content page-animate">
 
-
-      <!-- =====================================================
+      <main class="content page-animate">
+        <!-- =====================================================
            TOPBAR
       ====================================================== -->
 
-      <header class="topbar reveal-soft">
 
-        <div class="topbar-left"></div>
+        <header class="topbar reveal-soft">
+          <div class="topbar-left"></div>
 
-        <div class="topbar-right">
 
-          <!-- User -->
-          <div
-            class="tb-user"
-            id="userbox"
-          >
+          <div class="topbar-right">
+            <!-- User -->
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            />
 
-            <div class="tb-meta">
+              <div class="tb-meta">
+                <div class="tb-name" id="tbName">Faculty</div>
 
-              <div
-                class="tb-name"
-                id="tbName"
-              >
-                Faculty
+
+                <div class="tb-role" id="tbRole">Faculty</div>
               </div>
-
-              <div
-                class="tb-role"
-                id="tbRole"
-              >
-                Faculty
-              </div>
-
-            </div>
-
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-            >
-              ▾
-            </button>
-
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
 
 
               <button
-                class="tb-item danger"
+                class="tb-drop"
+                id="userMenuBtn"
                 type="button"
-                id="topbarLogout"
+                aria-label="Open user menu"
               >
-                Logout
+                ▾
               </button>
 
-            </div>
 
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
+              </div>
+            </div>
           </div>
-
-        </div>
-
-      </header>
+        </header>
 
 
-
-      <!-- =====================================================
+        <!-- =====================================================
            PROMOTION PAGE
       ====================================================== -->
 
-      <section class="tp-page">
 
-
-        <!-- ===================================================
+        <section class="tp-page">
+          <!-- ===================================================
              PAGE TITLE
         ==================================================== -->
 
-        <div
-          class="tp-page-title reveal-soft"
-          id="tpTitle"
-        >
-          Promotion
-        </div>
+
+          <div class="tp-page-title reveal-soft" id="tpTitle">Promotion</div>
 
 
-        <div
-          class="tp-page-subtitle reveal-soft"
-        >
-          End-of-school-year learner promotion
-          recommendations
-        </div>
+          <div class="tp-page-subtitle reveal-soft">
+            End-of-school-year learner promotion recommendations
+          </div>
 
 
-
-        <!-- ===================================================
+          <!-- ===================================================
              SCHOOL / CLASS INFORMATION
         ==================================================== -->
 
-        <section class="card tp-info-card reveal-scale">
 
-          <div class="tp-info-grid">
+          <section class="card tp-info-card reveal-scale">
+            <div class="tp-info-grid">
+              <!-- School Year -->
 
 
-            <!-- School Year -->
+              <div class="tp-info-item">
+                <div class="tp-info-label">School Year</div>
 
-            <div class="tp-info-item">
 
-              <div class="tp-info-label">
-                School Year
+                <div class="tp-info-value" id="schoolYearLabel">Loading...</div>
               </div>
 
-              <div
-                class="tp-info-value"
-                id="schoolYearLabel"
-              >
-                Loading...
+
+              <!-- Assigned Class -->
+
+
+              <div class="tp-info-item">
+                <div class="tp-info-label">Assigned Class</div>
+
+
+                <div class="tp-info-value" id="assignedClassLabel">
+                  Loading...
+                </div>
               </div>
 
+
+              <!-- Final Term -->
+
+
+              <div class="tp-info-item">
+                <div class="tp-info-label">Final Term</div>
+
+
+                <div class="tp-info-value" id="finalTermLabel">Loading...</div>
+              </div>
+
+
+              <!-- Final Term Status -->
+
+
+              <div class="tp-info-item">
+                <div class="tp-info-label">Final Term Status</div>
+
+
+                <div class="tp-status-badge pending" id="finalTermStatus">
+                  Checking...
+                </div>
+              </div>
             </div>
+          </section>
 
 
-            <!-- Assigned Class -->
-
-            <div class="tp-info-item">
-
-              <div class="tp-info-label">
-                Assigned Class
-              </div>
-
-              <div
-                class="tp-info-value"
-                id="assignedClassLabel"
-              >
-                Loading...
-              </div>
-
-            </div>
-
-
-            <!-- Final Term -->
-
-            <div class="tp-info-item">
-
-              <div class="tp-info-label">
-                Final Term
-              </div>
-
-              <div
-                class="tp-info-value"
-                id="finalTermLabel"
-              >
-                Loading...
-              </div>
-
-            </div>
-
-
-            <!-- Final Term Status -->
-
-            <div class="tp-info-item">
-
-              <div class="tp-info-label">
-                Final Term Status
-              </div>
-
-              <div
-                class="tp-status-badge pending"
-                id="finalTermStatus"
-              >
-                Checking...
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-
-        <!-- ===================================================
+          <!-- ===================================================
              NOT READY MESSAGE
         ==================================================== -->
 
-        <section
-          class="card tp-warning-card reveal-scale"
-          id="promotionWarning"
-          hidden
-        >
 
-          <div class="tp-warning-icon">
-            !
-          </div>
+          <section
+            class="card tp-warning-card reveal-scale"
+            id="promotionWarning"
+            hidden
+          >
+            <div class="tp-warning-icon">!</div>
 
-          <div>
 
-            <div class="tp-warning-title">
-              Promotion is not yet available
+            <div>
+              <div class="tp-warning-title">Promotion is not yet available</div>
+
+
+              <div class="tp-warning-text" id="promotionWarningText">
+                The final term must be completed and locked before promotion
+                recommendations can be submitted.
+              </div>
             </div>
-
-            <div
-              class="tp-warning-text"
-              id="promotionWarningText"
-            >
-              The final term must be completed
-              and locked before promotion
-              recommendations can be submitted.
-            </div>
-
-          </div>
-
-        </section>
+          </section>
 
 
-
-        <!-- ===================================================
+          <!-- ===================================================
              MAIN PROMOTION CARD
         ==================================================== -->
 
-        <section
-          class="card tp-card reveal-scale"
-          id="promotionCard"
-        >
 
-
-          <!-- =================================================
+          <section class="card tp-card reveal-scale" id="promotionCard">
+            <!-- =================================================
                CARD HEADER
           ================================================== -->
 
-          <div class="tp-card-header">
 
-            <div>
+            <div class="tp-card-header">
+              <div>
+                <div class="tp-card-title">Learner Promotion</div>
 
-              <div class="tp-card-title">
-                Learner Promotion
+
+                <div class="tp-card-subtitle" id="promotionScopeLabel">
+                  Loading assigned learners...
+                </div>
               </div>
 
-              <div
-                class="tp-card-subtitle"
-                id="promotionScopeLabel"
-              >
-                Loading assigned learners...
-              </div>
 
+              <div class="tp-card-actions">
+                <button
+                  type="button"
+                  class="tp-btn tp-btn-secondary"
+                  id="refreshBtn"
+                >
+                  ↻ Refresh
+                </button>
+              </div>
             </div>
 
 
-            <div class="tp-card-actions">
-
-              <button
-                type="button"
-                class="tp-btn tp-btn-secondary"
-                id="refreshBtn"
-              >
-                ↻ Refresh
-              </button>
-
-            </div>
-
-          </div>
-
-
-
-          <!-- =================================================
+            <!-- =================================================
                SUMMARY
           ================================================== -->
 
-          <div class="tp-summary-grid">
+
+            <div class="tp-summary-grid">
+              <div class="tp-summary-item">
+                <span> Total Learners </span>
 
 
-            <div class="tp-summary-item">
+                <strong id="summaryTotal"> 0 </strong>
+              </div>
 
-              <span>
-                Total Learners
-              </span>
 
-              <strong id="summaryTotal">
-                0
-              </strong>
+              <div class="tp-summary-item">
+                <span> Promote </span>
 
+
+                <strong id="summaryPromote"> 0 </strong>
+              </div>
+
+
+              <div class="tp-summary-item">
+                <span> Retain </span>
+
+
+                <strong id="summaryRetain"> 0 </strong>
+              </div>
+
+
+              <div class="tp-summary-item">
+                <span> Transfer </span>
+
+
+                <strong id="summaryTransfer"> 0 </strong>
+              </div>
+
+
+              <div class="tp-summary-item">
+                <span> Pending </span>
+
+
+                <strong id="summaryPending"> 0 </strong>
+              </div>
             </div>
 
 
-            <div class="tp-summary-item">
-
-              <span>
-                Promote
-              </span>
-
-              <strong id="summaryPromote">
-                0
-              </strong>
-
-            </div>
-
-
-            <div class="tp-summary-item">
-
-              <span>
-                Retain
-              </span>
-
-              <strong id="summaryRetain">
-                0
-              </strong>
-
-            </div>
-
-
-            <div class="tp-summary-item">
-
-              <span>
-                Transfer
-              </span>
-
-              <strong id="summaryTransfer">
-                0
-              </strong>
-
-            </div>
-
-
-            <div class="tp-summary-item">
-
-              <span>
-                Pending
-              </span>
-
-              <strong id="summaryPending">
-                0
-              </strong>
-
-            </div>
-
-          </div>
-
-
-
-          <!-- =================================================
+            <!-- =================================================
                TABLE
           ================================================== -->
 
-          <div class="tp-table-wrap">
 
-            <table
-              class="tp-table"
-              id="promotionTable"
-            >
-
-              <thead>
-
-                <tr>
-
-                  <th class="tp-no">
-                    No.
-                  </th>
-
-                  <th class="tp-student">
-                    Learner
-                  </th>
-
-                  <th>
-                    Final Grade
-                  </th>
-
-                  <th>
-                    Remarks
-                  </th>
-
-                  <th>
-                    Recommendation
-                  </th>
-
-                  <th>
-                    Status
-                  </th>
-
-                </tr>
-
-              </thead>
+            <div class="tp-table-wrap">
+              <table class="tp-table" id="promotionTable">
+                <thead>
+                  <tr>
+                    <th class="tp-no">No.</th>
 
 
-              <tbody id="promotionTbody">
-
-                <tr>
-
-                  <td
-                    colspan="6"
-                    class="tp-empty"
-                  >
-                    Loading learners...
-                  </td>
-
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
+                    <th class="tp-student">Learner</th>
 
 
+                    <th>Final Grade</th>
 
-          <!-- =================================================
+
+                    <th>Remarks</th>
+
+
+                    <th>Recommendation</th>
+
+
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+
+                <tbody id="promotionTbody">
+                  <tr>
+                    <td colspan="6" class="tp-empty">Loading learners...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+            <!-- =================================================
                SUBMISSION NOTE
           ================================================== -->
 
-          <div class="tp-note">
 
-            <div class="tp-note-title">
-              Promotion Process
+            <div class="tp-note">
+              <div class="tp-note-title">Promotion Process</div>
+
+
+              <div class="tp-note-text">
+                Faculty members submit a recommendation for each learner. Final
+                promotion and next school-year enrollment are subject to Admin
+                review and approval.
+              </div>
             </div>
 
-            <div class="tp-note-text">
-              Faculty members submit a recommendation
-              for each learner. Final promotion and
-              next school-year enrollment are subject
-              to Admin review and approval.
-            </div>
 
-          </div>
-
-
-
-          <!-- =================================================
+            <!-- =================================================
                FOOTER ACTIONS
           ================================================== -->
 
-          <div class="tp-footer">
 
-            <div
-              class="tp-save-status"
-              id="submissionStatus"
-            >
-              No changes made
+            <div class="tp-footer">
+              <div class="tp-save-status" id="submissionStatus">
+                No changes made
+              </div>
+
+
+              <button
+                type="button"
+                class="tp-btn tp-btn-primary"
+                id="submitPromotionBtn"
+              >
+                Submit Promotion Recommendations
+              </button>
             </div>
-
-
-            <button
-              type="button"
-              class="tp-btn tp-btn-primary"
-              id="submitPromotionBtn"
-            >
-              Submit Promotion Recommendations
-            </button>
-
-          </div>
-
+          </section>
         </section>
-
-      </section>
-
-    </main>
-
-  </div>
+      </main>
+    </div>
 
 
-
-  <!-- =========================================================
+    <!-- =========================================================
        JAVASCRIPT
   ========================================================== -->
 
-  <!-- Page animations -->
-  <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher sidebar -->
-  <script src="../../js/teacher/teacher-sidebar.js"></script>
+    <!-- Page animations -->
+    <script src="../../shared/js/page-animations.js"></script>
 
-  <!-- Teacher promotion -->
-  <script src="../../js/teacher/teacher-promotion.js"></script>
 
-</body>
+    <!-- Teacher sidebar -->
+    <script src="../../js/teacher/teacher-sidebar.js"></script>
+
+
+    <!-- Teacher promotion -->
+    <script src="../../js/teacher/teacher-promotion.js"></script>
+  </body>
 </html>
+
+
+

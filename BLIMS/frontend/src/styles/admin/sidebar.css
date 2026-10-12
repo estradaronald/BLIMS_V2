@@ -1,8 +1,6 @@
 /* frontend/src/styles/sidebar.css */
 
 
-
-
 /* =========================================================
    ROOT VARIABLES
 ========================================================= */
@@ -15,10 +13,10 @@
 
 
   --sbText: rgba(255, 255, 255, 0.92);
-  --sbDim: rgba(255, 255, 255, 0.70);
+  --sbDim: rgba(255, 255, 255, 0.7);
+  --sbHover: rgba(255, 255, 255, 0.08);
+  --sbLine: rgba(255, 255, 255, 0.1);
 }
-
-
 
 
 /* =========================================================
@@ -34,12 +32,7 @@
   height: calc(100vh - 28px);
 
 
-  background:
-    linear-gradient(
-      180deg,
-      var(--navy),
-      var(--navy-2)
-    );
+  background: linear-gradient(180deg, var(--navy), var(--navy-2));
 
 
   border-radius: 14px;
@@ -59,11 +52,8 @@
   flex-direction: column;
 
 
-  box-shadow:
-    0 10px 22px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
-
-
 
 
 /* =========================================================
@@ -86,8 +76,6 @@
 }
 
 
-
-
 /* =========================================================
    SCHOOL LOGO WRAPPER
 ========================================================= */
@@ -101,7 +89,7 @@
   border-radius: 50%;
 
 
-  background:transparent;
+  background: transparent;
 
 
   display: flex;
@@ -110,8 +98,6 @@
   align-items: center;
   justify-content: center;
 }
-
-
 
 
 /* =========================================================
@@ -131,8 +117,6 @@
 }
 
 
-
-
 /* =========================================================
    SCHOOL INFORMATION
 ========================================================= */
@@ -144,8 +128,6 @@
 
   padding: 0 10px;
 }
-
-
 
 
 .sb-school-name {
@@ -162,8 +144,6 @@
 }
 
 
-
-
 .sb-school-sub {
   color: var(--sbDim);
 
@@ -175,22 +155,20 @@
 }
 
 
-
-
 /* =========================================================
    NAVIGATION
 ========================================================= */
 
 
 .sb-nav {
-  padding: 10px 14px 14px;
+  padding: 11px 14px 14px;
 
 
   display: flex;
   flex-direction: column;
 
 
-  gap: 6px;
+  gap: 7px;
 
 
   margin-top: 8px;
@@ -205,8 +183,6 @@
 
   scroll-behavior: smooth;
 }
-
-
 
 
 /* =========================================================
@@ -248,14 +224,11 @@
    * Small left padding keeps the heading aligned
    * with the dropdown category titles.
    */
-  padding:
-    10px 4px 3px;
+  padding: 10px 4px 3px;
 
 
   user-select: none;
 }
-
-
 
 
 /*
@@ -269,8 +242,6 @@
 }
 
 
-
-
 /* =========================================================
    NAVIGATION DIVIDERS
 ========================================================= */
@@ -280,18 +251,14 @@
   height: 1px;
 
 
-  background:
-    rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.12);
 
 
-  margin:
-    4px 14px;
+  margin: 4px 14px;
 
 
   flex-shrink: 0;
 }
-
-
 
 
 /* =========================================================
@@ -304,32 +271,22 @@
 }
 
 
-
-
 .sb-nav::-webkit-scrollbar-track {
   background: transparent;
 }
 
 
-
-
 .sb-nav::-webkit-scrollbar-thumb {
-  background:
-    rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.18);
 
 
   border-radius: 999px;
 }
 
 
-
-
 .sb-nav::-webkit-scrollbar-thumb:hover {
-  background:
-    rgba(255, 255, 255, 0.30);
+  background: rgba(255, 255, 255, 0.3);
 }
-
-
 
 
 /* =========================================================
@@ -346,8 +303,6 @@
 
   gap: 4px;
 }
-
-
 
 
 /* =========================================================
@@ -384,8 +339,7 @@
    * Matches the left alignment of OVERVIEW,
    * COMMUNICATION, and SYSTEM.
    */
-  padding:
-    4px 4px;
+  padding: 4px 4px;
 
 
   display: flex;
@@ -415,8 +369,6 @@
 }
 
 
-
-
 /* =========================================================
    DROPDOWN TITLE
 ========================================================= */
@@ -442,8 +394,6 @@
 }
 
 
-
-
 /* =========================================================
    DROPDOWN CHEVRON
 ========================================================= */
@@ -459,11 +409,8 @@
   opacity: 0.9;
 
 
-  transition:
-    transform 0.2s ease;
+  transition: transform 0.2s ease;
 }
-
-
 
 
 /* =========================================================
@@ -472,11 +419,8 @@
 
 
 .sb-group-toggle:hover {
-  background:
-    rgba(255, 255, 255, 0.10);
+  background: var(--sbHover);
 }
-
-
 
 
 /* =========================================================
@@ -485,15 +429,11 @@
 
 
 .sb-group-toggle:focus-visible {
-  outline:
-    2px solid
-    rgba(255, 255, 255, 0.65);
+  outline: 2px solid rgba(255, 255, 255, 0.65);
 
 
   outline-offset: -2px;
 }
-
-
 
 
 /* =========================================================
@@ -501,13 +441,9 @@
 ========================================================= */
 
 
-.sb-group.is-open
-  .sb-chevron {
-  transform:
-    rotate(180deg);
+.sb-group.is-open .sb-chevron {
+  transform: rotate(180deg);
 }
-
-
 
 
 /* =========================================================
@@ -533,14 +469,9 @@
 }
 
 
-
-
-.sb-group.is-open
-  .sb-submenu {
+.sb-group.is-open .sb-submenu {
   display: flex;
 }
-
-
 
 
 /* =========================================================
@@ -558,8 +489,7 @@
   gap: 12px;
 
 
-  padding:
-    10px 14px;
+  padding: 10px 14px;
 
 
   border-radius: 12px;
@@ -592,8 +522,6 @@
 }
 
 
-
-
 /* =========================================================
    NAVIGATION ICON CONTAINER
 ========================================================= */
@@ -614,18 +542,14 @@
   justify-content: center;
 
 
-  background:
-    rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.10);
 
 
   flex: 0 0 40px;
 
 
-  transition:
-    background 0.2s ease;
+  transition: background 0.2s ease;
 }
-
-
 
 
 /* =========================================================
@@ -644,16 +568,11 @@
   display: block;
 
 
-  filter:
-    brightness(0)
-    invert(1);
+  filter: brightness(0) invert(1);
 
 
-  transition:
-    filter 0.2s ease;
+  transition: filter 0.2s ease;
 }
-
-
 
 
 /* =========================================================
@@ -662,11 +581,8 @@
 
 
 .sb-item:hover {
-  background:
-    rgba(255, 255, 255, 0.10);
+  background: var(--sbHover);
 }
-
-
 
 
 /* =========================================================
@@ -676,12 +592,9 @@
 
 .sb-item.active {
   background: var(--white);
-
-
   color: var(--navy);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
-
 
 
 .sb-item.active .sb-ico {
@@ -689,15 +602,9 @@
 }
 
 
-
-
 .sb-item.active .sb-ico img {
-  filter:
-    brightness(0)
-    invert(1);
+  filter: brightness(0) invert(1);
 }
-
-
 
 
 /* =========================================================
@@ -713,19 +620,14 @@
 }
 
 
-
-
 /* =========================================================
    COLLAPSED SCHOOL INFORMATION
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-school {
+.sidebar.is-collapsed .sb-school {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -733,12 +635,9 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-section-title {
+.sidebar.is-collapsed .sb-section-title {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -752,12 +651,9 @@
  */
 
 
-.sidebar.is-collapsed
-  .sb-group-toggle {
+.sidebar.is-collapsed .sb-group-toggle {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -765,15 +661,12 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-submenu {
+.sidebar.is-collapsed .sb-submenu {
   display: flex;
 
 
   padding-left: 0;
 }
-
-
 
 
 /* =========================================================
@@ -781,13 +674,9 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-top {
-  padding:
-    18px 10px 8px;
+.sidebar.is-collapsed .sb-top {
+  padding: 18px 10px 8px;
 }
-
-
 
 
 /* =========================================================
@@ -795,13 +684,10 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-logo-wrap {
+.sidebar.is-collapsed .sb-logo-wrap {
   width: 62px;
   height: 62px;
 }
-
-
 
 
 /* =========================================================
@@ -809,13 +695,10 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-logo {
+.sidebar.is-collapsed .sb-logo {
   width: 52px;
   height: 52px;
 }
-
-
 
 
 /* =========================================================
@@ -823,16 +706,12 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-nav {
-  padding:
-    10px 10px;
+.sidebar.is-collapsed .sb-nav {
+  padding: 10px 10px;
 
 
   gap: 12px;
 }
-
-
 
 
 /* =========================================================
@@ -840,8 +719,7 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-item {
+.sidebar.is-collapsed .sb-item {
   justify-content: center;
 
 
@@ -853,8 +731,6 @@
 
   width: 100%;
 }
-
-
 
 
 /* =========================================================
@@ -862,12 +738,9 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-text {
+.sidebar.is-collapsed .sb-text {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -875,8 +748,7 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-ico {
+.sidebar.is-collapsed .sb-ico {
   width: 40px;
   height: 40px;
 
@@ -884,11 +756,8 @@
   flex: 0 0 40px;
 
 
-  background:
-    rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.14);
 }
-
-
 
 
 /* =========================================================
@@ -896,17 +765,12 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-divider {
-  margin:
-    4px 8px;
+.sidebar.is-collapsed .sb-divider {
+  margin: 4px 8px;
 
 
-  background:
-    rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.1);
 }
-
-
 
 
 /* =========================================================
@@ -914,32 +778,19 @@
 ========================================================= */
 
 
-.sidebar.is-collapsed
-  .sb-item.active {
+.sidebar.is-collapsed .sb-item.active {
   background: var(--white);
 }
 
 
-
-
-.sidebar.is-collapsed
-  .sb-item.active
-  .sb-ico {
+.sidebar.is-collapsed .sb-item.active .sb-ico {
   background: var(--navy);
 }
 
 
-
-
-.sidebar.is-collapsed
-  .sb-item.active
-  .sb-ico img {
-  filter:
-    brightness(0)
-    invert(1);
+.sidebar.is-collapsed .sb-item.active .sb-ico img {
+  filter: brightness(0) invert(1);
 }
-
-
 
 
 /* =========================================================
@@ -947,8 +798,7 @@
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar {
+html.sb-collapsed .sidebar {
   width: 86px;
 
 
@@ -956,20 +806,14 @@ html.sb-collapsed
 }
 
 
-
-
 /* =========================================================
    HTML COLLAPSED SCHOOL INFORMATION
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-school {
+html.sb-collapsed .sidebar .sb-school {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -977,13 +821,9 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-section-title {
+html.sb-collapsed .sidebar .sb-section-title {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -991,13 +831,9 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-group-toggle {
+html.sb-collapsed .sidebar .sb-group-toggle {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -1005,9 +841,7 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-submenu {
+html.sb-collapsed .sidebar .sb-submenu {
   display: flex;
 
 
@@ -1015,21 +849,14 @@ html.sb-collapsed
 }
 
 
-
-
 /* =========================================================
    HTML COLLAPSED SCHOOL HEADER
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-top {
-  padding:
-    18px 10px 8px;
+html.sb-collapsed .sidebar .sb-top {
+  padding: 18px 10px 8px;
 }
-
-
 
 
 /* =========================================================
@@ -1037,14 +864,10 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-logo-wrap {
+html.sb-collapsed .sidebar .sb-logo-wrap {
   width: 62px;
   height: 62px;
 }
-
-
 
 
 /* =========================================================
@@ -1052,14 +875,10 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-logo {
+html.sb-collapsed .sidebar .sb-logo {
   width: 52px;
   height: 52px;
 }
-
-
 
 
 /* =========================================================
@@ -1067,17 +886,12 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-nav {
-  padding:
-    10px 10px;
+html.sb-collapsed .sidebar .sb-nav {
+  padding: 10px 10px;
 
 
   gap: 12px;
 }
-
-
 
 
 /* =========================================================
@@ -1085,18 +899,12 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-divider {
-  margin:
-    4px 8px;
+html.sb-collapsed .sidebar .sb-divider {
+  margin: 4px 8px;
 
 
-  background:
-    rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.1);
 }
-
-
 
 
 /* =========================================================
@@ -1104,9 +912,7 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-item {
+html.sb-collapsed .sidebar .sb-item {
   justify-content: center;
 
 
@@ -1120,20 +926,14 @@ html.sb-collapsed
 }
 
 
-
-
 /* =========================================================
    HTML COLLAPSED NAVIGATION TEXT
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-text {
+html.sb-collapsed .sidebar .sb-text {
   display: none;
 }
-
-
 
 
 /* =========================================================
@@ -1141,9 +941,7 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-ico {
+html.sb-collapsed .sidebar .sb-ico {
   width: 40px;
   height: 40px;
 
@@ -1151,11 +949,8 @@ html.sb-collapsed
   flex: 0 0 40px;
 
 
-  background:
-    rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.14);
 }
-
-
 
 
 /* =========================================================
@@ -1163,31 +958,956 @@ html.sb-collapsed
 ========================================================= */
 
 
-html.sb-collapsed
-  .sidebar
-  .sb-item.active {
+html.sb-collapsed .sidebar .sb-item.active {
   background: var(--white);
 }
 
 
-
-
-html.sb-collapsed
-  .sidebar
-  .sb-item.active
-  .sb-ico {
+html.sb-collapsed .sidebar .sb-item.active .sb-ico {
   background: var(--navy);
+}
+
+
+html.sb-collapsed .sidebar .sb-item.active .sb-ico img {
+  filter: brightness(0) invert(1);
+}
+
+
+/* =========================================================
+   MOBILE SIDEBAR RESPONSIVE
+========================================================= */
+
+
+@media (max-width: 700px) {
+  /* Sidebar becomes an off-canvas drawer */
+  .sidebar {
+    position: fixed;
+    z-index: 1000;
+
+
+    top: 14px;
+    left: 14px;
+    bottom: 14px;
+
+
+    width: 260px;
+    min-width: 260px;
+    height: auto;
+
+
+    margin: 0;
+
+
+    transform: translateX(calc(-100% - 20px));
+    transition: transform 0.25s ease;
+
+
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  }
+
+
+  /* Open mobile sidebar */
+  html.sb-mobile-open .sidebar {
+    transform: translateX(0);
+  }
+
+
+  /* Do NOT use the desktop 86px collapsed state on mobile */
+  html.sb-collapsed .sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-school,
+  html.sb-collapsed .sidebar .sb-section-title,
+  html.sb-collapsed .sidebar .sb-group-toggle {
+    display: initial;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-submenu {
+    display: none;
+    padding-left: 10px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-group.is-open .sb-submenu {
+    display: flex;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-top {
+    padding: 18px 16px 10px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-logo-wrap {
+    width: 78px;
+    height: 78px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-logo {
+    width: 108px;
+    height: 108px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-nav {
+    padding: 10px 14px 14px;
+    gap: 6px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-item {
+    justify-content: flex-start;
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-text {
+    display: inline;
+  }
+
+
+  html.sb-collapsed .sidebar .sb-ico {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+
+  /* Mobile backdrop */
+  .sb-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+
+
+    z-index: 999;
+
+
+    background: rgba(0, 0, 0, 0.42);
+
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+
+  html.sb-mobile-open .sb-mobile-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+
+  /* Main content uses the full viewport */
+  .content {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* Mobile sidebar button */
+  .sidebar-float-toggle {
+    position: fixed !important;
+
+
+    top: 18px !important;
+    left: 18px !important;
+
+
+    right: auto !important;
+
+
+    z-index: 1100;
+
+
+    width: 42px;
+    height: 42px;
+
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+
+    border-radius: 12px;
+  }
+
+
+  /* When sidebar is open, move button inside its edge */
+  html.sb-mobile-open .sidebar-float-toggle {
+    left: 284px !important;
+  }
+
+
+  /* Give the topbar room for the mobile toggle */
+  .topbar {
+    padding-left: 58px;
+  }
+}
+
+
+/* =========================================================
+   SIDEBAR FLOATING TOGGLE
+========================================================= */
+
+
+.sidebar-float-toggle {
+  position: fixed;
+
+
+  width: 40px;
+  height: 40px;
+
+
+  border: none;
+  border-radius: 12px;
+
+
+  background: #ffffff;
+
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, .20),
+    0 0 0 3px rgba(11, 77, 122, .15);
+
+
+  cursor: pointer;
+
+
+  display: flex;
+
+
+  align-items: center;
+  justify-content: center;
+
+
+  z-index: 999999;
+
+
+  visibility: hidden;
+
+
+  transition:
+  transform .2s ease,
+  box-shadow .2s ease;
+}
+
+
+.sidebar-float-toggle:hover {
+  transform: translateY(-2px);
+
+
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, .25),
+    0 0 0 4px rgba(11, 77, 122, .25);
+}
+
+
+/* =========================================================
+   BLIMS SIDEBAR — MODERN POLISH
+   Visual refinement only.
+   Does not change sidebar functionality.
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   SIDEBAR SURFACE
+--------------------------------------------------------- */
+
+
+.sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      #0b4d7a 0%,
+      #08466f 48%,
+      #073d61 100%
+    );
+
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.12);
 }
 
 
 
 
-html.sb-collapsed
+/* ---------------------------------------------------------
+   SCHOOL HEADER
+--------------------------------------------------------- */
+
+
+.sb-top {
+  padding: 16px 16px 8px;
+  gap: 8px;
+}
+
+
+.sb-logo-wrap {
+  width: 72px;
+  height: 72px;
+}
+
+
+.sb-logo {
+  width: 88px;
+  height: 88px;
+}
+
+
+.sb-school {
+  padding: 0 8px;
+}
+
+
+.sb-school-name {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+
+.sb-school-sub {
+  font-size: 11px;
+  margin-top: 3px;
+  opacity: 0.78;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   NAVIGATION AREA
+--------------------------------------------------------- */
+
+
+.sb-nav {
+  padding: 9px 12px 13px;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   SECTION LABELS
+--------------------------------------------------------- */
+
+
+.sb-section-title {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 9px 5px 3px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   DIVIDERS
+--------------------------------------------------------- */
+
+
+.sb-divider {
+  background: rgba(255, 255, 255, 0.09);
+  margin: 3px 10px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   DROPDOWN GROUPS
+--------------------------------------------------------- */
+
+
+.sb-group {
+  gap: 3px;
+}
+
+
+.sb-group-toggle {
+  min-height: 36px;
+  padding: 4px 7px;
+  border-radius: 9px;
+}
+
+
+.sb-group-title {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+
+.sb-chevron {
+  font-size: 13px;
+  opacity: 0.65;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   SUBMENU
+--------------------------------------------------------- */
+
+
+.sb-submenu {
+  gap: 4px;
+  padding-left: 7px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   NAVIGATION ITEMS
+--------------------------------------------------------- */
+
+
+.sb-item {
+  gap: 10px;
+  padding: 7px 10px;
+  min-height: 43px;
+
+
+  border-radius: 10px;
+
+
+  color: rgba(255, 255, 255, 0.88);
+
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   NAVIGATION ICONS
+--------------------------------------------------------- */
+
+
+.sb-ico {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+
+  border-radius: 9px;
+
+
+  background: rgba(255, 255, 255, 0.08);
+
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.sb-ico img {
+  width: 17px;
+  height: 17px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   HOVER
+--------------------------------------------------------- */
+
+
+.sb-item:hover {
+  background: rgba(255, 255, 255, 0.075);
+}
+
+
+.sb-item:hover .sb-ico {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   ACTIVE PAGE
+--------------------------------------------------------- */
+
+
+.sb-item.active {
+  background: rgba(255, 255, 255, 0.14);
+
+
+  color: #ffffff;
+
+
+  box-shadow: none;
+
+
+  position: relative;
+}
+
+
+
+
+/* Small active indicator */
+
+
+.sb-item.active::before {
+  content: "";
+
+
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+
+
+  width: 4px;
+
+
+  border-radius: 0 4px 4px 0;
+
+
+  background: #ffffff;
+
+
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   COLLAPSED SIDEBAR
+--------------------------------------------------------- */
+
+
+.sidebar.is-collapsed .sb-nav {
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+
+.sidebar.is-collapsed .sb-item {
+  padding: 5px;
+  min-height: 43px;
+
+
+  justify-content: center;
+}
+
+
+.sidebar.is-collapsed .sb-ico {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+}
+
+
+.sidebar.is-collapsed .sb-item.active::before {
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   MOBILE
+   Keep the existing drawer behavior.
+--------------------------------------------------------- */
+
+
+@media (max-width: 700px) {
+
+
+  .sb-top {
+    padding-top: 16px;
+  }
+
+
+  .sb-nav {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+
+  .sb-item {
+    min-height: 44px;
+  }
+
+
+}
+
+
+/* =========================================================
+   BLIMS SIDEBAR — SECOND UX POLISH
+   Dropdowns, hierarchy, hover, collapsed mode,
+   header spacing, scrollbar, and accessibility.
+========================================================= */
+
+
+
+
+/* ---------------------------------------------------------
+   1. SCHOOL HEADER REFINEMENT
+--------------------------------------------------------- */
+
+
+.sb-top {
+  padding-bottom: 6px;
+}
+
+
+.sb-school-name {
+  letter-spacing: -0.1px;
+}
+
+
+.sb-school-sub {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   2. DROPDOWN CATEGORY — CURRENT SECTION
+   Highlights the category containing the active page.
+--------------------------------------------------------- */
+
+
+.sb-group:has(.sb-item.active) .sb-group-toggle {
+  color: #ffffff;
+}
+
+
+.sb-group:has(.sb-item.active) .sb-group-title {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   3. SUBMENU VISUAL CONNECTION
+   Creates a subtle guide line so users understand
+   that the pages belong to the category above.
+--------------------------------------------------------- */
+
+
+.sb-submenu {
+  position: relative;
+  margin-left: 5px;
+  padding-left: 13px;
+}
+
+
+.sb-submenu::before {
+  content: "";
+
+
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  bottom: 2px;
+
+
+  width: 1px;
+
+
+  background: rgba(255, 255, 255, 0.12);
+
+
+  border-radius: 999px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   4. SUBMENU ITEMS
+--------------------------------------------------------- */
+
+
+.sb-submenu .sb-item {
+  position: relative;
+}
+
+
+.sb-submenu .sb-item:hover {
+  background: rgba(255, 255, 255, 0.085);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   5. HOVER FEEDBACK
+   Slight icon emphasis without excessive animation.
+--------------------------------------------------------- */
+
+
+.sb-item:hover .sb-ico {
+  transform: scale(1.03);
+}
+
+
+.sb-item.active .sb-ico {
+  transform: none;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   6. ACTIVE SUBMENU
+--------------------------------------------------------- */
+
+
+.sb-submenu .sb-item.active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   7. DROPDOWN CHEVRON
+--------------------------------------------------------- */
+
+
+.sb-group-toggle:hover .sb-chevron {
+  opacity: 1;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   8. KEYBOARD FOCUS
+   Clear enough for accessibility, invisible otherwise.
+--------------------------------------------------------- */
+
+
+.sb-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: -2px;
+}
+
+
+.sb-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   9. SCROLLBAR REFINEMENT
+--------------------------------------------------------- */
+
+
+.sb-nav {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(255, 255, 255, 0.18)
+    transparent;
+}
+
+
+.sb-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+.sb-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+
+.sb-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   10. COLLAPSED SIDEBAR
+--------------------------------------------------------- */
+
+
+.sidebar.is-collapsed .sb-nav {
+  gap: 5px;
+}
+
+
+.sidebar.is-collapsed .sb-item {
+  border-radius: 10px;
+}
+
+
+.sidebar.is-collapsed .sb-item:hover .sb-ico {
+  transform: scale(1.04);
+}
+
+
+.sidebar.is-collapsed .sb-item.active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+
+.sidebar.is-collapsed .sb-item.active::before {
+  width: 4px;
+}
+
+
+
+
+/* ---------------------------------------------------------
+   11. COLLAPSED ICON STATES
+--------------------------------------------------------- */
+
+
+.sidebar.is-collapsed .sb-ico {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+.sidebar.is-collapsed .sb-item:hover .sb-ico {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+
+.sidebar.is-collapsed .sb-item.active .sb-ico {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+
+
+
+/* ---------------------------------------------------------
+   12. MOBILE
+   Preserve the existing drawer behavior.
+--------------------------------------------------------- */
+
+
+@media (max-width: 700px) {
+
+
+  .sb-submenu {
+    margin-left: 4px;
+    padding-left: 12px;
+  }
+
+
+  .sb-submenu::before {
+    left: 1px;
+  }
+
+
+  .sb-item:hover .sb-ico {
+    transform: none;
+  }
+
+
+}
+
+
+
+
+/* ---------------------------------------------------------
+   13. REDUCE MOTION
+   Respect users who prefer reduced animation.
+--------------------------------------------------------- */
+
+
+@media (prefers-reduced-motion: reduce) {
+
+
+  .sb-item,
+  .sb-ico,
+  .sb-chevron,
+  .sb-group-toggle {
+    transition: none !important;
+  }
+
+
+}
+
+
+/* =========================================================
+   SIDEBAR PRE-PAINT GROUP STATE
+========================================================= */
+
+
+html.sb-preopen-user-management
   .sidebar
-  .sb-item.active
-  .sb-ico img {
-  filter:
-    brightness(0)
-    invert(1);
+  .sb-group[data-group="user-management"]
+  .sb-submenu,
+
+
+html.sb-preopen-academic-setup
+  .sidebar
+  .sb-group[data-group="academic-setup"]
+  .sb-submenu,
+
+
+html.sb-preopen-records
+  .sidebar
+  .sb-group[data-group="records"]
+  .sb-submenu {
+  display: flex;
+}
+
+
+/* Match the open chevron before JavaScript runs */
+html.sb-preopen-user-management
+  .sidebar
+  .sb-group[data-group="user-management"]
+  .sb-chevron,
+
+
+html.sb-preopen-academic-setup
+  .sidebar
+  .sb-group[data-group="academic-setup"]
+  .sb-chevron,
+
+
+html.sb-preopen-records
+  .sidebar
+  .sb-group[data-group="records"]
+  .sb-chevron {
+  transform: rotate(180deg);
 }
 

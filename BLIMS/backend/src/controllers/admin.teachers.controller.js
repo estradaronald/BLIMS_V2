@@ -663,20 +663,49 @@ exports.deleteTeacher = async (req, res) => {
   try {
     const { teacherId } = req.params;
 
-    const teacher = await Teacher.findOne({ teacherId });
+    // Find teacher using either:
+    // - Teacher._id
+    // - linked User._id
+    const teacher = await Teacher.findOne({
+      $or: [
+        { _id: teacherId },
+        { userId: teacherId }
+      ]
+    });
+
     if (!teacher) {
-      return res.status(404).json({ ok: false, message: "Teacher not found." });
+      return res.status(404).json({
+        ok: false,
+        message: "Teacher not found."
+      });
     }
 
-    if (teacher.userId) {
-      await User.deleteOne({ _id: teacher.userId });
+    // Save the linked User ID before deleting the Teacher
+    const userId = teacher.userId;
+
+    // Delete the Teacher record
+    await Teacher.deleteOne({
+      _id: teacher._id
+    });
+
+    // Delete the corresponding login account
+    if (userId) {
+      await User.deleteOne({
+        _id: userId
+      });
     }
 
-    await Teacher.deleteOne({ teacherId });
+    return res.json({
+      ok: true,
+      message: "Teacher deleted successfully."
+    });
 
-    res.json({ ok: true });
   } catch (err) {
     console.error("deleteTeacher error:", err);
-    res.status(500).json({ ok: false, message: "Failed to delete teacher." });
+
+    return res.status(500).json({
+      ok: false,
+      message: "Failed to delete teacher."
+    });
   }
 };

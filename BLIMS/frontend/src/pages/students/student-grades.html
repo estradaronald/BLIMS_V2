@@ -1,334 +1,434 @@
 <!-- frontend/src/pages/student/student-grades.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <head>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Student - Grades</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  />
+        // Restore collapsed sidebar before first paint.
+        if (
+          isDesktop &&
+          localStorage.getItem("student_sidebar_collapsed_v1") === "1"
+        ) {
+          root.classList.add("sb-collapsed");
+        }
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+        // Restore My Learning dropdown before first paint.
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("student_sidebar_groups_v1") || "{}",
+          );
 
-  <!-- Baseline styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/sidebar.css"
-  />
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  />
+          if (saved["my-learning"] === true) {
+            root.classList.add("sb-preopen-learning");
+          }
+        } catch {
+          // Ignore invalid saved sidebar state.
+        }
+      })();
+    </script>
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin-announcements.css"
-  />
 
-  <!-- Student Grades -->
-  <link
-    rel="stylesheet"
-    href="../../styles/student/student-grades.css"
-  />
-</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<body data-page="grades">
 
-  <!-- Floating sidebar toggle -->
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+    <title>Student - Grades</title>
 
-  <div class="app">
 
-    <!-- Sidebar -->
-    <div id="sidebar-mount"></div>
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-    <main class="content">
 
-      <!-- =================================================
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- Baseline styles -->
+    <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
+
+
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+    <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
+
+
+    <!-- Student Grades -->
+    <link rel="stylesheet" href="../../styles/student/student-grades.css" />
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="grades">
+    <!-- Floating sidebar toggle -->
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
+
+
+    <div class="app">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar" data-role="student">
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
+            <img
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
+            />
+          </div>
+
+
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
+
+
+        <nav class="sb-nav">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-dashboard.html"
+            data-nav="dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY LEARNING -->
+          <div
+            class="sb-group"
+            id="studentLearningGroup"
+            data-group="my-learning"
+          >
+            <button
+              class="sb-group-toggle"
+              id="studentLearningToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="studentLearningMenu"
+            >
+              <span class="sb-group-title">MY LEARNING</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
+            </button>
+
+
+            <div class="sb-submenu" id="studentLearningMenu">
+              <a
+                class="sb-item"
+                href="./student-schedule.html"
+                data-nav="schedule"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-classwork.html"
+                data-nav="classwork"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/asess.svg" alt="" />
+                </span>
+                <span class="sb-text">ASSIGNMENT</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-subjects.html"
+                data-nav="subjects"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+                <span class="sb-text">SUBJECTS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-attendance.html"
+                data-nav="attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a class="sb-item" href="./student-grades.html" data-nav="grades">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY ACCOUNT -->
+          <div class="sb-section-title">MY ACCOUNT</div>
+
+
+          <a class="sb-item" href="./student-profile.html" data-nav="profile">
+            <span class="sb-ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span class="sb-text">PROFILE</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content page-animate">
+        <!-- =================================================
            TOP BAR
       ================================================== -->
 
-      <header class="topbar">
 
-        <div class="topbar-right">
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="avatar"
+              />
 
-          <div
-            class="tb-user"
-            id="userbox"
-          >
 
-            <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="avatar"
-            />
+              <div class="tb-meta">
+                <div class="tb-name">Student</div>
 
-            <div class="tb-meta">
 
-              <div class="tb-name">
-                Student
+                <div class="tb-role">Grades</div>
               </div>
 
-              <div class="tb-role">
-                Grades
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" type="button" id="topbarLogout">
+                  Logout
+                </button>
               </div>
-
             </div>
-
-            <button
-              class="tb-drop"
-              id="userMenuBtn"
-              type="button"
-              aria-label="Open user menu"
-            >
-              ▾
-            </button>
-
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
-              >
-                Settings
-              </button>
-
-              <button
-                class="tb-item danger"
-                type="button"
-                id="topbarLogout"
-              >
-                Logout
-              </button>
-
-            </div>
-
           </div>
-
-        </div>
-
-      </header>
-
-
-      <!-- =================================================
-           PAGE
-      ================================================== -->
-
-      <section class="teachers-wrap">
-
-        <!-- Page heading -->
-        <div class="teachers-page-head">
-
-          <h2 class="teachers-title">
-            Grades
-          </h2>
-
-        </div>
+        </header>
 
 
         <!-- =================================================
+           PAGE
+      ================================================== -->
+
+
+        <section class="teachers-wrap">
+          <!-- Page heading -->
+          <div class="teachers-page-head reveal-item">
+            <h2 class="teachers-title">Grades</h2>
+          </div>
+
+
+          <!-- =================================================
              MAIN CARD
         ================================================== -->
 
-        <div class="card t-card grades-card">
 
-          <!-- =================================================
+          <div class="card t-card grades-card reveal-scale">
+            <!-- =================================================
                CARD HEADER
           ================================================== -->
 
-          <div class="t-card-head grades-head">
 
-            <div class="grades-left">
+            <div class="t-card-head grades-head">
+              <div class="grades-left">
+                <div class="t-subtitle">Academic Performance</div>
 
-              <div class="t-subtitle">
-                Academic Performance
+
+                <div class="grades-sub">
+                  <!-- Backend fills this -->
+                  <span id="gradesGradeSection"> Grade — </span>
+                </div>
               </div>
 
-              <div class="grades-sub">
 
-                <!-- Backend fills this -->
-                <span id="gradesGradeSection">
-                  Grade —
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <!-- =================================================
+              <!-- =================================================
                  TERM TABS
             ================================================== -->
 
-            <div class="grades-actions">
 
-              <div
-                class="grades-tabs"
-                id="gradesTabs"
-                role="tablist"
-                aria-label="Grade terms"
-              >
-                <!-- JS fills terms dynamically -->
+              <div class="grades-actions">
+                <div
+                  class="grades-tabs"
+                  id="gradesTabs"
+                  role="tablist"
+                  aria-label="Grade terms"
+                >
+                  <!-- JS fills terms dynamically -->
+                </div>
               </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- =================================================
-               SUMMARY
-          ================================================== -->
-
-          <div class="grades-summary">
-
-            <div class="grades-sum-card">
-
-              <div class="grades-sum-k">
-                Final Average
-              </div>
-
-              <div
-                class="grades-sum-v"
-                id="finalAverage"
-              >
-                —
-              </div>
-
-            </div>
-
-
-            <div class="grades-sum-card">
-
-              <div class="grades-sum-k">
-                Promotion Status
-              </div>
-
-              <div
-                class="grades-sum-v"
-                id="promotionStatus"
-              >
-                —
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- =================================================
-               GRADES TABLE
-          ================================================== -->
-
-          <div class="grades-body">
-
-            <div
-              class="grades-table-wrap"
-              id="gradesTableWrap"
-            >
-
-              <table class="grades-table">
-
-                <thead>
-
-                  <tr>
-
-                    <th style="width: 55%;">
-                      Subject
-                    </th>
-
-                    <th
-                      style="
-                        width: 20%;
-                        text-align: right;
-                      "
-                    >
-                      Grade
-                    </th>
-
-                    <th style="width: 25%;">
-                      Remarks
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody id="gradesTbody">
-                  <!-- JS fills -->
-                </tbody>
-
-              </table>
-
             </div>
 
 
             <!-- =================================================
+               SUMMARY
+          ================================================== -->
+
+
+            <div class="grades-summary">
+              <div class="grades-sum-card">
+                <div class="grades-sum-k">Final Average</div>
+
+
+                <div class="grades-sum-v" id="finalAverage">—</div>
+              </div>
+
+
+              <div class="grades-sum-card">
+                <div class="grades-sum-k">Promotion Status</div>
+
+
+                <div class="grades-sum-v" id="promotionStatus">—</div>
+              </div>
+            </div>
+
+
+            <!-- =================================================
+               GRADES TABLE
+          ================================================== -->
+
+
+            <div class="grades-body">
+              <div class="grades-table-wrap" id="gradesTableWrap">
+                <table class="grades-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 55%">Subject</th>
+
+
+                      <th style="width: 20%; text-align: right">Grade</th>
+
+
+                      <th style="width: 25%">Remarks</th>
+                    </tr>
+                  </thead>
+
+
+                  <tbody id="gradesTbody">
+                    <!-- JS fills -->
+                  </tbody>
+                </table>
+              </div>
+
+
+              <!-- =================================================
                  EMPTY / LOADING STATE
             ================================================== -->
 
-            <div
-              id="gradesEmpty"
-              class="grades-empty hidden"
-            >
-              No grades available yet.
+
+              <div id="gradesEmpty" class="grades-empty hidden">
+                No grades available yet.
+              </div>
             </div>
-
           </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
+        </section>
+      </main>
+    </div>
 
 
-  <!-- =====================================================
+    <!-- =====================================================
        STUDENT SIDEBAR
   ====================================================== -->
 
-  <script
-    src="../../js/student/student-sidebar.js"
-  ></script>
+
+    <script src="../../shared/js/page-animations.js"></script>
+    <script src="../../js/student/student-sidebar.js"></script>
 
 
-  <!-- =====================================================
+    <!-- =====================================================
        STUDENT GRADES
   ====================================================== -->
 
-  <script
-    src="../../js/student/student-grades.js"
-  ></script>
 
-</body>
+    <script src="../../js/student/student-grades.js"></script>
+  </body>
 </html>
+
+
+

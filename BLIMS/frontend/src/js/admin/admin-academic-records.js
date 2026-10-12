@@ -24,16 +24,18 @@
 // We should connect the actual grade-record backend once its model/
 // controller is confirmed.
 
+
 document.addEventListener("DOMContentLoaded", () => {
-  const $ = (id) =>
-    document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
+
 
   /* =========================================================
      API
   ========================================================= */
 
-  const ADMIN_API =
-    "/api/admin";
+
+  const ADMIN_API = "/api/admin";
+
 
   let csrfToken = "";
 
@@ -42,50 +44,59 @@ document.addEventListener("DOMContentLoaded", () => {
      UI
   ========================================================= */
 
-  const gradeSelect =
-    $("gradeSelect");
 
-  const sectionSelect =
-    $("sectionSelect");
+  const gradeSelect = $("gradeSelect");
 
-  const searchInput =
-    $("searchInput");
 
-  const recordsTbody =
-    $("recordsTbody");
+  const sectionSelect = $("sectionSelect");
 
-  const summaryLine =
-    $("summaryLine");
 
-  const exportBtn =
-    $("exportBtn");
+  const searchInput = $("searchInput");
 
-  const exportMenu =
-    $("exportMenu");
 
-  const exportClassBtn =
-    $("exportClassBtn");
+  const recordsTbody = $("recordsTbody");
 
-  const exportGradeBtn =
-    $("exportGradeBtn");
 
-  const exportAllBtn =
-    $("exportAllBtn");
+  const summaryLine = $("summaryLine");
+
+
+  const refreshBtn = $("refreshBtn");
+
+
+  const exportBtn = $("exportBtn");
+
+
+  const exportMenu = $("exportMenu");
+
+
+  const exportClassBtn = $("exportClassBtn");
+
+
+  const exportGradeBtn = $("exportGradeBtn");
+
+
+  const exportAllBtn = $("exportAllBtn");
 
 
   /* =========================================================
      STATE
   ========================================================= */
 
+
   let students = [];
+
 
   let gradeLevels = [];
 
+
   let sections = [];
+
 
   let activeSchoolYear = null;
 
+
   let terms = [];
+
 
   let currentRows = [];
 
@@ -94,28 +105,14 @@ document.addEventListener("DOMContentLoaded", () => {
      HELPERS
   ========================================================= */
 
+
   function esc(value) {
     return String(value ?? "")
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
 
@@ -156,36 +153,24 @@ document.addEventListener("DOMContentLoaded", () => {
      CSRF
   ========================================================= */
 
+
   async function loadCsrfToken() {
     try {
-      const response =
-        await fetch(
-          "/api/csrf-token",
-          {
-            credentials:
-              "include",
-          }
-        );
+      const response = await fetch("/api/csrf-token", {
+        credentials: "include",
+      });
 
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
 
-      csrfToken =
-        data?.csrfToken ||
-        "";
+      const data = await response.json().catch(() => ({}));
+
+
+      csrfToken = data?.csrfToken || "";
+
 
       return csrfToken;
-
     } catch (error) {
+      console.warn("Failed to load CSRF token:", error);
 
-      console.warn(
-        "Failed to load CSRF token:",
-        error
-      );
 
       return "";
     }
@@ -196,73 +181,47 @@ document.addEventListener("DOMContentLoaded", () => {
      API HELPER
   ========================================================= */
 
-  async function api(
-    path,
-    options = {}
-  ) {
-    const method =
-      String(
-        options.method ||
-          "GET"
-      ).toUpperCase();
+
+  async function api(path, options = {}) {
+    const method = String(options.method || "GET").toUpperCase();
+
 
     const headers = {
       ...(options.headers || {}),
     };
 
 
-    if (
-      [
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-      ].includes(method)
-    ) {
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
       if (!csrfToken) {
         await loadCsrfToken();
       }
 
-      headers[
-        "X-CSRF-Token"
-      ] =
-        csrfToken || "";
+
+      headers["X-CSRF-Token"] = csrfToken || "";
     }
 
 
-    if (
-      options.body &&
-      !headers[
-        "Content-Type"
-      ]
-    ) {
-      headers[
-        "Content-Type"
-      ] =
-        "application/json";
+    if (options.body && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
     }
 
 
-    const response =
-      await fetch(
-        `${ADMIN_API}${path}`,
-        {
-          ...options,
+    const response = await fetch(`${ADMIN_API}${path}`, {
+      ...options,
 
-          credentials:
-            "include",
 
-          headers,
-        }
-      );
+      credentials: "include",
+
+
+      headers,
+    });
 
 
     let data = null;
 
 
     try {
-      data =
-        await response.json();
+      data = await response.json();
     } catch {
       data = null;
     }
@@ -270,17 +229,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!response.ok) {
       throw new Error(
-        data?.message ||
-          data?.error ||
-          `Request failed (${response.status})`
+        data?.message || data?.error || `Request failed (${response.status})`,
       );
     }
 
 
     if (
       data &&
-      typeof data ===
-        "object" &&
+      typeof data === "object" &&
       data.ok === true &&
       "data" in data
     ) {
@@ -296,68 +252,36 @@ document.addEventListener("DOMContentLoaded", () => {
      LOAD GRADE LEVELS
   ========================================================= */
 
+
   async function loadGradeLevels() {
-    const data =
-      await api(
-        "/grade-levels"
-      );
+    const data = await api("/grade-levels");
 
 
     let list = [];
 
 
-    if (
-      Array.isArray(data)
-    ) {
+    if (Array.isArray(data)) {
       list = data;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.items
-      )
-    ) {
-      list =
-        data.items;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.gradeLevels
-      )
-    ) {
-      list =
-        data.gradeLevels;
+    } else if (data && Array.isArray(data.items)) {
+      list = data.items;
+    } else if (data && Array.isArray(data.gradeLevels)) {
+      list = data.gradeLevels;
     }
 
 
-    gradeLevels =
-      list
-        .map(
-          (item) => {
-            if (
-              typeof item ===
-              "string"
-            ) {
-              return item;
-            }
-
-            return (
-              item?.grade ||
-              item?.name ||
-              ""
-            );
-          }
-        )
-        .filter(Boolean);
+    gradeLevels = list
+      .map((item) => {
+        if (typeof item === "string") {
+          return item;
+        }
 
 
-    gradeLevels =
-      [
-        ...new Set(
-          gradeLevels
-        ),
-      ];
+        return item?.grade || item?.name || "";
+      })
+      .filter(Boolean);
+
+
+    gradeLevels = [...new Set(gradeLevels)];
   }
 
 
@@ -365,9 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
      LOAD SECTIONS
   ========================================================= */
 
-  async function loadSections(
-    grade
-  ) {
+
+  async function loadSections(grade) {
     sections = [];
 
 
@@ -377,69 +300,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const data =
-      await api(
-        `/sections?grade=${encodeURIComponent(
-          grade
-        )}`
-      );
+    const data = await api(`/sections?grade=${encodeURIComponent(grade)}`);
 
 
     let list = [];
 
 
-    if (
-      Array.isArray(data)
-    ) {
+    if (Array.isArray(data)) {
       list = data;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.items
-      )
-    ) {
-      list =
-        data.items;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.sections
-      )
-    ) {
-      list =
-        data.sections;
+    } else if (data && Array.isArray(data.items)) {
+      list = data.items;
+    } else if (data && Array.isArray(data.sections)) {
+      list = data.sections;
     }
 
 
-    sections =
-      list
-        .map(
-          (item) => {
-            if (
-              typeof item ===
-              "string"
-            ) {
-              return item;
-            }
-
-            return (
-              item?.section ||
-              item?.name ||
-              ""
-            );
-          }
-        )
-        .filter(Boolean);
+    sections = list
+      .map((item) => {
+        if (typeof item === "string") {
+          return item;
+        }
 
 
-    sections =
-      [
-        ...new Set(
-          sections
-        ),
-      ];
+        return item?.section || item?.name || "";
+      })
+      .filter(Boolean);
+
+
+    sections = [...new Set(sections)];
 
 
     buildSectionSelect();
@@ -450,77 +338,38 @@ document.addEventListener("DOMContentLoaded", () => {
      LOAD ACTIVE SCHOOL YEAR
   ========================================================= */
 
+
   async function loadActiveSchoolYear() {
-    const data =
-      await api(
-        "/school-years"
-      );
+    const data = await api("/school-years");
 
 
-    let schoolYears =
-      [];
+    let schoolYears = [];
 
 
-    if (
-      Array.isArray(data)
-    ) {
-      schoolYears =
-        data;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.items
-      )
-    ) {
-      schoolYears =
-        data.items;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.schoolYears
-      )
-    ) {
-      schoolYears =
-        data.schoolYears;
+    if (Array.isArray(data)) {
+      schoolYears = data;
+    } else if (data && Array.isArray(data.items)) {
+      schoolYears = data.items;
+    } else if (data && Array.isArray(data.schoolYears)) {
+      schoolYears = data.schoolYears;
     }
 
 
     activeSchoolYear =
-      schoolYears.find(
-        (item) =>
-          item?.isActive ===
-          true
-      ) || null;
+      schoolYears.find((item) => item?.isActive === true) || null;
 
 
-    if (
-      !activeSchoolYear
-    ) {
+    if (!activeSchoolYear) {
       terms = [];
       return;
     }
 
 
-    terms =
-      Array.isArray(
-        activeSchoolYear.terms
-      )
-        ? activeSchoolYear.terms
-            .slice()
-            .sort(
-              (a, b) =>
-                (
-                  a.order ||
-                  0
-                ) -
-                (
-                  b.order ||
-                  0
-                )
-            )
-        : [];
+    terms = Array.isArray(activeSchoolYear.terms)
+      ? activeSchoolYear.terms
+          .slice()
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
+      : [];
   }
 
 
@@ -528,37 +377,17 @@ document.addEventListener("DOMContentLoaded", () => {
      LOAD STUDENTS
   ========================================================= */
 
+
   async function loadStudents() {
-    const data =
-      await api(
-        "/students?class=all"
-      );
+    const data = await api("/students?class=all");
 
 
-    if (
-      Array.isArray(data)
-    ) {
-      students =
-        data;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.students
-      )
-    ) {
-      students =
-        data.students;
-
-    } else if (
-      data &&
-      Array.isArray(
-        data.items
-      )
-    ) {
-      students =
-        data.items;
-
+    if (Array.isArray(data)) {
+      students = data;
+    } else if (data && Array.isArray(data.students)) {
+      students = data.students;
+    } else if (data && Array.isArray(data.items)) {
+      students = data.items;
     } else {
       students = [];
     }
@@ -569,26 +398,14 @@ document.addEventListener("DOMContentLoaded", () => {
      GRADE / SECTION HELPERS
   ========================================================= */
 
-  function getStudentGrade(
-    student
-  ) {
-    return (
-      student?.className ||
-      student?.grade ||
-      student?.gradeLevel ||
-      ""
-    );
+
+  function getStudentGrade(student) {
+    return student?.className || student?.grade || student?.gradeLevel || "";
   }
 
 
-  function getStudentSection(
-    student
-  ) {
-    return (
-      student?.sectionName ||
-      student?.section ||
-      ""
-    );
+  function getStudentSection(student) {
+    return student?.sectionName || student?.section || "";
   }
 
 
@@ -596,41 +413,28 @@ document.addEventListener("DOMContentLoaded", () => {
      BUILD GRADE SELECT
   ========================================================= */
 
+
   function buildGradeSelect() {
-    const current =
-      gradeSelect.value;
+    const current = gradeSelect.value;
 
 
-    gradeSelect.innerHTML =
-      gradeLevels
-        .map(
-          (grade) => `
+    gradeSelect.innerHTML = gradeLevels
+      .map(
+        (grade) => `
             <option
-              value="${esc(
-                grade
-              )}"
+              value="${esc(grade)}"
             >
-              ${esc(
-                grade
-              )}
+              ${esc(grade)}
             </option>
-          `
-        )
-        .join("");
-
-
-    if (
-      gradeLevels.includes(
-        current
+          `,
       )
-    ) {
-      gradeSelect.value =
-        current;
+      .join("");
 
+
+    if (gradeLevels.includes(current)) {
+      gradeSelect.value = current;
     } else {
-      gradeSelect.value =
-        gradeLevels[0] ||
-        "";
+      gradeSelect.value = gradeLevels[0] || "";
     }
   }
 
@@ -639,41 +443,28 @@ document.addEventListener("DOMContentLoaded", () => {
      BUILD SECTION SELECT
   ========================================================= */
 
+
   function buildSectionSelect() {
-    const current =
-      sectionSelect.value;
+    const current = sectionSelect.value;
 
 
-    sectionSelect.innerHTML =
-      sections
-        .map(
-          (section) => `
+    sectionSelect.innerHTML = sections
+      .map(
+        (section) => `
             <option
-              value="${esc(
-                section
-              )}"
+              value="${esc(section)}"
             >
-              ${esc(
-                section
-              )}
+              ${esc(section)}
             </option>
-          `
-        )
-        .join("");
-
-
-    if (
-      sections.includes(
-        current
+          `,
       )
-    ) {
-      sectionSelect.value =
-        current;
+      .join("");
 
+
+    if (sections.includes(current)) {
+      sectionSelect.value = current;
     } else {
-      sectionSelect.value =
-        sections[0] ||
-        "";
+      sectionSelect.value = sections[0] || "";
     }
   }
 
@@ -682,89 +473,45 @@ document.addEventListener("DOMContentLoaded", () => {
      FILTER STUDENTS
   ========================================================= */
 
+
   function getFilteredStudents() {
-    const grade =
-      gradeSelect.value;
-
-    const section =
-      sectionSelect.value;
-
-    const query =
-      norm(
-        searchInput.value
-      );
+    const grade = gradeSelect.value;
 
 
-    let result =
-      students.filter(
-        (student) => {
-
-          const studentGrade =
-            getStudentGrade(
-              student
-            );
-
-          const studentSection =
-            getStudentSection(
-              student
-            );
+    const section = sectionSelect.value;
 
 
-          const matchesGrade =
-            norm(
-              studentGrade
-            ) ===
-            norm(
-              grade
-            );
+    const query = norm(searchInput.value);
 
 
-          const matchesSection =
-            norm(
-              studentSection
-            ) ===
-            norm(
-              section
-            );
+    let result = students.filter((student) => {
+      const studentGrade = getStudentGrade(student);
 
 
-          return (
-            matchesGrade &&
-            matchesSection
-          );
-        }
-      );
+      const studentSection = getStudentSection(student);
+
+
+      const matchesGrade = norm(studentGrade) === norm(grade);
+
+
+      const matchesSection = norm(studentSection) === norm(section);
+
+
+      return matchesGrade && matchesSection;
+    });
 
 
     if (query) {
-      result =
-        result.filter(
-          (student) =>
-            norm(
-              getStudentName(
-                student
-              )
-            ).includes(
-              query
-            )
-        );
+      result = result.filter((student) =>
+        norm(getStudentName(student)).includes(query),
+      );
     }
 
 
-    result.sort(
-      (a, b) =>
-        getStudentName(
-          a
-        ).localeCompare(
-          getStudentName(
-            b
-          )
-        )
-    );
+    result.sort((a, b) => getStudentName(a).localeCompare(getStudentName(b)));
 
 
-    currentRows =
-      result;
+    currentRows = result;
 
 
     return result;
@@ -775,12 +522,8 @@ document.addEventListener("DOMContentLoaded", () => {
      GET TERM GRADE
   ========================================================= */
 
-  function getTermGrade(
-    student,
-    term,
-    index
-  ) {
 
+  function getTermGrade(student, term, index) {
     /*
      * Supports a few possible
      * structures if grades are
@@ -788,47 +531,23 @@ document.addEventListener("DOMContentLoaded", () => {
      * student response.
      */
 
-    if (
-      Array.isArray(
-        student?.terms
-      )
-    ) {
 
-      const exact =
-        student.terms.find(
-          (item) =>
-            norm(
-              item?.name
-            ) ===
-            norm(
-              term?.name
-            )
-        );
+    if (Array.isArray(student?.terms)) {
+      const exact = student.terms.find(
+        (item) => norm(item?.name) === norm(term?.name),
+      );
 
 
       if (exact) {
-        return (
-          exact.grade ??
-          exact.score ??
-          exact.value ??
-          null
-        );
+        return exact.grade ?? exact.score ?? exact.value ?? null;
       }
 
 
-      const indexed =
-        student.terms[
-          index
-        ];
+      const indexed = student.terms[index];
 
 
       if (indexed) {
-        return (
-          indexed.grade ??
-          indexed.score ??
-          indexed.value ??
-          null
-        );
+        return indexed.grade ?? indexed.score ?? indexed.value ?? null;
       }
     }
 
@@ -837,44 +556,23 @@ document.addEventListener("DOMContentLoaded", () => {
      * grades object
      */
 
-    if (
-      student?.grades &&
-      typeof student.grades ===
-        "object"
-    ) {
 
-      const exact =
-        student.grades[
-          term?.name
-        ];
+    if (student?.grades && typeof student.grades === "object") {
+      const exact = student.grades[term?.name];
 
 
-      if (
-        exact !==
-        undefined
-      ) {
+      if (exact !== undefined) {
         return exact;
       }
 
 
-      const key =
-        Object.keys(
-          student.grades
-        ).find(
-          (item) =>
-            norm(item) ===
-            norm(
-              term?.name
-            )
-        );
+      const key = Object.keys(student.grades).find(
+        (item) => norm(item) === norm(term?.name),
+      );
 
 
       if (key) {
-        return (
-          student.grades[
-            key
-          ]
-        );
+        return student.grades[key];
       }
     }
 
@@ -883,20 +581,12 @@ document.addEventListener("DOMContentLoaded", () => {
      * Direct Q1-Q4 fields.
      */
 
-    const keys = [
-      `q${index + 1}`,
-      `term${index + 1}`,
-      `grade${index + 1}`,
-    ];
+
+    const keys = [`q${index + 1}`, `term${index + 1}`, `grade${index + 1}`];
 
 
-    for (
-      const key of keys
-    ) {
-      if (
-        student?.[key] !==
-        undefined
-      ) {
+    for (const key of keys) {
+      if (student?.[key] !== undefined) {
         return student[key];
       }
     }
@@ -910,60 +600,24 @@ document.addEventListener("DOMContentLoaded", () => {
      FINAL AVERAGE
   ========================================================= */
 
-  function toNumber(
-    value
-  ) {
-    if (
-      value ===
-        null ||
-      value ===
-        undefined ||
-      String(
-        value
-      ).trim() ===
-        ""
-    ) {
+
+  function toNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === "") {
       return null;
     }
 
 
-    const number =
-      Number(value);
+    const number = Number(value);
 
 
-    return Number.isFinite(
-      number
-    )
-      ? number
-      : null;
+    return Number.isFinite(number) ? number : null;
   }
 
 
-  function computeFinal(
-    student
-  ) {
-    const values =
-      terms
-        .map(
-          (
-            term,
-            index
-          ) =>
-            toNumber(
-              getTermGrade(
-                student,
-                term,
-                index
-              )
-            )
-        )
-        .filter(
-          (
-            value
-          ) =>
-            value !==
-            null
-        );
+  function computeFinal(student) {
+    const values = terms
+      .map((term, index) => toNumber(getTermGrade(student, term, index)))
+      .filter((value) => value !== null);
 
 
     if (!values.length) {
@@ -971,24 +625,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const total =
-      values.reduce(
-        (
-          sum,
-          value
-        ) =>
-          sum + value,
-        0
-      );
+    const total = values.reduce((sum, value) => sum + value, 0);
 
 
-    return Math.round(
-      (
-        total /
-        values.length
-      ) *
-        100
-    ) / 100;
+    return Math.round((total / values.length) * 100) / 100;
   }
 
 
@@ -996,51 +636,32 @@ document.addEventListener("DOMContentLoaded", () => {
      STATUS
   ========================================================= */
 
-  function statusPill(
-    status
-  ) {
-    const normalized =
-      norm(
-        status
-      );
+
+  function statusPill(status) {
+    const normalized = norm(status);
 
 
-    let className =
-      "pending";
-
-    let label =
-      "Pending";
+    let className = "pending";
 
 
-    if (
-      normalized ===
-      "promoted"
-    ) {
-      className =
-        "promoted";
+    let label = "Pending";
 
-      label =
-        "Promoted";
 
-    } else if (
-      normalized ===
-      "retained"
-    ) {
-      className =
-        "retained";
+    if (normalized === "promoted") {
+      className = "promoted";
 
-      label =
-        "Retained";
 
-    } else if (
-      normalized ===
-      "missed"
-    ) {
-      className =
-        "missed";
+      label = "Promoted";
+    } else if (normalized === "retained") {
+      className = "retained";
 
-      label =
-        "Missed";
+
+      label = "Retained";
+    } else if (normalized === "missed") {
+      className = "missed";
+
+
+      label = "Missed";
     }
 
 
@@ -1048,9 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <span
         class="ar-status ${className}"
       >
-        ${esc(
-          label
-        )}
+        ${esc(label)}
       </span>
     `;
   }
@@ -1060,11 +679,9 @@ document.addEventListener("DOMContentLoaded", () => {
      RENDER TABLE HEADER
   ========================================================= */
 
+
   function renderHeaders() {
-    const table =
-      document.querySelector(
-        ".ar-table"
-      );
+    const table = document.querySelector(".ar-table");
 
 
     if (!table) {
@@ -1072,10 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const thead =
-      table.querySelector(
-        "thead"
-      );
+    const thead = table.querySelector("thead");
 
 
     if (!thead) {
@@ -1083,28 +697,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const termHeaders =
-      terms
-        .map(
-          (term) => `
+    const termHeaders = terms
+      .map(
+        (term) => `
             <th
               style="
                 width:90px;
                 text-align:center;
               "
             >
-              ${esc(
-                term?.name ||
-                "Term"
-              )}
+              ${esc(term?.name || "Term")}
             </th>
-          `
-        )
-        .join("");
+          `,
+      )
+      .join("");
 
 
     thead.innerHTML = `
       <tr>
+
 
         <th
           style="width:70px;"
@@ -1112,11 +723,14 @@ document.addEventListener("DOMContentLoaded", () => {
           No.
         </th>
 
+
         <th>
           Student
         </th>
 
+
         ${termHeaders}
+
 
         <th
           style="
@@ -1127,6 +741,7 @@ document.addEventListener("DOMContentLoaded", () => {
           Final Avg
         </th>
 
+
         <th
           style="
             width:140px;
@@ -1135,6 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
         >
           Status
         </th>
+
 
       </tr>
     `;
@@ -1145,158 +761,114 @@ document.addEventListener("DOMContentLoaded", () => {
      RENDER TABLE
   ========================================================= */
 
+
   function render() {
     renderHeaders();
 
 
-    const rows =
-      getFilteredStudents();
+    const rows = getFilteredStudents();
 
 
-    const grade =
-      gradeSelect.value ||
-      "—";
-
-    const section =
-      sectionSelect.value ||
-      "—";
+    const grade = gradeSelect.value || "—";
 
 
-    summaryLine.textContent =
-      `Showing: ${grade} • Section ${section} • ${rows.length} student(s)`;
+    const section = sectionSelect.value || "—";
 
 
-    const colspan =
-      2 +
-      terms.length +
-      2;
+    summaryLine.textContent = `Showing: ${grade} • Section ${section} • ${rows.length} student(s)`;
+
+
+    const colspan = 2 + terms.length + 2;
 
 
     if (!rows.length) {
       recordsTbody.innerHTML = `
         <tr class="ar-empty">
 
+
           <td colspan="${colspan}">
             No students found.
           </td>
 
+
         </tr>
       `;
+
 
       return;
     }
 
 
-    recordsTbody.innerHTML =
-      rows
-        .map(
-          (
-            student,
-            index
-          ) => {
-
-            const finalAverage =
-              computeFinal(
-                student
-              );
+    recordsTbody.innerHTML = rows
+      .map((student, index) => {
+        const finalAverage = computeFinal(student);
 
 
-            const termCells =
-              terms
-                .map(
-                  (
-                    term,
-                    termIndex
-                  ) => {
-
-                    const grade =
-                      getTermGrade(
-                        student,
-                        term,
-                        termIndex
-                      );
+        const termCells = terms
+          .map((term, termIndex) => {
+            const grade = getTermGrade(student, term, termIndex);
 
 
-                    return `
+            return `
                       <td
                         style="
                           text-align:center;
                         "
                       >
                         ${
-                          grade ===
-                            null ||
-                          grade ===
-                            undefined ||
-                          String(
-                            grade
-                          ).trim() ===
-                            ""
+                          grade === null ||
+                          grade === undefined ||
+                          String(grade).trim() === ""
                             ? "—"
-                            : esc(
-                                grade
-                              )
+                            : esc(grade)
                         }
                       </td>
                     `;
-                  }
-                )
-                .join("");
+          })
+          .join("");
 
 
-            return `
+        return `
               <tr
-                data-id="${esc(
-                  student.id ||
-                  student._id ||
-                  ""
-                )}"
+                data-id="${esc(student.id || student._id || "")}"
               >
+
 
                 <td>
                   ${index + 1}
                 </td>
 
+
                 <td>
                   <strong>
-                    ${esc(
-                      getStudentName(
-                        student
-                      )
-                    )}
+                    ${esc(getStudentName(student))}
                   </strong>
                 </td>
 
+
                 ${termCells}
+
 
                 <td
                   class="ar-avg"
                 >
-                  ${
-                    finalAverage ===
-                    null
-                      ? "—"
-                      : esc(
-                          finalAverage
-                        )
-                  }
+                  ${finalAverage === null ? "—" : esc(finalAverage)}
                 </td>
+
 
                 <td
                   style="
                     text-align:center;
                   "
                 >
-                  ${statusPill(
-                    student.status
-                  )}
+                  ${statusPill(student.status)}
                 </td>
+
 
               </tr>
             `;
-          }
-        )
-        .join("");
+      })
+      .join("");
   }
 
 
@@ -1304,27 +876,15 @@ document.addEventListener("DOMContentLoaded", () => {
      CSV HELPERS
   ========================================================= */
 
-  function csvEscape(
-    value
-  ) {
-    const text =
-      String(
-        value ?? ""
-      );
+
+  function csvEscape(value) {
+    const text = String(value ?? "");
 
 
-    const escaped =
-      text.replaceAll(
-        '"',
-        '""'
-      );
+    const escaped = text.replaceAll('"', '""');
 
 
-    if (
-      /[",\n]/.test(
-        text
-      )
-    ) {
+    if (/[",\n]/.test(text)) {
       return `"${escaped}"`;
     }
 
@@ -1333,141 +893,73 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  function downloadCsv(
-    rows,
-    filename
-  ) {
+  function downloadCsv(rows, filename) {
     const headers = [
       "Grade Level",
       "Section",
       "Student",
-      ...terms.map(
-        (term) =>
-          term?.name ||
-          "Term"
-      ),
+      ...terms.map((term) => term?.name || "Term"),
       "Final Average",
       "Status",
     ];
 
 
-    const lines = [
-      headers
-        .map(
-          csvEscape
-        )
-        .join(","),
-    ];
+    const lines = [headers.map(csvEscape).join(",")];
 
 
-    rows.forEach(
-      (student) => {
-
-        const values = [
-          getStudentGrade(
-            student
-          ),
-          getStudentSection(
-            student
-          ),
-          getStudentName(
-            student
-          ),
-        ];
+    rows.forEach((student) => {
+      const values = [
+        getStudentGrade(student),
+        getStudentSection(student),
+        getStudentName(student),
+      ];
 
 
-        terms.forEach(
-          (
-            term,
-            index
-          ) => {
-
-            values.push(
-              getTermGrade(
-                student,
-                term,
-                index
-              ) ?? ""
-            );
-          }
-        );
+      terms.forEach((term, index) => {
+        values.push(getTermGrade(student, term, index) ?? "");
+      });
 
 
-        values.push(
-          computeFinal(
-            student
-          ) ?? ""
-        );
+      values.push(computeFinal(student) ?? "");
 
 
-        values.push(
-          student.status ||
-          "Pending"
-        );
+      values.push(student.status || "Pending");
 
 
-        lines.push(
-          values
-            .map(
-              csvEscape
-            )
-            .join(",")
-        );
-      }
-    );
+      lines.push(values.map(csvEscape).join(","));
+    });
 
 
-    const csv =
-      lines.join(
-        "\n"
-      );
+    const csv = lines.join("\n");
 
 
-    const blob =
-      new Blob(
-        [csv],
-        {
-          type:
-            "text/csv;charset=utf-8",
-        }
-      );
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8",
+    });
 
 
-    const url =
-      URL.createObjectURL(
-        blob
-      );
+    const url = URL.createObjectURL(blob);
 
 
-    const link =
-      document.createElement(
-        "a"
-      );
+    const link = document.createElement("a");
 
 
-    link.href =
-      url;
-
-    link.download =
-      filename;
+    link.href = url;
 
 
-    document.body.appendChild(
-      link
-    );
+    link.download = filename;
+
+
+    document.body.appendChild(link);
+
 
     link.click();
+
 
     link.remove();
 
 
-    setTimeout(
-      () =>
-        URL.revokeObjectURL(
-          url
-        ),
-      1200
-    );
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
   }
 
 
@@ -1475,41 +967,30 @@ document.addEventListener("DOMContentLoaded", () => {
      EXPORT CURRENT VIEW
   ========================================================= */
 
+
   function exportCurrentView() {
-    const rows =
-      currentRows.slice();
+    const rows = currentRows.slice();
 
 
     if (!rows.length) {
-      alert(
-        "There are no student records to export."
-      );
+      alert("There are no student records to export.");
+
 
       return;
     }
 
 
-    const grade =
-      gradeSelect.value ||
-      "All";
+    const grade = gradeSelect.value || "All";
 
-    const section =
-      sectionSelect.value ||
-      "All";
+
+    const section = sectionSelect.value || "All";
 
 
     const filename =
-      `academic_records_${grade}_Section_${section}.csv`
-        .replaceAll(
-          " ",
-          "_"
-        );
+      `academic_records_${grade}_Section_${section}.csv`.replaceAll(" ", "_");
 
 
-    downloadCsv(
-      rows,
-      filename
-    );
+    downloadCsv(rows, filename);
   }
 
 
@@ -1517,15 +998,14 @@ document.addEventListener("DOMContentLoaded", () => {
      EXPORT GRADE LEVEL
   ========================================================= */
 
+
   function exportGradeLevel() {
-    const selectedGrade =
-      gradeSelect.value;
+    const selectedGrade = gradeSelect.value;
 
 
     if (!selectedGrade) {
-      alert(
-        "Please select a grade level first."
-      );
+      alert("Please select a grade level first.");
+
 
       return;
     }
@@ -1541,72 +1021,41 @@ document.addEventListener("DOMContentLoaded", () => {
      * ALL sections under that grade.
      */
 
-    const rows =
-      students
-        .filter(
-          (student) =>
-            norm(
-              getStudentGrade(
-                student
-              )
-            ) ===
-            norm(
-              selectedGrade
-            )
-        )
-        .sort(
-          (a, b) => {
 
-            const sectionCompare =
-              getStudentSection(
-                a
-              ).localeCompare(
-                getStudentSection(
-                  b
-                )
-              );
-
-
-            if (
-              sectionCompare !==
-              0
-            ) {
-              return sectionCompare;
-            }
-
-
-            return getStudentName(
-              a
-            ).localeCompare(
-              getStudentName(
-                b
-              )
-            );
-          }
+    const rows = students
+      .filter(
+        (student) => norm(getStudentGrade(student)) === norm(selectedGrade),
+      )
+      .sort((a, b) => {
+        const sectionCompare = getStudentSection(a).localeCompare(
+          getStudentSection(b),
         );
 
 
+        if (sectionCompare !== 0) {
+          return sectionCompare;
+        }
+
+
+        return getStudentName(a).localeCompare(getStudentName(b));
+      });
+
+
     if (!rows.length) {
-      alert(
-        `No student records found for ${selectedGrade}.`
-      );
+      alert(`No student records found for ${selectedGrade}.`);
+
 
       return;
     }
 
 
-    const filename =
-      `academic_records_${selectedGrade}.csv`
-        .replaceAll(
-          " ",
-          "_"
-        );
-
-
-    downloadCsv(
-      rows,
-      filename
+    const filename = `academic_records_${selectedGrade}.csv`.replaceAll(
+      " ",
+      "_",
     );
+
+
+    downloadCsv(rows, filename);
   }
 
 
@@ -1614,8 +1063,8 @@ document.addEventListener("DOMContentLoaded", () => {
      EXPORT ALL RECORDS
   ========================================================= */
 
-  function exportAllRecords() {
 
+  function exportAllRecords() {
     /*
      * Export every student.
      *
@@ -1628,76 +1077,42 @@ document.addEventListener("DOMContentLoaded", () => {
      * Student Name
      */
 
-    const rows =
-      students
-        .slice()
-        .sort(
-          (a, b) => {
 
-            const gradeCompare =
-              getStudentGrade(
-                a
-              ).localeCompare(
-                getStudentGrade(
-                  b
-                )
-              );
+    const rows = students.slice().sort((a, b) => {
+      const gradeCompare = getStudentGrade(a).localeCompare(getStudentGrade(b));
 
 
-            if (
-              gradeCompare !==
-              0
-            ) {
-              return gradeCompare;
-            }
+      if (gradeCompare !== 0) {
+        return gradeCompare;
+      }
 
 
-            const sectionCompare =
-              getStudentSection(
-                a
-              ).localeCompare(
-                getStudentSection(
-                  b
-                )
-              );
+      const sectionCompare = getStudentSection(a).localeCompare(
+        getStudentSection(b),
+      );
 
 
-            if (
-              sectionCompare !==
-              0
-            ) {
-              return sectionCompare;
-            }
+      if (sectionCompare !== 0) {
+        return sectionCompare;
+      }
 
 
-            return getStudentName(
-              a
-            ).localeCompare(
-              getStudentName(
-                b
-              )
-            );
-          }
-        );
+      return getStudentName(a).localeCompare(getStudentName(b));
+    });
 
 
     if (!rows.length) {
-      alert(
-        "There are no student records to export."
-      );
+      alert("There are no student records to export.");
+
 
       return;
     }
 
 
-    const filename =
-      "academic_records_all.csv";
+    const filename = "academic_records_all.csv";
 
 
-    downloadCsv(
-      rows,
-      filename
-    );
+    downloadCsv(rows, filename);
   }
 
 
@@ -1705,187 +1120,141 @@ document.addEventListener("DOMContentLoaded", () => {
      EXPORT MENU
   ========================================================= */
 
+
   function toggleExportMenu() {
-    exportMenu?.classList.toggle(
-      "hidden"
-    );
+    exportMenu?.classList.toggle("hidden");
   }
 
 
   function closeExportMenu() {
-    exportMenu?.classList.add(
-      "hidden"
-    );
+    exportMenu?.classList.add("hidden");
   }
 
 
-  exportBtn?.addEventListener(
-    "click",
-    (event) => {
+  exportBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
 
-      event.stopPropagation();
 
-      toggleExportMenu();
-    }
-  );
+    toggleExportMenu();
+  });
 
 
   /* ---------------------------------------------------------
      Current View
   --------------------------------------------------------- */
 
-  exportClassBtn?.addEventListener(
-    "click",
-    () => {
 
-      closeExportMenu();
+  exportClassBtn?.addEventListener("click", () => {
+    closeExportMenu();
 
-      exportCurrentView();
-    }
-  );
+
+    exportCurrentView();
+  });
 
 
   /* ---------------------------------------------------------
      Grade Level
   --------------------------------------------------------- */
 
-  exportGradeBtn?.addEventListener(
-    "click",
-    () => {
 
-      closeExportMenu();
+  exportGradeBtn?.addEventListener("click", () => {
+    closeExportMenu();
 
-      exportGradeLevel();
-    }
-  );
+
+    exportGradeLevel();
+  });
 
 
   /* ---------------------------------------------------------
      All Records
   --------------------------------------------------------- */
 
-  exportAllBtn?.addEventListener(
-    "click",
-    () => {
 
-      closeExportMenu();
-
-      exportAllRecords();
-    }
-  );
+  exportAllBtn?.addEventListener("click", () => {
+    closeExportMenu();
 
 
-  document.addEventListener(
-    "click",
-    () => {
-
-      closeExportMenu();
-    }
-  );
+    exportAllRecords();
+  });
 
 
-  exportMenu?.addEventListener(
-    "click",
-    (event) => {
+  document.addEventListener("click", () => {
+    closeExportMenu();
+  });
 
-      event.stopPropagation();
-    }
-  );
+
+  exportMenu?.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
 
 
   /* =========================================================
      GRADE CHANGE
   ========================================================= */
 
-  gradeSelect?.addEventListener(
-    "change",
-    async () => {
 
-      try {
-
-        gradeSelect.disabled =
-          true;
-
-        sectionSelect.disabled =
-          true;
+  gradeSelect?.addEventListener("change", async () => {
+    try {
+      gradeSelect.disabled = true;
 
 
-        await loadSections(
-          gradeSelect.value
-        );
+      sectionSelect.disabled = true;
 
 
-        render();
+      await loadSections(gradeSelect.value);
 
-      } catch (error) {
 
-        showTableError(
-          error.message ||
-            "Failed to load sections."
-        );
+      render();
+    } catch (error) {
+      showTableError(error.message || "Failed to load sections.");
+    } finally {
+      gradeSelect.disabled = false;
 
-      } finally {
 
-        gradeSelect.disabled =
-          false;
-
-        sectionSelect.disabled =
-          false;
-      }
+      sectionSelect.disabled = false;
     }
-  );
+  });
 
 
   /* =========================================================
      SECTION CHANGE
   ========================================================= */
 
-  sectionSelect?.addEventListener(
-    "change",
-    () => {
 
-      render();
-    }
-  );
+  sectionSelect?.addEventListener("change", () => {
+    render();
+  });
 
 
   /* =========================================================
      SEARCH
   ========================================================= */
 
-  searchInput?.addEventListener(
-    "input",
-    () => {
 
-      render();
-    }
-  );
+  searchInput?.addEventListener("input", () => {
+    render();
+  });
 
 
   /* =========================================================
      ERROR
   ========================================================= */
 
-  function showTableError(
-    message
-  ) {
-    const colspan =
-      2 +
-      terms.length +
-      2;
+
+  function showTableError(message) {
+    const colspan = 2 + terms.length + 2;
 
 
     recordsTbody.innerHTML = `
       <tr class="ar-empty">
 
+
         <td
           colspan="${colspan}"
         >
-          ${esc(
-            message ||
-              "Failed to load records."
-          )}
+          ${esc(message || "Failed to load records.")}
         </td>
+
 
       </tr>
     `;
@@ -1896,10 +1265,9 @@ document.addEventListener("DOMContentLoaded", () => {
      INITIALIZE
   ========================================================= */
 
+
   async function init() {
-
     try {
-
       await loadCsrfToken();
 
 
@@ -1907,6 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
        * Load the school configuration
        * and actual students.
        */
+
 
       await Promise.all([
         loadGradeLevels(),
@@ -1919,6 +1288,7 @@ document.addEventListener("DOMContentLoaded", () => {
        * Build the real grade selector.
        */
 
+
       buildGradeSelect();
 
 
@@ -1927,32 +1297,38 @@ document.addEventListener("DOMContentLoaded", () => {
        * the selected grade.
        */
 
-      await loadSections(
-        gradeSelect.value
-      );
+
+      await loadSections(gradeSelect.value);
 
 
       /*
        * Render everything.
        */
 
+
       render();
-
     } catch (error) {
-
-      console.error(
-        "Academic Records initialization failed:",
-        error
-      );
+      console.error("Academic Records initialization failed:", error);
 
 
-      showTableError(
-        error.message ||
-          "Failed to load academic records."
-      );
+      showTableError(error.message || "Failed to load academic records.");
     }
   }
 
 
+  async function refresh() {
+    closeExportMenu();
+    await init();
+  }
+
+
+  refreshBtn?.addEventListener("click", async () => {
+    await refresh();
+  });
+
+
   init();
 });
+
+
+

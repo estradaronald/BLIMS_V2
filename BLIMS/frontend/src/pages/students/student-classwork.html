@@ -1,455 +1,530 @@
 <!-- frontend/src/pages/student/student-classwork.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-  <title>Student - Classwork</title>
 
-  <!-- Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        // Restore collapsed sidebar before first paint.
+        if (
+          isDesktop &&
+          localStorage.getItem("student_sidebar_collapsed_v1") === "1"
+        ) {
+          root.classList.add("sb-collapsed");
+        }
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  >
 
-  <!-- Baseline styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/sidebar.css"
-  />
+        // Restore My Learning dropdown before first paint.
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("student_sidebar_groups_v1") || "{}",
+          );
 
-  <link
-    rel="stylesheet"
-    href="../../styles/admin/admin-dashboard.css"
-  />
 
-  <!-- Header / Card / Modal styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/admin-announcements.css"
-  />
+          if (saved["my-learning"] === true) {
+            root.classList.add("sb-preopen-learning");
+          }
+        } catch {
+          // Ignore invalid saved sidebar state.
+        }
+      })();
+    </script>
 
-  <!-- Student Classwork styles -->
-  <link
-    rel="stylesheet"
-    href="../../styles/student/student-classwork.css"
-  />
-</head>
 
-<body data-page="classwork">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- =========================================
+
+    <title>Student - Classwork</title>
+
+
+    <!-- Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- Baseline styles -->
+    <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
+
+
+    <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
+
+
+    <!-- Header / Card / Modal styles -->
+    <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
+
+
+    <!-- Student Classwork styles -->
+    <link rel="stylesheet" href="../../styles/student/student-classwork.css" />
+    <link rel="stylesheet" href="../../shared/css/page-animations.css" />
+  </head>
+
+
+  <body data-page="classwork">
+    <!-- =========================================
        FLOATING SIDEBAR TOGGLE
   ========================================== -->
 
-  <button
-    class="sidebar-float-toggle"
-    id="sidebarFloatToggle"
-    type="button"
-    aria-label="Toggle sidebar"
-  >
-    ←
-  </button>
+
+    <button
+      class="sidebar-float-toggle"
+      id="sidebarFloatToggle"
+      type="button"
+      aria-label="Toggle sidebar"
+    >
+      ←
+    </button>
 
 
-  <div class="app">
-
-    <!-- =========================================
+    <div class="app">
+      <!-- =========================================
          SIDEBAR
     ========================================== -->
 
-    <div id="sidebar-mount"></div>
 
-
-    <main class="content">
-
-      <!-- =========================================
-           TOP BAR
-      ========================================== -->
-
-      <header class="topbar">
-
-        <div class="topbar-right">
-
-         
-
-
-          <div
-            class="tb-user"
-            id="userbox"
-          >
-
+      <aside class="sidebar" id="sidebar" data-role="student">
+        <div class="sb-top">
+          <div class="sb-logo-wrap">
             <img
-              class="tb-avatar"
-              src="../../assets/images/bg.jpg"
-              alt="Student avatar"
+              src="../../assets/images/logo.png"
+              class="sb-logo"
+              alt="School Logo"
             />
+          </div>
 
 
-            <div class="tb-meta">
-
-              <div class="tb-name">
-                Student
-              </div>
-
-              <div class="tb-role">
-                Classwork
-              </div>
-
-            </div>
+          <div class="sb-school">
+            <div class="sb-school-name">Bolosan Elementary School</div>
+            <div class="sb-school-sub">Bolosan District, Dagupan City</div>
+          </div>
+        </div>
 
 
+        <nav class="sb-nav">
+          <!-- OVERVIEW -->
+          <div class="sb-section-title">OVERVIEW</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-dashboard.html"
+            data-nav="dashboard"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/dashboard.svg" alt="" />
+            </span>
+            <span class="sb-text">DASHBOARD</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY LEARNING -->
+          <div
+            class="sb-group"
+            id="studentLearningGroup"
+            data-group="my-learning"
+          >
             <button
-              class="tb-drop"
-              id="userMenuBtn"
+              class="sb-group-toggle"
+              id="studentLearningToggle"
               type="button"
-              aria-label="Open user menu"
+              aria-expanded="false"
+              aria-controls="studentLearningMenu"
             >
-              ▾
+              <span class="sb-group-title">MY LEARNING</span>
+              <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
 
-            <div
-              class="tb-menu"
-              id="userMenu"
-            >
-
-              <button
-                class="tb-item"
-                type="button"
+            <div class="sb-submenu" id="studentLearningMenu">
+              <a
+                class="sb-item"
+                href="./student-schedule.html"
+                data-nav="schedule"
               >
-                Settings
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/mysched.svg" alt="" />
+                </span>
+                <span class="sb-text">MY SCHEDULE</span>
+              </a>
 
 
-              <button
-                class="tb-item danger"
-                id="topbarLogout"
-                type="button"
+              <a
+                class="sb-item"
+                href="./student-classwork.html"
+                data-nav="classwork"
               >
-                Logout
-              </button>
+                <span class="sb-ico">
+                  <img src="../../assets/icons/asess.svg" alt="" />
+                </span>
+                <span class="sb-text">ASSIGNMENT</span>
+              </a>
 
+
+              <a
+                class="sb-item"
+                href="./student-subjects.html"
+                data-nav="subjects"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/subjects.svg" alt="" />
+                </span>
+                <span class="sb-text">SUBJECTS</span>
+              </a>
+
+
+              <a
+                class="sb-item"
+                href="./student-attendance.html"
+                data-nav="attendance"
+              >
+                <span class="sb-ico">
+                  <img src="../../assets/icons/attendance.svg" alt="" />
+                </span>
+                <span class="sb-text">ATTENDANCE</span>
+              </a>
+
+
+              <a class="sb-item" href="./student-grades.html" data-nav="grades">
+                <span class="sb-ico">
+                  <img src="../../assets/icons/grades.svg" alt="" />
+                </span>
+                <span class="sb-text">GRADES</span>
+              </a>
             </div>
-
           </div>
 
-        </div>
 
-      </header>
+          <div class="sb-divider"></div>
 
 
-      <!-- =========================================
-           PAGE
+          <!-- COMMUNICATIONS -->
+          <div class="sb-section-title">COMMUNICATIONS</div>
+
+
+          <a
+            class="sb-item"
+            href="./student-announcements.html"
+            data-nav="announcements"
+          >
+            <span class="sb-ico">
+              <img src="../../assets/icons/anouncement.svg" alt="" />
+            </span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
+          </a>
+
+
+          <div class="sb-divider"></div>
+
+
+          <!-- MY ACCOUNT -->
+          <div class="sb-section-title">MY ACCOUNT</div>
+
+
+          <a class="sb-item" href="./student-profile.html" data-nav="profile">
+            <span class="sb-ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span class="sb-text">PROFILE</span>
+          </a>
+        </nav>
+      </aside>
+
+
+      <main class="content page-animate">
+        <!-- =========================================
+           TOP BAR
       ========================================== -->
 
-      <section class="teachers-wrap">
 
-        <!-- PAGE HEADER -->
+        <header class="topbar reveal-soft">
+          <div class="topbar-right">
+            <div class="tb-user" id="userbox">
+              <img
+                class="tb-avatar"
+                src="../../assets/images/bg.jpg"
+                alt="Student avatar"
+              />
 
-        <div class="teachers-page-head">
 
-          <h2 class="teachers-title">
-           Assignment 
-          </h2>
+              <div class="tb-meta">
+                <div class="tb-name">Student</div>
 
-        </div>
+
+                <div class="tb-role">Classwork</div>
+              </div>
+
+
+              <button
+                class="tb-drop"
+                id="userMenuBtn"
+                type="button"
+                aria-label="Open user menu"
+              >
+                ▾
+              </button>
+
+
+              <div class="tb-menu" id="userMenu">
+                <button class="tb-item" type="button">Settings</button>
+
+
+                <button class="tb-item danger" id="topbarLogout" type="button">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
 
 
         <!-- =========================================
-             MAIN CARD
-        ========================================== -->
-
-        <div class="card t-card cw-card">
-
-          <!-- CARD HEADER -->
-
-          <div class="t-card-head cw-head">
-
-            <!-- LEFT -->
-
-            <div class="cw-left">
-
-              <div class="t-subtitle">
-                Assignments & Tasks
-              </div>
+           PAGE
+      ========================================== -->
 
 
-              <!--
-                School year intentionally removed.
-                Student only sees their class and section.
-              -->
-
-              <div class="cw-sub">
-
-                <span id="cwGradeSection">
-                  Grade 6 - Section A
-                </span>
-
-              </div>
-
-            </div>
+        <section class="teachers-wrap">
+          <!-- PAGE HEADER -->
 
 
-            <!-- =====================================
-                 FILTERS / SEARCH
-            ====================================== -->
-
-            <div class="cw-actions">
-
-              <!-- Subject filter -->
-
-              <div class="cw-filter-wrap">
-
-                <select
-                  id="cwSubjectFilter"
-                  class="t-filter cw-filter"
-                  aria-label="Filter by subject"
-                >
-                  <option value="all">
-                    Subject: All
-                  </option>
-                </select>
-
-              </div>
-
-
-              <!-- Search -->
-
-              <div class="t-search cw-search">
-
-                <span
-                  class="t-search-ico"
-                  aria-hidden="true"
-                >
-                  🔎
-                </span>
-
-
-                <input
-                  id="cwSearch"
-                  type="text"
-                  placeholder="Search classwork"
-                  aria-label="Search classwork"
-                  autocomplete="off"
-                />
-
-              </div>
-
-            </div>
-
+          <div class="teachers-page-head reveal-item">
+            <h2 class="teachers-title">Assignment</h2>
           </div>
 
 
           <!-- =========================================
+             MAIN CARD
+        ========================================== -->
+
+
+          <div class="card t-card cw-card reveal-scale">
+            <!-- CARD HEADER -->
+
+
+            <div class="t-card-head cw-head">
+              <!-- LEFT -->
+
+
+              <div class="cw-left">
+                <div class="t-subtitle">Assignments & Tasks</div>
+
+
+                <!--
+                School year intentionally removed.
+                Student only sees their class and section.
+              -->
+
+
+                <div class="cw-sub">
+                  <span id="cwGradeSection"> Grade 6 - Section A </span>
+                </div>
+              </div>
+
+
+              <!-- =====================================
+                 FILTERS / SEARCH
+            ====================================== -->
+
+
+              <div class="cw-actions">
+                <!-- Subject filter -->
+
+
+                <div class="cw-filter-wrap">
+                  <select
+                    id="cwSubjectFilter"
+                    class="t-filter cw-filter"
+                    aria-label="Filter by subject"
+                  >
+                    <option value="all">Subject: All</option>
+                  </select>
+                </div>
+
+
+                <!-- Search -->
+
+
+                <div class="t-search cw-search">
+                  <span class="t-search-ico" aria-hidden="true"> 🔎 </span>
+
+
+                  <input
+                    id="cwSearch"
+                    type="text"
+                    placeholder="Search classwork"
+                    aria-label="Search classwork"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+            </div>
+
+
+            <!-- =========================================
                CLASSWORK BODY
           ========================================== -->
 
-          <div class="cw-body">
 
-            <!-- Assignment list -->
-
-            <div
-              class="cw-list"
-              id="cwList"
-            ></div>
+            <div class="cw-body">
+              <!-- Assignment list -->
 
 
-            <!-- Empty state -->
+              <div class="cw-list" id="cwList"></div>
 
-            <div
-              id="cwEmpty"
-              class="cw-empty hidden"
-            >
-              No classwork to display.
+
+              <!-- Empty state -->
+
+
+              <div id="cwEmpty" class="cw-empty hidden">
+                No classwork to display.
+              </div>
             </div>
-
           </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
+        </section>
+      </main>
+    </div>
 
 
-  <!-- =============================================
+    <!-- =============================================
        VIEW ASSIGNMENT DETAILS MODAL
   ============================================== -->
 
-  <div
-    class="tmodal hidden"
-    id="cwViewModal"
-    aria-hidden="true"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="cwViewTitle"
-  >
-
-    <!-- Backdrop -->
 
     <div
-      class="tmodal-backdrop"
-      id="cwViewBackdrop"
-    ></div>
-
-
-    <!-- Dialog -->
-
-    <div
-      class="tmodal-dialog cw-view-dialog"
-      role="document"
+      class="tmodal hidden"
+      id="cwViewModal"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cwViewTitle"
     >
+      <!-- Backdrop -->
 
-      <!-- =========================================
+
+      <div class="tmodal-backdrop" id="cwViewBackdrop"></div>
+
+
+      <!-- Dialog -->
+
+
+      <div class="tmodal-dialog cw-view-dialog" role="document">
+        <!-- =========================================
            MODAL HEADER
       ========================================== -->
 
-      <div class="tmodal-head">
 
-        <div>
+        <div class="tmodal-head">
+          <div>
+            <div class="tmodal-title" id="cwViewTitle">Assignment Details</div>
 
-          <div
-            class="tmodal-title"
-            id="cwViewTitle"
-          >
-            Assignment Details
+
+            <div class="tmodal-sub" id="cwViewSub">—</div>
           </div>
 
 
-          <div
-            class="tmodal-sub"
-            id="cwViewSub"
+          <button
+            class="tmodal-x"
+            id="cwViewCloseX"
+            type="button"
+            aria-label="Close"
           >
-            —
-          </div>
-
+            ✕
+          </button>
         </div>
 
 
-        <button
-          class="tmodal-x"
-          id="cwViewCloseX"
-          type="button"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-
-      </div>
-
-
-      <!-- =========================================
+        <!-- =========================================
            MODAL BODY
       ========================================== -->
 
-      <div class="tmodal-body">
 
-        <!-- Assignment information -->
-
-        <div
-          class="cw-view-chips"
-          id="cwViewChips"
-        ></div>
+        <div class="tmodal-body">
+          <!-- Assignment information -->
 
 
-        <!-- Instructions -->
+          <div class="cw-view-chips" id="cwViewChips"></div>
 
-        <div class="cw-view-block">
 
-          <div class="cw-view-label">
-            Description
+          <!-- Instructions -->
+
+
+          <div class="cw-view-block">
+            <div class="cw-view-label">Description</div>
+
+
+            <div class="cw-view-text" id="cwViewDesc">—</div>
           </div>
 
 
-          <div
-            class="cw-view-text"
-            id="cwViewDesc"
-          >
-            —
-          </div>
+          <!-- Attachment -->
 
+
+          <div class="cw-view-block">
+            <div class="cw-view-label">Attachment</div>
+
+
+            <div class="cw-view-file" id="cwViewFile">
+              <span class="cw-file-muted"> No file attached. </span>
+            </div>
+          </div>
         </div>
 
 
-        <!-- Attachment -->
-
-        <div class="cw-view-block">
-
-          <div class="cw-view-label">
-            Attachment
-          </div>
-
-
-          <div
-            class="cw-view-file"
-            id="cwViewFile"
-          >
-
-            <span class="cw-file-muted">
-              No file attached.
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- =========================================
+        <!-- =========================================
            MODAL FOOTER
       ========================================== -->
 
-      <div class="tmodal-foot">
 
-        <button
-          class="t-ghost"
-          id="cwViewCloseBtn"
-          type="button"
-        >
-          Close
-        </button>
-
-
-        <div class="tmodal-foot-right">
-
-          <button
-            class="t-ghost"
-            id="cwDownloadBtn"
-            type="button"
-            disabled
-          >
-            Download
+        <div class="tmodal-foot">
+          <button class="t-ghost" id="cwViewCloseBtn" type="button">
+            Close
           </button>
 
+
+          <div class="tmodal-foot-right">
+            <button class="t-ghost" id="cwDownloadBtn" type="button" disabled>
+              Download
+            </button>
+          </div>
         </div>
-
       </div>
-
     </div>
 
-  </div>
 
-
-  <!-- =============================================
+    <!-- =============================================
        SCRIPTS
   ============================================== -->
 
-  <script
-    src="../../js/student/student-sidebar.js"
-  ></script>
+
+    <script src="../../shared/js/page-animations.js"></script>
+    <script src="../../js/student/student-sidebar.js"></script>
 
 
-  <script
-    src="../../js/student/student-classwork.js"
-  ></script>
-
-</body>
+    <script src="../../js/student/student-classwork.js"></script>
+  </body>
 </html>
+
+
+

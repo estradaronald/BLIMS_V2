@@ -1,487 +1,923 @@
-/* frontend/src/styles/admin/admin-class-schedule.css */
-.hidden{ display:none !important; }
+/* frontend/src/styles/admin/admin-class-schedule.css
+   Class Schedule — adapted from admin-grade-levels.css
+   Keep existing HTML hooks and JS IDs/classes intact.
+*/
 
-.cs-wrap{ padding:0; margin:0; }
 
-.cs-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  margin:0 0 10px;
+/* Shared page spacing */
+.hidden {
+  display: none !important;
 }
 
-.cs-title{
-  margin:0;
-  font-size:34px;
-  font-weight:1000;
-  color:#0b2c4a;
-  line-height:1.15;
+
+.topbar {
+  margin-bottom: 4px;
 }
 
-.cs-sub{
-  margin-top:6px;
-  font-size:12px;
-  font-weight:800;
-  color:rgba(11,44,74,.55);
+
+.cs-wrap,
+.teachers-wrap.cs-wrap {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.cs-primary{
-  height:42px;
-  border:none;
-  border-radius:12px;
-  background:#0b4d7a;
-  color:#fff;
-  font-weight:1000;
-  padding:0 14px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  box-shadow:0 10px 22px rgba(0,0,0,.10);
-}
-.cs-plus{
-  width:30px;
-  height:30px;
-  border-radius:10px;
-  background:rgba(255,255,255,.18);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:1000;
+
+.cs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 0;
 }
 
-.cs-grid{
-  display:grid;
-  grid-template-columns:380px 1fr;
-  gap:14px;
-  align-items:start;
+
+.cs-title {
+  margin: 0;
+  color: #0b2c4a;
+  font-size: 34px;
+  font-weight: 1000;
+  line-height: 1.15;
 }
 
-.cs-left{ padding:0; overflow:hidden; }
-.cs-left-head{
-  padding:14px 14px 10px;
-  border-bottom:1px solid rgba(11,44,74,.10);
-}
-.cs-left-title{
-  font-size:14px;
-  font-weight:1000;
-  color:#0b2c4a;
-}
-.cs-left-hint{
-  margin-top:4px;
-  font-size:11px;
-  font-weight:800;
-  color:rgba(11,44,74,.55);
+
+.cs-sub {
+  margin-top: 5px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
-.cs-grade-list{
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+
+.cs-primary {
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #0b4d7a;
+  border-radius: 12px;
+  background: #0b4d7a;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(11, 77, 122, 0.12);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.cs-primary:hover {
+  background: #083b5e;
+  border-color: #083b5e;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(11, 77, 122, 0.16);
+}
+.cs-primary:active {
+  transform: translateY(0);
+}
+.cs-primary:focus-visible,
+.cs-grade-btn:focus-visible,
+.cs-icon-btn:focus-visible,
+.cs-x:focus-visible,
+.cs-ghost:focus-visible,
+.cs-save:focus-visible,
+.cs-danger:focus-visible {
+  outline: 3px solid rgba(11, 77, 122, 0.22);
+  outline-offset: 2px;
+}
+.cs-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
 }
 
-.cs-grade-btn{
-  width:100%;
-  border:none;
-  cursor:pointer;
-  text-align:left;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px;
-  border-radius:12px;
-  background:#fff;
-  box-shadow:0 10px 22px rgba(0,0,0,.06);
-  border:1px solid rgba(11,44,74,.06);
-  font-weight:1000;
-  color:#0b2c4a;
-  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+
+/* Two-card layout follows Grade Levels & Sections */
+.cs-grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
 }
-.cs-grade-btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 12px 26px rgba(0,0,0,.08);
-  border-color:rgba(11,44,74,.12);
+.cs-left,
+.cs-right {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
 }
-.cs-grade-btn.active{
-  background:rgba(11,77,122,0.08);
-  border-color:rgba(11,77,122,.25);
-  box-shadow:0 12px 26px rgba(0,0,0,.10), 0 0 0 3px rgba(11,77,122,.12);
+.cs-left-head {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+}
+.cs-left-title,
+.cs-right-title {
+  color: #0b2c4a;
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 1.25;
+}
+.cs-left-hint,
+.cs-right-sub {
+  margin-top: 4px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
-.cs-pill{
-  font-size:11px;
-  font-weight:1000;
-  color:rgba(11,44,74,.65);
-  background:#f1f4f8;
-  padding:6px 10px;
-  border-radius:999px;
-  white-space:nowrap;
+
+/* Grade selection */
+.cs-grade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+}
+.cs-grade-btn {
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #fff;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+.cs-grade-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.08);
+  transform: translateY(-1px);
+}
+.cs-grade-btn.active {
+  background: #f1f7fb;
+  border-color: rgba(11, 77, 122, 0.2);
+  color: #0b4d7a;
+}
+.cs-pill {
+  min-width: 28px;
+  min-height: 24px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: rgba(11, 44, 74, 0.58);
+  font-size: 10px;
+  font-weight: 900;
+}
+.cs-grade-btn.active .cs-pill {
+  background: #dcecf7;
+  color: #0b4d7a;
+}
+.cs-left-foot {
+  padding: 14px;
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+}
+.cs-field {
+  min-width: 0;
+}
+.cs-field label {
+  display: block;
+  margin: 0 0 6px;
+  color: #0b2c4a;
+  font-size: 11px;
+  font-weight: 800;
+}
+.cs-input,
+.cs-time-input,
+.cs-room-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 13px;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.cs-input:focus,
+.cs-time-input:focus,
+.cs-room-input:focus {
+  border-color: rgba(11, 77, 122, 0.28);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
+}
+.cs-mini-hint {
+  margin-top: 8px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
-.cs-left-foot{
-  padding:12px 14px 14px;
-  border-top:1px solid rgba(11,44,74,.10);
+
+/* Schedule panel and reference-style search/filter */
+.cs-right-head {
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+}
+.cs-right-head > div:first-child {
+  min-width: 0;
+}
+.cs-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.cs-search {
+  box-sizing: border-box;
+  width: 280px;
+  min-width: 220px;
+  height: 40px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.cs-search:focus-within {
+  border-color: rgba(11, 77, 122, 0.25);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
+}
+.cs-search-ico {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: block;
+  overflow: hidden;
+  font-size: 0;
+  pointer-events: none;
+}
+.cs-search-ico::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 9px;
+  height: 9px;
+  border: 1.7px solid #0b4d7a;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.cs-search-ico::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 9px;
+  width: 6px;
+  height: 1.7px;
+  border-radius: 999px;
+  background: #0b4d7a;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+.cs-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cs-search input::placeholder {
+  color: rgba(11, 44, 74, 0.48);
+}
+.cs-filter {
+  height: 42px;
+  min-width: 125px;
+  padding: 0 38px 0 14px;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 999px;
+  outline: none;
+  appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230b2c4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+.cs-filter:focus {
+  border-color: rgba(11, 77, 122, 0.22);
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
 
-.cs-field label{
-  display:block;
-  font-size:12px;
-  font-weight:1000;
-  color:#0b2c4a;
-  margin-bottom:6px;
+
+/* Main table — same visual language as .gl-table */
+.cs-table-wrap {
+  width: 100%;
+  padding: 0 14px 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.cs-table {
+  width: 100%;
+  min-width: 760px;
+  border: 1px solid rgba(11, 44, 74, 0.08);
+  border-radius: 14px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background: #fff;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+}
+.cs-table thead th {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+  background: #f8fafc;
+  color: rgba(11, 44, 74, 0.68);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cs-table thead th:first-child,
+.cs-table tbody td:first-child {
+  width: 52px;
+  text-align: center;
+}
+.cs-table thead th:last-child,
+.cs-table tbody td:last-child {
+  text-align: center;
+}
+.cs-table tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #eef3f9;
+  background: #fff;
+  color: #0b2c4a;
+  vertical-align: middle;
+  line-height: 1.45;
+}
+.cs-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.cs-table tbody tr:not(.cs-empty):hover td {
+  background: #f8fafc;
+}
+.cs-table tbody td:first-child {
+  color: rgba(11, 44, 74, 0.48);
+  font-weight: 900;
+}
+.cs-empty td {
+  padding: 34px 18px !important;
+  background: #fff !important;
+  color: rgba(11, 44, 74, 0.55) !important;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+.cs-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cs-icon-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0b4d7a;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.cs-icon-btn img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  object-fit: contain;
+}
+.cs-icon-btn:hover {
+  transform: translateY(-1px);
+}
+.cs-edit:hover {
+  background: #f1f7fb;
+  border-color: rgba(11, 77, 122, 0.24);
+  box-shadow: 0 4px 10px rgba(11, 77, 122, 0.06);
+}
+.cs-del {
+  color: #a61b1b;
+}
+.cs-del img {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(6000%)
+    hue-rotate(350deg) brightness(92%) contrast(110%);
+}
+.cs-del:hover {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.06);
 }
 
-.cs-input{
-  width:100%;
-  height:38px;
-  border-radius:10px;
-  border:1px solid rgba(11,44,74,.10);
-  padding:0 12px;
-  background:#fff;
-  outline:none;
+
+/* Modal overlay/dialog — preserve existing modal hooks */
+.cs-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.cs-modal.hidden {
+  display: none !important;
+}
+.cs-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 30, 47, 0.48);
+  backdrop-filter: blur(2px);
+}
+.cs-dialog {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(880px, 100%);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 56px rgba(11, 44, 74, 0.2);
+}
+.cs-lg {
+  width: min(1120px, 100%);
+}
+.cs-sm {
+  width: min(480px, 100%);
+}
+.cs-mhead {
+  flex: 0 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+}
+.cs-mtitle {
+  color: #0b2c4a;
+  font-size: 16px;
+  font-weight: 1000;
+  line-height: 1.35;
+}
+.cs-msub {
+  margin-top: 5px;
+  color: rgba(11, 44, 74, 0.55);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.cs-x {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0b2c4a;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+.cs-x:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.18);
+}
+.cs-mbody {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 20px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.cs-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+.cs-form-top {
+  margin-bottom: 16px;
+}
+.cs-wide {
+  grid-column: 1 / -1;
 }
 
-.cs-mini-hint{
-  margin-top:8px;
-  font-size:11px;
-  font-weight:800;
-  color:rgba(11,44,74,.55);
+
+/* Bulk subject/time/room rows */
+.cs-bulk-box {
+  overflow: hidden;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 14px;
+  background: #fff;
+}
+.cs-bulk-head {
+  padding: 14px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+  background: #f8fafc;
+}
+.cs-bulk-title {
+  color: #0b2c4a;
+  font-size: 13px;
+  font-weight: 1000;
+}
+.cs-bulk-sub {
+  margin-top: 4px;
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.cs-bulk-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.cs-bulk-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #0b2c4a;
+  font-family: inherit;
+  font-size: 12px;
+}
+.cs-bulk-table thead th {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
+  background: #f8fafc;
+  color: rgba(11, 44, 74, 0.68);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cs-bulk-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef3f9;
+  vertical-align: middle;
+}
+.cs-bulk-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.cs-bulk-index {
+  color: rgba(11, 44, 74, 0.48);
+  font-weight: 900;
+}
+.cs-bulk-subject {
+  color: #0b2c4a;
+  font-weight: 900;
+}
+.cs-time-input,
+.cs-room-input {
+  height: 38px;
+  border-radius: 10px;
 }
 
-.cs-right{ padding:0; overflow:hidden; }
-.cs-right-head{
-  padding:14px 14px 10px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
+
+/* Error, delete confirmation, success toast */
+.cs-error {
+  margin-top: 13px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #a61b1b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.cs-confirm {
+  padding: 14px;
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #0b2c4a;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+.cs-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 13px 16px;
+  transform: translateX(-50%);
+  border: 1px solid #d7e9df;
+  border-radius: 12px;
+  background: #fff;
+  color: #166534;
+  box-shadow: 0 16px 36px rgba(11, 44, 74, 0.14);
+  pointer-events: none;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+.cs-toast[hidden] {
+  display: none !important;
+}
+.cs-toast-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 1000;
 }
 
-.cs-right-title{
-  font-size:14px;
-  font-weight:1000;
-  color:#0b2c4a;
+
+/* Modal footer */
+.cs-mfoot {
+  flex: 0 0 auto;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(11, 44, 74, 0.08);
+  background: #fff;
 }
-.cs-right-sub{
-  margin-top:4px;
-  font-size:11px;
-  font-weight:800;
-  color:rgba(11,44,74,.55);
+.cs-foot-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.cs-ghost,
+.cs-save,
+.cs-danger {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+.cs-ghost {
+  border-color: #e2e8f0;
+  background: #fff;
+  color: #0b2c4a;
+}
+.cs-ghost:hover {
+  background: #f8fafc;
+  border-color: rgba(11, 44, 74, 0.18);
+}
+.cs-save {
+  border-color: #0b4d7a;
+  background: #0b4d7a;
+  color: #fff;
+}
+.cs-save:hover {
+  border-color: #083b5e;
+  background: #083b5e;
+}
+.cs-danger {
+  border-color: #b91c1c;
+  background: #b91c1c;
+  color: #fff;
+}
+.cs-danger:hover {
+  border-color: #991b1b;
+  background: #991b1b;
 }
 
-.cs-tools{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
+
+/* Responsive */
+@media (max-width: 1120px) {
+  .cs-grid {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+  .cs-right-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cs-tools {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .cs-search {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+}
+@media (max-width: 900px) {
+  .cs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-grade-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cs-left-foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 14px;
+  }
+  .cs-mini-hint {
+    margin: 0 0 10px;
+  }
+}
+@media (max-width: 700px) {
+  .cs-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cs-title {
+    font-size: 28px;
+  }
+  .cs-primary {
+    align-self: flex-start;
+  }
+  .cs-right-head {
+    padding: 14px;
+  }
+  .cs-tools {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cs-search,
+  .cs-filter {
+    width: 100%;
+    min-width: 0;
+  }
+  .cs-table-wrap {
+    padding: 0 10px 12px;
+  }
+  .cs-grade-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-left-foot {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .cs-mini-hint {
+    margin-top: 8px;
+  }
+  .cs-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-wide {
+    grid-column: auto;
+  }
+  .cs-modal {
+    padding: 10px;
+  }
+  .cs-dialog,
+  .cs-lg,
+  .cs-sm {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 12px;
+  }
+  .cs-mhead {
+    padding: 15px 16px;
+  }
+  .cs-mbody {
+    padding: 15px 16px;
+  }
+  .cs-mfoot {
+    padding: 12px 16px;
+    align-items: stretch;
+  }
+  .cs-foot-right {
+    flex-wrap: wrap;
+  }
+  .cs-toast {
+    top: 12px;
+    left: 12px;
+    width: auto;
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    transform: none;
+  }
+}
+@media (max-width: 460px) {
+  .cs-primary {
+    width: 100%;
+  }
+  .cs-mfoot {
+    flex-direction: column-reverse;
+  }
+  .cs-mfoot > button,
+  .cs-foot-right,
+  .cs-foot-right > button {
+    width: 100%;
+  }
+  .cs-foot-right {
+    flex-direction: column-reverse;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-primary,
+  .cs-grade-btn,
+  .cs-icon-btn,
+  .cs-ghost,
+  .cs-save,
+  .cs-danger {
+    transition: none;
+  }
 }
 
-.cs-search{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:#fff;
-  border-radius:999px;
-  padding:10px 14px;
-  box-shadow:0 10px 22px rgba(0,0,0,.08);
-  min-width:260px;
-  height:42px;
-  border:1px solid rgba(11,44,74,.06);
-}
-.cs-search input{
-  border:none;
-  outline:none;
-  width:100%;
-  font-size:13px;
-  background:transparent;
-}
 
-.cs-filter{
-  height:42px;
-  border-radius:999px;
-  padding:0 44px 0 14px;
-  border:1px solid rgba(11,44,74,.10);
-  background:#fff;
-  font-size:13px;
-  outline:none;
-  box-shadow:0 10px 22px rgba(0,0,0,.06);
-  -webkit-appearance:none;
-  -moz-appearance:none;
-  appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:14px 14px;
-}
 
-.cs-table-wrap{ padding:0 14px 14px; }
-.cs-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-  border-radius:12px;
-  overflow:hidden;
-}
-.cs-table thead th{
-  background:#0b4d7a;
-  color:#fff;
-  text-align:left;
-  padding:12px 14px;
-  font-weight:900;
-}
-.cs-table tbody td{
-  padding:12px 14px;
-  border-bottom:1px solid #eef3f9;
-  color:#0b2c4a;
-}
-.cs-empty td{
-  color:rgba(11,44,74,.55);
-  font-weight:800;
-}
-
-.cs-actions{
-  display:flex;
-  justify-content:center;
-  gap:8px;
-}
-
-.cs-icon-btn{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid rgba(11,44,74,.10);
-  background:#fff;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 10px 22px rgba(0,0,0,.06);
-  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease, border-color .12s ease;
-  font-weight:1000;
-}
-.cs-icon-btn:hover{
-  filter:brightness(.98);
-  border-color:rgba(11,44,74,.18);
-  box-shadow:0 12px 26px rgba(0,0,0,.08);
-  transform:translateY(-1px);
-}
-.cs-edit{ color:#0b4d7a; }
-.cs-del{ color:#a61b1b; }
-
-.cs-modal{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  padding:18px;
-}
-.cs-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.35);
-}
-
-.cs-dialog{
-  position:relative;
-  width:min(880px, calc(100% - 28px));
-  max-height:calc(100vh - 36px);
-  margin:0 auto;
-  background:#f7f7f7;
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 22px 70px rgba(0,0,0,.25);
-  display:flex;
-  flex-direction:column;
-  top:0;
-}
-.cs-lg{
-  width:min(1180px, calc(100% - 28px));
-}
-.cs-sm{
-  width:min(520px, calc(100% - 28px));
-}
-
-.cs-mhead{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  padding:14px 16px;
-  background:#e9e9e9;
-  border-bottom:1px solid rgba(0,0,0,.06);
-  flex-shrink:0;
-}
-.cs-mtitle{ font-size:16px; font-weight:1000; color:#0b2c4a; }
-.cs-msub{ margin-top:4px; font-size:12px; font-weight:800; color:rgba(11,44,74,.65); }
-
-.cs-x{
-  width:36px;
-  height:36px;
-  border:none;
-  border-radius:12px;
-  background:#fff;
-  cursor:pointer;
-  box-shadow:0 10px 22px rgba(0,0,0,.10);
-  font-weight:1000;
-}
-
-.cs-mbody{
-  padding:14px;
-  overflow:auto;
-  flex:1 1 auto;
-}
-
-.cs-form{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:12px;
-}
-.cs-form-top{
-  margin-bottom:14px;
-}
-.cs-wide{ grid-column:1 / -1; }
-
-.cs-bulk-box{
-  background:#fff;
-  border:1px solid rgba(11,44,74,.10);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 10px 22px rgba(0,0,0,.05);
-}
-.cs-bulk-head{
-  padding:14px;
-  border-bottom:1px solid rgba(11,44,74,.08);
-  background:#f8fbff;
-}
-.cs-bulk-title{
-  font-size:14px;
-  font-weight:1000;
-  color:#0b2c4a;
-}
-.cs-bulk-sub{
-  margin-top:4px;
-  font-size:11px;
-  font-weight:800;
-  color:rgba(11,44,74,.55);
-}
-
-.cs-bulk-table-wrap{
-  overflow-x:auto;
-}
-.cs-bulk-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-  min-width:900px;
-}
-.cs-bulk-table thead th{
-  background:#0b4d7a;
-  color:#fff;
-  text-align:left;
-  padding:12px 14px;
-  font-weight:900;
-}
-.cs-bulk-table tbody td{
-  padding:10px 14px;
-  border-bottom:1px solid #eef3f9;
-  color:#0b2c4a;
-}
-.cs-bulk-index{
-  font-weight:1000;
-  color:rgba(11,44,74,.60);
-}
-.cs-bulk-subject{
-  font-weight:900;
-}
-.cs-time-input{
-  width:100%;
-  height:38px;
-  border-radius:10px;
-  border:1px solid rgba(11,44,74,.10);
-  padding:0 12px;
-  background:#fff;
-  outline:none;
-}
-.cs-room-input{
-  width:100%;
-  height:38px;
-  border-radius:10px;
-  border:1px solid rgba(11,44,74,.10);
-  padding:0 12px;
-  background:#fff;
-  outline:none;
-}
-
-.cs-error{
-  margin-top:12px;
-  background:#ffecec;
-  border:1px solid #ffd1d1;
-  color:#a61b1b;
-  padding:10px 12px;
-  border-radius:12px;
-  font-weight:900;
-  font-size:13px;
-}
-
-.cs-confirm{
-  font-size:13px;
-  font-weight:900;
-  color:#0b2c4a;
-  background:#fff;
-  border:1px solid rgba(11,44,74,.10);
-  border-radius:12px;
-  padding:12px;
-}
-
-.cs-mfoot{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 14px 14px;
-  background:#e9e9e9;
-  border-top:1px solid rgba(0,0,0,.06);
-  flex-shrink:0;
-}
-.cs-foot-right{ display:flex; gap:10px; }
-
-.cs-ghost{
-  height:36px;
-  border:none;
-  border-radius:999px;
-  padding:0 18px;
-  background:#fff;
-  box-shadow:0 10px 22px rgba(0,0,0,.08);
-  cursor:pointer;
-  font-weight:900;
-  color:#0b2c4a;
-}
-
-.cs-save{
-  height:36px;
-  border:none;
-  border-radius:999px;
-  padding:0 22px;
-  background:#0b4d7a;
-  color:#fff;
-  font-weight:1000;
-  cursor:pointer;
-  box-shadow:0 10px 22px rgba(0,0,0,.12);
-}
-.cs-danger{
-  height:36px;
-  border:none;
-  border-radius:12px;
-  padding:0 18px;
-  background:#e05a5a;
-  color:#fff;
-  font-weight:1000;
-  cursor:pointer;
-  box-shadow:0 10px 22px rgba(0,0,0,.12);
-}
-
-@media (max-width:1100px){
-  .cs-grid{ grid-template-columns:1fr; }
-  .cs-form{ grid-template-columns:1fr; }
-  .cs-search{ min-width:220px; }
-}

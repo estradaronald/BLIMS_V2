@@ -2,12 +2,14 @@
    frontend/src/styles/admin/admin-announcements.css
    ========================================================= */
 
+
 @import url("./admin-teachers.css");
 
 
 /* =========================================================
    FILTERS
    ========================================================= */
+
 
 .ann-filters {
   display: flex;
@@ -17,14 +19,55 @@
   flex-wrap: wrap;
 }
 
+
 .ann-search {
-  min-width: 320px;
+  flex: 1 1 320px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+.ann-search .t-search-ico {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: block;
+  font-size: 0;
+}
+
+
+.ann-search .t-search-ico::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 1px;
+  left: 1px;
+  border: 1.7px solid #0b4d7a;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+
+.ann-search .t-search-ico::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 1.7px;
+  left: 9px;
+  top: 10px;
+  border-radius: 999px;
+  background: #0b4d7a;
+  transform: rotate(45deg);
+  transform-origin: left center;
 }
 
 
 /* =========================================================
    ANNOUNCEMENT FEED
    ========================================================= */
+
 
 .ann-feed {
   display: flex;
@@ -39,29 +82,25 @@
    ANNOUNCEMENT CARD
    ========================================================= */
 
+
 .ann-card {
   position: relative;
-
-  background: #fff;
-
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid #e7edf3;
   border-radius: 14px;
-
-  border: 1px solid rgba(11, 44, 74, 0.06);
-
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
-
+  box-shadow: 0 2px 8px rgba(11, 44, 74, 0.04);
   overflow: visible;
-
   transition:
-    box-shadow 0.18s ease,
     border-color 0.18s ease,
-    transform 0.18s ease;
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
 }
 
-.ann-card:hover {
-  border-color: rgba(11, 77, 122, 0.12);
 
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.09);
+.ann-card:hover {
+  border-color: #dce5ed;
+  box-shadow: 0 3px 10px rgba(11, 44, 74, 0.06);
 }
 
 
@@ -69,20 +108,19 @@
    CARD MAIN AREA
    ========================================================= */
 
+
 .ann-card-top {
   display: flex;
-
   align-items: flex-start;
-
   justify-content: space-between;
-
   gap: 16px;
-
-  padding: 20px 22px;
+  padding: 18px 20px;
 }
+
 
 .ann-card-left {
   flex: 1;
+
 
   min-width: 0;
 }
@@ -92,36 +130,37 @@
    TITLE
    ========================================================= */
 
+
 .ann-title-row {
   display: flex;
 
+
   align-items: center;
 
+
   gap: 10px;
+
 
   flex-wrap: wrap;
 }
 
+
 .ann-title {
-  margin: 10px 0 0;
-
+  margin: 8px 0 0;
   font-size: 17px;
-
   font-weight: 1000;
-
   line-height: 1.35;
-
   color: #0b2c4a;
+  overflow-wrap: anywhere;
 }
 
+
 .ann-body {
-  margin: 8px 0 0;
-
-  font-size: 13px;
-
-  color: rgba(11, 44, 74, 0.68);
-
-  line-height: 1.55;
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #526579;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 
@@ -129,18 +168,25 @@
    CARD META
    ========================================================= */
 
+
 .ann-meta {
-  margin-top: 10px;
+  margin-top: 8px;
+
 
   display: flex;
 
+
   align-items: center;
+
 
   gap: 10px;
 
+
   font-size: 11px;
 
+
   color: rgba(11, 44, 74, 0.55);
+
 
   flex-wrap: wrap;
 }
@@ -150,52 +196,73 @@
    CATEGORY PILL
    ========================================================= */
 
+
 .ann-pill {
   display: inline-flex;
 
+
   align-items: center;
+
 
   justify-content: center;
 
-  min-height: 30px;
 
-  padding: 0 13px;
+  min-height: 28px;
+
+
+  padding: 0 12px;
+
 
   border-radius: 999px;
 
+
   font-size: 11px;
+
 
   font-weight: 1000;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #f7fbff;
 
+
   color: #0b2c4a;
+
 
   white-space: nowrap;
 }
 
+
 .ann-pill.priority {
   background: #fff3f3;
 
+
   border-color: #ffd2d2;
+
 
   color: #a61b1b;
 }
 
+
 .ann-pill.events {
   background: #eef7ff;
 
+
   border-color: #cfe6ff;
+
 
   color: #0b4d7a;
 }
 
+
 .ann-pill.academic {
   background: #f4f7ff;
 
+
   border-color: #dbe3ff;
+
 
   color: #2d3a8c;
 }
@@ -205,12 +272,15 @@
    STATUS
    ========================================================= */
 
+
 .ann-status {
   font-size: 11px;
 
+
   font-weight: 1000;
 
-  color: rgba(11, 44, 74, 0.70);
+
+  color: rgba(11, 44, 74, 0.7);
 }
 
 
@@ -218,16 +288,22 @@
    CARD RIGHT SIDE
    ========================================================= */
 
+
 .ann-card-right {
   position: relative;
 
+
   display: flex;
+
 
   flex-direction: column;
 
+
   align-items: flex-end;
 
+
   gap: 10px;
+
 
   flex: 0 0 auto;
 }
@@ -237,32 +313,44 @@
    THREE-DOT BUTTON
    ========================================================= */
 
-.ann-kebab {
-  width: 42px;
 
-  height: 42px;
+.ann-kebab {
+  width: 40px;
+  height: 40px;
+
 
   display: inline-flex;
 
+
   align-items: center;
+
 
   justify-content: center;
 
+
   border-radius: 12px;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #fff;
 
+
   color: #0b2c4a;
+
 
   cursor: pointer;
 
+
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+
 
   font-size: 21px;
 
+
   line-height: 1;
+
 
   transition:
     background 0.18s ease,
@@ -271,16 +359,23 @@
     transform 0.18s ease;
 }
 
+
 .ann-kebab:hover {
-  background: #f4f9fd;
-
-  border-color: rgba(11, 77, 122, 0.22);
-
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  background: #f4f7fa;
+  border-color: #c7d5e1;
+  box-shadow: 0 5px 12px rgba(11, 44, 74, 0.08);
 }
+
 
 .ann-kebab:active {
   transform: scale(0.96);
+}
+
+
+.ann-kebab:focus-visible,
+.ann-menu button:focus-visible {
+  outline: 3px solid rgba(11, 77, 122, 0.25);
+  outline-offset: 2px;
 }
 
 
@@ -288,41 +383,38 @@
    EXPANDABLE ACTION ROW
    ========================================================= */
 
+
 .ann-menu {
   display: flex;
-
   align-items: center;
-
   justify-content: flex-end;
-
   gap: 8px;
-
   width: 100%;
-
-  padding: 14px 22px;
-
+  padding: 12px 20px;
   background: #fbfdff;
-
-  border-top: 1px solid rgba(11, 44, 74, 0.08);
-
+  border-top: 1px solid #edf1f5;
   border-radius: 0 0 14px 14px;
-
   animation: annMenuOpen 0.16s ease-out;
 }
+
 
 .ann-menu.hidden {
   display: none;
 }
 
+
 @keyframes annMenuOpen {
   from {
     opacity: 0;
 
+
     transform: translateY(-4px);
   }
 
+
   to {
     opacity: 1;
+
 
     transform: translateY(0);
   }
@@ -333,28 +425,40 @@
    ACTION BUTTONS
    ========================================================= */
 
+
 .ann-menu button {
   min-width: 118px;
 
+
   height: 40px;
+
 
   padding: 0 16px;
 
-  border-radius: 11px;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+  border-radius: 10px;
+
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #fff;
 
+
   color: #0b2c4a;
+
 
   cursor: pointer;
 
+
   font-family: inherit;
+
 
   font-size: 12px;
 
+
   font-weight: 1000;
+
 
   transition:
     background 0.18s ease,
@@ -363,13 +467,13 @@
     transform 0.18s ease;
 }
 
+
 .ann-menu button:hover {
-  background: #f5f9fc;
-
-  border-color: rgba(11, 77, 122, 0.18);
-
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+  background: #f5f8fb;
+  border-color: #d5e0e9;
+  box-shadow: 0 3px 8px rgba(11, 44, 74, 0.06);
 }
+
 
 .ann-menu button:active {
   transform: scale(0.98);
@@ -378,16 +482,21 @@
 
 /* View button */
 
+
 .ann-menu button[data-act="view"] {
   background: #0b4d7a;
 
+
   border-color: #0b4d7a;
+
 
   color: #fff;
 }
 
+
 .ann-menu button[data-act="view"]:hover {
   background: #0a4167;
+
 
   border-color: #0a4167;
 }
@@ -395,18 +504,19 @@
 
 /* Delete button */
 
+
+/* Delete button — matched to reference */
 .ann-menu .danger {
   color: #a61b1b;
-
-  border-color: #ffd2d2;
-
-  background: #fff;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
 }
 
-.ann-menu .danger:hover {
-  background: #fff3f3;
 
-  border-color: #f3bcbc;
+.ann-menu .danger:hover {
+  color: #a61b1b;
+  background: #ffe4e6;
+  border-color: #fda4af;
 }
 
 
@@ -414,21 +524,17 @@
    EMPTY STATE
    ========================================================= */
 
+
 .ann-empty {
   margin-top: 10px;
-
-  padding: 18px;
-
-  border-radius: 14px;
-
-  background: #fff;
-
-  border: 1px dashed rgba(11, 44, 74, 0.18);
-
-  color: rgba(11, 44, 74, 0.65);
-
-  font-weight: 900;
-
+  padding: 22px 18px;
+  border: 1px solid #e7edf3;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #8795a5;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
   text-align: center;
 }
 
@@ -437,28 +543,39 @@
    BIG WHITE LIST CARD
    ========================================================= */
 
+
 .ann-wrap-card {
   padding: 0;
-
-  overflow: visible;
+  overflow: hidden;
+  border-radius: 16px;
 }
+
 
 .ann-card-head {
-  align-items: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 14px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #edf1f5;
 }
+
 
 .ann-card-body {
-  padding: 0 14px 14px;
-
+  padding: 8px 14px 14px;
   overflow: visible;
 }
+
 
 .ann-card-head .ann-filters {
   margin: 0;
 }
 
+
 .ann-wrap-card .t-subtitle {
-  margin-top: 6px;
+  margin: 0;
 }
 
 
@@ -466,22 +583,12 @@
    CREATE / EDIT MODAL
    ========================================================= */
 
+
 .ann-dialog {
   width: min(700px, calc(100% - 28px));
-
-  /*
-   * Keep the modal inside the viewport.
-   * This prevents the footer from disappearing when
-   * Schedule for later adds extra fields.
-   */
-  height: min(780px, calc(100vh - 40px));
-
   max-height: calc(100vh - 40px);
-
   display: flex;
-
   flex-direction: column;
-
   overflow: hidden;
 }
 
@@ -489,6 +596,7 @@
 /* =========================================================
    MODAL HEADER
    ========================================================= */
+
 
 .ann-dialog .tmodal-head {
   flex: 0 0 auto;
@@ -499,16 +607,22 @@
    MODAL BODY
    ========================================================= */
 
+
 .ann-dialog .tmodal-body {
   flex: 1 1 auto;
 
+
   min-height: 0;
+
 
   overflow-y: auto;
 
+
   overflow-x: hidden;
 
-  padding: 20px 16px;
+
+  padding: 16px 14px;
+
 
   /*
    * Makes scrolling feel cleaner on touch devices.
@@ -519,19 +633,24 @@
 
 /* Custom scrollbar */
 
+
 .ann-dialog .tmodal-body::-webkit-scrollbar {
   width: 7px;
 }
+
 
 .ann-dialog .tmodal-body::-webkit-scrollbar-track {
   background: transparent;
 }
 
+
 .ann-dialog .tmodal-body::-webkit-scrollbar-thumb {
-  background: rgba(11, 77, 122, 0.20);
+  background: rgba(11, 77, 122, 0.2);
+
 
   border-radius: 999px;
 }
+
 
 .ann-dialog .tmodal-body::-webkit-scrollbar-thumb:hover {
   background: rgba(11, 77, 122, 0.32);
@@ -542,14 +661,19 @@
    MODAL FOOTER
    ========================================================= */
 
+
 .ann-dialog .tmodal-foot {
   flex: 0 0 auto;
 
+
   position: relative;
+
 
   z-index: 5;
 
+
   background: #fff;
+
 
   border-top: 1px solid rgba(11, 44, 74, 0.08);
 }
@@ -559,18 +683,18 @@
    FORM
    ========================================================= */
 
+
 .ann-form {
   display: flex;
-
   flex-direction: column;
-
-  gap: 17px;
+  gap: 14px;
 }
 
 
 /* =========================================================
    FORM FIELD
    ========================================================= */
+
 
 .ann-form .tmodal-field {
   width: 100%;
@@ -581,14 +705,20 @@
    TEXT EDITOR
    ========================================================= */
 
+
 .ann-editor {
-  border-radius: 12px;
-
-  border: 1px solid rgba(11, 44, 74, 0.10);
-
+  border: 1px solid #dce5ed;
+  border-radius: 10px;
   background: #fff;
-
   overflow: hidden;
+  transition: border-color 0.18s ease,
+              box-shadow 0.18s ease;
+}
+
+
+.ann-editor:focus-within {
+  border-color: #0b4d7a;
+  box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
 
 
@@ -596,33 +726,28 @@
    ANNOUNCEMENT TEXTAREA
    ========================================================= */
 
+
 .ann-textarea {
   width: 100%;
-
-  min-height: 150px;
-
+  height: 120px;
+  min-height: 120px;
   resize: vertical;
-
   border: none;
-
   outline: none;
-
-  padding: 14px 14px;
-
+  padding: 12px;
   font: inherit;
-
   background: transparent;
-
   display: block;
-
   line-height: 1.55;
-
   color: #0b2c4a;
+  box-sizing: border-box;
 }
+
 
 .ann-textarea::placeholder {
   color: rgba(11, 44, 74, 0.45);
 }
+
 
 .ann-textarea:focus {
   outline: none;
@@ -633,10 +758,13 @@
    SCHEDULE / PUBLICATION SECTION
    ========================================================= */
 
+
 .ann-publication {
   display: flex;
 
+
   flex-direction: column;
+
 
   gap: 10px;
 }
@@ -644,12 +772,16 @@
 
 /* Publication options */
 
+
 .ann-publication-options {
   display: flex;
 
+
   align-items: center;
 
+
   gap: 24px;
+
 
   padding-top: 3px;
 }
@@ -657,33 +789,46 @@
 
 /* Radio option */
 
+
 .ann-radio-option {
   display: inline-flex;
 
+
   align-items: center;
+
 
   gap: 8px;
 
+
   cursor: pointer;
+
 
   color: #0b2c4a;
 
+
   font-size: 13px;
+
 
   font-weight: 800;
 }
 
+
 .ann-radio-option input {
   width: 17px;
 
+
   height: 17px;
+
 
   margin: 0;
 
+
   accent-color: #0b4d7a;
+
 
   cursor: pointer;
 }
+
 
 .ann-radio-option span {
   user-select: none;
@@ -694,31 +839,41 @@
    SCHEDULE FIELDS
    ========================================================= */
 
+
 .ann-schedule-fields {
   padding: 15px;
 
+
   border: 1px solid rgba(11, 77, 122, 0.12);
+
 
   border-radius: 12px;
 
+
   background: #f8fbfe;
+
 
   animation: annScheduleIn 0.15s ease-out;
 }
+
 
 .ann-schedule-fields.hidden {
   display: none;
 }
 
+
 @keyframes annScheduleIn {
   from {
     opacity: 0;
 
+
     transform: translateY(-4px);
   }
 
+
   to {
     opacity: 1;
+
 
     transform: translateY(0);
   }
@@ -729,12 +884,15 @@
    SCHEDULE DATE + TIME GRID
    ========================================================= */
 
+
 .ann-schedule-grid {
   display: grid;
+
 
   grid-template-columns:
     minmax(0, 1fr)
     minmax(0, 1fr);
+
 
   gap: 14px;
 }
@@ -744,20 +902,27 @@
    SCHEDULE FIELD
    ========================================================= */
 
+
 .ann-schedule-field {
   min-width: 0;
 
+
   display: flex;
 
+
   flex-direction: column;
+
 
   gap: 7px;
 }
 
+
 .ann-schedule-field label {
   font-size: 12px;
 
+
   font-weight: 1000;
+
 
   color: #0b2c4a;
 }
@@ -767,30 +932,42 @@
    DATE / TIME INPUTS
    ========================================================= */
 
+
 .ann-schedule-field input {
   width: 100%;
 
+
   min-width: 0;
+
 
   height: 44px;
 
+
   padding: 0 12px;
+
 
   border: 1px solid rgba(11, 44, 74, 0.12);
 
+
   border-radius: 10px;
+
 
   background: #fff;
 
+
   color: #0b2c4a;
 
+
   font: inherit;
+
 
   outline: none;
 }
 
+
 .ann-schedule-field input:focus {
   border-color: #0b4d7a;
+
 
   box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.08);
 }
@@ -800,12 +977,16 @@
    SCHEDULE HINT
    ========================================================= */
 
+
 .ann-schedule-hint {
   margin-top: 8px;
 
+
   font-size: 11px;
 
+
   line-height: 1.45;
+
 
   color: rgba(11, 44, 74, 0.58);
 }
@@ -815,19 +996,23 @@
    OLD TOOLBAR SUPPORT
    ========================================================= */
 
+
 /*
  * The formatting toolbar was removed from the current
  * announcement design, but these styles are kept so
  * older markup does not break unexpectedly.
  */
 
+
 .ann-toolbar {
   display: none;
 }
 
+
 .ann-tool {
   display: none;
 }
+
 
 .ann-tool-sep {
   display: none;
@@ -838,116 +1023,165 @@
    ATTACHMENTS
    ========================================================= */
 
+
 .ann-drop {
   margin-top: 8px;
 
-  border: 2px dashed rgba(11, 77, 122, 0.30);
+
+  border: 2px dashed rgba(11, 77, 122, 0.3);
+
 
   border-radius: 14px;
 
+
   padding: 14px;
+
 
   background: #fbfdff;
 
+
   display: flex;
+
 
   flex-direction: column;
 
+
   align-items: center;
+
 
   justify-content: center;
 
+
   gap: 8px;
 
+
   cursor: pointer;
+
 
   text-align: center;
 }
 
+
 .ann-drop-ico {
   font-size: 24px;
+
 
   opacity: 0.85;
 }
 
+
 .ann-drop-text {
   font-size: 12px;
 
+
   font-weight: 900;
+
 
   color: #0b2c4a;
 }
+
 
 .ann-files {
   display: flex;
 
+
   flex-wrap: wrap;
 
+
   gap: 10px;
+
 
   margin-top: 10px;
 }
 
+
 .ann-file {
   display: flex;
 
+
   align-items: center;
+
 
   gap: 8px;
 
+
   padding: 8px 10px;
+
 
   border-radius: 12px;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #fff;
 
+
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+
 
   max-width: 100%;
 }
 
+
 .ann-file img {
   width: 34px;
 
+
   height: 34px;
+
 
   border-radius: 10px;
 
+
   object-fit: cover;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
 }
+
 
 .ann-file-name {
   font-size: 12px;
 
+
   font-weight: 1000;
+
 
   color: #0b2c4a;
 
+
   white-space: nowrap;
+
 
   overflow: hidden;
 
+
   text-overflow: ellipsis;
+
 
   max-width: 260px;
 }
 
+
 .ann-file-x {
   width: 28px;
 
+
   height: 28px;
+
 
   border-radius: 10px;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+
 
   background: #fff;
 
+
   cursor: pointer;
+
 
   font-weight: 1000;
 }
@@ -957,28 +1191,38 @@
    VIEW MODAL
    ========================================================= */
 
+
 .ann-view-dialog {
   width: min(720px, calc(100% - 28px));
 
+
   max-height: calc(100vh - 40px);
+
 
   display: flex;
 
+
   flex-direction: column;
+
 
   overflow: hidden;
 }
+
 
 .ann-view-dialog .tmodal-head {
   flex: 0 0 auto;
 }
 
+
 .ann-view-dialog .tmodal-body {
   flex: 1 1 auto;
 
+
   min-height: 0;
 
+
   overflow-y: auto;
+
 
   overflow-x: hidden;
 }
@@ -988,42 +1232,54 @@
    VIEW CONTENT
    ========================================================= */
 
+
 .ann-view {
   padding: 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
 
 .ann-view-top {
   display: flex;
 
+
   align-items: center;
 
+
   gap: 8px;
+
 
   flex-wrap: wrap;
 }
 
+
 .ann-view-h {
-  margin: 14px 0 8px;
-
+  margin: 4px 0 0;
   font-size: 21px;
-
   font-weight: 1000;
-
   line-height: 1.35;
-
   color: #0b2c4a;
+  overflow-wrap: anywhere;
 }
+
 
 .ann-view-msg {
   margin: 0;
 
+
   color: rgba(11, 44, 74, 0.78);
+
 
   line-height: 1.7;
 
+
   font-size: 14px;
 
+
   white-space: normal;
+
 
   overflow-wrap: anywhere;
 }
@@ -1033,32 +1289,42 @@
    VIEW MODAL FILES
    ========================================================= */
 
+
 .ann-view-files {
   margin-top: 12px;
 
+
   display: flex;
 
+
   gap: 10px;
+
 
   flex-wrap: wrap;
 }
 
+
 .ann-view-files img {
   width: 120px;
 
+
   height: 90px;
+
 
   border-radius: 14px;
 
+
   object-fit: cover;
 
-  border: 1px solid rgba(11, 44, 74, 0.10);
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
 }
 
 
 /* =========================================================
    ERROR MESSAGE
    ========================================================= */
+
 
 #annFormError {
   margin-top: 2px;
@@ -1069,15 +1335,17 @@
    RESPONSIVE
    ========================================================= */
 
-@media (max-width: 900px) {
 
+@media (max-width: 900px) {
   .ann-card-top {
     padding: 18px;
   }
 
+
   .ann-menu {
     padding: 12px 18px;
   }
+
 
   .ann-menu button {
     min-width: 105px;
@@ -1086,23 +1354,28 @@
 
 
 @media (max-width: 700px) {
-
   .ann-search {
-    min-width: 220px;
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
   }
 
 
   /* Card */
 
+
   .ann-card-top {
     padding: 16px;
+
 
     gap: 10px;
   }
 
+
   .ann-title {
     font-size: 15px;
   }
+
 
   .ann-body {
     font-size: 12px;
@@ -1111,16 +1384,21 @@
 
   /* Action row */
 
+
   .ann-menu {
     justify-content: stretch;
 
+
     flex-wrap: wrap;
+
 
     padding: 12px 16px;
   }
 
+
   .ann-menu button {
     flex: 1 1 calc(50% - 8px);
+
 
     min-width: 0;
   }
@@ -1128,13 +1406,17 @@
 
   /* Create modal */
 
+
   .ann-dialog {
     width: calc(100% - 20px);
 
+
     height: calc(100vh - 20px);
+
 
     max-height: calc(100vh - 20px);
   }
+
 
   .ann-dialog .tmodal-body {
     padding: 18px 14px;
@@ -1143,16 +1425,20 @@
 
   /* Publication */
 
+
   .ann-publication-options {
     flex-direction: column;
 
+
     align-items: flex-start;
+
 
     gap: 12px;
   }
 
 
   /* Schedule */
+
 
   .ann-schedule-grid {
     grid-template-columns: 1fr;
@@ -1161,40 +1447,68 @@
 
   /* View modal */
 
+
   .ann-view-dialog {
     width: calc(100% - 20px);
 
+
     max-height: calc(100vh - 20px);
   }
-
 }
 
 
 @media (max-width: 480px) {
-
   .ann-kebab {
     width: 38px;
 
+
     height: 38px;
   }
+
 
   .ann-card-top {
     padding: 14px;
   }
 
+
   .ann-menu {
     flex-direction: column;
+
 
     align-items: stretch;
   }
 
+
   .ann-menu button {
     width: 100%;
 
+
     flex: none;
   }
+
 
   .ann-dialog .tmodal-foot {
     padding: 12px;
   }
 }
+
+
+#annViewAudience {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid #e1eaf1;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #526579;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+
+#annViewAudience {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
