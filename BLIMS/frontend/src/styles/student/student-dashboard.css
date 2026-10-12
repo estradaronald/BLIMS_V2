@@ -58,6 +58,8 @@ h4 {
   justify-content: flex-end;
   margin-bottom: 4px;
   padding: 6px 8px 6px 60px;
+  position: relative;
+  z-index: 10;
 }
 
 

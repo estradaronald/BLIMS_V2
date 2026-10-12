@@ -174,7 +174,7 @@
     if (cached) return cached;
 
     const data = await fetchJSON(
-      `PSGCBASE/provinces/{provinceCode}/cities-municipalities`,
+      `${PSGC_BASE}/provinces/${provinceCode}/cities-municipalities`,
     );
 
     cacheSet(key, data);
@@ -190,7 +190,7 @@
     if (cached) return cached;
 
     const data = await fetchJSON(
-      `PSGCBASE/cities-municipalities/{cityCode}/barangays`,
+      `${PSGC_BASE}/cities-municipalities/${cityCode}/barangays`,
     );
 
     cacheSet(key, data);
@@ -1677,51 +1677,51 @@
   }
 
   async function deletePending() {
-  if (!pendingDeleteId) return;
+    if (!pendingDeleteId) return;
 
-  const teacher = teachers.find((t) => t.id === pendingDeleteId);
+    const teacher = teachers.find((t) => t.id === pendingDeleteId);
 
-  if (!teacher) {
-    closeConfirm();
-    return;
-  }
-
-  const teacherName = fullName(teacher) || "Teacher";
-  const deleteBtn = $("confirmDeleteBtn");
-
-  try {
-    if (deleteBtn) {
-      deleteBtn.disabled = true;
+    if (!teacher) {
+      closeConfirm();
+      return;
     }
 
-    // Permanently delete the teacher and linked account from the backend.
-    await apiFetch(
-      `/api/admin/teachers/${encodeURIComponent(pendingDeleteId)}`,
-      {
-        method: "DELETE",
+    const teacherName = fullName(teacher) || "Teacher";
+    const deleteBtn = $("confirmDeleteBtn");
+
+    try {
+      if (deleteBtn) {
+        deleteBtn.disabled = true;
       }
-    );
 
-    // Remove the deleted teacher from the local table.
-    teachers = teachers.filter((t) => t.id !== pendingDeleteId);
+      // Permanently delete the teacher and linked account from the backend.
+      await apiFetch(
+        `/api/admin/teachers/${encodeURIComponent(pendingDeleteId)}`,
+        {
+          method: "DELETE",
+        },
+      );
 
-    closeConfirm();
-    renderTeachersTable();
+      // Remove the deleted teacher from the local table.
+      teachers = teachers.filter((t) => t.id !== pendingDeleteId);
 
-    showSuccess(`${teacherName} was deleted successfully.`);
-  } catch (err) {
-    console.error("Delete teacher failed:", err);
+      closeConfirm();
+      renderTeachersTable();
 
-    // Keep the teacher in the table when the backend delete fails.
-    closeConfirm();
+      showSuccess(`${teacherName} was deleted successfully.`);
+    } catch (err) {
+      console.error("Delete teacher failed:", err);
 
-    alert(err.message || "Failed to delete teacher.");
-  } finally {
-    if (deleteBtn) {
-      deleteBtn.disabled = false;
+      // Keep the teacher in the table when the backend delete fails.
+      closeConfirm();
+
+      alert(err.message || "Failed to delete teacher.");
+    } finally {
+      if (deleteBtn) {
+        deleteBtn.disabled = false;
+      }
     }
   }
-}
   // ==============================
   // Modal
   // ==============================
@@ -2983,6 +2983,3 @@
     init();
   }
 })();
-
-
-

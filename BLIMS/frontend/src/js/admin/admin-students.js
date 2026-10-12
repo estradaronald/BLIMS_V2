@@ -188,7 +188,7 @@
     if (cached) return cached;
 
     const data = await fetchJSON(
-      `PSGCBASE/provinces/{provinceCode}/cities-municipalities`,
+      `${PSGC_BASE}/provinces/${provinceCode}/cities-municipalities`,
     );
 
     cacheSet(key, data);
@@ -204,7 +204,7 @@
     if (cached) return cached;
 
     const data = await fetchJSON(
-      `PSGCBASE/cities-municipalities/{cityCode}/barangays`,
+      `${PSGC_BASE}/cities-municipalities/${cityCode}/barangays`,
     );
 
     cacheSet(key, data);
@@ -1582,6 +1582,52 @@
       return "Postal Code must be exactly 4 digits.";
     }
 
+    const dob = $("dob")?.value || "";
+
+    if (!dob) {
+      return "Date of birth is required.";
+    }
+
+    const [year, month, day] = dob.split("-").map(Number);
+    const dobDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    if (
+      !year ||
+      !month ||
+      !day ||
+      dobDate.getFullYear() !== year ||
+      dobDate.getMonth() !== month - 1 ||
+      dobDate.getDate() !== day
+    ) {
+      return "Please enter a valid date of birth.";
+    }
+
+    if (dobDate >= today) {
+      return "Date of birth must be before today.";
+    }
+
+    let age = today.getFullYear() - dobDate.getFullYear();
+
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < dobDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 5) {
+      return "Student must be at least 5 years old.";
+    }
+
+    if (age > 100) {
+      return "Please enter a valid date of birth.";
+    }
+
     return "";
   }
 
@@ -1665,15 +1711,15 @@
       });
 
       const created = data?.student;
-
       const tempPass = data?.tempPass || "";
+      const studentId = created?.studentId || "";
 
       if (created?.id && tempPass) {
         tempPassCache[created.id] = tempPass;
       }
 
       if ($("studentId")) {
-        $("studentId").value = created?.studentId || "";
+        $("studentId").value = studentId;
       }
 
       if ($("tempPass")) {
@@ -1682,10 +1728,18 @@
 
       await loadStudents();
 
-      showFormView();
-
       editingStudentId = null;
       editingStudentSnapshot = null;
+
+      alert(
+        `✅ Student created!\n\n` +
+          `Student ID: ${studentId || "Not returned"}\n` +
+          `Temp Password: ${tempPass || "Not returned"}\n\n` +
+          `⚠️ Save this password now. It will not be shown again later.`,
+      );
+
+      showListView();
+      clearForm();
     } catch (error) {
       console.error("Save student error:", error);
 
@@ -3317,5 +3371,3 @@
     }
   });
 })();
-
-

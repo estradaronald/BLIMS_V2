@@ -2438,7 +2438,7 @@ body {
 
 
 .dash-grid {
-  width: 100%;
+  width: auto;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:

@@ -18,41 +18,33 @@
   - MODAL:          id="teacherModal"
 -->
 
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Admin - Teachers</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- SAME as dashboard -->
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <!-- Teachers page styles -->
     <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -62,13 +54,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -76,11 +66,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -91,7 +79,6 @@
       })();
     </script>
   </head>
-
 
   <body data-page="teachers">
     <!-- =====================
@@ -106,7 +93,6 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- Sidebar is mounted by JavaScript -->
       <!-- SIDEBAR -->
@@ -114,7 +100,6 @@
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -125,52 +110,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -181,10 +155,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -192,35 +164,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -231,10 +196,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -246,20 +209,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
-                <span class="sb-text">  SECTIONS &amp; FACULTY </span>
+                <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -270,10 +229,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -284,25 +241,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -313,10 +265,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -324,10 +274,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -338,28 +286,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -370,38 +312,30 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
-
 
       <!-- =====================
          MAIN CONTENT
@@ -420,14 +354,11 @@
                 alt="Admin avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Estrada, Ronald B.</div>
 
-
                 <div class="tb-role">Admin</div>
               </div>
-
 
               <!-- User menu button -->
               <button
@@ -439,11 +370,9 @@
                 ▾
               </button>
 
-
               <!-- User menu -->
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -452,7 +381,6 @@
             </div>
           </div>
         </header>
-
 
         <!-- =====================
            PAGE
@@ -464,28 +392,11 @@
           <div class="teachers-page-head">
             <h2 class="teachers-title">Faculty</h2>
 
-
             <div class="teachers-head-actions">
-              <div id="formHeaderActions" class="t-form-header-actions hidden">
-                <button id="cancelBtn" class="t-ghost" type="button">
-                  Cancel
-                </button>
-
-
-                <button id="resetBtn" class="t-ghost" type="button">
-                  Reset
-                </button>
-
-
-                <button id="saveBtn" class="t-save" type="button">Save</button>
-              </div>
-
-
               <button id="bulkCreateBtn" class="t-bulk-btn" type="button">
                 Bulk Create
                 <span class="t-plus">＋</span>
               </button>
-
 
               <button id="addNewBtn" class="t-add-btn" type="button">
                 Add New
@@ -493,7 +404,6 @@
               </button>
             </div>
           </div>
-
 
           <!-- =====================
              LIST VIEW
@@ -505,18 +415,15 @@
                 <div class="t-list-heading">
                   <div class="t-subtitle">Faculty Members</div>
 
-
                   <div class="t-list-description">
                     Manage and view registered faculty members.
                   </div>
                 </div>
 
-
                 <div class="t-tools">
                   <!-- Search -->
                   <div class="t-search">
                     <span class="t-search-ico" aria-hidden="true"> 🔎 </span>
-
 
                     <input
                       id="searchInput"
@@ -528,7 +435,6 @@
                 </div>
               </div>
 
-
               <!-- =====================
        FACULTY TABLE
   ====================== -->
@@ -538,23 +444,17 @@
                     <tr>
                       <th class="t-col-no">No.</th>
 
-
                       <th class="t-col-member">Faculty Member</th>
-
 
                       <th class="t-col-contact">Contact</th>
 
-
                       <th class="t-col-professional">Professional Details</th>
 
-
                       <th class="t-col-employment">Employment</th>
-
 
                       <th class="t-action-head">Action</th>
                     </tr>
                   </thead>
-
 
                   <tbody id="teachersTbody">
                     <tr class="t-empty">
@@ -565,7 +465,6 @@
               </div>
             </div>
           </section>
-
 
           <!-- =====================
              ADD / EDIT FORM
@@ -582,13 +481,11 @@
                 <div class="card t-form-card t-basic-card">
                   <div class="t-form-hd">Basic Information</div>
 
-
                   <div class="t-form-bd">
                     <!-- NAME -->
                     <div class="t-row4">
                       <div class="t-field">
                         <label for="firstName">First Name</label>
-
 
                         <input
                           id="firstName"
@@ -598,10 +495,8 @@
                         />
                       </div>
 
-
                       <div class="t-field">
                         <label for="middleName">Middle Name</label>
-
 
                         <input
                           id="middleName"
@@ -611,10 +506,8 @@
                         />
                       </div>
 
-
                       <div class="t-field">
                         <label for="lastName">Last Name</label>
-
 
                         <input
                           id="lastName"
@@ -624,10 +517,8 @@
                         />
                       </div>
 
-
                       <div class="t-field">
                         <label for="suffix">Suffix</label>
-
 
                         <select id="suffix" class="t-select">
                           <option value="">None</option>
@@ -642,20 +533,16 @@
                       </div>
                     </div>
 
-
                     <!-- DOB + GENDER -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="dob">Date of Birth</label>
 
-
                         <input id="dob" type="date" />
                       </div>
 
-
                       <div class="t-field">
                         <label>Gender</label>
-
 
                         <div class="t-gender">
                           <label class="t-radio">
@@ -666,14 +553,11 @@
                               checked
                             />
 
-
                             <span>Male</span>
                           </label>
 
-
                           <label class="t-radio">
                             <input type="radio" name="gender" value="female" />
-
 
                             <span>Female</span>
                           </label>
@@ -683,20 +567,17 @@
                   </div>
                 </div>
 
-
                 <!-- =====================
                    CREDENTIALS
               ====================== -->
                 <div class="card t-form-card t-creds-card">
                   <div class="t-form-hd">Credentials</div>
 
-
                   <div class="t-form-bd">
                     <!-- PRC -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label> Has PRC License? </label>
-
 
                         <div class="t-gender">
                           <label class="t-radio">
@@ -708,10 +589,8 @@
                               checked
                             />
 
-
                             <span> No </span>
                           </label>
-
 
                           <label class="t-radio">
                             <input
@@ -721,16 +600,13 @@
                               value="yes"
                             />
 
-
                             <span> Yes </span>
                           </label>
                         </div>
                       </div>
 
-
                       <div class="t-field">
                         <label for="prcLicense"> PRC License No. </label>
-
 
                         <input
                           id="prcLicense"
@@ -743,83 +619,64 @@
                       </div>
                     </div>
 
-
                     <!-- MAJOR + EDUCATIONAL ATTAINMENT -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="majorSpec"> Major / Specialization </label>
 
-
                         <select id="majorSpec" class="t-select">
                           <option value="">Select</option>
 
-
                           <option value="English">English</option>
-
 
                           <option value="Math">Math</option>
 
-
                           <option value="Science">Science</option>
-
 
                           <option value="Filipino">Filipino</option>
 
-
                           <option value="MAPEH">MAPEH</option>
-
 
                           <option value="ICT">ICT</option>
 
-
                           <option value="SPED">SPED</option>
-
 
                           <option value="Other">Other</option>
                         </select>
-
 
                         <small class="t-hint">
                           Select “Other” to specify.
                         </small>
                       </div>
 
-
                       <div class="t-field">
                         <label for="highestEduc">
                           Highest Educational Attainment
                         </label>
 
-
                         <select id="highestEduc" class="t-select">
                           <option value="">Select</option>
-
 
                           <option value="Bachelor's Degree">
                             Bachelor's Degree
                           </option>
 
-
                           <option value="With Master's Units">
                             With Master's Units
                           </option>
 
-
                           <option value="Master's Degree">
                             Master's Degree
                           </option>
-
 
                           <option value="Doctorate">Doctorate</option>
                         </select>
                       </div>
                     </div>
 
-
                     <!-- OTHER MAJOR -->
                     <div class="t-field hidden" id="majorOtherWrap">
                       <label for="majorOther"> If Other, please specify </label>
-
 
                       <input
                         id="majorOther"
@@ -828,12 +685,10 @@
                       />
                     </div>
 
-
                     <!-- DATE HIRED -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="dateHired"> Date Hired </label>
-
 
                         <input id="dateHired" type="date" />
                       </div>
@@ -841,7 +696,6 @@
                   </div>
                 </div>
               </div>
-
 
               <!-- =====================
                  RIGHT COLUMN
@@ -853,17 +707,14 @@
                 <div class="card t-form-card">
                   <div class="t-form-hd">Contact & Address</div>
 
-
                   <div class="t-form-bd">
                     <!-- PHONE + EMAIL -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="phone">Phone</label>
 
-
                         <div class="t-inline">
                           <span class="t-prefix">+63</span>
-
 
                           <input
                             id="phone"
@@ -875,16 +726,13 @@
                           />
                         </div>
 
-
                         <small class="t-hint">
                           Enter 10 digits (e.g., 9123456789)
                         </small>
                       </div>
 
-
                       <div class="t-field">
                         <label for="email">Email</label>
-
 
                         <input
                           id="email"
@@ -895,11 +743,9 @@
                       </div>
                     </div>
 
-
                     <!-- STREET -->
                     <div class="t-field">
                       <label for="street">Street</label>
-
 
                       <input
                         id="street"
@@ -909,20 +755,16 @@
                       />
                     </div>
 
-
                     <!-- PROVINCE + CITY -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="provinceSelect"> Province </label>
 
-
                         <select id="provinceSelect" class="t-select"></select>
                       </div>
 
-
                       <div class="t-field">
                         <label for="citySelect"> City </label>
-
 
                         <select
                           id="citySelect"
@@ -932,12 +774,10 @@
                       </div>
                     </div>
 
-
                     <!-- BARANGAY + POSTAL -->
                     <div class="t-row2">
                       <div class="t-field">
                         <label for="brgySelect"> Barangay </label>
-
 
                         <select
                           id="brgySelect"
@@ -946,10 +786,8 @@
                         ></select>
                       </div>
 
-
                       <div class="t-field">
                         <label for="postal"> Postal Code </label>
-
 
                         <input
                           id="postal"
@@ -963,20 +801,17 @@
                   </div>
                 </div>
 
-
                 <!-- =====================
                    LOGIN / ACCOUNT
               ====================== -->
                 <div class="card t-form-card">
                   <div class="t-form-hd">Login / Account Details</div>
 
-
                   <div class="t-form-bd">
                     <div class="t-row2">
                       <!-- TEACHER ID -->
                       <div class="t-field">
                         <label for="teacherId"> Teacher ID </label>
-
 
                         <input
                           id="teacherId"
@@ -986,11 +821,9 @@
                         />
                       </div>
 
-
                       <!-- PASSWORD -->
                       <div class="t-field">
                         <label for="tempPass"> Password </label>
-
 
                         <div class="t-inline">
                           <input
@@ -999,7 +832,6 @@
                             readonly
                             placeholder="Generated on Save"
                           />
-
 
                           <button
                             id="regenPassBtn"
@@ -1012,13 +844,11 @@
                           </button>
                         </div>
 
-
                         <small class="t-hint">
                           Password is generated automatically on Save.
                         </small>
                       </div>
                     </div>
-
 
                     <!-- =====================
                        FORM ERROR
@@ -1032,24 +862,33 @@
                   </div>
                 </div>
               </div>
+              <div id="formHeaderActions" class="t-form-actions-bottom hidden">
+                <button id="cancelBtn" class="t-ghost" type="button">
+                  Cancel
+                </button>
+
+
+                <button id="resetBtn" class="t-ghost" type="button">
+                  Reset
+                </button>
+
+
+                <button id="saveBtn" class="t-save" type="button">Save</button>
+              </div>
             </div>
           </section>
-
 
           <!-- =====================================================
             BULK CREATE TEACHERS
         ====================================================== -->
 
-
           <section id="bulkCreateView" class="t-view hidden">
             <div class="card bulk-create-card">
               <!-- HEADER -->
 
-
               <div class="bulk-create-header">
                 <div>
                   <div class="bulk-create-title">Bulk Create Teachers</div>
-
 
                   <div class="bulk-create-subtitle">
                     Create multiple teacher accounts at once.
@@ -1057,9 +896,7 @@
                 </div>
               </div>
 
-
               <!-- IMPORT TOOLS -->
-
 
               <div class="bulk-import-tools">
                 <div class="bulk-import-left">
@@ -1072,7 +909,6 @@
                     Upload Excel
                   </button>
 
-
                   <button
                     id="bulkTeacherDownloadTemplateBtn"
                     class="bulk-tool-btn"
@@ -1082,7 +918,6 @@
                     Download Template
                   </button>
 
-
                   <input
                     id="bulkTeacherExcelInput"
                     type="file"
@@ -1091,7 +926,6 @@
                   />
                 </div>
 
-
                 <div class="bulk-import-note">
                   Excel columns: First Name, Middle Name, Last Name, Suffix,
                   Email, Phone, Date of Birth, Gender, PRC License, Major /
@@ -1099,36 +933,28 @@
                 </div>
               </div>
 
-
               <!-- IMPORT STATUS -->
-
 
               <div
                 id="bulkTeacherImportStatus"
                 class="bulk-import-status hidden"
               ></div>
 
-
               <!-- ERROR -->
-
 
               <div id="bulkTeacherCreateError" class="bulk-error hidden"></div>
 
-
               <!-- TEACHER INFORMATION -->
-
 
               <div class="bulk-entry-header">
                 <div>
                   <div class="bulk-entry-label">Teacher Information</div>
-
 
                   <div class="bulk-entry-note">
                     Required teacher information must be completed before
                     creating accounts.
                   </div>
                 </div>
-
 
                 <div class="bulk-row-generator">
                   <label
@@ -1137,7 +963,6 @@
                   >
                     Number of Teachers
                   </label>
-
 
                   <div class="bulk-row-generator-controls">
                     <input
@@ -1148,7 +973,6 @@
                       value="2"
                       placeholder="2"
                     />
-
 
                     <button
                       id="generateBulkTeachersBtn"
@@ -1161,18 +985,14 @@
                 </div>
               </div>
 
-
               <!-- TEACHER ROWS -->
-
 
               <div
                 id="bulkTeachersContainer"
                 class="bulk-teachers-container"
               ></div>
 
-
               <!-- ADD ANOTHER -->
-
 
               <button
                 id="addBulkTeacherBtn"
@@ -1183,15 +1003,12 @@
                 Add Another Teacher
               </button>
 
-
               <!-- ACTIONS -->
-
 
               <div class="bulk-create-actions">
                 <button id="cancelBulkCreateBtn" class="t-ghost" type="button">
                   Cancel
                 </button>
-
 
                 <button id="saveBulkTeachersBtn" class="t-save" type="button">
                   Create Teachers
@@ -1203,14 +1020,12 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        TEACHER PROFILE MODAL
   ====================================================== -->
     <div id="teacherModal" class="tmodal hidden" aria-hidden="true">
       <!-- BACKDROP -->
       <div class="tmodal-backdrop" id="teacherModalBackdrop"></div>
-
 
       <!-- MODAL DIALOG -->
       <div
@@ -1233,30 +1048,24 @@
               alt="Teacher photo"
             />
 
-
             <div>
               <div id="teacherModalTitle" class="tmodal-title">
                 Teacher Profile
               </div>
 
-
               <div class="tmodal-sub">
                 <span id="tmTeacherId"> Teacher ID: — </span>
 
-
                 <span class="tmodal-dot"> • </span>
-
 
                 <span id="tmStatus" class="tmodal-status">
                   <span class="tmodal-status-dot"></span>
-
 
                   Active
                 </span>
               </div>
             </div>
           </div>
-
 
           <!-- Close X -->
           <button
@@ -1268,7 +1077,6 @@
             ✕
           </button>
         </div>
-
 
         <!-- =====================
            PROFILE SECTIONS
@@ -1282,22 +1090,18 @@
             Basic Info
           </button>
 
-
           <button class="tmodal-tab" data-tab="contact" type="button">
             Contact & Address
           </button>
-
 
           <button class="tmodal-tab" data-tab="creds" type="button">
             Professional
           </button>
 
-
           <button class="tmodal-tab" data-tab="account" type="button">
             Account
           </button>
         </div>
-
 
         <!-- =====================
            MODAL BODY
@@ -1307,19 +1111,16 @@
           <div class="tmodal-panel" data-panel="basic">
             <div class="tmodal-section-title">Personal Information</div>
 
-
             <div class="tmodal-grid">
               <div class="tmodal-field">
                 <label>Full Name</label>
                 <input id="tmFullName" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Gender</label>
                 <input id="tmGender" type="text" readonly />
               </div>
-
 
               <div class="tmodal-field">
                 <label>Date of Birth</label>
@@ -1327,9 +1128,7 @@
               </div>
             </div>
 
-
             <div class="tmodal-section-title">Employment Summary</div>
-
 
             <div class="tmodal-summary-grid">
               <div class="tmodal-summary-item">
@@ -1337,18 +1136,15 @@
                 <strong id="tmSummaryTeacherId">—</strong>
               </div>
 
-
               <div class="tmodal-summary-item">
                 <span>Position</span>
                 <strong id="tmSummaryPosition">Teacher</strong>
               </div>
 
-
               <div class="tmodal-summary-item">
                 <span>Date Hired</span>
                 <strong id="tmSummaryHired">—</strong>
               </div>
-
 
               <div class="tmodal-summary-item">
                 <span>Status</span>
@@ -1357,11 +1153,9 @@
             </div>
           </div>
 
-
           <!-- CONTACT & ADDRESS -->
           <div class="tmodal-panel hidden" data-panel="contact">
             <div class="tmodal-section-title">Contact Information</div>
-
 
             <div class="tmodal-grid">
               <div class="tmodal-field">
@@ -1369,16 +1163,13 @@
                 <input id="tmPhone" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Email</label>
                 <input id="tmEmail" type="text" readonly />
               </div>
             </div>
 
-
             <div class="tmodal-section-title">Address</div>
-
 
             <div class="tmodal-grid">
               <div class="tmodal-field" style="grid-column: 1 / -1">
@@ -1386,24 +1177,20 @@
                 <input id="tmStreet" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Province</label>
                 <input id="tmProvince" type="text" readonly />
               </div>
-
 
               <div class="tmodal-field">
                 <label>City</label>
                 <input id="tmCity" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Barangay</label>
                 <input id="tmBrgy" type="text" readonly />
               </div>
-
 
               <div class="tmodal-field">
                 <label>Postal Code</label>
@@ -1412,11 +1199,9 @@
             </div>
           </div>
 
-
           <!-- PROFESSIONAL -->
           <div class="tmodal-panel hidden" data-panel="creds">
             <div class="tmodal-section-title">Professional Credentials</div>
-
 
             <div class="tmodal-grid">
               <div class="tmodal-field">
@@ -1424,18 +1209,15 @@
                 <input id="tmPrc" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Major / Specialization</label>
                 <input id="tmMajor" type="text" readonly />
               </div>
 
-
               <div class="tmodal-field">
                 <label>Highest Attainment</label>
                 <input id="tmEduc" type="text" readonly />
               </div>
-
 
               <div class="tmodal-field">
                 <label>Date Hired</label>
@@ -1444,18 +1226,15 @@
             </div>
           </div>
 
-
           <!-- ACCOUNT -->
           <div class="tmodal-panel hidden" data-panel="account">
             <div class="tmodal-section-title">Account Information</div>
-
 
             <div class="tmodal-grid">
               <div class="tmodal-field">
                 <label>Teacher ID</label>
                 <input id="tmAccId" type="text" readonly />
               </div>
-
 
               <div class="tmodal-field">
                 <label>Account Status</label>
@@ -1465,7 +1244,6 @@
           </div>
         </div>
 
-
         <!-- =====================
            MODAL FOOTER
       ====================== -->
@@ -1474,7 +1252,6 @@
           <button class="t-ghost" id="teacherModalCloseBtn" type="button">
             Close
           </button>
-
 
           <div class="tmodal-foot-right">
             <!-- EDIT -->
@@ -1486,13 +1263,11 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        DELETE CONFIRM MODAL
   ====================================================== -->
     <div id="confirmModal" class="t-confirm-modal hidden" aria-hidden="true">
       <div class="t-confirm-backdrop" id="confirmModalBackdrop"></div>
-
 
       <div
         class="t-confirm-dialog"
@@ -1507,7 +1282,6 @@
             <div class="t-confirm-sub">This cannot be undone.</div>
           </div>
 
-
           <button
             class="t-confirm-x"
             id="confirmCloseX"
@@ -1518,17 +1292,14 @@
           </button>
         </div>
 
-
         <div class="t-confirm-body">
           <div class="t-confirm-text" id="confirmText">Are you sure?</div>
         </div>
-
 
         <div class="t-confirm-foot">
           <button class="t-ghost" id="confirmCancelBtn" type="button">
             Cancel
           </button>
-
 
           <div class="t-confirm-foot-right">
             <button class="t-danger" id="confirmDeleteBtn" type="button">
@@ -1538,7 +1309,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- =====================================================
        SUCCESS TOAST
@@ -1555,34 +1325,23 @@
       <span id="successToastText"></span>
     </div>
 
-
     <!-- =====================================================
        JAVASCRIPT
   ====================================================== -->
 
-
     <!-- SheetJS for Excel import/export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-
 
     <!-- Admin authentication guard -->
     <script src="../../js/auth/admin-guard.js"></script>
 
-
     <!-- Sidebar -->
     <script src="../../js/admin/sidebar.js"></script>
 
-
     <!-- Dashboard / Topbar -->
     <script src="../../js/admin/admin-dashboard.js"></script>
-
 
     <!-- Teachers page -->
     <script src="../../js/admin/admin-teachers.js"></script>
   </body>
 </html>
-
-
-
-
-
