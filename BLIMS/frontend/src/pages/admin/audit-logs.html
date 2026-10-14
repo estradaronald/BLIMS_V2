@@ -483,35 +483,29 @@
               </div>
 
 
-              <!-- Action -->
+             <!-- Action -->
 
+<select id="actionSelect" class="audit-select">
+  <option value="">All Actions</option>
 
-              <select id="actionSelect" class="audit-select">
-                <option value="">All Actions</option>
+  <option value="AUTH_LOGIN_SUCCESS">
+    AUTH_LOGIN_SUCCESS
+  </option>
 
+  <option value="AUTH_LOGIN_FAIL">
+    AUTH_LOGIN_FAIL
+  </option>
 
-                <option value="AUTH_LOGIN_SUCCESS">AUTH_LOGIN_SUCCESS</option>
+  
 
+  <option value="GRADE_UPDATE_UP">
+    GRADE_UPDATE_UP
+  </option>
 
-                <option value="AUTH_LOGIN_FAIL">AUTH_LOGIN_FAIL</option>
-
-
-                <option value="AUTH_LOGOUT">AUTH_LOGOUT</option>
-
-
-                <option value="AUTH_PASSWORD_CHANGED">
-                  AUTH_PASSWORD_CHANGED
-                </option>
-
-
-                <option value="AUTH_MFA_OTP_SENT">AUTH_MFA_OTP_SENT</option>
-
-
-                <option value="AUTH_MFA_VERIFY_SUCCESS">
-                  AUTH_MFA_VERIFY_SUCCESS
-                </option>
-              </select>
-
+  <option value="GRADE_UPDATE_DOWN">
+    GRADE_UPDATE_DOWN
+  </option>
+</select>
 
               <!-- Outcome -->
 

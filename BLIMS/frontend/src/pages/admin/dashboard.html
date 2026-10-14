@@ -4,46 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Admin Dashboard</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Shared styles -->
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-
 
     <style>
       .topbar {
         margin-bottom: 4px;
       }
-
-
-      .ms-page {
-        padding: 0;
-      }
     </style>
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -53,13 +39,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -67,11 +51,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -82,7 +64,6 @@
       })();
     </script>
   </head>
-
 
   <body data-page="dashboard">
     <!-- SIDEBAR TOGGLE -->
@@ -95,14 +76,12 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- SIDEBAR -->
       <aside class="sidebar" id="sidebar" data-role="admin">
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -113,52 +92,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -169,10 +137,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -180,35 +146,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -219,10 +178,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -234,20 +191,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text">GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -258,10 +211,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -272,25 +223,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -301,10 +247,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -312,10 +256,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -326,28 +268,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -358,44 +294,35 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
 
-
       <main class="content ms-page">
         <!-- =====================================================
            TOPBAR
       ====================================================== -->
-
 
         <header class="topbar">
           <div class="topbar-right">
@@ -406,14 +333,11 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Estrada, Ronald B.</div>
 
-
                 <div class="tb-role">Admin</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -424,10 +348,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -437,25 +359,20 @@
           </div>
         </header>
 
-
         <!-- =====================================================
            DASHBOARD
       ====================================================== -->
-
 
         <section class="dash-grid">
           <!-- ===================================================
              HERO
         ==================================================== -->
 
-
           <div class="card hero" style="grid-area: hero">
             <div class="hero-left">
               <div class="hero-eyebrow">Bolosan Elementary School</div>
 
-
               <h2>Welcome, Estrada, Ronald B.</h2>
-
 
               <p>
                 Manage your school operations with ease. Stay updated on
@@ -464,7 +381,6 @@
               </p>
             </div>
 
-
             <div class="hero-date">
               <span class="hero-date-label">Today</span>
               <strong id="dashboardToday">September 18, 2026</strong>
@@ -472,11 +388,9 @@
             </div>
           </div>
 
-
           <!-- ===================================================
              KPI STATS
         ==================================================== -->
-
 
           <div class="stats-row" style="grid-area: stats">
             <!-- TOTAL LEARNERS -->
@@ -486,19 +400,15 @@
                   <span>♟</span>
                 </div>
 
-
                 <div class="stat-mid">
                   <div class="stat-label">Total Learners</div>
 
-
                   <div class="stat-value" id="statStudents">0</div>
-
 
                   <div class="stat-helper">Currently enrolled</div>
                 </div>
               </div>
             </a>
-
 
             <!-- TOTAL FACULTY -->
             <a href="./teachers.html" class="stat-link">
@@ -507,19 +417,15 @@
                   <span>★</span>
                 </div>
 
-
                 <div class="stat-mid">
                   <div class="stat-label">Total Faculty</div>
 
-
                   <div class="stat-value" id="statTeachers">0</div>
-
 
                   <div class="stat-helper">Active faculty</div>
                 </div>
               </div>
             </a>
-
 
             <!-- TODAY'S ATTENDANCE -->
             <a href="./attendance.html" class="stat-link">
@@ -528,13 +434,10 @@
                   <span>✓</span>
                 </div>
 
-
                 <div class="stat-mid">
                   <div class="stat-label">Today's Attendance</div>
 
-
                   <div class="stat-value" id="statAttendance">—</div>
-
 
                   <div class="stat-helper" id="statAttendanceHelper">
                     Attendance rate
@@ -543,7 +446,6 @@
               </div>
             </a>
 
-
             <!-- ACTIVE ANNOUNCEMENTS -->
             <a href="./announcements.html" class="stat-link">
               <div class="stat pink">
@@ -551,13 +453,10 @@
                   <span>⌁</span>
                 </div>
 
-
                 <div class="stat-mid">
                   <div class="stat-label">Active Announcements</div>
 
-
                   <div class="stat-value" id="statAnnouncements">0</div>
-
 
                   <div class="stat-helper">Non-archived announcements</div>
                 </div>
@@ -565,11 +464,9 @@
             </a>
           </div>
 
-
           <!-- ===================================================
              ANALYTICS ROW
         ==================================================== -->
-
 
           <div class="analytics-grid" style="grid-area: analytics">
             <!-- ENROLLMENT TREND -->
@@ -581,7 +478,6 @@
                   <p>Number of enrolled learners across recent school years.</p>
                 </div>
 
-
                 <select
                   class="analytics-select"
                   id="enrollmentRange"
@@ -592,14 +488,12 @@
                 </select>
               </div>
 
-
               <div
                 class="chart-preview enrollment-preview"
                 id="enrollmentChart"
                 aria-label="Enrollment trend chart"
               >
                 <div class="chart-y-labels" id="enrollmentYAxis"></div>
-
 
                 <div class="line-chart-stage">
                   <div class="chart-grid-lines" id="enrollmentGridLines">
@@ -609,7 +503,6 @@
                     <span></span>
                     <span></span>
                   </div>
-
 
                   <svg
                     class="line-chart-svg"
@@ -632,15 +525,12 @@
                       </linearGradient>
                     </defs>
 
-
                     <path class="chart-area-fill" id="enrollmentArea"></path>
                     <polyline class="chart-line" id="enrollmentLine"></polyline>
                     <g id="enrollmentPoints"></g>
                   </svg>
 
-
                   <div class="chart-x-labels" id="enrollmentXAxis"></div>
-
 
                   <div
                     class="chart-tooltip"
@@ -655,19 +545,16 @@
                 </div>
               </div>
 
-
               <div class="chart-summary" id="enrollmentSummary">
                 <span>Current school year</span>
                 <strong>—</strong>
               </div>
 
-
-              <div class="chart-note">
-                Demo data for frontend development. Historical values will later
-                come from BLIMS enrollment records.
+              <div class="chart-note" id="enrollmentNote">
+                Enrollment totals are based on recorded BLIMS enrollment
+                history.
               </div>
             </section>
-
 
             <!-- ATTENDANCE OVERVIEW -->
             <section class="card analytics-card">
@@ -677,7 +564,6 @@
                   <h3>Attendance Overview</h3>
                   <p>Present and absent learners for the selected period.</p>
                 </div>
-
 
                 <select
                   class="analytics-select"
@@ -689,7 +575,6 @@
                   <option>This Month</option>
                 </select>
               </div>
-
 
               <div class="attendance-preview" id="attendancePreview">
                 <div
@@ -703,7 +588,6 @@
                   </div>
                 </div>
 
-
                 <div class="attendance-legend">
                   <div class="attendance-row">
                     <span class="legend-dot present"></span>
@@ -711,13 +595,11 @@
                     <strong id="attendancePresent">—</strong>
                   </div>
 
-
                   <div class="attendance-row">
                     <span class="legend-dot absent"></span>
                     <span>Absent</span>
                     <strong id="attendanceAbsent">—</strong>
                   </div>
-
 
                   <div class="attendance-row total">
                     <span class="legend-dot total-dot"></span>
@@ -727,13 +609,11 @@
                 </div>
               </div>
 
-
               <div class="chart-note" id="attendanceNote">
                 Demo attendance data for frontend development. The API can
                 replace this dataset later.
               </div>
             </section>
-
 
             <!-- LEARNERS BY GRADE -->
             <section class="card analytics-card grade-card">
@@ -744,7 +624,6 @@
                   <p>Current learner count across Grade 1 to Grade 6.</p>
                 </div>
 
-
                 <select
                   class="analytics-select"
                   id="gradeSchoolYear"
@@ -753,7 +632,6 @@
                   <option>S.Y. 2025–2026</option>
                 </select>
               </div>
-
 
               <div
                 class="bar-chart-preview"
@@ -767,17 +645,14 @@
                   <span></span>
                 </div>
 
-
                 <div class="bars" id="gradeBars"></div>
               </div>
-
 
               <div class="chart-note" id="gradeNote">
                 Demo enrollment distribution for frontend development. Current
                 counts will later come from BLIMS enrollment records.
               </div>
             </section>
-
 
             <!-- RECENT ANNOUNCEMENTS -->
             <section class="card list-card">
@@ -787,10 +662,8 @@
                   <h3>Recent Announcements</h3>
                 </div>
 
-
                 <a href="./announcements.html" class="view-all">View All</a>
               </div>
-
 
               <div class="dashboard-list" id="recentAnnouncementsList">
                 <div class="dashboard-list-item">
@@ -802,7 +675,6 @@
                   <span class="list-arrow">›</span>
                 </div>
 
-
                 <div class="dashboard-list-item">
                   <span class="list-pill academic">Academic</span>
                   <div class="list-main">
@@ -811,7 +683,6 @@
                   </div>
                   <span class="list-arrow">›</span>
                 </div>
-
 
                 <div class="dashboard-list-item">
                   <span class="list-pill event">Event</span>
@@ -824,7 +695,6 @@
               </div>
             </section>
 
-
             <!-- UPCOMING EVENTS -->
             <section class="card list-card">
               <div class="section-head">
@@ -833,10 +703,8 @@
                   <h3>Upcoming Events</h3>
                 </div>
 
-
                 <a href="./events.html" class="view-all">View All</a>
               </div>
-
 
               <div class="event-list" id="upcomingEventsList">
                 <div class="event-list-item">
@@ -850,7 +718,6 @@
                   </div>
                 </div>
 
-
                 <div class="event-list-item">
                   <div class="event-date">
                     <strong>—</strong>
@@ -861,7 +728,6 @@
                     <span>Event details will appear here.</span>
                   </div>
                 </div>
-
 
                 <div class="event-list-item">
                   <div class="event-date">
@@ -875,7 +741,6 @@
                 </div>
               </div>
             </section>
-
 
             <!-- SCHOOL CALENDAR -->
             <div class="card calendar" style="grid-area: calendar">
@@ -894,7 +759,6 @@
                     Month
                   </button>
 
-
                   <button
                     type="button"
                     id="calendarWeekBtn"
@@ -904,9 +768,7 @@
                   </button>
                 </div>
 
-
                 <div class="cal-title" id="calTitle">August 2026</div>
-
 
                 <div class="calendar-nav-group">
                   <button
@@ -917,7 +779,6 @@
                   >
                     ‹
                   </button>
-
 
                   <button
                     class="cal-nav"
@@ -930,7 +791,6 @@
                 </div>
               </div>
 
-
               <!-- CALENDAR DAYS -->
               <div class="cal-days" id="calDays">
                 <div>SUN</div>
@@ -942,7 +802,6 @@
                 <div>SAT</div>
               </div>
 
-
               <!-- CALENDAR GRID -->
               <div class="cal-grid" id="calGrid"></div>
             </div>
@@ -951,11 +810,9 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        CALENDAR DETAILS MODAL
   ====================================================== -->
-
 
     <div
       class="calendar-details-modal hidden"
@@ -963,7 +820,6 @@
       aria-hidden="true"
     >
       <div class="calendar-details-backdrop" id="calendarDetailsBackdrop"></div>
-
 
       <div
         class="calendar-details-dialog"
@@ -977,10 +833,8 @@
               Announcement
             </div>
 
-
             <h2 id="calendarDetailsTitle">Announcement</h2>
           </div>
-
 
           <button
             type="button"
@@ -992,19 +846,15 @@
           </button>
         </div>
 
-
         <div class="calendar-details-meta" id="calendarDetailsMeta"></div>
-
 
         <div class="calendar-details-body" id="calendarDetailsBody"></div>
       </div>
     </div>
 
-
     <!-- =====================================================
        MULTIPLE ITEMS MODAL
   ====================================================== -->
-
 
     <div
       class="calendar-details-modal hidden"
@@ -1016,7 +866,6 @@
         id="calendarDayDetailsBackdrop"
       ></div>
 
-
       <div
         class="calendar-details-dialog calendar-day-dialog"
         role="dialog"
@@ -1026,10 +875,8 @@
           <div>
             <div class="calendar-details-category">Calendar</div>
 
-
             <h2>Items for this day</h2>
           </div>
-
 
           <button
             type="button"
@@ -1041,7 +888,6 @@
           </button>
         </div>
 
-
         <div
           class="calendar-day-details-list"
           id="calendarDayDetailsList"
@@ -1049,22 +895,15 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        SCRIPTS
   ====================================================== -->
 
-
     <script src="../../js/auth/admin-guard.js"></script>
 
-
     <script src="../../js/admin/sidebar.js"></script>
-
 
     <script src="../../js/admin/admin-dashboard.js"></script>
     <script src="../../js/admin/admin-dashboard-phase2.js"></script>
   </body>
 </html>
-
-
-

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const Grade = require("../models/Grade.model");
+const AuditLog = require("../models/AuditLog.model");
 const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
 const SchoolYear = require("../models/SchoolYear.model");
@@ -15,6 +16,55 @@ function normalize(value) {
 }
 
 /**
+ * Create an audit log for a grade action.
+ *
+ * Audit logging must never cause a successful grade operation
+ * to fail if the audit-log write itself encounters an error.
+ */
+async function createGradeAuditLog(
+  req,
+  { action, outcome = "SUCCESS", message = "", meta = {} },
+) {
+  try {
+    const sessionUser = req.session?.user || {};
+
+    const actorUserId =
+      sessionUser.id || sessionUser._id || req.session?.userId || null;
+
+    const actorUsername =
+      sessionUser.username || sessionUser.userName || sessionUser.email || "";
+
+    const actorRole = sessionUser.role || "";
+
+    await AuditLog.create({
+      actor_user_id: mongoose.Types.ObjectId.isValid(actorUserId)
+        ? actorUserId
+        : null,
+
+      actor_username: normalize(actorUsername),
+
+      actor_role: normalize(actorRole),
+
+      action,
+
+      outcome,
+
+      message,
+
+      ip: req.ip || req.headers["x-forwarded-for"] || "",
+
+      user_agent: req.get("user-agent") || "",
+
+      path: req.originalUrl || req.path || "",
+
+      meta,
+    });
+  } catch (auditError) {
+    console.error("createGradeAuditLog error:", auditError);
+  }
+}
+
+/**
  * Get the logged-in teacher.
  *
  * Supports the different session shapes currently used
@@ -22,9 +72,7 @@ function normalize(value) {
  */
 async function getTeacherBySession(req) {
   const sessionUserId =
-    req.session?.user?.id ||
-    req.session?.user?._id ||
-    req.session?.userId;
+    req.session?.user?.id || req.session?.user?._id || req.session?.userId;
 
   if (!sessionUserId) {
     return null;
@@ -55,14 +103,14 @@ function getTeacherScope(teacher) {
         teacher?.className ||
         teacher?.gradeLevel ||
         teacher?.grade ||
-        teacher?.advisoryClass
+        teacher?.advisoryClass,
     ),
 
     sectionName: normalize(
       teacher?.handledSection ||
         teacher?.sectionName ||
         teacher?.section ||
-        teacher?.advisorySection
+        teacher?.advisorySection,
     ),
   };
 }
@@ -79,9 +127,7 @@ async function getSubjectsForGrade(className) {
     grade: className,
   }).lean();
 
-  return Array.isArray(gradeLevel?.subjects)
-    ? gradeLevel.subjects
-    : [];
+  return Array.isArray(gradeLevel?.subjects) ? gradeLevel.subjects : [];
 }
 
 /**
@@ -92,9 +138,7 @@ function findSchoolYearTerm(schoolYear, termId) {
     return null;
   }
 
-  return schoolYear.terms.find(
-    (term) => String(term._id) === String(termId)
-  );
+  return schoolYear.terms.find((term) => String(term._id) === String(termId));
 }
 
 /**
@@ -109,13 +153,9 @@ function normalizeAssessment(assessment) {
     return null;
   }
 
-  const assessmentId = normalize(
-    assessment.assessmentId || assessment.id
-  );
+  const assessmentId = normalize(assessment.assessmentId || assessment.id);
 
-  const activity = normalize(
-    assessment.activity || assessment.name
-  );
+  const activity = normalize(assessment.activity || assessment.name);
 
   const total = Number(assessment.total);
 
@@ -145,9 +185,7 @@ function normalizeAssessment(assessment) {
     score !== null &&
     (!Number.isFinite(score) || score < 0 || score > total)
   ) {
-    throw new Error(
-      `Assessment score must be between 0 and ${total}.`
-    );
+    throw new Error(`Assessment score must be between 0 and ${total}.`);
   }
 
   return {
@@ -166,15 +204,12 @@ function normalizeTermAssessment(assessment) {
     return null;
   }
 
-  const assessmentId = normalize(
-    assessment.assessmentId || assessment.id
-  );
+  const assessmentId = normalize(assessment.assessmentId || assessment.id);
 
-  const activity = normalize(
-    assessment.activity || assessment.name
-  );
+  const activity = normalize(assessment.activity || assessment.name);
 
   let total = null;
+
   let score = null;
 
   if (
@@ -201,13 +236,8 @@ function normalizeTermAssessment(assessment) {
     throw new Error("Term assessment name is required.");
   }
 
-  if (
-    total !== null &&
-    (!Number.isFinite(total) || total < 1)
-  ) {
-    throw new Error(
-      "Term assessment total must be at least 1."
-    );
+  if (total !== null && (!Number.isFinite(total) || total < 1)) {
+    throw new Error("Term assessment total must be at least 1.");
   }
 
   if (
@@ -215,9 +245,7 @@ function normalizeTermAssessment(assessment) {
     total !== null &&
     (!Number.isFinite(score) || score < 0 || score > total)
   ) {
-    throw new Error(
-      `Term assessment score must be between 0 and ${total}.`
-    );
+    throw new Error(`Term assessment score must be between 0 and ${total}.`);
   }
 
   return {
@@ -244,13 +272,9 @@ async function getGradeEncodingData(req, res) {
 
     const teacherScope = getTeacherScope(teacher);
 
-    if (
-      !teacherScope.className ||
-      !teacherScope.sectionName
-    ) {
+    if (!teacherScope.className || !teacherScope.sectionName) {
       return res.status(400).json({
-        message:
-          "Teacher class and section are not properly configured.",
+        message: "Teacher class and section are not properly configured.",
       });
     }
 
@@ -264,16 +288,19 @@ async function getGradeEncodingData(req, res) {
 
     const students = await Student.find({
       isActive: true,
+
       gradeLevel: teacherScope.className,
+
       sectionName: teacherScope.sectionName,
     })
       .select(
-        "_id studentId firstName middleName lastName suffix gradeLevel sectionName"
+        "_id studentId firstName middleName lastName suffix gradeLevel sectionName",
       )
       .lean();
 
     students.sort((a, b) => {
       const lastA = normalize(a.lastName).toLowerCase();
+
       const lastB = normalize(b.lastName).toLowerCase();
 
       if (lastA !== lastB) {
@@ -281,24 +308,28 @@ async function getGradeEncodingData(req, res) {
       }
 
       const firstA = normalize(a.firstName).toLowerCase();
+
       const firstB = normalize(b.firstName).toLowerCase();
 
       return firstA.localeCompare(firstB);
     });
 
-    const subjects = await getSubjectsForGrade(
-      teacherScope.className
-    );
+    const subjects = await getSubjectsForGrade(teacherScope.className);
 
     const terms = Array.isArray(schoolYear.terms)
       ? [...schoolYear.terms]
           .sort((a, b) => a.order - b.order)
           .map((term) => ({
             id: String(term._id),
+
             order: term.order,
+
             name: normalize(term.name),
+
             start: term.start || null,
+
             end: term.end || null,
+
             locked: Boolean(term.locked),
           }))
       : [];
@@ -308,7 +339,9 @@ async function getGradeEncodingData(req, res) {
 
       schoolYear: {
         id: String(schoolYear._id),
+
         name: normalize(schoolYear.name),
+
         terms,
       },
 
@@ -317,10 +350,7 @@ async function getGradeEncodingData(req, res) {
       subjects,
     });
   } catch (error) {
-    console.error(
-      "getGradeEncodingData error:",
-      error
-    );
+    console.error("getGradeEncodingData error:", error);
 
     return res.status(500).json({
       message: "Failed to load grade encoding data.",
@@ -353,7 +383,9 @@ async function saveGrade(req, res) {
     }
 
     const studentId = normalize(req.body.studentId);
+
     const subject = normalize(req.body.subject);
+
     const termId = normalize(req.body.termId);
 
     if (!studentId) {
@@ -384,10 +416,7 @@ async function saveGrade(req, res) {
        TERM VALIDATION
     ------------------------------------------------------- */
 
-    const term = findSchoolYearTerm(
-      schoolYear,
-      termId
-    );
+    const term = findSchoolYearTerm(schoolYear, termId);
 
     if (!term) {
       return res.status(404).json({
@@ -397,14 +426,15 @@ async function saveGrade(req, res) {
 
     /*
      * IMPORTANT:
+     *
      * Locking is enforced on the backend.
      *
      * Do NOT remove this.
      */
+
     if (term.locked) {
       return res.status(403).json({
-        message:
-          "This term is locked and can no longer be edited.",
+        message: "This term is locked and can no longer be edited.",
       });
     }
 
@@ -414,15 +444,17 @@ async function saveGrade(req, res) {
 
     const student = await Student.findOne({
       studentId,
+
       isActive: true,
+
       gradeLevel: teacherScope.className,
+
       sectionName: teacherScope.sectionName,
     }).lean();
 
     if (!student) {
       return res.status(403).json({
-        message:
-          "You are not allowed to encode grades for this student.",
+        message: "You are not allowed to encode grades for this student.",
       });
     }
 
@@ -430,31 +462,20 @@ async function saveGrade(req, res) {
        SUBJECT VALIDATION
     ------------------------------------------------------- */
 
-    const subjects =
-      await getSubjectsForGrade(
-        teacherScope.className
-      );
+    const subjects = await getSubjectsForGrade(teacherScope.className);
 
-    const validSubject = subjects.some(
-      (item) => {
-        const subjectName =
-          typeof item === "string"
-            ? item
-            : item?.name ||
-              item?.subject ||
-              item?.subjectName;
+    const validSubject = subjects.some((item) => {
+      const subjectName =
+        typeof item === "string"
+          ? item
+          : item?.name || item?.subject || item?.subjectName;
 
-        return (
-          normalize(subjectName).toLowerCase() ===
-          subject.toLowerCase()
-        );
-      }
-    );
+      return normalize(subjectName).toLowerCase() === subject.toLowerCase();
+    });
 
     if (!validSubject) {
       return res.status(400).json({
-        message:
-          "This subject is not assigned to the teacher's grade level.",
+        message: "This subject is not assigned to the teacher's grade level.",
       });
     }
 
@@ -468,16 +489,11 @@ async function saveGrade(req, res) {
 
     try {
       if (Array.isArray(req.body.writtenWorks)) {
-        writtenWorks = req.body.writtenWorks.map(
-          normalizeAssessment
-        );
+        writtenWorks = req.body.writtenWorks.map(normalizeAssessment);
       }
 
       if (Array.isArray(req.body.performanceTasks)) {
-        performanceTasks =
-          req.body.performanceTasks.map(
-            normalizeAssessment
-          );
+        performanceTasks = req.body.performanceTasks.map(normalizeAssessment);
       }
     } catch (assessmentError) {
       return res.status(400).json({
@@ -496,10 +512,7 @@ async function saveGrade(req, res) {
       typeof req.body.termAssessment === "object"
     ) {
       try {
-        termAssessment =
-          normalizeTermAssessment(
-            req.body.termAssessment
-          );
+        termAssessment = normalizeTermAssessment(req.body.termAssessment);
       } catch (assessmentError) {
         return res.status(400).json({
           message: assessmentError.message,
@@ -520,11 +533,7 @@ async function saveGrade(req, res) {
     ) {
       const value = Number(req.body.initialGrade);
 
-      if (
-        Number.isFinite(value) &&
-        value >= 0 &&
-        value <= 100
-      ) {
+      if (Number.isFinite(value) && value >= 0 && value <= 100) {
         initialGrade = value;
       }
     }
@@ -538,11 +547,7 @@ async function saveGrade(req, res) {
     ) {
       const value = Number(req.body.termGrade);
 
-      if (
-        Number.isFinite(value) &&
-        value >= 0 &&
-        value <= 100
-      ) {
+      if (Number.isFinite(value) && value >= 0 && value <= 100) {
         termGrade = value;
       }
     }
@@ -551,69 +556,212 @@ async function saveGrade(req, res) {
        SAVE
     ------------------------------------------------------- */
 
-    const savedGrade =
-      await Grade.findOneAndUpdate(
-        {
-          studentId,
-          subject,
-          termId,
-          schoolYearId: schoolYear._id,
-        },
+    // -------------------------------------------------------
+    // CHECK EXISTING GRADE
+    // -------------------------------------------------------
 
-        {
-          $set: {
+    const existingGrade = await Grade.findOne({
+      studentId,
+
+      subject,
+
+      termId,
+
+      schoolYearId: schoolYear._id,
+    }).lean();
+
+    const savedGrade = await Grade.findOneAndUpdate(
+      {
+        studentId,
+
+        subject,
+
+        termId,
+
+        schoolYearId: schoolYear._id,
+      },
+
+      {
+        $set: {
+          studentId,
+
+          gradeLevel: teacherScope.className,
+
+          sectionName: teacherScope.sectionName,
+
+          subject,
+
+          schoolYearId: schoolYear._id,
+
+          schoolYearName: normalize(schoolYear.name),
+
+          termId,
+
+          writtenWorks,
+
+          performanceTasks,
+
+          termAssessment,
+
+          initialGrade,
+
+          termGrade,
+
+          teacherId: teacher._id,
+        },
+      },
+
+      {
+        upsert: true,
+
+        returnDocument: "after",
+
+        setDefaultsOnInsert: true,
+
+        runValidators: true,
+      },
+    ).lean();
+
+    // -------------------------------------------------------
+    // AUDIT LOG
+    // -------------------------------------------------------
+
+    if (existingGrade) {
+      // -----------------------------------------------------
+      // Determine which numeric grade should be compared.
+      //
+      // Prefer termGrade. If there is no termGrade,
+      // compare initialGrade instead.
+      // -----------------------------------------------------
+
+      const previousGrade =
+        existingGrade.termGrade ?? existingGrade.initialGrade ?? null;
+
+      const newGrade = termGrade ?? initialGrade ?? null;
+
+      let action = null;
+
+      let message = "";
+
+      // -----------------------------------------------------
+      // GRADE INCREASED
+      // -----------------------------------------------------
+
+      if (
+        previousGrade !== null &&
+        newGrade !== null &&
+        newGrade > previousGrade
+      ) {
+        action = "GRADE_UPDATE_UP";
+
+        message = `Grade increased for student ${studentId} from ${previousGrade} to ${newGrade}.`;
+      }
+
+      // -----------------------------------------------------
+      // GRADE DECREASED
+      // -----------------------------------------------------
+      else if (
+        previousGrade !== null &&
+        newGrade !== null &&
+        newGrade < previousGrade
+      ) {
+        action = "GRADE_UPDATE_DOWN";
+
+        message = `Grade decreased for student ${studentId} from ${previousGrade} to ${newGrade}.`;
+      }
+
+      // -----------------------------------------------------
+      // SAME GRADE
+      //
+      // No grade-change audit is created when the numeric
+      // grade remains the same.
+      // -----------------------------------------------------
+
+      if (action) {
+        await createGradeAuditLog(req, {
+          action,
+
+          outcome: "SUCCESS",
+
+          message,
+
+          meta: {
             studentId,
 
-            gradeLevel:
-              teacherScope.className,
+            gradeLevel: teacherScope.className,
 
-            sectionName:
-              teacherScope.sectionName,
+            sectionName: teacherScope.sectionName,
 
             subject,
 
-            schoolYearId:
-              schoolYear._id,
-
-            schoolYearName:
-              normalize(schoolYear.name),
+            schoolYearName: normalize(schoolYear.name),
 
             termId,
 
-            writtenWorks,
+            // Previous grade values
+            previousInitialGrade: existingGrade.initialGrade,
 
-            performanceTasks,
+            previousTermGrade: existingGrade.termGrade,
 
-            termAssessment,
+            // New grade values
+            newInitialGrade: initialGrade,
 
-            initialGrade,
+            newTermGrade: termGrade,
 
-            termGrade,
+            // Values used for comparison
+            previousGrade,
 
-            teacherId: teacher._id,
+            newGrade,
+
+            teacherId: String(teacher._id),
           },
-        },
+        });
+      }
+    } else {
+      // -----------------------------------------------------
+      // NEW GRADE
+      // -----------------------------------------------------
 
-        {
-          upsert: true,
-          returnDocument: "after",
-          setDefaultsOnInsert: true,
-          runValidators: true,
-        }
-      ).lean();
+      await createGradeAuditLog(req, {
+        action: "GRADE_CREATE",
+
+        outcome: "SUCCESS",
+
+        message: `Grade created for student ${studentId}.`,
+
+        meta: {
+          studentId,
+
+          gradeLevel: teacherScope.className,
+
+          sectionName: teacherScope.sectionName,
+
+          subject,
+
+          schoolYearName: normalize(schoolYear.name),
+
+          termId,
+
+          initialGrade,
+
+          termGrade,
+
+          teacherId: String(teacher._id),
+        },
+      });
+    }
 
     return res.status(200).json({
       message: "Grade saved successfully.",
+
       grade: savedGrade,
     });
   } catch (error) {
-    console.error(
-      "saveGrade error:",
-      error
-    );
+    console.error("saveGrade error:", error);
 
     return res.status(500).json({
       message: "Failed to save grade.",
+
       error: error.message,
     });
   }
@@ -646,17 +794,15 @@ async function getSavedGrades(req, res) {
     const grades = await Grade.find({
       teacherId: teacher._id,
 
-      gradeLevel:
-        teacherScope.className,
+      gradeLevel: teacherScope.className,
 
-      sectionName:
-        teacherScope.sectionName,
+      sectionName: teacherScope.sectionName,
 
-      schoolYearId:
-        schoolYear._id,
+      schoolYearId: schoolYear._id,
     })
       .sort({
         subject: 1,
+
         studentId: 1,
       })
       .lean();
@@ -665,58 +811,50 @@ async function getSavedGrades(req, res) {
      * Sort terms according to the actual school-year
      * term order rather than assuming Q1/Q2/Q3/Q4.
      */
+
     const termOrderMap = new Map(
-      (schoolYear.terms || []).map(
-        (term) => [
-          String(term._id),
-          term.order,
-        ]
-      )
+      (schoolYear.terms || []).map((term) => [String(term._id), term.order]),
     );
 
     grades.sort((a, b) => {
-      const subjectCompare =
-        normalize(a.subject).localeCompare(
-          normalize(b.subject)
-        );
+      const subjectCompare = normalize(a.subject).localeCompare(
+        normalize(b.subject),
+      );
 
       if (subjectCompare !== 0) {
         return subjectCompare;
       }
 
-      const termA =
-        termOrderMap.get(
-          String(a.termId)
-        ) ?? 999;
+      const termA = termOrderMap.get(String(a.termId)) ?? 999;
 
-      const termB =
-        termOrderMap.get(
-          String(b.termId)
-        ) ?? 999;
+      const termB = termOrderMap.get(String(b.termId)) ?? 999;
 
       if (termA !== termB) {
         return termA - termB;
       }
 
-      return normalize(
-        a.studentId
-      ).localeCompare(
-        normalize(b.studentId)
-      );
+      return normalize(a.studentId).localeCompare(normalize(b.studentId));
     });
 
     return res.json({
       schoolYear: {
         id: String(schoolYear._id),
+
         name: normalize(schoolYear.name),
+
         terms: (schoolYear.terms || [])
           .sort((a, b) => a.order - b.order)
           .map((term) => ({
             id: String(term._id),
+
             order: term.order,
+
             name: normalize(term.name),
+
             start: term.start || null,
+
             end: term.end || null,
+
             locked: Boolean(term.locked),
           })),
       },
@@ -724,10 +862,7 @@ async function getSavedGrades(req, res) {
       grades,
     });
   } catch (error) {
-    console.error(
-      "getSavedGrades error:",
-      error
-    );
+    console.error("getSavedGrades error:", error);
 
     return res.status(500).json({
       message: "Failed to load saved grades.",
@@ -741,6 +876,8 @@ async function getSavedGrades(req, res) {
 
 module.exports = {
   getGradeEncodingData,
+
   saveGrade,
+
   getSavedGrades,
 };

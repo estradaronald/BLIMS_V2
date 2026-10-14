@@ -34,6 +34,11 @@ const adminSchoolYearsRoutes = require("./routes/admin.school-years.routes");
 const adminClassScheduleRoutes = require("./routes/admin.class-schedule.routes");
 const adminAttendanceRoutes = require("./routes/admin.attendance.routes");
 
+// Academic Records
+const adminAcademicRecordsRoutes = require(
+  "./routes/admin.academic.records.routes"
+);
+
 // Admin account management
 const adminAccountsRoutes = require("./routes/admin.routes");
 
@@ -55,7 +60,9 @@ const teacherGradeRoutes = require("./routes/teacherGrade.routes");
 const teacherPromotionRoutes = require("./routes/teacherPromotion.routes");
 
 // Teacher announcements
-const teacherAnnouncementsRoutes = require("./routes/teacher.announcements.routes");
+const teacherAnnouncementsRoutes = require(
+  "./routes/teacher.announcements.routes"
+);
 
 // ==============================
 // Student routes
@@ -68,16 +75,22 @@ const studentScheduleRoutes = require("./routes/student.schedule.routes");
 const studentSubjectsRoutes = require("./routes/student.subjects.routes");
 
 // Student attendance
-const studentAttendanceRoutes = require("./routes/student.attendance.routes");
+const studentAttendanceRoutes = require(
+  "./routes/student.attendance.routes"
+);
 
 // Student grades
 const studentGradesRoutes = require("./routes/student.grades.routes");
 
 // Student announcements
-const studentAnnouncementsRoutes = require("./routes/student.announcements.routes");
+const studentAnnouncementsRoutes = require(
+  "./routes/student.announcements.routes"
+);
 
 // Student assignments
-const studentAssignmentRoutes = require("./routes/student.assignment.routes");
+const studentAssignmentRoutes = require(
+  "./routes/student.assignment.routes"
+);
 
 // ==============================
 // Middleware
@@ -374,6 +387,13 @@ app.use(
   adminAttendanceRoutes
 );
 
+// Academic Records
+
+app.use(
+  "/api/admin/academic-records",
+  adminAcademicRecordsRoutes
+);
+
 // ==================================================
 // ADMIN ANNOUNCEMENTS + EVENTS
 // ==================================================
@@ -386,6 +406,7 @@ app.use(
 // DELETE /api/admin/announcements/:id
 //
 // Events use:
+//
 // category: "events"
 // ==================================================
 
