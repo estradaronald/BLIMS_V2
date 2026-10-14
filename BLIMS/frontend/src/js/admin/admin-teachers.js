@@ -1463,9 +1463,6 @@
         <div class="t-member-cell">
 
 
-          <div class="t-member-avatar" aria-hidden="true">
-            ${escapeHtml(getInitials(t))}
-          </div>
 
 
           <div class="t-member-info">

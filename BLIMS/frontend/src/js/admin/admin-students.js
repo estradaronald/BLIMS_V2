@@ -764,9 +764,7 @@
       <td class="t-col-member">
         <div class="t-member-cell">
 
-          <div class="t-member-avatar" aria-hidden="true">
-            ${escapeHtml(getInitials(student))}
-          </div>
+       
 
           <div class="t-member-info">
 
