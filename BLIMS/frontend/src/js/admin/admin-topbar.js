@@ -13,10 +13,9 @@
 
       const user = data.user;
 
-      const name =
-        ${user.last_name || ""}, ${user.first_name || ""}
-          .replace(/^,\s*|\s*,$/g, "")
-          .trim();
+      const name = `${user.last_name || ""}, ${user.first_name || ""}`
+        .replace(/^,\s*|\s*,$/g, "")
+        .trim();
 
       const nameEl = document.getElementById("tbName");
       const roleEl = document.getElementById("tbRole");

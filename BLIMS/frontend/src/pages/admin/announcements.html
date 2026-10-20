@@ -1,52 +1,38 @@
 <!-- frontend/src/pages/admin/announcements.html -->
 
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
 
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 
     <title>Admin - Announcements</title>
 
-
     <!-- Plus Jakarta Sans -->
-
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Shared layout styles -->
-
 
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-
 
     <!-- Page styles -->
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-announcements.css" />
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -56,13 +42,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -70,11 +54,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -86,10 +68,8 @@
     </script>
   </head>
 
-
   <body data-page="announcements">
     <!-- Floating sidebar toggle -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -100,14 +80,12 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- SIDEBAR -->
       <aside class="sidebar" id="sidebar" data-role="admin">
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -118,52 +96,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -174,10 +141,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -185,35 +150,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -224,10 +182,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -239,20 +195,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -263,10 +215,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -277,25 +227,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -306,10 +251,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -317,10 +260,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -331,28 +272,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -363,42 +298,33 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
 
-
       <main class="content">
         <!-- TOP BAR -->
-
 
         <header class="topbar">
           <div class="topbar-right">
@@ -409,21 +335,15 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
-               <div class="tb-name" id="tbName">Loading...</div>
+                <div class="tb-name" id="tbName">Loading...</div>
 
-<div class="tb-role" id="tbRole">Loading...</div>
+                <div class="tb-role" id="tbRole">Loading...</div>
               </div>
-
 
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-
               <div class="tb-menu" id="userMenu">
-                <button class="tb-item" type="button">Settings</button>
-
-
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
                 </button>
@@ -432,33 +352,26 @@
           </div>
         </header>
 
-
         <!-- PAGE -->
-
 
         <section class="teachers-wrap">
           <div class="teachers-page-head">
             <h2 class="teachers-title">Announcements</h2>
 
-
             <button id="createAnnBtn" class="t-add-btn" type="button">
               Create New Announcement
-
 
               <span class="t-plus"> ＋ </span>
             </button>
           </div>
 
-
           <div class="card t-card ann-wrap-card">
             <div class="t-card-head ann-card-head">
               <div class="t-subtitle">All Announcements</div>
 
-
               <div class="ann-filters">
                 <div class="t-search ann-search">
                   <span class="t-search-ico" aria-hidden="true"></span>
-
 
                   <input
                     id="annSearch"
@@ -467,46 +380,34 @@
                   />
                 </div>
 
-
                 <select id="typeFilter" class="t-filter">
                   <option value="all">Type: All</option>
 
-
                   <option value="published">Published</option>
-
 
                   <option value="scheduled">Scheduled</option>
 
-
                   <option value="draft">Draft</option>
-
 
                   <option value="archived">Archived</option>
                 </select>
 
-
                 <select id="catFilter" class="t-filter">
                   <option value="all">Category: All</option>
 
-
                   <option value="general">General Announcements</option>
-
 
                   <option value="events">School Events</option>
 
-
                   <option value="academic">Academic Notices</option>
-
 
                   <option value="priority">Priority Alerts</option>
                 </select>
               </div>
             </div>
 
-
             <div class="ann-card-body">
               <section class="ann-feed" id="annFeed"></section>
-
 
               <div id="annEmpty" class="ann-empty hidden">
                 No announcements yet.
@@ -517,15 +418,12 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        CREATE / EDIT MODAL
        ===================================================== -->
 
-
     <div id="annModal" class="tmodal hidden" aria-hidden="true">
       <div class="tmodal-backdrop" id="annModalBackdrop"></div>
-
 
       <div
         class="tmodal-dialog ann-dialog"
@@ -536,7 +434,6 @@
       >
         <!-- HEADER -->
 
-
         <div class="tmodal-head">
           <div class="tmodal-head-left">
             <div>
@@ -544,13 +441,11 @@
                 Create New Announcement
               </div>
 
-
               <div class="tmodal-sub">
                 Create an announcement for your school community.
               </div>
             </div>
           </div>
-
 
           <button
             class="tmodal-x"
@@ -562,18 +457,14 @@
           </button>
         </div>
 
-
         <!-- BODY -->
-
 
         <div class="tmodal-body">
           <div class="ann-form">
             <!-- TITLE -->
 
-
             <div class="tmodal-field">
               <label for="annTitle"> Title </label>
-
 
               <input
                 id="annTitle"
@@ -582,35 +473,26 @@
               />
             </div>
 
-
             <!-- CATEGORY -->
-
 
             <div class="tmodal-field">
               <label for="annCategory"> Category </label>
 
-
               <select id="annCategory" class="t-select">
                 <option value="general">General Announcement</option>
 
-
                 <option value="events">School Event</option>
 
-
                 <option value="academic">Academic Notice</option>
-
 
                 <option value="priority">Priority Alert</option>
               </select>
             </div>
 
-
             <!-- AUDIENCE -->
-
 
             <div class="tmodal-field">
               <label for="annAudience"> Audience </label>
-
 
               <!--
               IMPORTANT:
@@ -622,28 +504,21 @@
               teachers = Teachers Only
             -->
 
-
               <select id="annAudience" class="t-select" name="audience">
                 <option value="all" selected>Students & Teachers</option>
 
-
                 <option value="students">Students Only</option>
-
 
                 <option value="teachers">Teachers Only</option>
               </select>
 
-
               <div class="t-hint">Choose who can see this announcement.</div>
             </div>
 
-
             <!-- MESSAGE -->
-
 
             <div class="tmodal-field">
               <label for="annMessage">Message</label>
-
 
               <div class="ann-editor">
                 <textarea
@@ -654,13 +529,10 @@
               </div>
             </div>
 
-
             <!-- PUBLICATION -->
-
 
             <div class="tmodal-field">
               <label> Publication </label>
-
 
               <div class="ann-publication-options">
                 <label class="ann-radio-option">
@@ -672,10 +544,8 @@
                     checked
                   />
 
-
                   <span> Publish Now </span>
                 </label>
-
 
                 <label class="ann-radio-option">
                   <input
@@ -685,34 +555,27 @@
                     id="annScheduleLater"
                   />
 
-
                   <span> Schedule for later </span>
                 </label>
               </div>
             </div>
 
-
             <!-- SCHEDULE -->
-
 
             <div id="annScheduleFields" class="ann-schedule-fields hidden">
               <div class="ann-schedule-grid">
                 <div class="tmodal-field">
                   <label for="annScheduleDate"> Schedule Date </label>
 
-
                   <input id="annScheduleDate" type="date" />
                 </div>
-
 
                 <div class="tmodal-field">
                   <label for="annScheduleTime"> Schedule Time </label>
 
-
                   <input id="annScheduleTime" type="time" />
                 </div>
               </div>
-
 
               <div class="t-hint">
                 The announcement will become visible at the selected date and
@@ -720,29 +583,23 @@
               </div>
             </div>
 
-
             <!-- ERROR -->
-
 
             <div id="annFormError" class="t-error hidden"></div>
           </div>
         </div>
 
-
         <!-- FOOTER -->
-
 
         <div class="tmodal-foot">
           <button class="t-ghost" id="annCancelBtn" type="button">
             Cancel
           </button>
 
-
           <div class="tmodal-foot-right">
             <button class="t-ghost" id="annDraftBtn" type="button">
               Save as Draft
             </button>
-
 
             <button class="t-save" id="annPublishBtn" type="button">
               Publish
@@ -752,15 +609,12 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        VIEW MODAL
        ===================================================== -->
 
-
     <div id="annViewModal" class="tmodal hidden" aria-hidden="true">
       <div class="tmodal-backdrop" id="annViewBackdrop"></div>
-
 
       <div
         class="tmodal-dialog ann-view-dialog"
@@ -771,7 +625,6 @@
       >
         <!-- HEADER -->
 
-
         <div class="tmodal-head">
           <div class="tmodal-head-left">
             <div>
@@ -779,13 +632,11 @@
                 Announcement Details
               </div>
 
-
               <div class="tmodal-sub">
                 <span id="annViewMeta"> — </span>
               </div>
             </div>
           </div>
-
 
           <button
             class="tmodal-x"
@@ -797,9 +648,7 @@
           </button>
         </div>
 
-
         <!-- BODY -->
-
 
         <div class="tmodal-body">
           <div class="ann-view">
@@ -808,43 +657,34 @@
                 General Announcement
               </span>
 
-
               <span id="annViewStatus" class="ann-status"> Published </span>
             </div>
 
-
             <h3 id="annViewH" class="ann-view-h">—</h3>
-
 
             <div class="ann-view-audience">
               <span class="ann-view-label"> Audience </span>
-
 
               <span id="annViewAudience" class="ann-view-audience-value">
                 Students & Teachers
               </span>
             </div>
 
-
             <div id="annViewMsg" class="ann-view-msg">—</div>
           </div>
         </div>
 
-
         <!-- FOOTER -->
-
 
         <div class="tmodal-foot">
           <button class="t-ghost" id="annViewCloseBtn" type="button">
             Close
           </button>
 
-
           <div class="tmodal-foot-right">
             <button class="t-save" id="annViewEditBtn" type="button">
               Edit
             </button>
-
 
             <button class="tmodal-danger" id="annViewArchiveBtn" type="button">
               Archive
@@ -854,23 +694,15 @@
       </div>
     </div>
 
-
     <!-- SCRIPTS -->
-
 
     <script src="../../js/auth/admin-guard.js"></script>
 
-
     <script src="../../js/admin/sidebar.js"></script>
 
-
     <script src="../../js/admin/admin-dashboard.js"></script>
-
 
     <script src="../../js/admin/admin-announcements.js"></script>
     <script src="../../js/admin/admin-topbar.js"></script>
   </body>
 </html>
-
-
-

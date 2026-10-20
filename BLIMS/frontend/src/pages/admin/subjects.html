@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - Subjects</title>
 
-
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,20 +14,16 @@
       rel="stylesheet"
     />
 
-
     <!-- Shared -->
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <!-- Page -->
     <link rel="stylesheet" href="../../styles/admin/admin-subjects.css" />
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -38,13 +33,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -52,11 +45,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -68,7 +59,6 @@
     </script>
   </head>
 
-
   <body data-page="subjects">
     <button
       class="sidebar-float-toggle"
@@ -79,14 +69,12 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- SIDEBAR -->
       <aside class="sidebar" id="sidebar" data-role="admin">
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -97,52 +85,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -153,10 +130,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -164,35 +139,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -203,10 +171,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -218,20 +184,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -242,10 +204,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -256,25 +216,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -285,10 +240,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -296,10 +249,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -310,28 +261,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -342,38 +287,30 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
-
 
       <main class="content">
         <header class="topbar">
@@ -387,13 +324,11 @@
               <div class="tb-meta">
                 <div class="tb-name" id="tbName">Loading...</div>
 
-<div class="tb-role" id="tbRole">Loading...</div>
+                <div class="tb-role" id="tbRole">Loading...</div>
               </div>
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-
               <div class="tb-menu" id="userMenu">
-                <button class="tb-item" type="button">Settings</button>
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
                 </button>
@@ -402,14 +337,12 @@
           </div>
         </header>
 
-
         <section class="sub-wrap">
           <div class="sub-head">
             <div>
               <h2 class="sub-title">Subjects</h2>
               <div class="sub-sub">Manage subjects per grade level.</div>
             </div>
-
 
             <div class="sub-head-actions">
               <button class="sub-ghost" id="addGradeBtn" type="button">
@@ -426,7 +359,6 @@
             </div>
           </div>
 
-
           <div class="sub-grid">
             <aside class="card sub-left">
               <div class="sub-left-head">
@@ -436,10 +368,8 @@
                 </div>
               </div>
 
-
               <div id="gradeList" class="sub-grade-list"></div>
             </aside>
-
 
             <section class="card sub-right">
               <div class="sub-right-head">
@@ -453,7 +383,6 @@
                   </div>
                 </div>
 
-
                 <div class="sub-tools">
                   <div class="sub-search">
                     <span class="sub-search-ico">🔎</span>
@@ -464,7 +393,6 @@
                       disabled
                     />
                   </div>
-
 
                   <button
                     class="sub-ghost"
@@ -484,7 +412,6 @@
                   </button>
                 </div>
               </div>
-
 
               <div class="sub-table-wrap">
                 <table class="sub-table">
@@ -510,13 +437,11 @@
       </main>
     </div>
 
-
     <!-- ======================
       SUBJECT MODAL
   ======================= -->
     <div id="subjectModal" class="sub-modal hidden" aria-hidden="true">
       <div class="sub-backdrop" id="subjectModalBackdrop"></div>
-
 
       <div
         class="sub-dialog"
@@ -542,7 +467,6 @@
           </button>
         </div>
 
-
         <div class="sub-mbody">
           <div class="sub-form">
             <div class="sub-field">
@@ -550,12 +474,10 @@
               <select id="modalGrade" class="sub-input"></select>
             </div>
 
-
             <div class="sub-field sub-wide">
               <label>Subjects</label>
               <div class="sub-checklist" id="subjectChecklist"></div>
             </div>
-
 
             <div class="sub-field sub-wide">
               <label>Add New Subject (optional)</label>
@@ -573,10 +495,8 @@
             </div>
           </div>
 
-
           <div id="subjectModalError" class="sub-error hidden"></div>
         </div>
-
 
         <div class="sub-mfoot">
           <button class="sub-ghost" id="subjectCancelBtn" type="button">
@@ -594,13 +514,11 @@
       </div>
     </div>
 
-
     <!-- ======================
       ADD GRADE MODAL
   ======================= -->
     <div id="gradeModal" class="sub-modal hidden" aria-hidden="true">
       <div class="sub-backdrop" id="gradeModalBackdrop"></div>
-
 
       <div
         class="sub-dialog sub-sm"
@@ -624,7 +542,6 @@
           </button>
         </div>
 
-
         <div class="sub-mbody">
           <div class="sub-field">
             <label>Grade Level Name</label>
@@ -637,7 +554,6 @@
           </div>
           <div id="gradeModalError" class="sub-error hidden"></div>
         </div>
-
 
         <div class="sub-mfoot">
           <button class="sub-ghost" id="gradeCancelBtn" type="button">
@@ -652,13 +568,11 @@
       </div>
     </div>
 
-
     <!-- ======================
   DELETE CONFIRM MODAL
 ======================= -->
     <div id="confirmModal" class="sub-modal hidden" aria-hidden="true">
       <div class="sub-backdrop" id="confirmModalBackdrop"></div>
-
 
       <div
         class="sub-dialog sub-sm"
@@ -671,12 +585,10 @@
           <div>
             <div class="sub-mtitle" id="confirmModalTitle">Delete Item?</div>
 
-
             <div class="sub-msub" id="confirmModalSub">
               This action cannot be undone.
             </div>
           </div>
-
 
           <button
             class="sub-x"
@@ -688,19 +600,16 @@
           </button>
         </div>
 
-
         <div class="sub-mbody">
           <div class="sub-confirm-text" id="confirmText">
             Are you sure you want to delete this item?
           </div>
         </div>
 
-
         <div class="sub-mfoot">
           <button class="sub-ghost" id="confirmCancelBtn" type="button">
             Cancel
           </button>
-
 
           <div class="sub-foot-right">
             <button class="sub-danger" id="confirmDeleteBtn" type="button">
@@ -710,7 +619,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- ======================
   SUCCESS NOTIFICATION
@@ -725,7 +633,6 @@
       <span id="successToastText">Success.</span>
     </div>
 
-
     <script src="../../js/auth/admin-guard.js"></script>
     <script src="../../js/admin/sidebar.js"></script>
     <script src="../../js/admin/admin-dashboard.js"></script>
@@ -733,6 +640,3 @@
     <script src="../../js/admin/admin-topbar.js"></script>
   </body>
 </html>
-
-
-

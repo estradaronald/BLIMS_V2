@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - School Year & Terms</title>
 
-
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,20 +14,16 @@
       rel="stylesheet"
     />
 
-
     <!-- Shared -->
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <!-- Page -->
     <link rel="stylesheet" href="../../styles/admin/admin-school-year.css" />
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -38,13 +33,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -52,11 +45,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -68,7 +59,6 @@
     </script>
   </head>
 
-
   <body data-page="school-year">
     <button
       class="sidebar-float-toggle"
@@ -79,14 +69,12 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- SIDEBAR -->
       <aside class="sidebar" id="sidebar" data-role="admin">
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -97,52 +85,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -153,10 +130,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -164,35 +139,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -203,10 +171,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -218,20 +184,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -242,10 +204,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -256,25 +216,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; TERMS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -285,10 +240,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -296,10 +249,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -310,28 +261,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -342,44 +287,35 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
 
-
       <main class="content">
         <!-- =====================================================
            TOPBAR
       ====================================================== -->
-
 
         <header class="topbar">
           <div class="topbar-right">
@@ -390,21 +326,15 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
-              <div class="tb-name" id="tbName">Loading...</div>
+                <div class="tb-name" id="tbName">Loading...</div>
 
-<div class="tb-role" id="tbRole">Loading...</div>
+                <div class="tb-role" id="tbRole">Loading...</div>
               </div>
-
 
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-
               <div class="tb-menu" id="userMenu">
-                <button class="tb-item" type="button">Settings</button>
-
-
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
                 </button>
@@ -413,26 +343,21 @@
           </div>
         </header>
 
-
         <!-- =====================================================
            PAGE
       ====================================================== -->
 
-
         <section class="sy-wrap">
           <!-- PAGE HEADER -->
-
 
           <div class="sy-head">
             <div>
               <h2 class="sy-title">School Year & Terms</h2>
 
-
               <div class="sy-sub">
                 Define the academic timeline and manage term dates.
               </div>
             </div>
-
 
             <div class="sy-head-actions">
               <button
@@ -444,7 +369,6 @@
                 Delete School Year
               </button>
 
-
               <button class="sy-primary" id="addSchoolYearBtn" type="button">
                 Create School Year
                 <span class="sy-plus">＋</span>
@@ -452,49 +376,40 @@
             </div>
           </div>
 
-
           <!-- =====================================================
              MAIN GRID
         ====================================================== -->
-
 
           <div class="sy-grid">
             <!-- =================================================
                LEFT: SCHOOL YEAR LIST
           ================================================== -->
 
-
             <aside class="card sy-left">
               <div class="sy-left-head">
                 <div class="sy-left-title">School Years</div>
-
 
                 <div class="sy-left-hint">
                   Select one to view terms and set Active.
                 </div>
               </div>
 
-
               <div id="syList" class="sy-list"></div>
             </aside>
-
 
             <!-- =================================================
                RIGHT: SCHOOL YEAR DETAILS
           ================================================== -->
-
 
             <section class="card sy-right">
               <div class="sy-right-head">
                 <div>
                   <div class="sy-right-title" id="selectedSYTitle">—</div>
 
-
                   <div class="sy-right-sub" id="selectedSYSub">
                     Select a school year to view details.
                   </div>
                 </div>
-
 
                 <div class="sy-actions">
                   <button
@@ -505,7 +420,6 @@
                   >
                     Set as Active
                   </button>
-
 
                   <button
                     class="sy-ghost"
@@ -518,9 +432,7 @@
                 </div>
               </div>
 
-
               <!-- TERMS TABLE -->
-
 
               <div class="sy-table-wrap">
                 <table class="sy-table">
@@ -528,20 +440,15 @@
                     <tr>
                       <th style="width: 90px">No.</th>
 
-
                       <th>Term</th>
-
 
                       <th style="width: 210px">Start</th>
 
-
                       <th style="width: 210px">End</th>
-
 
                       <th style="width: 160px; text-align: center">Status</th>
                     </tr>
                   </thead>
-
 
                   <tbody id="termsTbody">
                     <tr class="sy-empty">
@@ -556,11 +463,9 @@
       </main>
     </div>
 
-
     <!-- =========================================================
      SUCCESS TOAST
 ========================================================== -->
-
 
     <div
       id="successToast"
@@ -575,15 +480,12 @@
       </span>
     </div>
 
-
     <!-- =========================================================
      CREATE SCHOOL YEAR MODAL
 ========================================================== -->
 
-
     <div id="createSYModal" class="sy-modal hidden" aria-hidden="true">
       <div class="sy-backdrop" id="createSYBackdrop"></div>
-
 
       <div
         class="sy-dialog sy-sm"
@@ -594,15 +496,12 @@
       >
         <!-- MODAL HEADER -->
 
-
         <div class="sy-mhead">
           <div>
             <div class="sy-mtitle" id="createSYTitle">Create School Year</div>
 
-
             <div class="sy-msub">Example: 2026–2027</div>
           </div>
-
 
           <button
             class="sy-x"
@@ -614,18 +513,14 @@
           </button>
         </div>
 
-
         <!-- MODAL BODY -->
-
 
         <div class="sy-mbody">
           <div class="sy-form">
             <!-- SCHOOL YEAR NAME -->
 
-
             <div class="sy-field">
               <label for="syNameInput"> School Year Name </label>
-
 
               <input
                 id="syNameInput"
@@ -635,49 +530,36 @@
               />
             </div>
 
-
             <!-- START DATE -->
-
 
             <div class="sy-field">
               <label for="syStartInput"> Start Date </label>
 
-
               <input id="syStartInput" class="sy-input" type="date" />
             </div>
 
-
             <!-- END DATE -->
-
 
             <div class="sy-field">
               <label for="syEndInput"> End Date </label>
 
-
               <input id="syEndInput" class="sy-input" type="date" />
             </div>
 
-
             <!-- NUMBER OF TERMS -->
-
 
             <div class="sy-field sy-wide">
               <label for="numberOfTermsInput"> Number of Terms </label>
 
-
               <select id="numberOfTermsInput" class="sy-input">
                 <option value="1">1 Term</option>
 
-
                 <option value="2">2 Terms</option>
-
 
                 <option value="3" selected>3 Terms</option>
 
-
                 <option value="4">4 Terms</option>
               </select>
-
 
               <div class="sy-hint">
                 The school year will automatically create the selected number of
@@ -686,22 +568,17 @@
             </div>
           </div>
 
-
           <!-- CREATE ERROR -->
-
 
           <div id="createSYError" class="sy-error hidden"></div>
         </div>
 
-
         <!-- MODAL FOOTER -->
-
 
         <div class="sy-mfoot">
           <button class="sy-ghost" id="createSYCancel" type="button">
             Cancel
           </button>
-
 
           <div class="sy-foot-right">
             <button class="sy-save" id="createSYSave" type="button">
@@ -712,15 +589,12 @@
       </div>
     </div>
 
-
     <!-- =========================================================
        EDIT TERMS MODAL
   ========================================================== -->
 
-
     <div id="editTermsModal" class="sy-modal hidden" aria-hidden="true">
       <div class="sy-backdrop" id="editTermsBackdrop"></div>
-
 
       <div
         class="sy-dialog"
@@ -731,17 +605,14 @@
       >
         <!-- MODAL HEADER -->
 
-
         <div class="sy-mhead">
           <div>
             <div class="sy-mtitle" id="editTermsTitle">Edit Terms</div>
-
 
             <div class="sy-msub" id="editTermsSub">
               Update term dates and lock finished terms.
             </div>
           </div>
-
 
           <button
             class="sy-x"
@@ -753,9 +624,7 @@
           </button>
         </div>
 
-
         <!-- MODAL BODY -->
-
 
         <div class="sy-mbody">
           <div class="sy-qwrap">
@@ -763,43 +632,33 @@
               <div class="sy-qhint">
                 Terms for:
 
-
                 <strong id="editTermsName"> — </strong>
               </div>
-
 
               <div class="sy-hint">Maximum of 4 terms.</div>
             </div>
 
-
             <!-- TERMS EDITOR -->
-
 
             <div id="termsEditor" class="sy-qeditor"></div>
           </div>
 
-
           <!-- EDIT ERROR -->
-
 
           <div id="editTermsError" class="sy-error hidden"></div>
         </div>
 
-
         <!-- MODAL FOOTER -->
-
 
         <div class="sy-mfoot">
           <button class="sy-ghost" id="editTermsCancel" type="button">
             Cancel
           </button>
 
-
           <div class="sy-foot-right">
             <button class="sy-ghost" id="editTermsReset" type="button">
               Reset
             </button>
-
 
             <button class="sy-save" id="editTermsSave" type="button">
               Save Changes
@@ -809,15 +668,12 @@
       </div>
     </div>
 
-
     <!-- =========================================================
        CONFIRM ACTION MODAL
   ========================================================== -->
 
-
     <div id="confirmModal" class="sy-modal hidden" aria-hidden="true">
       <div class="sy-backdrop" id="confirmBackdrop"></div>
-
 
       <div
         class="sy-dialog sy-sm"
@@ -830,12 +686,10 @@
           <div>
             <div class="sy-mtitle" id="confirmTitle">Confirm Action</div>
 
-
             <div class="sy-msub" id="confirmSub">
               Please confirm this action.
             </div>
           </div>
-
 
           <button
             class="sy-x"
@@ -847,17 +701,14 @@
           </button>
         </div>
 
-
         <div class="sy-mbody">
           <div class="sy-confirm" id="confirmText">Are you sure?</div>
         </div>
-
 
         <div class="sy-mfoot">
           <button class="sy-ghost" id="confirmCancel" type="button">
             Cancel
           </button>
-
 
           <div class="sy-foot-right">
             <button class="sy-danger" id="confirmDelete" type="button">
@@ -868,11 +719,9 @@
       </div>
     </div>
 
-
     <!-- =========================================================
        SCRIPTS
   ========================================================== -->
-
 
     <script src="../../js/auth/admin-guard.js"></script>
     <script src="../../js/admin/sidebar.js"></script>
@@ -881,6 +730,3 @@
     <script src="../../js/admin/admin-topbar.js"></script>
   </body>
 </html>
-
-
-

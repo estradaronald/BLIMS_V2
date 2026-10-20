@@ -1,11 +1,9 @@
 // frontend/src/js/admin/admin-audit-logs.js
 
 (function () {
-
   if (window.__adminAuditLogsInit) return;
 
   window.__adminAuditLogsInit = true;
-
 
   // =====================================================
   // HELPERS
@@ -13,13 +11,11 @@
 
   const $ = (id) => document.getElementById(id);
 
-
   // =====================================================
   // STATE
   // =====================================================
 
   const state = {
-
     page: 1,
 
     limit: 10,
@@ -35,37 +31,26 @@
     outcome: "",
 
     date: "",
-
   };
-
 
   // =====================================================
   // DATE FORMAT
   // =====================================================
 
   function fmtDate(iso) {
-
     try {
-
       return new Date(iso).toLocaleString();
-
     } catch {
-
       return iso || "";
-
     }
-
   }
-
 
   // =====================================================
   // ESCAPE HTML
   // =====================================================
 
   function esc(s) {
-
     return String(s ?? "")
-
       .replaceAll("&", "&amp;")
 
       .replaceAll("<", "&lt;")
@@ -75,69 +60,48 @@
       .replaceAll('"', "&quot;")
 
       .replaceAll("'", "&#39;");
-
   }
-
 
   // =====================================================
   // OUTCOME BADGE
   // =====================================================
 
   function outcomeBadge(outcome) {
-
     const value = String(outcome || "")
       .trim()
       .toUpperCase();
 
-
     let className = "info";
 
-
     if (value === "SUCCESS") {
-
       className = "success";
-
     } else if (value === "FAIL") {
-
       className = "fail";
-
     } else if (value === "INFO") {
-
       className = "info";
-
     }
-
 
     return `
       <span class="audit-badge ${className}">
         ${esc(value || "—")}
       </span>
     `;
-
   }
-
 
   // =====================================================
   // ERROR
   // =====================================================
 
   function showError(msg) {
-
     const tbody = $("auditBody");
 
     const meta = $("auditMeta");
 
-
     if (meta) {
-
-      meta.textContent =
-        msg || "Failed to load audit logs.";
-
+      meta.textContent = msg || "Failed to load audit logs.";
     }
 
-
     if (tbody) {
-
       tbody.innerHTML = `
         <tr>
 
@@ -145,33 +109,24 @@
             colspan="8"
             class="audit-empty"
           >
-            ${esc(
-              msg ||
-              "Failed to load audit logs."
-            )}
+            ${esc(msg || "Failed to load audit logs.")}
           </td>
 
         </tr>
       `;
-
     }
-
   }
-
 
   // =====================================================
   // RENDER ROWS
   // =====================================================
 
   function renderRows(rows) {
-
     const tbody = $("auditBody");
 
     if (!tbody) return;
 
-
     if (!rows || rows.length === 0) {
-
       tbody.innerHTML = `
         <tr>
 
@@ -186,32 +141,20 @@
       `;
 
       return;
-
     }
-
 
     tbody.innerHTML = rows
 
       .map((r, idx) => {
+        const user = r.actor_username || "—";
 
-        const user =
-          r.actor_username || "—";
+        const role = r.actor_role || "—";
 
-        const role =
-          r.actor_role || "—";
+        const msg = r.message || "—";
 
-        const msg =
-          r.message || "—";
+        const ip = r.ip || "—";
 
-        const ip =
-          r.ip || "—";
-
-
-        const rowNumber =
-          ((state.page - 1) * state.limit)
-          + idx
-          + 1;
-
+        const rowNumber = (state.page - 1) * state.limit + idx + 1;
 
         return `
           <tr>
@@ -252,596 +195,372 @@
 
           </tr>
         `;
-
       })
 
       .join("");
-
   }
-
 
   // =====================================================
   // RENDER META
   // =====================================================
 
   function renderMeta() {
-
     const meta = $("auditMeta");
 
+    const start = state.total === 0 ? 0 : (state.page - 1) * state.limit + 1;
 
-    const start =
-      state.total === 0
-        ? 0
-        : ((state.page - 1) * state.limit) + 1;
-
-
-    const end =
-      Math.min(
-        state.page * state.limit,
-        state.total
-      );
-
+    const end = Math.min(state.page * state.limit, state.total);
 
     if (meta) {
-
-      meta.textContent =
-        `Showing ${start} to ${end} of ${state.total} logs`;
-
+      meta.textContent = `Showing ${start} to ${end} of ${state.total} logs`;
     }
 
-
     renderPagination();
-
   }
-
 
   // =====================================================
   // PAGINATION
   // =====================================================
 
   function renderPagination() {
-
-    const container =
-      $("pageNumbers");
+    const container = $("pageNumbers");
 
     if (!container) return;
 
-
     container.innerHTML = "";
-
 
     const maxVisible = 5;
 
+    let startPage = Math.max(1, state.page - 2);
 
-    let startPage =
-      Math.max(
-        1,
-        state.page - 2
-      );
+    let endPage = Math.min(state.pages, startPage + maxVisible - 1);
 
-
-    let endPage =
-      Math.min(
-        state.pages,
-        startPage + maxVisible - 1
-      );
-
-
-    if (
-      endPage - startPage + 1 <
-      maxVisible
-    ) {
-
-      startPage =
-        Math.max(
-          1,
-          endPage - maxVisible + 1
-        );
-
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
     }
 
-
-    for (
-      let page = startPage;
-      page <= endPage;
-      page++
-    ) {
-
-      const btn =
-        document.createElement("button");
-
+    for (let page = startPage; page <= endPage; page++) {
+      const btn = document.createElement("button");
 
       btn.type = "button";
 
-      btn.className =
-        "audit-page-number";
-
+      btn.className = "audit-page-number";
 
       if (page === state.page) {
-
         btn.classList.add("active");
-
       }
-
 
       btn.textContent = page;
 
-
-      btn.addEventListener(
-        "click",
-        () => {
-
-          if (page === state.page) {
-            return;
-          }
-
-          state.page = page;
-
-          fetchLogs().catch(() => {});
-
+      btn.addEventListener("click", () => {
+        if (page === state.page) {
+          return;
         }
-      );
 
+        state.page = page;
+
+        fetchLogs().catch(() => {});
+      });
 
       container.appendChild(btn);
-
     }
 
-
     if (state.pages > endPage) {
+      const dots = document.createElement("span");
 
-      const dots =
-        document.createElement("span");
-
-      dots.className =
-        "audit-page-dots";
+      dots.className = "audit-page-dots";
 
       dots.textContent = "…";
 
       container.appendChild(dots);
 
-
-      const last =
-        document.createElement("button");
+      const last = document.createElement("button");
 
       last.type = "button";
 
-      last.className =
-        "audit-page-number";
+      last.className = "audit-page-number";
 
-      last.textContent =
-        state.pages;
+      last.textContent = state.pages;
 
+      last.addEventListener("click", () => {
+        state.page = state.pages;
 
-      last.addEventListener(
-        "click",
-        () => {
-
-          state.page =
-            state.pages;
-
-          fetchLogs().catch(() => {});
-
-        }
-      );
-
+        fetchLogs().catch(() => {});
+      });
 
       container.appendChild(last);
-
     }
 
+    const prev = $("prevBtn");
 
-    const prev =
-      $("prevBtn");
-
-    const next =
-      $("nextBtn");
-
+    const next = $("nextBtn");
 
     if (prev) {
-
-      prev.disabled =
-        state.page <= 1;
-
+      prev.disabled = state.page <= 1;
     }
-
 
     if (next) {
-
-      next.disabled =
-        state.page >= state.pages;
-
+      next.disabled = state.page >= state.pages;
     }
-
   }
-
 
   // =====================================================
   // FETCH LOGS
   // =====================================================
 
   async function fetchLogs() {
+    const qs = new URLSearchParams();
 
-    const qs =
-      new URLSearchParams();
+    qs.set("page", String(state.page));
 
-
-    qs.set(
-      "page",
-      String(state.page)
-    );
-
-
-    qs.set(
-      "limit",
-      String(state.limit)
-    );
-
+    qs.set("limit", String(state.limit));
 
     if (state.q) {
-
-      qs.set(
-        "q",
-        state.q
-      );
-
+      qs.set("q", state.q);
     }
-
 
     if (state.action) {
-
-      qs.set(
-        "action",
-        state.action
-      );
-
+      qs.set("action", state.action);
     }
-
 
     if (state.outcome) {
-
-      qs.set(
-        "outcome",
-        state.outcome
-      );
-
+      qs.set("outcome", state.outcome);
     }
 
-if (state.date) {
-  qs.set(
-    "date",
-    state.date
-  );
-}
+    if (state.date) {
+      qs.set("date", state.date);
+    }
 
-    const url =
-      `/api/admin/audit-logs?${qs.toString()}`;
-
+    const url = `/api/admin/audit-logs?${qs.toString()}`;
 
     let res;
 
-
     try {
+      res = await fetch(url, {
+        method: "GET",
 
-      res = await fetch(
-        url,
-        {
-          method: "GET",
+        credentials: "include",
 
-          credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
 
-          headers: {
-            Accept:
-              "application/json",
-          },
-
-          cache: "no-store",
-        }
-      );
-
+        cache: "no-store",
+      });
     } catch (e) {
-
-      showError(
-        "Network error: unable to reach server."
-      );
+      showError("Network error: unable to reach server.");
 
       return;
-
     }
-
 
     // =================================================
     // AUTH
     // =================================================
 
-    if (
-      res.status === 401 ||
-      res.status === 403
-    ) {
-
+    if (res.status === 401 || res.status === 403) {
       location.replace("/");
 
       return;
-
     }
-
 
     // =================================================
     // 404
     // =================================================
 
     if (res.status === 404) {
-
       showError(
-        "Audit Logs API not found (404). Backend route /api/admin/audit-logs is not mounted."
+        "Audit Logs API not found (404). Backend route /api/admin/audit-logs is not mounted.",
       );
 
       return;
-
     }
-
 
     // =================================================
     // OTHER ERROR
     // =================================================
 
     if (!res.ok) {
-
-      const text =
-        await res.text()
-          .catch(() => "");
-
+      const text = await res.text().catch(() => "");
 
       showError(
-        `Failed to load audit logs (${res.status}). ${text || ""}`.trim()
+        `Failed to load audit logs (${res.status}). ${text || ""}`.trim(),
       );
 
       return;
-
     }
-
 
     // =================================================
     // RESPONSE
     // =================================================
 
-    const data =
-      await res.json()
-        .catch(() => null);
-
+    const data = await res.json().catch(() => null);
 
     if (!data) {
-
-      showError(
-        "Invalid server response."
-      );
+      showError("Invalid server response.");
 
       return;
-
     }
 
+    state.page = data.page || 1;
 
-    state.page =
-      data.page || 1;
+    state.limit = data.limit || state.limit;
 
+    state.total = data.total || 0;
 
-    state.limit =
-      data.limit || state.limit;
+    state.pages = data.pages || 1;
 
-
-    state.total =
-      data.total || 0;
-
-
-    state.pages =
-      data.pages || 1;
-
-
-    renderRows(
-      data.rows || []
-    );
-
+    renderRows(data.rows || []);
 
     renderMeta();
-
   }
-
 
   // =====================================================
   // APPLY FILTERS
   // =====================================================
 
   function applyFilters() {
-
     state.page = 1;
 
+    state.q = ($("qInput")?.value || "").trim();
 
-    state.q =
-      ($("qInput")?.value || "")
-        .trim();
+    state.action = $("actionSelect")?.value || "";
 
+    state.outcome = $("outcomeSelect")?.value || "";
 
-    state.action =
-      $("actionSelect")?.value || "";
+    state.date = $("auditDate")?.value || "";
 
-
-    state.outcome =
-      $("outcomeSelect")?.value || "";
-
-
-    state.date =
-  $("auditDate")?.value || "";
-
-    fetchLogs()
-      .catch(() => {});
-
+    fetchLogs().catch(() => {});
   }
 
+  // =====================================================
+  // CLEAR FILTERS
+  // =====================================================
 
- // =====================================================
-// CLEAR FILTERS
-// =====================================================
+  function clearFilters() {
+    state.page = 1;
 
-function clearFilters() {
+    state.q = "";
 
-  state.page = 1;
+    state.action = "";
 
-  state.q = "";
+    state.outcome = "";
 
-  state.action = "";
+    state.date = "";
 
-  state.outcome = "";
+    const q = $("qInput");
 
-  state.date = "";
+    const a = $("actionSelect");
 
+    const o = $("outcomeSelect");
 
-  const q =
-    $("qInput");
+    const date = $("auditDate");
 
-  const a =
-    $("actionSelect");
+    if (q) {
+      q.value = "";
+    }
 
-  const o =
-    $("outcomeSelect");
+    if (a) {
+      a.value = "";
+    }
 
-  const date =
-    $("auditDate");
+    if (o) {
+      o.value = "";
+    }
 
+    if (date) {
+      date.value = "";
+    }
 
-  if (q) {
-    q.value = "";
+    fetchLogs().catch(() => {});
   }
-
-  if (a) {
-    a.value = "";
-  }
-
-  if (o) {
-    o.value = "";
-  }
-
-  if (date) {
-    date.value = "";
-  }
-
-
-  fetchLogs()
-    .catch(() => {});
-
-}
-
 
   // =====================================================
   // CONTROLS
   // =====================================================
 
   function initControls() {
+    $("applyBtn")?.addEventListener("click", applyFilters);
 
-    $("applyBtn")
-      ?.addEventListener(
-        "click",
-        applyFilters
-      );
+    $("clearBtn")?.addEventListener("click", clearFilters);
 
+    $("prevBtn")?.addEventListener("click", () => {
+      if (state.page > 1) {
+        state.page -= 1;
 
-    $("clearBtn")
-      ?.addEventListener(
-        "click",
-        clearFilters
-      );
+        fetchLogs().catch(() => {});
+      }
+    });
 
+    $("nextBtn")?.addEventListener("click", () => {
+      if (state.page < state.pages) {
+        state.page += 1;
 
-    $("prevBtn")
-      ?.addEventListener(
-        "click",
-        () => {
+        fetchLogs().catch(() => {});
+      }
+    });
 
-          if (state.page > 1) {
+    $("limitSelect")?.addEventListener("change", () => {
+      state.limit = Number($("limitSelect").value) || 10;
 
-            state.page -= 1;
+      state.page = 1;
 
-            fetchLogs()
-              .catch(() => {});
+      fetchLogs().catch(() => {});
+    });
 
-          }
-
-        }
-      );
-
-
-    $("nextBtn")
-      ?.addEventListener(
-        "click",
-        () => {
-
-          if (
-            state.page <
-            state.pages
-          ) {
-
-            state.page += 1;
-
-            fetchLogs()
-              .catch(() => {});
-
-          }
-
-        }
-      );
-
-
-    $("limitSelect")
-      ?.addEventListener(
-        "change",
-        () => {
-
-          state.limit =
-            Number(
-              $("limitSelect").value
-            ) || 10;
-
-
-          state.page = 1;
-
-
-          fetchLogs()
-            .catch(() => {});
-
-        }
-      );
-
-
-    $("qInput")
-      ?.addEventListener(
-        "keydown",
-        (e) => {
-
-          if (e.key === "Enter") {
-
-            applyFilters();
-
-          }
-
-        }
-      );
-
+    $("qInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        applyFilters();
+      }
+    });
   }
-
 
   // =====================================================
   // INIT
   // =====================================================
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+  document.addEventListener("DOMContentLoaded", () => {
+    initControls();
 
-      initControls();
+    // Audit Logs topbar dropdown
+    const userMenuBtn = $("userMenuBtn");
+    const userMenu = $("userMenu");
+    const logoutBtn = $("topbarLogout");
 
-      fetchLogs()
-        .catch(() => {});
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        logoutBtn.disabled = true;
 
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+        } catch (err) {
+          console.error("Logout request failed:", err);
+        } finally {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/";
+        }
+      });
     }
-  );
 
+    if (userMenuBtn && userMenu) {
+      userMenuBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        userMenu.classList.toggle("open");
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          !userMenu.contains(event.target) &&
+          !userMenuBtn.contains(event.target)
+        ) {
+          userMenu.classList.remove("open");
+        }
+      });
+    }
+
+    fetchLogs().catch(() => {});
+  });
 })();

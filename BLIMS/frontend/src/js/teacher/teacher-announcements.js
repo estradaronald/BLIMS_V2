@@ -55,38 +55,52 @@
 // Schedule date/time appear directly in the form.
 //
 
-
 // =========================================================
 // API
 // =========================================================
 
-const API_BASE =
-  "/api/teacher/announcements";
+const API_BASE = "/api/teacher/announcements";
 
+const SCOPE_API = "/api/teacher/students/scope";
 
-const SCOPE_API =
-  "/api/teacher/students/scope";
-
-
-const $ = (id) =>
-  document.getElementById(id);
-
+const $ = (id) => document.getElementById(id);
 
 // =========================================================
 // STATE
 // =========================================================
 
-let tab =
-  "my";
+let tab = "my";
 
+let announcements = [];
 
-let announcements =
-  [];
+let editingId = null;
 
+let CURRENT_TEACHER_NAME = "";
 
-let editingId =
-  null;
+async function loadCurrentTeacherName() {
+  try {
+    const data = await apiRequest("/api/auth/me");
+    const user = data?.user;
 
+    if (!user) return;
+
+    const name = [user.first_name, user.middle_name, user.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    if (name) {
+      CURRENT_TEACHER_NAME = name;
+
+      const nameElement = $("tbName");
+      if (nameElement) {
+        nameElement.textContent = name;
+      }
+    }
+  } catch (error) {
+    console.error("[teacher-announcements] Failed to load user name:", error);
+  }
+}
 
 // =========================================================
 // TEACHER SCOPE
@@ -116,363 +130,167 @@ let editingId =
 //
 
 let TEACHER_SCOPE = {
-
   className: "",
 
   sectionName: "",
-
 };
-
 
 // =========================================================
 // LOCAL USER
 // =========================================================
 
 function readUser() {
-
   try {
-
-    return JSON.parse(
-      localStorage.getItem(
-        "user"
-      ) || "{}"
-    );
-
+    return JSON.parse(localStorage.getItem("user") || "{}");
   } catch (err) {
-
-    console.error(
-      "[teacher-announcements] Failed to read local user:",
-      err
-    );
+    console.error("[teacher-announcements] Failed to read local user:", err);
 
     return {};
-
   }
-
 }
-
 
 // =========================================================
 // HELPERS
 // =========================================================
 
 function normalize(value) {
-
-  return String(
-    value ?? ""
-  ).trim();
-
+  return String(value ?? "").trim();
 }
-
 
 function escapeHtml(value) {
-
-  return String(
-    value ?? ""
-  )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
-
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
-
 
 // =========================================================
 // DATE HELPERS
 // =========================================================
 
 function parseDate(value) {
-
   if (!value) {
-
     return null;
-
   }
 
+  const d = value instanceof Date ? value : new Date(value);
 
-  const d =
-    value instanceof Date
-      ? value
-      : new Date(value);
-
-
-  if (
-    Number.isNaN(
-      d.getTime()
-    )
-  ) {
-
+  if (Number.isNaN(d.getTime())) {
     return null;
-
   }
-
 
   return d;
-
 }
-
 
 function formatDate(value) {
-
-  const d =
-    parseDate(
-      value
-    );
-
+  const d = parseDate(value);
 
   if (!d) {
-
     return "—";
-
   }
 
-
-  return d.toLocaleString(
-    undefined,
-    {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-  );
-
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
-
 
 function formatDateOnly(value) {
-
-  const d =
-    parseDate(
-      value
-    );
-
+  const d = parseDate(value);
 
   if (!d) {
-
     return "";
-
   }
 
+  const year = d.getFullYear();
 
-  const year =
-    d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
 
+  const day = String(d.getDate()).padStart(2, "0");
 
-  const month =
-    String(
-      d.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  const day =
-    String(
-      d.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  return (
-    `${year}-${month}-${day}`
-  );
-
+  return `${year}-${month}-${day}`;
 }
-
 
 function formatTimeOnly(value) {
-
-  const d =
-    parseDate(
-      value
-    );
-
+  const d = parseDate(value);
 
   if (!d) {
-
     return "";
-
   }
 
+  const hours = String(d.getHours()).padStart(2, "0");
 
-  const hours =
-    String(
-      d.getHours()
-    ).padStart(
-      2,
-      "0"
-    );
+  const minutes = String(d.getMinutes()).padStart(2, "0");
 
-
-  const minutes =
-    String(
-      d.getMinutes()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  return (
-    `${hours}:${minutes}`
-  );
-
+  return `${hours}:${minutes}`;
 }
-
 
 // =========================================================
 // STATUS
 // =========================================================
 
 function getStatus(a) {
-
-  if (
-    a?.archived === true
-  ) {
-
+  if (a?.archived === true) {
     return "archived";
-
   }
 
-
-  if (
-    a?.draft === true
-  ) {
-
+  if (a?.draft === true) {
     return "draft";
-
   }
 
+  if (a?.publishAt) {
+    const publishTime = new Date(a.publishAt).getTime();
 
-  if (
-    a?.publishAt
-  ) {
-
-    const publishTime =
-      new Date(
-        a.publishAt
-      ).getTime();
-
-
-    if (
-      !Number.isNaN(
-        publishTime
-      ) &&
-      publishTime >
-        Date.now()
-    ) {
-
+    if (!Number.isNaN(publishTime) && publishTime > Date.now()) {
       return "scheduled";
-
     }
-
   }
-
 
   return "published";
-
 }
-
 
 // =========================================================
 // SOURCE / ROLE
 // =========================================================
 
 function getAnnouncementSource(a) {
+  const source = normalize(a?.source).toLowerCase();
 
-  const source =
-    normalize(
-      a?.source
-    ).toLowerCase();
+  const authorRole = normalize(a?.authorRole).toLowerCase();
 
+  const createdByRole = normalize(a?.createdByRole).toLowerCase();
 
-  const authorRole =
-    normalize(
-      a?.authorRole
-    ).toLowerCase();
+  const createdBy = a?.createdBy;
 
-
-  const createdByRole =
-    normalize(
-      a?.createdByRole
-    ).toLowerCase();
-
-
-  const createdBy =
-    a?.createdBy;
-
-
-  const createdByRoleNested =
-    normalize(
-      createdBy?.role
-    ).toLowerCase();
-
+  const createdByRoleNested = normalize(createdBy?.role).toLowerCase();
 
   /*
     ADMIN
   */
 
-  if (
-    source === "admin" ||
-    source === "administrator"
-  ) {
-
+  if (source === "admin" || source === "administrator") {
     return "admin";
-
   }
 
-
-  if (
-    authorRole === "admin" ||
-    authorRole === "administrator"
-  ) {
-
+  if (authorRole === "admin" || authorRole === "administrator") {
     return "admin";
-
   }
 
-
-  if (
-    createdByRole === "admin" ||
-    createdByRole === "administrator"
-  ) {
-
+  if (createdByRole === "admin" || createdByRole === "administrator") {
     return "admin";
-
   }
-
 
   if (
     createdByRoleNested === "admin" ||
     createdByRoleNested === "administrator"
   ) {
-
     return "admin";
-
   }
-
 
   /*
     Everything else shown
@@ -481,137 +299,62 @@ function getAnnouncementSource(a) {
   */
 
   return "teacher";
-
 }
-
 
 function isAdminAnnouncement(a) {
-
-  return (
-    getAnnouncementSource(
-      a
-    ) === "admin"
-  );
-
+  return getAnnouncementSource(a) === "admin";
 }
-
 
 function getSourceLabel(a) {
-
-  return isAdminAnnouncement(
-    a
-  )
-    ? "Admin"
-    : "Teacher";
-
+  return isAdminAnnouncement(a) ? "Admin" : "Teacher";
 }
-
 
 // =========================================================
 // TEACHER ASSIGNMENT
 // =========================================================
 
 async function loadTeacherScope() {
-
   try {
+    console.log("[teacher-announcements] Loading teacher scope...");
 
-    console.log(
-      "[teacher-announcements] Loading teacher scope..."
-    );
+    const result = await apiRequest(SCOPE_API);
 
-
-    const result =
-      await apiRequest(
-        SCOPE_API
-      );
-
-
-    const scope =
-      result?.data ||
-      result?.scope ||
-      {};
-
+    const scope = result?.data || result?.scope || {};
 
     TEACHER_SCOPE = {
+      className: normalize(
+        scope.className || scope.class || scope.grade || scope.gradeLevel || "",
+      ),
 
-      className:
-        normalize(
-          scope.className ||
-          scope.class ||
-          scope.grade ||
-          scope.gradeLevel ||
-          ""
-        ),
-
-      sectionName:
-        normalize(
-          scope.sectionName ||
-          scope.section ||
-          ""
-        ),
-
+      sectionName: normalize(scope.sectionName || scope.section || ""),
     };
 
-
-    console.log(
-      "[teacher-announcements] TEACHER_SCOPE:",
-      TEACHER_SCOPE
-    );
-
-
+    console.log("[teacher-announcements] TEACHER_SCOPE:", TEACHER_SCOPE);
   } catch (err) {
-
-    console.error(
-      "[teacher-announcements] Failed to load teacher scope:",
-      err
-    );
-
+    console.error("[teacher-announcements] Failed to load teacher scope:", err);
 
     TEACHER_SCOPE = {
-
       className: "",
 
       sectionName: "",
-
     };
-
   }
-
 }
-
 
 function hasTeacherScope() {
-
   return (
-    !!normalize(
-      TEACHER_SCOPE.className
-    ) &&
-    !!normalize(
-      TEACHER_SCOPE.sectionName
-    )
+    !!normalize(TEACHER_SCOPE.className) &&
+    !!normalize(TEACHER_SCOPE.sectionName)
   );
-
 }
-
 
 function scopeLabel() {
-
-  if (
-    hasTeacherScope()
-  ) {
-
-    return (
-      `${TEACHER_SCOPE.className} - ` +
-      `${TEACHER_SCOPE.sectionName}`
-    );
-
+  if (hasTeacherScope()) {
+    return `${TEACHER_SCOPE.className} - ` + `${TEACHER_SCOPE.sectionName}`;
   }
 
-
   return "(unassigned)";
-
 }
-
 
 // =========================================================
 // AUDIENCE
@@ -632,26 +375,15 @@ function scopeLabel() {
 //
 
 function getTeacherAudienceLabel() {
-
   return scopeLabel();
-
 }
 
-
-function getAnnouncementAudienceLabel(
-  announcement
-) {
-
+function getAnnouncementAudienceLabel(announcement) {
   /*
     ADMIN ANNOUNCEMENT
   */
 
-  if (
-    isAdminAnnouncement(
-      announcement
-    )
-  ) {
-
+  if (isAdminAnnouncement(announcement)) {
     /*
       Admin audience can use the actual
       audience value stored in the model.
@@ -664,76 +396,40 @@ function getAnnouncementAudienceLabel(
         class
     */
 
-    const audience =
-      normalize(
-        announcement?.audience
-      ).toLowerCase();
+    const audience = normalize(announcement?.audience).toLowerCase();
 
-
-    if (
-      audience === "students"
-    ) {
-
+    if (audience === "students") {
       return "Students";
-
     }
 
-
-    if (
-      audience === "teachers"
-    ) {
-
+    if (audience === "teachers") {
       return "Teachers";
-
     }
 
-
-    if (
-      audience === "all"
-    ) {
-
+    if (audience === "all") {
       return "School-wide";
-
     }
-
 
     if (
       audience === "class" &&
       announcement?.className &&
       announcement?.sectionName
     ) {
-
-      return (
-        `${normalize(
-          announcement.className
-        )} - ${normalize(
-          announcement.sectionName
-        )}`
-      );
-
+      return `${normalize(announcement.className)} - ${normalize(
+        announcement.sectionName,
+      )}`;
     }
 
-
     return "School-wide";
-
   }
-
 
   /*
     TEACHER ANNOUNCEMENT
   */
 
-  const className =
-    normalize(
-      announcement?.className
-    );
+  const className = normalize(announcement?.className);
 
-
-  const sectionName =
-    normalize(
-      announcement?.sectionName
-    );
-
+  const sectionName = normalize(announcement?.sectionName);
 
   /*
     Always prefer the class/section
@@ -744,17 +440,9 @@ function getAnnouncementAudienceLabel(
     assignment may have changed later.
   */
 
-  if (
-    className &&
-    sectionName
-  ) {
-
-    return (
-      `${className} - ${sectionName}`
-    );
-
+  if (className && sectionName) {
+    return `${className} - ${sectionName}`;
   }
-
 
   /*
     Fallback to the currently
@@ -762,59 +450,41 @@ function getAnnouncementAudienceLabel(
   */
 
   return getTeacherAudienceLabel();
-
 }
-
 
 // =========================================================
 // TEACHER NAME
 // =========================================================
 
 function getTeacherName() {
-
-  const u =
-    readUser();
-
+  const u = readUser();
 
   return (
+    CURRENT_TEACHER_NAME ||
     u.fullName ||
-
     [
-      u.firstName,
-      u.middleName,
-      u.lastName,
+      u.firstName || u.first_name,
+      u.middleName || u.middle_name,
+      u.lastName || u.last_name,
     ]
       .filter(Boolean)
-      .join(" ") ||
-
+      .join(" ")
+      .trim() ||
     u.username ||
-
     "Teacher"
   );
-
 }
-
 
 // =========================================================
 // AUTHOR NAME
 // =========================================================
 
 function getAuthorName(a) {
-
-  if (
-    isAdminAnnouncement(
-      a
-    )
-  ) {
-
+  if (isAdminAnnouncement(a)) {
     return "Administrator";
-
   }
 
-
-  const createdBy =
-    a?.createdBy;
-
+  const createdBy = a?.createdBy;
 
   return (
     createdBy?.fullName ||
@@ -823,91 +493,54 @@ function getAuthorName(a) {
     a?.createdByName ||
     getTeacherName()
   );
-
 }
-
 
 // =========================================================
 // API
 // =========================================================
 
-async function apiRequest(
-  url,
-  options = {}
-) {
-
+async function apiRequest(url, options = {}) {
   const config = {
-
-    credentials:
-      "include",
+    credentials: "include",
 
     ...options,
 
     headers: {
-
-      "Content-Type":
-        "application/json",
+      "Content-Type": "application/json",
 
       ...(options.headers || {}),
-
     },
-
   };
 
-
-  const response =
-    await fetch(
-      url,
-      config
-    );
-
+  const response = await fetch(url, config);
 
   let data = null;
 
-
   try {
-
-    data =
-      await response.json();
-
+    data = await response.json();
   } catch {
-
     data = null;
-
   }
-
 
   if (!response.ok) {
-
     throw new Error(
-      data?.message ||
-      `Request failed with status ${response.status}.`
+      data?.message || `Request failed with status ${response.status}.`,
     );
-
   }
 
-
   return data;
-
 }
-
 
 // =========================================================
 // LOAD ANNOUNCEMENTS
 // =========================================================
 
 async function loadAnnouncements() {
+  const feed = $("annFeed");
 
-  const feed =
-    $("annFeed");
-
-
-  const empty =
-    $("annEmpty");
-
+  const empty = $("annEmpty");
 
   if (feed) {
-
     feed.innerHTML = `
 
       <div class="ann-empty">
@@ -921,82 +554,30 @@ async function loadAnnouncements() {
       </div>
 
     `;
-
   }
 
-
   try {
+    const result = await apiRequest(API_BASE);
 
-    const result =
-      await apiRequest(
-        API_BASE
-      );
-
-
-    if (
-      Array.isArray(
-        result
-      )
-    ) {
-
-      announcements =
-        result;
-
+    if (Array.isArray(result)) {
+      announcements = result;
+    } else if (Array.isArray(result?.data)) {
+      announcements = result.data;
+    } else if (Array.isArray(result?.announcements)) {
+      announcements = result.announcements;
+    } else {
+      announcements = [];
     }
 
-    else if (
-      Array.isArray(
-        result?.data
-      )
-    ) {
-
-      announcements =
-        result.data;
-
-    }
-
-    else if (
-      Array.isArray(
-        result?.announcements
-      )
-    ) {
-
-      announcements =
-        result.announcements;
-
-    }
-
-    else {
-
-      announcements =
-        [];
-
-    }
-
-
-    console.log(
-      "[teacher-announcements] loaded:",
-      announcements
-    );
-
+    console.log("[teacher-announcements] loaded:", announcements);
 
     renderList();
-
-
   } catch (err) {
+    console.error("[teacher-announcements] Failed to load:", err);
 
-    console.error(
-      "[teacher-announcements] Failed to load:",
-      err
-    );
-
-
-    announcements =
-      [];
-
+    announcements = [];
 
     if (feed) {
-
       feed.innerHTML = `
 
         <div class="ann-empty ann-error">
@@ -1006,108 +587,53 @@ async function loadAnnouncements() {
           </strong>
 
           <small>
-            ${escapeHtml(
-              err.message
-            )}
+            ${escapeHtml(err.message)}
           </small>
 
         </div>
 
       `;
-
     }
-
 
     if (empty) {
-
-      empty.classList.add(
-        "hidden"
-      );
-
+      empty.classList.add("hidden");
     }
-
   }
-
 }
-
 
 // =========================================================
 // FILTERS
 // =========================================================
 
 function getFilters() {
-
   return {
+    search: normalize($("annSearch")?.value || "").toLowerCase(),
 
-    search:
-      normalize(
-        $("annSearch")?.value ||
-        ""
-      ).toLowerCase(),
+    status: $("statusFilter")?.value || "all",
 
-    status:
-      $("statusFilter")?.value ||
-      "all",
-
-    category:
-      $("catFilter")?.value ||
-      "all",
-
+    category: $("catFilter")?.value || "all",
   };
-
 }
-
 
 // =========================================================
 // FILTER MATCHING
 // =========================================================
 
-function matchesFilters(
-  announcement,
-  filters
-) {
+function matchesFilters(announcement, filters) {
+  const status = getStatus(announcement);
 
-  const status =
-    getStatus(
-      announcement
-    );
-
-
-  if (
-    filters.status !==
-      "all" &&
-    status !==
-      filters.status
-  ) {
-
+  if (filters.status !== "all" && status !== filters.status) {
     return false;
-
   }
 
+  const category = announcement.category || "general";
 
-  const category =
-    announcement.category ||
-    "general";
-
-
-  if (
-    filters.category !==
-      "all" &&
-    category !==
-      filters.category
-  ) {
-
+  if (filters.category !== "all" && category !== filters.category) {
     return false;
-
   }
 
-
-  if (
-    filters.search
-  ) {
-
+  if (filters.search) {
     const haystack = [
-
       announcement.title,
 
       announcement.message,
@@ -1120,55 +646,32 @@ function matchesFilters(
 
       announcement.audience,
 
-      getAnnouncementAudienceLabel(
-        announcement
-      ),
+      getAnnouncementAudienceLabel(announcement),
 
-      getAuthorName(
-        announcement
-      ),
+      getAuthorName(announcement),
 
-      getSourceLabel(
-        announcement
-      ),
-
+      getSourceLabel(announcement),
     ]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
 
-
-    if (
-      !haystack.includes(
-        filters.search
-      )
-    ) {
-
+    if (!haystack.includes(filters.search)) {
       return false;
-
     }
-
   }
 
-
   return true;
-
 }
-
 
 // =========================================================
 // TAB DATA
 // =========================================================
 
 function getVisibleAnnouncements() {
+  const filters = getFilters();
 
-  const filters =
-    getFilters();
-
-
-  let rows =
-    [...announcements];
-
+  let rows = [...announcements];
 
   /*
     MY CLASS
@@ -1176,20 +679,9 @@ function getVisibleAnnouncements() {
     Only teacher announcements.
   */
 
-  if (
-    tab === "my"
-  ) {
-
-    rows =
-      rows.filter(
-        (a) =>
-          !isAdminAnnouncement(
-            a
-          )
-      );
-
+  if (tab === "my") {
+    rows = rows.filter((a) => !isAdminAnnouncement(a));
   }
-
 
   /*
     ADMIN
@@ -1197,142 +689,67 @@ function getVisibleAnnouncements() {
     Only admin announcements.
   */
 
-  if (
-    tab === "admin"
-  ) {
-
-    rows =
-      rows.filter(
-        (a) =>
-          isAdminAnnouncement(
-            a
-          )
-      );
-
+  if (tab === "admin") {
+    rows = rows.filter((a) => isAdminAnnouncement(a));
   }
 
-
-  rows =
-    rows.filter(
-      (a) =>
-        matchesFilters(
-          a,
-          filters
-        )
-    );
-
+  rows = rows.filter((a) => matchesFilters(a, filters));
 
   /*
     NEWEST FIRST
   */
 
-  rows.sort(
-    (a, b) => {
+  rows.sort((a, b) => {
+    const aTime = new Date(
+      a.updatedAt || a.createdAt || a.publishAt || 0,
+    ).getTime();
 
-      const aTime =
-        new Date(
-          a.updatedAt ||
-          a.createdAt ||
-          a.publishAt ||
-          0
-        ).getTime();
+    const bTime = new Date(
+      b.updatedAt || b.createdAt || b.publishAt || 0,
+    ).getTime();
 
-
-      const bTime =
-        new Date(
-          b.updatedAt ||
-          b.createdAt ||
-          b.publishAt ||
-          0
-        ).getTime();
-
-
-      return (
-        bTime - aTime
-      );
-
-    }
-  );
-
+    return bTime - aTime;
+  });
 
   return rows;
-
 }
-
 
 // =========================================================
 // CATEGORY LABEL
 // =========================================================
 
-function categoryLabel(
-  category
-) {
-
+function categoryLabel(category) {
   const labels = {
+    general: "General",
 
-    general:
-      "General",
+    events: "School Event",
 
-    events:
-      "School Event",
+    academic: "Academic",
 
-    academic:
-      "Academic",
-
-    priority:
-      "Priority",
-
+    priority: "Priority",
   };
 
-
-  return (
-    labels[category] ||
-    "General"
-  );
-
+  return labels[category] || "General";
 }
-
 
 // =========================================================
 // STATUS LABEL
 // =========================================================
 
-function statusLabel(
-  status
-) {
-
-  return (
-    status
-      .charAt(0)
-      .toUpperCase() +
-    status.slice(1)
-  );
-
+function statusLabel(status) {
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
-
 
 // =========================================================
 // BADGES
 // =========================================================
 
 function badgeHtml(a) {
+  const status = getStatus(a);
 
-  const status =
-    getStatus(
-      a
-    );
+  const category = a.category || "general";
 
-
-  const category =
-    a.category ||
-    "general";
-
-
-  const source =
-    getAnnouncementSource(
-      a
-    );
-
+  const source = getAnnouncementSource(a);
 
   return `
 
@@ -1340,91 +757,52 @@ function badgeHtml(a) {
 
       <span class="ta-badge">
 
-        ${escapeHtml(
-          categoryLabel(
-            category
-          )
-        )}
+        ${escapeHtml(categoryLabel(category))}
 
       </span>
 
 
       <span
-        class="ta-source-pill ${escapeHtml(
-          source
-        )}"
+        class="ta-source-pill ${escapeHtml(source)}"
       >
 
-        ${escapeHtml(
-          source === "admin"
-            ? "Admin"
-            : "My Class"
-        )}
+        ${escapeHtml(source === "admin" ? "Admin" : "My Class")}
 
       </span>
 
 
       <span
-        class="ta-status-pill ${escapeHtml(
-          status
-        )}"
+        class="ta-status-pill ${escapeHtml(status)}"
       >
 
-        ${escapeHtml(
-          statusLabel(
-            status
-          )
-        )}
+        ${escapeHtml(statusLabel(status))}
 
       </span>
 
     </div>
 
   `;
-
 }
-
 
 // =========================================================
 // RENDER LIST
 // =========================================================
 
 function renderList() {
+  const feed = $("annFeed");
 
-  const feed =
-    $("annFeed");
+  const empty = $("annEmpty");
 
-
-  const empty =
-    $("annEmpty");
-
-
-  if (
-    !feed ||
-    !empty
-  ) {
-
+  if (!feed || !empty) {
     return;
-
   }
 
+  const rows = getVisibleAnnouncements();
 
-  const rows =
-    getVisibleAnnouncements();
+  feed.innerHTML = "";
 
-
-  feed.innerHTML =
-    "";
-
-
-  if (
-    rows.length === 0
-  ) {
-
-    empty.classList.remove(
-      "hidden"
-    );
-
+  if (rows.length === 0) {
+    empty.classList.remove("hidden");
 
     empty.innerHTML = `
 
@@ -1435,11 +813,7 @@ function renderList() {
 
       <strong>
 
-        ${
-          tab === "admin"
-            ? "No admin announcements"
-            : "No class announcements"
-        }
+        ${tab === "admin" ? "No admin announcements" : "No class announcements"}
 
       </strong>
 
@@ -1450,7 +824,7 @@ function renderList() {
           tab === "admin"
             ? "There are no announcements published by administrators."
             : `Create an announcement for ${escapeHtml(
-                getTeacherAudienceLabel()
+                getTeacherAudienceLabel(),
               )}.`
         }
 
@@ -1458,60 +832,27 @@ function renderList() {
 
     `;
 
-
     return;
-
   }
 
+  empty.classList.add("hidden");
 
-  empty.classList.add(
-    "hidden"
-  );
+  rows.forEach((a) => {
+    const author = getAuthorName(a);
 
+    const id = a._id || a.id;
 
-  rows.forEach(
-    (a) => {
+    const admin = isAdminAnnouncement(a);
 
-      const author =
-        getAuthorName(
-          a
-        );
+    const status = getStatus(a);
 
+    const audience = getAnnouncementAudienceLabel(a);
 
-      const id =
-        a._id ||
-        a.id;
+    const item = document.createElement("article");
 
+    item.className = "ann-feed-item";
 
-      const admin =
-        isAdminAnnouncement(
-          a
-        );
-
-
-      const status =
-        getStatus(
-          a
-        );
-
-
-      const audience =
-        getAnnouncementAudienceLabel(
-          a
-        );
-
-
-      const item =
-        document.createElement(
-          "article"
-        );
-
-
-      item.className =
-        "ann-feed-item";
-
-
-      item.innerHTML = `
+    item.innerHTML = `
 
         <div class="ta-item-top">
 
@@ -1519,17 +860,12 @@ function renderList() {
 
             <div class="ta-item-title">
 
-              ${escapeHtml(
-                a.title ||
-                "Untitled"
-              )}
+              ${escapeHtml(a.title || "Untitled")}
 
             </div>
 
 
-            ${badgeHtml(
-              a
-            )}
+            ${badgeHtml(a)}
 
           </div>
 
@@ -1540,9 +876,7 @@ function renderList() {
               type="button"
               class="ta-btn-sm"
               data-action="view"
-              data-id="${escapeHtml(
-                id
-              )}"
+              data-id="${escapeHtml(id)}"
             >
               View
             </button>
@@ -1556,9 +890,7 @@ function renderList() {
                     type="button"
                     class="ta-btn-sm"
                     data-action="edit"
-                    data-id="${escapeHtml(
-                      id
-                    )}"
+                    data-id="${escapeHtml(id)}"
                   >
                     Edit
                   </button>
@@ -1568,9 +900,7 @@ function renderList() {
                     type="button"
                     class="ta-btn-sm danger"
                     data-action="delete"
-                    data-id="${escapeHtml(
-                      id
-                    )}"
+                    data-id="${escapeHtml(id)}"
                   >
                     Delete
                   </button>
@@ -1592,10 +922,7 @@ function renderList() {
 
         <div class="ta-item-body">
 
-          ${escapeHtml(
-            a.message ||
-            ""
-          )}
+          ${escapeHtml(a.message || "")}
 
         </div>
 
@@ -1610,9 +937,7 @@ function renderList() {
 
 
             <strong>
-              ${escapeHtml(
-                author
-              )}
+              ${escapeHtml(author)}
             </strong>
 
           </div>
@@ -1626,9 +951,7 @@ function renderList() {
 
 
             <strong>
-              ${escapeHtml(
-                audience
-              )}
+              ${escapeHtml(audience)}
             </strong>
 
           </div>
@@ -1646,11 +969,7 @@ function renderList() {
 
 
             <strong>
-              ${escapeHtml(
-                admin
-                  ? "Administrator"
-                  : "Teacher"
-              )}
+              ${escapeHtml(admin ? "Administrator" : "Teacher")}
             </strong>
 
           </div>
@@ -1661,11 +980,9 @@ function renderList() {
             <span>
 
               ${
-                status ===
-                "scheduled"
+                status === "scheduled"
                   ? "Scheduled:"
-                  : status ===
-                    "draft"
+                  : status === "draft"
                     ? "Updated:"
                     : a.publishAt
                       ? "Published:"
@@ -1677,13 +994,10 @@ function renderList() {
 
             ${escapeHtml(
               formatDate(
-                status ===
-                  "scheduled"
+                status === "scheduled"
                   ? a.publishAt
-                  : a.publishAt ||
-                    a.updatedAt ||
-                    a.createdAt
-              )
+                  : a.publishAt || a.updatedAt || a.createdAt,
+              ),
             )}
 
           </div>
@@ -1692,169 +1006,74 @@ function renderList() {
 
       `;
 
-
-      feed.appendChild(
-        item
-      );
-
-    }
-  );
-
+    feed.appendChild(item);
+  });
 }
-
 
 // =========================================================
 // VIEW MODAL
 // =========================================================
 
 function openViewModal(id) {
-
-  const announcement =
-    announcements.find(
-      (a) =>
-        String(
-          a._id ||
-          a.id
-        ) ===
-        String(
-          id
-        )
-    );
-
+  const announcement = announcements.find(
+    (a) => String(a._id || a.id) === String(id),
+  );
 
   if (!announcement) {
-
     return;
-
   }
 
-
-  const modal =
-    $("annViewModal");
-
+  const modal = $("annViewModal");
 
   if (!modal) {
-
     return;
-
   }
 
+  const status = getStatus(announcement);
 
-  const status =
-    getStatus(
-      announcement
-    );
+  const category = announcement.category || "general";
 
+  const admin = isAdminAnnouncement(announcement);
 
-  const category =
-    announcement.category ||
-    "general";
+  const title = announcement.title || "Announcement";
 
+  const audience = getAnnouncementAudienceLabel(announcement);
 
-  const admin =
-    isAdminAnnouncement(
-      announcement
-    );
-
-
-  const title =
-    announcement.title ||
-    "Announcement";
-
-
-  const audience =
-    getAnnouncementAudienceLabel(
-      announcement
-    );
-
-
-  if (
-    $("annViewTitle")
-  ) {
-
-    $("annViewTitle").textContent =
-      title;
-
+  if ($("annViewTitle")) {
+    $("annViewTitle").textContent = title;
   }
 
-
-  if (
-    $("annViewMeta")
-  ) {
-
-    $("annViewMeta").textContent =
-      formatDate(
-        status ===
-          "scheduled"
-          ? announcement.publishAt
-          : announcement.publishAt ||
+  if ($("annViewMeta")) {
+    $("annViewMeta").textContent = formatDate(
+      status === "scheduled"
+        ? announcement.publishAt
+        : announcement.publishAt ||
             announcement.updatedAt ||
-            announcement.createdAt
-      );
-
+            announcement.createdAt,
+    );
   }
 
-
-  if (
-    $("annViewH")
-  ) {
-
-    $("annViewH").textContent =
-      title;
-
+  if ($("annViewH")) {
+    $("annViewH").textContent = title;
   }
 
-
-  if (
-    $("annViewMsg")
-  ) {
-
-    $("annViewMsg").textContent =
-      announcement.message ||
-      "";
-
+  if ($("annViewMsg")) {
+    $("annViewMsg").textContent = announcement.message || "";
   }
 
-
-  if (
-    $("annViewSource")
-  ) {
-
-    $("annViewSource").textContent =
-      admin
-        ? "Administrator"
-        : "Teacher";
-
+  if ($("annViewSource")) {
+    $("annViewSource").textContent = admin ? "Administrator" : "Teacher";
   }
 
-
-  if (
-    $("annViewPill")
-  ) {
-
-    $("annViewPill").textContent =
-      categoryLabel(
-        category
-      );
-
+  if ($("annViewPill")) {
+    $("annViewPill").textContent = categoryLabel(category);
   }
 
+  if ($("annViewStatus")) {
+    $("annViewStatus").textContent = statusLabel(status);
 
-  if (
-    $("annViewStatus")
-  ) {
-
-    $("annViewStatus").textContent =
-      statusLabel(
-        status
-      );
-
-
-    $("annViewStatus").className =
-      `ta-status-pill ${status}`;
-
+    $("annViewStatus").className = `ta-status-pill ${status}`;
   }
-
 
   /*
     Audience.
@@ -1866,603 +1085,292 @@ function openViewModal(id) {
     populate it.
   */
 
-  const viewAudience =
-    $("annViewAudience");
+  const viewAudience = $("annViewAudience");
 
-
-  if (
-    viewAudience
-  ) {
-
-    viewAudience.textContent =
-      audience;
-
+  if (viewAudience) {
+    viewAudience.textContent = audience;
   }
-
 
   /*
     Event information removed.
   */
 
-  const eventInfo =
-    $("annViewEventInfo");
+  const eventInfo = $("annViewEventInfo");
 
-
-  if (
-    eventInfo
-  ) {
-
-    eventInfo.style.display =
-      "none";
-
+  if (eventInfo) {
+    eventInfo.style.display = "none";
   }
-
 
   /*
     Files removed.
   */
 
-  const files =
-    $("annViewFiles");
+  const files = $("annViewFiles");
 
+  if (files) {
+    files.innerHTML = "";
 
-  if (
-    files
-  ) {
-
-    files.innerHTML =
-      "";
-
-
-    files.style.display =
-      "none";
-
+    files.style.display = "none";
   }
-
 
   /*
     ACTIONS
   */
 
-  const actions =
-    $("annViewActions");
+  const actions = $("annViewActions");
 
-
-  if (
-    actions
-  ) {
-
-    actions.style.display =
-      "";
-
+  if (actions) {
+    actions.style.display = "";
   }
-
 
   /*
     EDIT
   */
 
-  const editButton =
-    $("annViewEditBtn");
+  const editButton = $("annViewEditBtn");
 
+  if (editButton) {
+    editButton.style.display = admin ? "none" : "";
 
-  if (
-    editButton
-  ) {
+    editButton.onclick = () => {
+      closeViewModal();
 
-    editButton.style.display =
-      admin
-        ? "none"
-        : "";
-
-
-    editButton.onclick =
-      () => {
-
-        closeViewModal();
-
-
-        openFormModal(
-          "edit",
-          announcement
-        );
-
-      };
-
+      openFormModal("edit", announcement);
+    };
   }
-
 
   /*
     DELETE
   */
 
-  const deleteButton =
-    $("annViewDeleteBtn");
+  const deleteButton = $("annViewDeleteBtn");
 
+  if (deleteButton) {
+    deleteButton.style.display = admin ? "none" : "";
 
-  if (
-    deleteButton
-  ) {
+    deleteButton.onclick = async () => {
+      closeViewModal();
 
-    deleteButton.style.display =
-      admin
-        ? "none"
-        : "";
-
-
-    deleteButton.onclick =
-      async () => {
-
-        closeViewModal();
-
-
-        await deleteAnnouncement(
-          announcement._id ||
-          announcement.id
-        );
-
-      };
-
+      await deleteAnnouncement(announcement._id || announcement.id);
+    };
   }
-
 
   /*
     OPEN
   */
 
-  modal.classList.remove(
-    "hidden"
-  );
+  modal.classList.remove("hidden");
 
+  modal.setAttribute("aria-hidden", "false");
 
-  modal.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-
-  document.body.style.overflow =
-    "hidden";
-
+  document.body.style.overflow = "hidden";
 }
-
 
 function closeViewModal() {
-
-  const modal =
-    $("annViewModal");
-
+  const modal = $("annViewModal");
 
   if (!modal) {
-
     return;
-
   }
 
+  modal.classList.add("hidden");
 
-  modal.classList.add(
-    "hidden"
-  );
+  modal.setAttribute("aria-hidden", "true");
 
-
-  modal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-
-  document.body.style.overflow =
-    "";
-
+  document.body.style.overflow = "";
 }
-
 
 // =========================================================
 // PUBLICATION VISIBILITY
 // =========================================================
 
-function updatePublicationFields(
-  clearSchedule = true
-) {
+function updatePublicationFields(clearSchedule = true) {
+  const scheduleRadio = $("publicationSchedule");
 
-  const scheduleRadio =
-    $("publicationSchedule");
+  const scheduleWrap = $("scheduleWrap");
 
+  const scheduleDate = $("inpScheduleDate");
 
-  const scheduleWrap =
-    $("scheduleWrap");
+  const scheduleTime = $("inpScheduleTime");
 
-
-  const scheduleDate =
-    $("inpScheduleDate");
-
-
-  const scheduleTime =
-    $("inpScheduleTime");
-
-
-  if (
-    !scheduleRadio
-  ) {
-
-    console.warn(
-      "[teacher-announcements] publicationSchedule not found"
-    );
-
+  if (!scheduleRadio) {
+    console.warn("[teacher-announcements] publicationSchedule not found");
 
     return;
-
   }
 
+  const shouldShowSchedule = scheduleRadio.checked;
 
-  const shouldShowSchedule =
-    scheduleRadio.checked;
+  if (scheduleWrap) {
+    if (shouldShowSchedule) {
+      scheduleWrap.hidden = false;
 
+      scheduleWrap.style.display = "flex";
 
-  if (
-    scheduleWrap
-  ) {
+      scheduleWrap.classList.remove("hidden");
 
-    if (
-      shouldShowSchedule
-    ) {
+      scheduleWrap.classList.add("schedule-visible");
 
-      scheduleWrap.hidden =
-        false;
+      scheduleWrap.setAttribute("aria-hidden", "false");
+    } else {
+      scheduleWrap.hidden = true;
 
+      scheduleWrap.style.display = "none";
 
-      scheduleWrap.style.display =
-        "flex";
+      scheduleWrap.classList.remove("schedule-visible");
 
+      scheduleWrap.classList.add("hidden");
 
-      scheduleWrap.classList.remove(
-        "hidden"
-      );
+      scheduleWrap.setAttribute("aria-hidden", "true");
+    }
+  }
 
+  if (scheduleDate) {
+    scheduleDate.disabled = !shouldShowSchedule;
 
-      scheduleWrap.classList.add(
-        "schedule-visible"
-      );
+    scheduleDate.required = shouldShowSchedule;
+  }
 
+  if (scheduleTime) {
+    scheduleTime.disabled = !shouldShowSchedule;
 
-      scheduleWrap.setAttribute(
-        "aria-hidden",
-        "false"
-      );
+    scheduleTime.required = shouldShowSchedule;
+  }
 
+  if (!shouldShowSchedule && clearSchedule) {
+    if (scheduleDate) {
+      scheduleDate.value = "";
     }
 
-    else {
-
-      scheduleWrap.hidden =
-        true;
-
-
-      scheduleWrap.style.display =
-        "none";
-
-
-      scheduleWrap.classList.remove(
-        "schedule-visible"
-      );
-
-
-      scheduleWrap.classList.add(
-        "hidden"
-      );
-
-
-      scheduleWrap.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
+    if (scheduleTime) {
+      scheduleTime.value = "";
     }
-
   }
-
-
-  if (
-    scheduleDate
-  ) {
-
-    scheduleDate.disabled =
-      !shouldShowSchedule;
-
-
-    scheduleDate.required =
-      shouldShowSchedule;
-
-  }
-
-
-  if (
-    scheduleTime
-  ) {
-
-    scheduleTime.disabled =
-      !shouldShowSchedule;
-
-
-    scheduleTime.required =
-      shouldShowSchedule;
-
-  }
-
-
-  if (
-    !shouldShowSchedule &&
-    clearSchedule
-  ) {
-
-    if (
-      scheduleDate
-    ) {
-
-      scheduleDate.value =
-        "";
-
-    }
-
-
-    if (
-      scheduleTime
-    ) {
-
-      scheduleTime.value =
-        "";
-
-    }
-
-  }
-
 
   console.log(
     "[teacher-announcements] publication mode:",
-    shouldShowSchedule
-      ? "schedule"
-      : "now"
+    shouldShowSchedule ? "schedule" : "now",
   );
-
 }
-
 
 // =========================================================
 // GET PUBLICATION MODE
 // =========================================================
 
 function getPublicationMode() {
+  const schedule = $("publicationSchedule");
 
-  const schedule =
-    $("publicationSchedule");
-
-
-  if (
-    schedule?.checked
-  ) {
-
+  if (schedule?.checked) {
     return "schedule";
-
   }
 
-
   return "now";
-
 }
-
 
 // =========================================================
 // CREATE / EDIT MODAL
 // =========================================================
 
-function openFormModal(
-  mode,
-  announcement = null
-) {
-
+function openFormModal(mode, announcement = null) {
   /*
     Prevent editing admin announcements.
   */
 
-  if (
-    mode === "edit" &&
-    announcement &&
-    isAdminAnnouncement(
-      announcement
-    )
-  ) {
-
-    alert(
-      "Admin announcements are read-only."
-    );
-
+  if (mode === "edit" && announcement && isAdminAnnouncement(announcement)) {
+    alert("Admin announcements are read-only.");
 
     return;
-
   }
-
 
   /*
     Teacher assignment check.
   */
 
-  if (
-    !hasTeacherScope()
-  ) {
-
-    alert(
-      "Teacher class/section assignment not found."
-    );
-
+  if (!hasTeacherScope()) {
+    alert("Teacher class/section assignment not found.");
 
     return;
-
   }
 
-
-  const modal =
-    $("annFormModal");
-
+  const modal = $("annFormModal");
 
   if (!modal) {
-
     return;
-
   }
 
-
-  editingId =
-    mode === "edit"
-      ? announcement?._id ||
-        announcement?.id
-      : null;
-
+  editingId = mode === "edit" ? announcement?._id || announcement?.id : null;
 
   /*
     HEADER
   */
 
-  if (
-    $("annFormTitle")
-  ) {
-
+  if ($("annFormTitle")) {
     $("annFormTitle").textContent =
-      mode === "edit"
-        ? "Edit Announcement"
-        : "New Announcement";
-
+      mode === "edit" ? "Edit Announcement" : "New Announcement";
   }
 
-
-  if (
-    $("annFormSub")
-  ) {
-
+  if ($("annFormSub")) {
     $("annFormSub").textContent =
       mode === "edit"
         ? `Update your announcement for ${scopeLabel()}.`
         : `Compose a message for ${scopeLabel()}.`;
-
   }
-
 
   /*
     BASIC FIELDS
   */
 
-  if (
-    $("inpTitle")
-  ) {
-
-    $("inpTitle").value =
-      announcement?.title ||
-      "";
-
+  if ($("inpTitle")) {
+    $("inpTitle").value = announcement?.title || "";
   }
 
-
-  if (
-    $("inpCategory")
-  ) {
-
-    $("inpCategory").value =
-      announcement?.category ||
-      "general";
-
+  if ($("inpCategory")) {
+    $("inpCategory").value = announcement?.category || "general";
   }
 
-
-  if (
-    $("inpMessage")
-  ) {
-
-    $("inpMessage").value =
-      announcement?.message ||
-      "";
-
+  if ($("inpMessage")) {
+    $("inpMessage").value = announcement?.message || "";
   }
-
 
   /*
     PUBLICATION
   */
 
-  const status =
-    mode === "edit"
-      ? getStatus(
-          announcement
-        )
-      : "published";
+  const status = mode === "edit" ? getStatus(announcement) : "published";
 
+  const publishNow = $("publicationNow");
 
-  const publishNow =
-    $("publicationNow");
+  const scheduleLater = $("publicationSchedule");
 
+  const isScheduled = status === "scheduled";
 
-  const scheduleLater =
-    $("publicationSchedule");
-
-
-  const isScheduled =
-    status ===
-    "scheduled";
-
-
-  if (
-    publishNow
-  ) {
-
-    publishNow.checked =
-      !isScheduled;
-
+  if (publishNow) {
+    publishNow.checked = !isScheduled;
   }
 
-
-  if (
-    scheduleLater
-  ) {
-
-    scheduleLater.checked =
-      isScheduled;
-
+  if (scheduleLater) {
+    scheduleLater.checked = isScheduled;
   }
-
 
   /*
     SCHEDULE DATE
   */
 
-  if (
-    $("inpScheduleDate")
-  ) {
-
-    $("inpScheduleDate").value =
-      isScheduled
-        ? formatDateOnly(
-            announcement?.publishAt
-          )
-        : "";
-
+  if ($("inpScheduleDate")) {
+    $("inpScheduleDate").value = isScheduled
+      ? formatDateOnly(announcement?.publishAt)
+      : "";
   }
-
 
   /*
     SCHEDULE TIME
   */
 
-  if (
-    $("inpScheduleTime")
-  ) {
-
-    $("inpScheduleTime").value =
-      isScheduled
-        ? formatTimeOnly(
-            announcement?.publishAt
-          )
-        : "";
-
+  if ($("inpScheduleTime")) {
+    $("inpScheduleTime").value = isScheduled
+      ? formatTimeOnly(announcement?.publishAt)
+      : "";
   }
-
 
   /*
     =======================================================
@@ -2478,37 +1386,21 @@ function openFormModal(
       current teacher assignment
   */
 
-  if (
-    $("inpAudienceLabel")
-  ) {
+  if ($("inpAudienceLabel")) {
+    $("inpAudienceLabel").value = getTeacherAudienceLabel();
 
-    $("inpAudienceLabel").value =
-      getTeacherAudienceLabel();
+    $("inpAudienceLabel").readOnly = true;
 
-
-    $("inpAudienceLabel").readOnly =
-      true;
-
-
-    $("inpAudienceLabel").disabled =
-      false;
-
+    $("inpAudienceLabel").disabled = false;
   }
-
 
   /*
     FORM HINT
   */
 
-  if (
-    $("formHint")
-  ) {
-
-    $("formHint").textContent =
-      "";
-
+  if ($("formHint")) {
+    $("formHint").textContent = "";
   }
-
 
   /*
     UPDATE PUBLICATION UI
@@ -2516,191 +1408,93 @@ function openFormModal(
     Do not clear existing schedule.
   */
 
-  updatePublicationFields(
-    false
-  );
-
+  updatePublicationFields(false);
 
   /*
     SHOW MODAL
   */
 
-  modal.classList.remove(
-    "hidden"
-  );
+  modal.classList.remove("hidden");
 
+  modal.setAttribute("aria-hidden", "false");
 
-  modal.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-
-  document.body.style.overflow =
-    "hidden";
-
+  document.body.style.overflow = "hidden";
 }
-
 
 function closeFormModal() {
-
-  const modal =
-    $("annFormModal");
-
+  const modal = $("annFormModal");
 
   if (!modal) {
-
     return;
-
   }
 
+  modal.classList.add("hidden");
 
-  modal.classList.add(
-    "hidden"
-  );
+  modal.setAttribute("aria-hidden", "true");
 
+  document.body.style.overflow = "";
 
-  modal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-
-  document.body.style.overflow =
-    "";
-
-
-  editingId =
-    null;
-
+  editingId = null;
 }
-
 
 // =========================================================
 // VALIDATE SCHEDULE
 // =========================================================
 
 function validateSchedule() {
+  const date = normalize($("inpScheduleDate")?.value);
 
-  const date =
-    normalize(
-      $("inpScheduleDate")?.value
-    );
+  const time = normalize($("inpScheduleTime")?.value);
 
-
-  const time =
-    normalize(
-      $("inpScheduleTime")?.value
-    );
-
-
-  const hint =
-    $("formHint");
-
+  const hint = $("formHint");
 
   if (!date) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Please select a schedule date.";
-
+    if (hint) {
+      hint.textContent = "Please select a schedule date.";
     }
-
 
     $("inpScheduleDate")?.focus();
 
-
     return null;
-
   }
 
-
   if (!time) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Please select a schedule time.";
-
+    if (hint) {
+      hint.textContent = "Please select a schedule time.";
     }
-
 
     $("inpScheduleTime")?.focus();
 
-
     return null;
-
   }
 
+  const scheduledDate = new Date(`${date}T${time}`);
 
-  const scheduledDate =
-    new Date(
-      `${date}T${time}`
-    );
-
-
-  if (
-    Number.isNaN(
-      scheduledDate.getTime()
-    )
-  ) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Please enter a valid schedule date and time.";
-
+  if (Number.isNaN(scheduledDate.getTime())) {
+    if (hint) {
+      hint.textContent = "Please enter a valid schedule date and time.";
     }
 
-
     return null;
-
   }
 
-
-  if (
-    scheduledDate.getTime() <=
-    Date.now()
-  ) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Schedule date and time must be in the future.";
-
+  if (scheduledDate.getTime() <= Date.now()) {
+    if (hint) {
+      hint.textContent = "Schedule date and time must be in the future.";
     }
 
-
     return null;
-
   }
-
 
   return scheduledDate;
-
 }
-
 
 // =========================================================
 // SAVE ANNOUNCEMENT
 // =========================================================
 
-async function saveAnnouncement(
-  forceDraft
-) {
-
-  const hint =
-    $("formHint");
-
+async function saveAnnouncement(forceDraft) {
+  const hint = $("formHint");
 
   /*
     =======================================================
@@ -2708,24 +1502,13 @@ async function saveAnnouncement(
     =======================================================
   */
 
-  if (
-    !hasTeacherScope()
-  ) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Teacher class/section assignment not found.";
-
+  if (!hasTeacherScope()) {
+    if (hint) {
+      hint.textContent = "Teacher class/section assignment not found.";
     }
 
-
     return;
-
   }
-
 
   /*
     =======================================================
@@ -2733,24 +1516,11 @@ async function saveAnnouncement(
     =======================================================
   */
 
-  const title =
-    normalize(
-      $("inpTitle")?.value
-    );
+  const title = normalize($("inpTitle")?.value);
 
+  const category = normalize($("inpCategory")?.value || "general");
 
-  const category =
-    normalize(
-      $("inpCategory")?.value ||
-      "general"
-    );
-
-
-  const message =
-    normalize(
-      $("inpMessage")?.value
-    );
-
+  const message = normalize($("inpMessage")?.value);
 
   /*
     =======================================================
@@ -2759,44 +1529,24 @@ async function saveAnnouncement(
   */
 
   if (!title) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Title is required.";
-
+    if (hint) {
+      hint.textContent = "Title is required.";
     }
-
 
     $("inpTitle")?.focus();
 
-
     return;
-
   }
 
-
   if (!message) {
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        "Message is required.";
-
+    if (hint) {
+      hint.textContent = "Message is required.";
     }
-
 
     $("inpMessage")?.focus();
 
-
     return;
-
   }
-
 
   /*
     =======================================================
@@ -2804,80 +1554,39 @@ async function saveAnnouncement(
     =======================================================
   */
 
-  let draft =
-    false;
+  let draft = false;
 
-
-  let publishAt =
-    null;
-
+  let publishAt = null;
 
   /*
     DRAFT
   */
 
-  if (
-    forceDraft
-  ) {
+  if (forceDraft) {
+    draft = true;
 
-    draft =
-      true;
-
-
-    publishAt =
-      null;
-
-  }
-
-
-  /*
+    publishAt = null;
+  } else if (getPublicationMode() === "now") {
+    /*
     PUBLISH NOW
   */
+    draft = false;
 
-  else if (
-    getPublicationMode() ===
-    "now"
-  ) {
-
-    draft =
-      false;
-
-
-    publishAt =
-      null;
-
-  }
-
-
-  /*
+    publishAt = null;
+  } else if (getPublicationMode() === "schedule") {
+    /*
     SCHEDULE
   */
-
-  else if (
-    getPublicationMode() ===
-    "schedule"
-  ) {
-
-    const scheduledDate =
-      validateSchedule();
-
+    const scheduledDate = validateSchedule();
 
     if (!scheduledDate) {
-
       return;
-
     }
 
+    draft = false;
 
-    draft =
-      false;
-
-
-    publishAt =
-      scheduledDate.toISOString();
-
+    publishAt = scheduledDate.toISOString();
   }
-
 
   /*
     =======================================================
@@ -2900,7 +1609,6 @@ async function saveAnnouncement(
   */
 
   const payload = {
-
     title,
 
     category,
@@ -2911,60 +1619,39 @@ async function saveAnnouncement(
 
     publishAt,
 
-
     /*
       Audience type.
 
       NEVER "all".
     */
 
-    audience:
-      "class",
-
+    audience: "class",
 
     /*
       Teacher assignment.
     */
 
-    className:
-      TEACHER_SCOPE.className,
+    className: TEACHER_SCOPE.className,
 
-
-    sectionName:
-      TEACHER_SCOPE.sectionName,
-
+    sectionName: TEACHER_SCOPE.sectionName,
 
     /*
       Source.
     */
 
-    source:
-      "teacher",
+    source: "teacher",
 
-
-    authorRole:
-      "teacher",
-
+    authorRole: "teacher",
   };
-
 
   console.log(
     "[teacher-announcements] teacher audience:",
-    `${payload.className} - ${payload.sectionName}`
+    `${payload.className} - ${payload.sectionName}`,
   );
 
+  console.log("[teacher-announcements] audience type:", payload.audience);
 
-  console.log(
-    "[teacher-announcements] audience type:",
-    payload.audience
-  );
-
-
-  console.log(
-    "[teacher-announcements] payload:",
-    payload
-  );
-
+  console.log("[teacher-announcements] payload:", payload);
 
   /*
     =======================================================
@@ -2972,72 +1659,25 @@ async function saveAnnouncement(
     =======================================================
   */
 
-  if (
-    hint
-  ) {
-
-    if (
-      editingId
-    ) {
-
-      if (
-        draft
-      ) {
-
-        hint.textContent =
-          "Updating draft...";
-
+  if (hint) {
+    if (editingId) {
+      if (draft) {
+        hint.textContent = "Updating draft...";
+      } else if (publishAt) {
+        hint.textContent = "Updating scheduled announcement...";
+      } else {
+        hint.textContent = "Publishing update...";
       }
-
-      else if (
-        publishAt
-      ) {
-
-        hint.textContent =
-          "Updating scheduled announcement...";
-
+    } else {
+      if (draft) {
+        hint.textContent = "Saving draft...";
+      } else if (publishAt) {
+        hint.textContent = "Scheduling announcement...";
+      } else {
+        hint.textContent = "Publishing...";
       }
-
-      else {
-
-        hint.textContent =
-          "Publishing update...";
-
-      }
-
     }
-
-    else {
-
-      if (
-        draft
-      ) {
-
-        hint.textContent =
-          "Saving draft...";
-
-      }
-
-      else if (
-        publishAt
-      ) {
-
-        hint.textContent =
-          "Scheduling announcement...";
-
-      }
-
-      else {
-
-        hint.textContent =
-          "Publishing...";
-
-      }
-
-    }
-
   }
-
 
   /*
     =======================================================
@@ -3045,33 +1685,17 @@ async function saveAnnouncement(
     =======================================================
   */
 
-  const draftButton =
-    $("btnDraft");
+  const draftButton = $("btnDraft");
 
+  const publishButton = $("btnPublish");
 
-  const publishButton =
-    $("btnPublish");
-
-
-  if (
-    draftButton
-  ) {
-
-    draftButton.disabled =
-      true;
-
+  if (draftButton) {
+    draftButton.disabled = true;
   }
 
-
-  if (
-    publishButton
-  ) {
-
-    publishButton.disabled =
-      true;
-
+  if (publishButton) {
+    publishButton.disabled = true;
   }
-
 
   /*
     =======================================================
@@ -3080,75 +1704,38 @@ async function saveAnnouncement(
   */
 
   try {
-
     let result;
-
 
     /*
       UPDATE
     */
 
-    if (
-      editingId
-    ) {
+    if (editingId) {
+      result = await apiRequest(
+        `${API_BASE}/${encodeURIComponent(editingId)}`,
 
-      result =
-        await apiRequest(
+        {
+          method: "PUT",
 
-          `${API_BASE}/${encodeURIComponent(
-            editingId
-          )}`,
-
-          {
-
-            method:
-              "PUT",
-
-            body:
-              JSON.stringify(
-                payload
-              ),
-
-          }
-
-        );
-
-    }
-
-
-    /*
+          body: JSON.stringify(payload),
+        },
+      );
+    } else {
+      /*
       CREATE
     */
+      result = await apiRequest(
+        API_BASE,
 
-    else {
+        {
+          method: "POST",
 
-      result =
-        await apiRequest(
-
-          API_BASE,
-
-          {
-
-            method:
-              "POST",
-
-            body:
-              JSON.stringify(
-                payload
-              ),
-
-          }
-
-        );
-
+          body: JSON.stringify(payload),
+        },
+      );
     }
 
-
-    console.log(
-      "[teacher-announcements] saved:",
-      result
-    );
-
+    console.log("[teacher-announcements] saved:", result);
 
     /*
       Helpful debug:
@@ -3156,356 +1743,166 @@ async function saveAnnouncement(
       Confirm what backend actually returned.
     */
 
-    if (
-      result?.data
-    ) {
-
+    if (result?.data) {
       console.log(
         "[teacher-announcements] saved audience:",
-        result.data.audience
+        result.data.audience,
       );
-
 
       console.log(
         "[teacher-announcements] saved class:",
-        result.data.className
+        result.data.className,
       );
-
 
       console.log(
         "[teacher-announcements] saved section:",
-        result.data.sectionName
+        result.data.sectionName,
       );
-
     }
-
 
     closeFormModal();
 
-
     await loadAnnouncements();
-
-
   } catch (err) {
+    console.error("[teacher-announcements] save error:", err);
 
-    console.error(
-      "[teacher-announcements] save error:",
-      err
-    );
-
-
-    if (
-      hint
-    ) {
-
-      hint.textContent =
-        err.message ||
-        "Failed to save announcement.";
-
+    if (hint) {
+      hint.textContent = err.message || "Failed to save announcement.";
     }
-
   } finally {
-
-    if (
-      draftButton
-    ) {
-
-      draftButton.disabled =
-        false;
-
+    if (draftButton) {
+      draftButton.disabled = false;
     }
 
-
-    if (
-      publishButton
-    ) {
-
-      publishButton.disabled =
-        false;
-
+    if (publishButton) {
+      publishButton.disabled = false;
     }
-
   }
-
 }
-
 
 // =========================================================
 // DELETE
 // =========================================================
 
-async function deleteAnnouncement(
-  id
-) {
-
-  const announcement =
-    announcements.find(
-      (a) =>
-        String(
-          a._id ||
-          a.id
-        ) ===
-        String(
-          id
-        )
-    );
-
+async function deleteAnnouncement(id) {
+  const announcement = announcements.find(
+    (a) => String(a._id || a.id) === String(id),
+  );
 
   if (!announcement) {
-
     return;
-
   }
-
 
   /*
     NEVER DELETE ADMIN ANNOUNCEMENTS.
   */
 
-  if (
-    isAdminAnnouncement(
-      announcement
-    )
-  ) {
-
-    alert(
-      "Admin announcements are read-only."
-    );
-
+  if (isAdminAnnouncement(announcement)) {
+    alert("Admin announcements are read-only.");
 
     return;
-
   }
 
-
-  const confirmed =
-    confirm(
-      `Delete "${announcement.title}"?`
-    );
-
+  const confirmed = confirm(`Delete "${announcement.title}"?`);
 
   if (!confirmed) {
-
     return;
-
   }
-
 
   try {
-
     await apiRequest(
-
-      `${API_BASE}/${encodeURIComponent(
-        id
-      )}`,
+      `${API_BASE}/${encodeURIComponent(id)}`,
 
       {
-
-        method:
-          "DELETE",
-
-      }
-
+        method: "DELETE",
+      },
     );
-
 
     await loadAnnouncements();
-
-
   } catch (err) {
+    console.error("[teacher-announcements] delete error:", err);
 
-    console.error(
-      "[teacher-announcements] delete error:",
-      err
-    );
-
-
-    alert(
-      err.message ||
-      "Failed to delete announcement."
-    );
-
+    alert(err.message || "Failed to delete announcement.");
   }
-
 }
-
 
 // =========================================================
 // TABS
 // =========================================================
 
-function setTab(
-  nextTab
-) {
+function setTab(nextTab) {
+  tab = nextTab === "admin" ? "admin" : "my";
 
-  tab =
-    nextTab === "admin"
-      ? "admin"
-      : "my";
+  const my = $("tabMy");
 
+  const admin = $("tabAdmin");
 
-  const my =
-    $("tabMy");
+  my?.classList.toggle("active", tab === "my");
 
+  admin?.classList.toggle("active", tab === "admin");
 
-  const admin =
-    $("tabAdmin");
+  my?.setAttribute("aria-selected", tab === "my" ? "true" : "false");
 
+  admin?.setAttribute("aria-selected", tab === "admin" ? "true" : "false");
 
-  my?.classList.toggle(
-    "active",
-    tab === "my"
-  );
+  const title = $("listTitle");
 
+  const sub = $("listSubtext");
 
-  admin?.classList.toggle(
-    "active",
-    tab === "admin"
-  );
-
-
-  my?.setAttribute(
-    "aria-selected",
-    tab === "my"
-      ? "true"
-      : "false"
-  );
-
-
-  admin?.setAttribute(
-    "aria-selected",
-    tab === "admin"
-      ? "true"
-      : "false"
-  );
-
-
-  const title =
-    $("listTitle");
-
-
-  const sub =
-    $("listSubtext");
-
-
-  const newButton =
-    $("btnNew");
-
+  const newButton = $("btnNew");
 
   /*
     MY CLASS
   */
 
-  if (
-    tab === "my"
-  ) {
-
-    if (
-      title
-    ) {
-
-      title.textContent =
-        "My Class Announcements";
-
+  if (tab === "my") {
+    if (title) {
+      title.textContent = "My Class Announcements";
     }
 
-
-    if (
-      sub
-    ) {
-
-      sub.textContent =
-        hasTeacherScope()
-          ? `Create and manage announcements for ${scopeLabel()}.`
-          : "Create and manage announcements for your handled class.";
-
+    if (sub) {
+      sub.textContent = hasTeacherScope()
+        ? `Create and manage announcements for ${scopeLabel()}.`
+        : "Create and manage announcements for your handled class.";
     }
 
-
-    if (
-      newButton
-    ) {
-
-      newButton.style.display =
-        "";
-
+    if (newButton) {
+      newButton.style.display = "";
     }
-
-  }
-
-
-  /*
+  } else {
+    /*
     ADMIN
   */
-
-  else {
-
-    if (
-      title
-    ) {
-
-      title.textContent =
-        "Admin Announcements";
-
+    if (title) {
+      title.textContent = "Admin Announcements";
     }
 
-
-    if (
-      sub
-    ) {
-
-      sub.textContent =
-        "Announcements published by administrators. Read-only.";
-
+    if (sub) {
+      sub.textContent = "Announcements published by administrators. Read-only.";
     }
 
-
-    if (
-      newButton
-    ) {
-
-      newButton.style.display =
-        "none";
-
+    if (newButton) {
+      newButton.style.display = "none";
     }
-
   }
 
-
   renderList();
-
 }
-
 
 // =========================================================
 // EVENT BINDING
 // =========================================================
 
 function bindEvents() {
-
   /*
     =======================================================
     TABS
     =======================================================
   */
 
-  $("tabMy")?.addEventListener(
-    "click",
-    () =>
-      setTab(
-        "my"
-      )
-  );
+  $("tabMy")?.addEventListener("click", () => setTab("my"));
 
-
-  $("tabAdmin")?.addEventListener(
-    "click",
-    () =>
-      setTab(
-        "admin"
-      )
-  );
-
+  $("tabAdmin")?.addEventListener("click", () => setTab("admin"));
 
   /*
     =======================================================
@@ -3513,14 +1910,7 @@ function bindEvents() {
     =======================================================
   */
 
-  $("btnNew")?.addEventListener(
-    "click",
-    () =>
-      openFormModal(
-        "create"
-      )
-  );
-
+  $("btnNew")?.addEventListener("click", () => openFormModal("create"));
 
   /*
     =======================================================
@@ -3528,23 +1918,11 @@ function bindEvents() {
     =======================================================
   */
 
-  $("annSearch")?.addEventListener(
-    "input",
-    renderList
-  );
+  $("annSearch")?.addEventListener("input", renderList);
 
+  $("statusFilter")?.addEventListener("change", renderList);
 
-  $("statusFilter")?.addEventListener(
-    "change",
-    renderList
-  );
-
-
-  $("catFilter")?.addEventListener(
-    "change",
-    renderList
-  );
-
+  $("catFilter")?.addEventListener("change", renderList);
 
   /*
     =======================================================
@@ -3552,60 +1930,31 @@ function bindEvents() {
     =======================================================
   */
 
-  const publicationNow =
-    $("publicationNow");
+  const publicationNow = $("publicationNow");
 
-
-  const publicationSchedule =
-    $("publicationSchedule");
-
+  const publicationSchedule = $("publicationSchedule");
 
   /*
     PUBLISH NOW
   */
 
-  if (
-    publicationNow
-  ) {
-
-    publicationNow.addEventListener(
-      "change",
-      () => {
-
-        updatePublicationFields(
-          true
-        );
-
-      }
-    );
-
+  if (publicationNow) {
+    publicationNow.addEventListener("change", () => {
+      updatePublicationFields(true);
+    });
   }
-
 
   /*
     SCHEDULE FOR LATER
   */
 
-  if (
-    publicationSchedule
-  ) {
+  if (publicationSchedule) {
+    publicationSchedule.addEventListener("change", () => {
+      updatePublicationFields(false);
 
-    publicationSchedule.addEventListener(
-      "change",
-      () => {
-
-        updatePublicationFields(
-          false
-        );
-
-
-        $("inpScheduleDate")?.focus();
-
-      }
-    );
-
+      $("inpScheduleDate")?.focus();
+    });
   }
-
 
   /*
     =======================================================
@@ -3613,131 +1962,63 @@ function bindEvents() {
     =======================================================
   */
 
-  $("annFeed")?.addEventListener(
-    "click",
-    async (event) => {
+  $("annFeed")?.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-action]");
 
-      const button =
-        event.target.closest(
-          "button[data-action]"
-        );
+    if (!button) {
+      return;
+    }
 
+    const action = button.dataset.action;
 
-      if (!button) {
+    const id = button.dataset.id;
 
-        return;
+    if (!id) {
+      return;
+    }
 
-      }
-
-
-      const action =
-        button.dataset.action;
-
-
-      const id =
-        button.dataset.id;
-
-
-      if (!id) {
-
-        return;
-
-      }
-
-
-      /*
+    /*
         VIEW
       */
 
-      if (
-        action ===
-        "view"
-      ) {
+    if (action === "view") {
+      openViewModal(id);
 
-        openViewModal(
-          id
-        );
+      return;
+    }
 
+    const announcement = announcements.find(
+      (a) => String(a._id || a.id) === String(id),
+    );
 
-        return;
+    if (!announcement) {
+      return;
+    }
 
-      }
-
-
-      const announcement =
-        announcements.find(
-          (a) =>
-            String(
-              a._id ||
-              a.id
-            ) ===
-            String(
-              id
-            )
-        );
-
-
-      if (!announcement) {
-
-        return;
-
-      }
-
-
-      /*
+    /*
         EDIT
       */
 
-      if (
-        action ===
-        "edit"
-      ) {
-
-        if (
-          isAdminAnnouncement(
-            announcement
-          )
-        ) {
-
-          alert(
-            "Admin announcements are read-only."
-          );
-
-
-          return;
-
-        }
-
-
-        openFormModal(
-          "edit",
-          announcement
-        );
-
+    if (action === "edit") {
+      if (isAdminAnnouncement(announcement)) {
+        alert("Admin announcements are read-only.");
 
         return;
-
       }
 
+      openFormModal("edit", announcement);
 
-      /*
+      return;
+    }
+
+    /*
         DELETE
       */
 
-      if (
-        action ===
-        "delete"
-      ) {
-
-        await deleteAnnouncement(
-          id
-        );
-
-      }
-
+    if (action === "delete") {
+      await deleteAnnouncement(id);
     }
-  );
-
+  });
 
   /*
     =======================================================
@@ -3745,26 +2026,11 @@ function bindEvents() {
     =======================================================
   */
 
-  $("annViewBackdrop")
-    ?.addEventListener(
-      "click",
-      closeViewModal
-    );
+  $("annViewBackdrop")?.addEventListener("click", closeViewModal);
 
+  $("annViewCloseX")?.addEventListener("click", closeViewModal);
 
-  $("annViewCloseX")
-    ?.addEventListener(
-      "click",
-      closeViewModal
-    );
-
-
-  $("annViewCloseBtn")
-    ?.addEventListener(
-      "click",
-      closeViewModal
-    );
-
+  $("annViewCloseBtn")?.addEventListener("click", closeViewModal);
 
   /*
     =======================================================
@@ -3772,26 +2038,11 @@ function bindEvents() {
     =======================================================
   */
 
-  $("annFormBackdrop")
-    ?.addEventListener(
-      "click",
-      closeFormModal
-    );
+  $("annFormBackdrop")?.addEventListener("click", closeFormModal);
 
+  $("annFormCloseX")?.addEventListener("click", closeFormModal);
 
-  $("annFormCloseX")
-    ?.addEventListener(
-      "click",
-      closeFormModal
-    );
-
-
-  $("btnCancel")
-    ?.addEventListener(
-      "click",
-      closeFormModal
-    );
-
+  $("btnCancel")?.addEventListener("click", closeFormModal);
 
   /*
     =======================================================
@@ -3799,15 +2050,7 @@ function bindEvents() {
     =======================================================
   */
 
-  $("btnDraft")
-    ?.addEventListener(
-      "click",
-      () =>
-        saveAnnouncement(
-          true
-        )
-    );
-
+  $("btnDraft")?.addEventListener("click", () => saveAnnouncement(true));
 
   /*
     =======================================================
@@ -3815,15 +2058,7 @@ function bindEvents() {
     =======================================================
   */
 
-  $("btnPublish")
-    ?.addEventListener(
-      "click",
-      () =>
-        saveAnnouncement(
-          false
-        )
-    );
-
+  $("btnPublish")?.addEventListener("click", () => saveAnnouncement(false));
 
   /*
     =======================================================
@@ -3831,182 +2066,102 @@ function bindEvents() {
     =======================================================
   */
 
-  document.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (
-        event.key !==
-        "Escape"
-      ) {
-
-        return;
-
-      }
-
-
-      const viewModal =
-        $("annViewModal");
-
-
-      const formModal =
-        $("annFormModal");
-
-
-      if (
-        viewModal &&
-        !viewModal.classList.contains(
-          "hidden"
-        )
-      ) {
-
-        closeViewModal();
-
-
-        return;
-
-      }
-
-
-      if (
-        formModal &&
-        !formModal.classList.contains(
-          "hidden"
-        )
-      ) {
-
-        closeFormModal();
-
-      }
-
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
     }
-  );
 
+    const viewModal = $("annViewModal");
+
+    const formModal = $("annFormModal");
+
+    if (viewModal && !viewModal.classList.contains("hidden")) {
+      closeViewModal();
+
+      return;
+    }
+
+    if (formModal && !formModal.classList.contains("hidden")) {
+      closeFormModal();
+    }
+  });
 }
-
 
 // =========================================================
 // HEADER
 // =========================================================
 
 function renderHeader() {
+  const name = getTeacherName();
 
-  const name =
-    getTeacherName();
+  const scope = scopeLabel();
 
-
-  const scope =
-    scopeLabel();
-
-
-  if (
-    $("tbName")
-  ) {
-
-    $("tbName").textContent =
-      name;
-
+  if ($("tbName")) {
+    $("tbName").textContent = name;
   }
 
-
-  if (
-    $("tbRole")
-  ) {
-
+  if ($("tbRole")) {
     $("tbRole").textContent =
-      scope !== "(unassigned)"
-        ? `${scope} Teacher`
-        : "Teacher";
-
+      scope !== "(unassigned)" ? `${scope} Teacher` : "Teacher";
   }
 
-
-  if (
-    $("taSub")
-  ) {
-
-    $("taSub").textContent =
-      `Posting to: ${scope}`;
-
+  if ($("taSub")) {
+    $("taSub").textContent = `Posting to: ${scope}`;
   }
-
 
   /*
     Update audience field if it exists.
   */
 
-  if (
-    $("inpAudienceLabel")
-  ) {
-
-    $("inpAudienceLabel").value =
-      getTeacherAudienceLabel();
-
+  if ($("inpAudienceLabel")) {
+    $("inpAudienceLabel").value = getTeacherAudienceLabel();
   }
-
 }
-
 
 // =========================================================
 // INIT
 // =========================================================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("[teacher-announcements] loaded");
 
-    console.log(
-      "[teacher-announcements] loaded"
-    );
-
-
-    /*
+  /*
       Bind UI first.
     */
 
-    bindEvents();
+  bindEvents();
 
-
-    /*
+  /*
       IMPORTANT:
 
       Load the actual teacher assignment
       BEFORE allowing announcement creation.
     */
 
-    await loadTeacherScope();
+  await loadTeacherScope();
+  await loadCurrentTeacherName();
 
+  /*
+  Render header using assignment.
+*/
 
-    /*
-      Render header using assignment.
-    */
+  renderHeader();
 
-    renderHeader();
-
-
-    /*
+  /*
       Initialize publication controls.
     */
 
-    updatePublicationFields(
-      false
-    );
+  updatePublicationFields(false);
 
-
-    /*
+  /*
       Start on My Class.
     */
 
-    setTab(
-      "my"
-    );
+  setTab("my");
 
-
-    /*
+  /*
       Load announcements.
     */
 
-    await loadAnnouncements();
-
-  }
-);
+  await loadAnnouncements();
+});

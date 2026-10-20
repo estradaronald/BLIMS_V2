@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - Class Schedule</title>
 
-
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,20 +14,16 @@
       rel="stylesheet"
     />
 
-
     <!-- Shared -->
     <link rel="stylesheet" href="../../styles/admin/sidebar.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <!-- Page -->
     <link rel="stylesheet" href="../../styles/admin/admin-class-schedule.css" />
-
 
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -38,13 +33,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar dropdown state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("admin_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["user-management"] === true) {
             document.documentElement.classList.add(
@@ -52,11 +45,9 @@
             );
           }
 
-
           if (saved["academic-setup"] === true) {
             document.documentElement.classList.add("sb-preopen-academic-setup");
           }
-
 
           if (saved["records"] === true) {
             document.documentElement.classList.add("sb-preopen-records");
@@ -68,7 +59,6 @@
     </script>
   </head>
 
-
   <body data-page="class-schedule">
     <button
       class="sidebar-float-toggle"
@@ -79,14 +69,12 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- SIDEBAR -->
       <aside class="sidebar" id="sidebar" data-role="admin">
         <!-- =====================================================
        SCHOOL HEADER
   ====================================================== -->
-
 
         <div class="sb-top">
           <div class="sb-logo-wrap">
@@ -97,52 +85,41 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
-
 
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <!-- =====================================================
        NAVIGATION
   ====================================================== -->
-
 
         <nav class="sb-nav">
           <!-- ===================================================
          OVERVIEW
     ==================================================== -->
 
-
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a class="sb-item" href="./dashboard.html" data-nav="dashboard">
             <span class="sb-ico">
               <img src="../../assets/icons/dashboard.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> DASHBOARD </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          USER MANAGEMENT
     ==================================================== -->
-
 
           <div class="sb-group" data-group="user-management">
             <button
@@ -153,10 +130,8 @@
             >
               <span class="sb-group-title"> USER MANAGEMENT </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbUserManagement">
               <a class="sb-item" href="./students.html" data-nav="students">
@@ -164,35 +139,28 @@
                   <img src="../../assets/icons/learner.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> LEARNERS </span>
               </a>
-
 
               <a class="sb-item" href="./teachers.html" data-nav="teachers">
                 <span class="sb-ico">
                   <img src="../../assets/icons/faculty.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> FACULTY </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          ACADEMIC SETUP
     ==================================================== -->
-
 
           <div class="sb-group" data-group="academic-setup">
             <button
@@ -203,10 +171,8 @@
             >
               <span class="sb-group-title"> ACADEMIC SETUP </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbAcademicSetup">
               <a
@@ -218,20 +184,16 @@
                   <img src="../../assets/icons/grades.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SECTIONS &amp; FACULTY </span>
               </a>
-
 
               <a class="sb-item" href="./subjects.html" data-nav="subjects">
                 <span class="sb-ico">
                   <img src="../../assets/icons/subjects.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> GRADE LEVELS &amp; SUBJECTS </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -242,10 +204,8 @@
                   <img src="../../assets/icons/classsched.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> CLASS SCHEDULE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -256,25 +216,20 @@
                   <img src="../../assets/icons/schoolyear.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> SCHOOL YEAR &amp; QUARTERS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          RECORDS
     ==================================================== -->
-
 
           <div class="sb-group" data-group="records">
             <button
@@ -285,10 +240,8 @@
             >
               <span class="sb-group-title"> RECORDS </span>
 
-
               <span class="sb-chevron" aria-hidden="true"> ˅ </span>
             </button>
-
 
             <div class="sb-submenu" id="sbRecords">
               <a class="sb-item" href="./attendance.html" data-nav="attendance">
@@ -296,10 +249,8 @@
                   <img src="../../assets/icons/attendance.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ATTENDANCE </span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -310,28 +261,22 @@
                   <img src="../../assets/icons/academicrecord.svg" alt="" />
                 </span>
 
-
                 <span class="sb-text"> ACADEMIC RECORDS </span>
               </a>
             </div>
           </div>
 
-
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          COMMUNICATION
     ==================================================== -->
 
-
           <div class="sb-section-title">COMMUNICATION</div>
-
 
           <a
             class="sb-item"
@@ -342,38 +287,30 @@
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> ANNOUNCEMENTS </span>
           </a>
-
 
           <!-- ===================================================
          DIVIDER
     ==================================================== -->
 
-
           <div class="sb-divider"></div>
-
 
           <!-- ===================================================
          SYSTEM
     ==================================================== -->
 
-
           <div class="sb-section-title">SYSTEM</div>
-
 
           <a class="sb-item" href="./audit-logs.html" data-nav="audit-logs">
             <span class="sb-ico">
               <img src="../../assets/icons/auditlogs.svg" alt="" />
             </span>
 
-
             <span class="sb-text"> AUDIT LOGS </span>
           </a>
         </nav>
       </aside>
-
 
       <main class="content">
         <header class="topbar">
@@ -384,15 +321,16 @@
                 src="../../assets/images/bg.jpg"
                 alt="avatar"
               />
-              <div class="tb-meta">
-               <div class="tb-name" id="tbName">Loading...</div>
 
-<div class="tb-role" id="tbRole">Loading...</div>
+              <div class="tb-meta">
+                <div class="tb-name" id="tbName">Loading...</div>
+
+                <div class="tb-role" id="tbRole">Loading...</div>
+              </div>
+
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-
               <div class="tb-menu" id="userMenu">
-                <button class="tb-item" type="button">Settings</button>
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
                 </button>
@@ -401,25 +339,21 @@
           </div>
         </header>
 
-
         <section class="cs-wrap teachers-wrap">
           <div class="cs-head teachers-page-head">
             <div>
               <h2 class="cs-title teachers-title">Class Schedule</h2>
-
 
               <div class="cs-sub">
                 Create teaching schedules per grade and section.
               </div>
             </div>
 
-
             <button class="cs-primary" id="addEntryBtn" type="button">
               <span>Add Schedule</span>
               <span class="cs-plus" aria-hidden="true">＋</span>
             </button>
           </div>
-
 
           <div class="cs-grid">
             <aside class="card cs-left">
@@ -430,9 +364,7 @@
                 </div>
               </div>
 
-
               <div id="gradeList" class="cs-grade-list"></div>
-
 
               <div class="cs-left-foot">
                 <div class="cs-field">
@@ -440,11 +372,9 @@
                   <select id="sectionSelect" class="cs-input"></select>
                 </div>
 
-
                 <div class="cs-mini-hint" id="sectionHint">—</div>
               </div>
             </aside>
-
 
             <section class="card cs-right">
               <div class="cs-right-head">
@@ -453,13 +383,11 @@
                     Select a Class
                   </div>
 
-
                   <div class="cs-right-sub" id="selectedClassSub">
                     Choose a grade level and section to view and manage
                     schedules.
                   </div>
                 </div>
-
 
                 <div class="cs-tools">
                   <div class="cs-search">
@@ -472,7 +400,6 @@
                     />
                   </div>
 
-
                   <select
                     id="roomFilter"
                     class="cs-filter"
@@ -482,7 +409,6 @@
                   </select>
                 </div>
               </div>
-
 
               <div class="cs-table-wrap">
                 <table class="cs-table">
@@ -497,7 +423,6 @@
                       <th scope="col">Action</th>
                     </tr>
                   </thead>
-
 
                   <tbody id="scheduleTbody">
                     <tr class="cs-empty">
@@ -515,11 +440,9 @@
       </main>
     </div>
 
-
     <!-- ADD/EDIT DAY MODAL -->
     <div id="entryModal" class="cs-modal hidden" aria-hidden="true">
       <div class="cs-backdrop" id="entryBackdrop"></div>
-
 
       <div
         class="cs-dialog cs-lg"
@@ -546,7 +469,6 @@
           </button>
         </div>
 
-
         <div class="cs-mbody">
           <div class="cs-form cs-form-top">
             <div class="cs-field">
@@ -554,12 +476,10 @@
               <select id="modalGrade" class="cs-input"></select>
             </div>
 
-
             <div class="cs-field">
               <label for="modalSection">Section</label>
               <select id="modalSection" class="cs-input"></select>
             </div>
-
 
             <div class="cs-field">
               <label for="modalDay">Day</label>
@@ -572,13 +492,11 @@
               </select>
             </div>
 
-
             <div class="cs-field cs-wide">
               <label for="modalAdviser">Assigned Teacher</label>
               <input id="modalAdviser" class="cs-input" type="text" readonly />
               <div class="cs-mini-hint hidden" id="adviserHint"></div>
             </div>
-
 
             <div class="cs-field cs-wide">
               <label for="modalNotes">Notes (optional)</label>
@@ -591,7 +509,6 @@
             </div>
           </div>
 
-
           <div class="cs-bulk-box">
             <div class="cs-bulk-head">
               <div class="cs-bulk-title">Subjects for Selected Grade</div>
@@ -600,7 +517,6 @@
                 to schedule.
               </div>
             </div>
-
 
             <div class="cs-bulk-table-wrap">
               <table class="cs-bulk-table">
@@ -622,10 +538,8 @@
             </div>
           </div>
 
-
           <div id="entryError" class="cs-error hidden"></div>
         </div>
-
 
         <div class="cs-mfoot">
           <button class="cs-ghost" id="entryCancel" type="button">
@@ -643,11 +557,9 @@
       </div>
     </div>
 
-
     <!-- CONFIRM DELETE MODAL -->
     <div id="confirmModal" class="cs-modal hidden" aria-hidden="true">
       <div class="cs-backdrop" id="confirmBackdrop"></div>
-
 
       <div
         class="cs-dialog cs-sm"
@@ -671,11 +583,9 @@
           </button>
         </div>
 
-
         <div class="cs-mbody">
           <div class="cs-confirm" id="confirmText">Are you sure?</div>
         </div>
-
 
         <div class="cs-mfoot">
           <button class="cs-ghost" id="confirmCancel" type="button">
@@ -690,7 +600,6 @@
       </div>
     </div>
 
-
     <div
       id="successToast"
       class="cs-toast"
@@ -703,7 +612,6 @@
       <span id="successToastText"></span>
     </div>
 
-
     <script src="../../js/auth/admin-guard.js"></script>
     <script src="../../js/admin/sidebar.js"></script>
     <script src="../../js/admin/admin-dashboard.js"></script>
@@ -711,6 +619,3 @@
     <script src="../../js/admin/admin-topbar.js"></script>
   </body>
 </html>
-
-
-
