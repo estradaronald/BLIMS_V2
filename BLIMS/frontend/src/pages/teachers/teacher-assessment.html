@@ -6,7 +6,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Sidebar collapsed state */
         if (
           isDesktop &&
@@ -15,13 +14,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -33,49 +30,37 @@
     </script>
     <meta charset="UTF-8" />
 
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - Assignments</title>
-
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Shared styles -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin-announcements.css" />
-
 
     <!-- Teacher assignment styles -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-assessment.css" />
 
-
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <body data-page="teacher-assessment">
     <!-- =====================================================
        SIDEBAR TOGGLE
   ====================================================== -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -85,7 +70,6 @@
     >
       ←
     </button>
-
 
     <div class="app">
       <!-- TEACHER SIDEBAR -->
@@ -100,18 +84,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -124,9 +105,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -140,7 +119,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -153,7 +131,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -164,7 +141,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -177,7 +153,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -188,28 +163,13 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- LEARNING ACTIVITIES -->
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
-
 
           <a
             class="sb-item"
@@ -222,13 +182,10 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -243,17 +200,14 @@
         </nav>
       </aside>
 
-
       <!-- ===================================================
          MAIN CONTENT
     ==================================================== -->
-
 
       <main class="content page-animate">
         <!-- =================================================
            TOPBAR
       ================================================== -->
-
 
         <header class="topbar reveal-soft">
           <div class="topbar-right">
@@ -264,21 +218,16 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name" id="tbName">Bruan, Alvin</div>
-
 
                 <div class="tb-role" id="tbRole">Faculty</div>
               </div>
 
-
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
-
 
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -288,17 +237,14 @@
           </div>
         </header>
 
-
         <!-- =================================================
            ASSIGNMENTS PAGE
       ================================================== -->
-
 
         <section class="as-page ms-page">
           <!-- =================================================
              PAGE HEADER
         ================================================== -->
-
 
           <div class="as-page-head reveal-soft">
             <div class="as-title-wrap">
@@ -306,11 +252,9 @@
             </div>
           </div>
 
-
           <!-- =================================================
              SUBJECTS VIEW
         ================================================== -->
-
 
           <section id="asSubjectsView" class="as-view" aria-hidden="false">
             <div class="as-subjects-shell card reveal-scale">
@@ -318,25 +262,20 @@
                  SUBJECT HEADER
             ---------------------------------------------- -->
 
-
               <div class="as-subjects-top reveal-item">
                 <div class="as-subjects-copy">
                   <div class="as-section-title">Your Subjects</div>
-
 
                   <div class="as-section-sub">
                     Select a subject to manage its assignments.
                   </div>
                 </div>
 
-
                 <!-- Search -->
-
 
                 <div class="as-subjects-tools">
                   <div class="t-search as-search">
                     <span class="t-search-ico" aria-hidden="true"></span>
-
 
                     <input
                       id="asSubjectSearch"
@@ -348,21 +287,17 @@
                 </div>
               </div>
 
-
               <!-- ---------------------------------------------
                  SUBJECT CARDS
             ---------------------------------------------- -->
-
 
               <div id="asSubjectCards" class="as-subject-grid reveal-item">
                 <!-- JS renders subject cards -->
               </div>
 
-
               <!-- ---------------------------------------------
                  EMPTY SUBJECT STATE
             ---------------------------------------------- -->
-
 
               <div
                 id="asSubjectsEmpty"
@@ -372,9 +307,7 @@
               >
                 <div class="as-empty-icon">📚</div>
 
-
                 <div class="as-empty-title">No assigned subjects yet</div>
-
 
                 <div class="as-empty-text">
                   Once subjects are assigned to your handled class and section,
@@ -384,11 +317,9 @@
             </div>
           </section>
 
-
           <!-- =================================================
              SUBJECT DETAIL VIEW
         ================================================== -->
-
 
           <section
             id="asDetailView"
@@ -400,7 +331,6 @@
                BACK BUTTON
           ================================================== -->
 
-
             <div class="as-detail-top reveal-soft">
               <button
                 id="asBackToSubjectsBtn"
@@ -411,11 +341,9 @@
               </button>
             </div>
 
-
             <!-- =================================================
                SUBJECT HERO
           ================================================== -->
-
 
             <section class="as-hero card reveal-scale">
               <div class="as-hero-cover" id="asHeroCover">
@@ -424,21 +352,16 @@
                     Assignments
                   </div>
 
-
                   <h2 class="as-hero-title" id="asHeroTitle">Subject Title</h2>
-
 
                   <div class="as-hero-meta" id="asHeroMeta">
                     <span id="asHeroSection"> Grade 1 - Section A </span>
 
-
                     <span class="as-meta-dot"> • </span>
-
 
                     <span id="asHeroTeacher"> Teacher Name </span>
                   </div>
                 </div>
-
 
                 <div class="as-hero-avatar reveal-item" id="asHeroAvatar">
                   A
@@ -446,79 +369,62 @@
               </div>
             </section>
 
-
             <!-- =================================================
                DETAIL GRID
           ================================================== -->
-
 
             <div class="as-detail-grid">
               <!-- =================================================
                  LEFT SIDEBAR / OVERVIEW
             ================================================== -->
 
-
               <aside class="as-upcoming card reveal-scale">
                 <div class="as-side-head reveal-item">
                   <div class="as-side-title">Overview</div>
 
-
                   <div class="as-side-sub">This subject</div>
                 </div>
-
 
                 <!-- ---------------------------------------------
                    ASSIGNMENT COUNTS
               ---------------------------------------------- -->
 
-
                 <div class="as-overview-list reveal-item">
                   <div class="as-overview-item">
                     <span> Total Assignments </span>
 
-
                     <b id="asOverviewTotal"> 0 </b>
                   </div>
-
 
                   <div class="as-overview-item">
                     <span> Published </span>
 
-
                     <b id="asOverviewPublished"> 0 </b>
                   </div>
-
 
                   <div class="as-overview-item">
                     <span> Drafts </span>
 
-
                     <b id="asOverviewDrafts"> 0 </b>
                   </div>
 
-
                   <div class="as-overview-item">
                     <span> Due This Week </span>
-
 
                     <b id="asOverviewDueWeek"> 0 </b>
                   </div>
                 </div>
 
-
                 <!-- ---------------------------------------------
                    UPCOMING ASSIGNMENT
               ---------------------------------------------- -->
 
-
                 <div class="as-upcoming-box reveal-item">
                   <div class="as-upcoming-title">Upcoming</div>
-
 
                   <div class="as-upcoming-copy" id="asUpcomingText">
                     No upcoming assignments yet.
                   </div>
-
 
                   <button
                     id="asJumpLatestBtn"
@@ -530,17 +436,14 @@
                 </div>
               </aside>
 
-
               <!-- =================================================
                  ASSIGNMENT AREA
             ================================================== -->
-
 
               <section class="as-stream reveal-scale">
                 <!-- ---------------------------------------------
                    TOOLBAR
               ---------------------------------------------- -->
-
 
                 <div class="as-stream-toolbar reveal-item">
                   <button
@@ -551,10 +454,8 @@
                     + Create Assignment
                   </button>
 
-
                   <div class="as-stream-filters">
                     <!-- Status -->
-
 
                     <select
                       id="asStatusFilter"
@@ -563,19 +464,14 @@
                     >
                       <option value="all">All Status</option>
 
-
                       <option value="published">Published</option>
 
-
                       <option value="draft">Draft</option>
-
 
                       <option value="archived">Archived</option>
                     </select>
 
-
                     <!-- Quarter -->
-
 
                     <select
                       id="asQuarterFilter"
@@ -584,26 +480,20 @@
                     >
                       <option value="all">All Quarters</option>
 
-
                       <option value="Q1">Quarter 1</option>
-
 
                       <option value="Q2">Quarter 2</option>
 
-
                       <option value="Q3">Quarter 3</option>
-
 
                       <option value="Q4">Quarter 4</option>
                     </select>
                   </div>
                 </div>
 
-
                 <!-- =================================================
                    ASSIGNMENTS TABLE
               ================================================== -->
-
 
                 <div class="as-table-wrap card">
                   <div class="as-table-scroll">
@@ -612,23 +502,17 @@
                         <tr>
                           <th>Assignment</th>
 
-
                           <th>Quarter</th>
-
 
                           <th>Due Date</th>
 
-
                           <th>Points</th>
 
-
                           <th>Status</th>
-
 
                           <th>Actions</th>
                         </tr>
                       </thead>
-
 
                       <tbody id="asActivityStream">
                         <!--
@@ -637,11 +521,9 @@
                     </table>
                   </div>
 
-
                   <!-- ---------------------------------------------
                      EMPTY ASSIGNMENT STATE
                 ---------------------------------------------- -->
-
 
                   <div
                     id="asActivityEmpty"
@@ -651,9 +533,7 @@
                   >
                     <div class="as-empty-icon">📝</div>
 
-
                     <div class="as-empty-title">No assignments yet</div>
-
 
                     <div class="as-empty-text">
                       Create your first assignment for this subject.
@@ -667,15 +547,12 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        CREATE ASSIGNMENT MODAL
   ====================================================== -->
 
-
     <div id="asActivityModal" class="as-modal hidden" aria-hidden="true" hidden>
       <div class="as-modal-backdrop" data-close="true"></div>
-
 
       <div
         class="as-modal-dialog card"
@@ -687,19 +564,16 @@
            MODAL HEADER
       ================================================== -->
 
-
         <div class="as-modal-head">
           <div>
             <div class="as-modal-title" id="asModalTitle">
               Create Assignment
             </div>
 
-
             <div class="as-modal-sub" id="asModalSub">
               Create an assignment for the selected subject.
             </div>
           </div>
-
 
           <button
             id="asModalCloseBtn"
@@ -711,11 +585,9 @@
           </button>
         </div>
 
-
         <!-- =================================================
            MODAL BODY
       ================================================== -->
-
 
         <div class="as-modal-body">
           <div class="as-form-grid">
@@ -723,12 +595,10 @@
                TITLE
           ---------------------------------------------- -->
 
-
             <div class="as-field col-12">
               <label class="as-label" for="asActivityTitleInput">
                 Assignment Title
               </label>
-
 
               <input
                 id="asActivityTitleInput"
@@ -739,43 +609,34 @@
               />
             </div>
 
-
             <!-- ---------------------------------------------
                QUARTER
           ---------------------------------------------- -->
-
 
             <div class="as-field col-6">
               <label class="as-label" for="asActivityQuarterSelect">
                 Quarter
               </label>
 
-
               <select id="asActivityQuarterSelect" class="as-select">
                 <option value="Q1">Quarter 1</option>
 
-
                 <option value="Q2">Quarter 2</option>
 
-
                 <option value="Q3">Quarter 3</option>
-
 
                 <option value="Q4">Quarter 4</option>
               </select>
             </div>
 
-
             <!-- ---------------------------------------------
                POINTS
           ---------------------------------------------- -->
-
 
             <div class="as-field col-6">
               <label class="as-label" for="asActivityPointsInput">
                 Total Points
               </label>
-
 
               <input
                 id="asActivityPointsInput"
@@ -788,47 +649,38 @@
               />
             </div>
 
-
             <!-- ---------------------------------------------
                DUE DATE
           ---------------------------------------------- -->
-
 
             <div class="as-field col-6">
               <label class="as-label" for="asActivityDueDateInput">
                 Due Date
               </label>
 
-
               <input id="asActivityDueDateInput" class="as-input" type="date" />
             </div>
-
 
             <!-- ---------------------------------------------
                DUE TIME
           ---------------------------------------------- -->
-
 
             <div class="as-field col-6">
               <label class="as-label" for="asActivityDueTimeInput">
                 Due Time
               </label>
 
-
               <input id="asActivityDueTimeInput" class="as-input" type="time" />
             </div>
-
 
             <!-- ---------------------------------------------
                INSTRUCTIONS
           ---------------------------------------------- -->
 
-
             <div class="as-field col-12">
               <label class="as-label" for="asActivityInstructionsInput">
                 Instructions
               </label>
-
 
               <textarea
                 id="asActivityInstructionsInput"
@@ -841,17 +693,14 @@
           </div>
         </div>
 
-
         <!-- =================================================
            MODAL FOOTER
       ================================================== -->
-
 
         <div class="as-modal-foot">
           <button id="asSaveDraftBtn" class="as-btn as-btn-ghost" type="button">
             Save as Draft
           </button>
-
 
           <button
             id="asPublishActivityBtn"
@@ -864,21 +713,14 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        JAVASCRIPT
   ====================================================== -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
 
-
     <script src="../../js/teacher/teacher-sidebar.js"></script>
-
 
     <script src="../../js/teacher/teacher-assessment.js"></script>
   </body>
 </html>
-
-
-

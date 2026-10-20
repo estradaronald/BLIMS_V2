@@ -6,7 +6,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Sidebar collapsed state */
         if (
           isDesktop &&
@@ -15,13 +14,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -34,42 +31,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - Attendance</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Shared -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-
 
     <!-- Teacher Attendance -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-attendance.css" />
-
 
     <!-- Page animations -->
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
 
-
   <body data-page="teacher-attendance">
     <!-- =========================================================
        SIDEBAR FLOAT TOGGLE
   ========================================================== -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -79,7 +67,6 @@
     >
       ←
     </button>
-
 
     <div class="app">
       <!-- TEACHER SIDEBAR -->
@@ -94,18 +81,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -118,9 +102,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -134,7 +116,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -147,7 +128,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -158,7 +138,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -171,7 +150,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -182,28 +160,13 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- LEARNING ACTIVITIES -->
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
-
 
           <a
             class="sb-item"
@@ -216,13 +179,10 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -237,17 +197,14 @@
         </nav>
       </aside>
 
-
       <!-- =======================================================
          MAIN CONTENT
     ======================================================== -->
-
 
       <main class="content page-animate">
         <!-- =====================================================
            TOPBAR
       ====================================================== -->
-
 
         <header class="topbar reveal-soft">
           <div class="topbar-right">
@@ -258,14 +215,11 @@
                 alt="Teacher avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Bruan, Alvin</div>
 
-
                 <div class="tb-role">Faculty</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -277,10 +231,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -290,43 +242,35 @@
           </div>
         </header>
 
-
         <!-- =====================================================
            PAGE
       ====================================================== -->
 
-
         <section class="att-wrap ms-page">
           <!-- PAGE TITLE -->
-
 
           <div class="att-head reveal-soft">
             <div class="att-title ms-title reveal-item">Attendance</div>
           </div>
 
-
           <!-- ===================================================
              STATE A: HOME
         ==================================================== -->
-
 
           <section id="attHomeView" class="att-view">
             <!-- =================================================
                DAILY ATTENDANCE CARD
           ================================================== -->
 
-
             <div class="card att-card reveal-scale">
               <div class="att-card-top reveal-item">
                 <div>
                   <div class="att-card-title">My Daily Class Attendance</div>
 
-
                   <div class="att-card-sub" id="attHomeSub">
                     Loading class and school year...
                   </div>
                 </div>
-
 
                 <button
                   id="takeAttendanceBtn"
@@ -337,17 +281,13 @@
                 </button>
               </div>
 
-
               <!-- CONTROLS -->
-
 
               <div class="att-controls reveal-item">
                 <!-- GRADE / SECTION -->
 
-
                 <div class="att-control">
                   <label for="scopeInput"> Grade / Section </label>
-
 
                   <input
                     id="scopeInput"
@@ -358,13 +298,10 @@
                   />
                 </div>
 
-
                 <!-- DATE -->
-
 
                 <div class="att-control">
                   <label for="dateInput"> Date </label>
-
 
                   <input
                     id="dateInput"
@@ -378,11 +315,9 @@
               </div>
             </div>
 
-
             <!-- =================================================
                YEAR-TO-DATE SUMMARY
           ================================================== -->
-
 
             <div class="card att-card reveal-scale">
               <div class="att-card-top slim reveal-item">
@@ -391,13 +326,11 @@
                     Year-to-date Attendance Summary
                   </div>
 
-
                   <div class="att-card-sub" id="attYtdSub">
                     Loading current school year...
                   </div>
                 </div>
               </div>
-
 
               <div class="att-table-wrap reveal-item">
                 <table class="att-table">
@@ -405,29 +338,21 @@
                     <tr>
                       <th style="width: 70px">No.</th>
 
-
                       <th>Student</th>
-
 
                       <th style="width: 90px">Present</th>
 
-
                       <th style="width: 90px">Absent</th>
-
 
                       <th style="width: 90px">Late</th>
 
-
                       <th style="width: 110px">Excused</th>
 
-
                       <th style="width: 110px">Total Days</th>
-
 
                       <th style="width: 120px">Attendance %</th>
                     </tr>
                   </thead>
-
 
                   <tbody id="ytdTbody">
                     <tr>
@@ -441,15 +366,12 @@
             </div>
           </section>
 
-
           <!-- ===================================================
              STATE B: TAKE ATTENDANCE
         ==================================================== -->
 
-
           <section id="attTakeView" class="att-view hidden">
             <!-- SESSION HEADER -->
-
 
             <div class="card att-session-head reveal-scale">
               <div class="att-session-left reveal-item">
@@ -457,10 +379,8 @@
                   Class - Section
                 </div>
 
-
                 <div class="att-session-date" id="sessionDateLabel">Today</div>
               </div>
-
 
               <button
                 id="cancelTakeBtn"
@@ -471,19 +391,15 @@
               </button>
             </div>
 
-
             <!-- SESSION GRID -->
-
 
             <div class="att-session-grid">
               <!-- =================================================
                  LEFT: STUDENT TABLE
             ================================================== -->
 
-
               <div class="card att-session-card reveal-scale">
                 <!-- TOOLBAR -->
-
 
                 <div class="att-session-toolbar reveal-item">
                   <div class="att-chips" id="statusChips">
@@ -495,7 +411,6 @@
                       All
                     </button>
 
-
                     <button
                       class="att-chip"
                       data-filter="present"
@@ -504,16 +419,13 @@
                       Present
                     </button>
 
-
                     <button class="att-chip" data-filter="absent" type="button">
                       Absent
                     </button>
 
-
                     <button class="att-chip" data-filter="late" type="button">
                       Late
                     </button>
-
 
                     <button
                       class="att-chip"
@@ -524,7 +436,6 @@
                     </button>
                   </div>
 
-
                   <div class="att-actions-row">
                     <button
                       id="markAllPresentBtn"
@@ -533,7 +444,6 @@
                     >
                       Mark All Present
                     </button>
-
 
                     <button
                       id="loadLastSessionBtn"
@@ -545,9 +455,7 @@
                   </div>
                 </div>
 
-
                 <!-- STUDENT TABLE -->
-
 
                 <div class="att-table-wrap reveal-item">
                   <table class="att-table">
@@ -555,20 +463,15 @@
                       <tr>
                         <th>Student</th>
 
-
                         <th style="width: 90px">Present</th>
-
 
                         <th style="width: 90px">Absent</th>
 
-
                         <th style="width: 90px">Late</th>
-
 
                         <th style="width: 110px">Excused</th>
                       </tr>
                     </thead>
-
 
                     <tbody id="takeTbody">
                       <tr>
@@ -581,15 +484,12 @@
                 </div>
               </div>
 
-
               <!-- =================================================
                  RIGHT: SUMMARY
             ================================================== -->
 
-
               <aside class="card att-side reveal-scale">
                 <div class="att-side-title reveal-item">Attendance Summary</div>
-
 
                 <div class="att-summary reveal-item">
                   <div class="att-sum-row">
@@ -597,24 +497,20 @@
                     <b id="sumPresent">0</b>
                   </div>
 
-
                   <div class="att-sum-row">
                     <span>Absent</span>
                     <b id="sumAbsent">0</b>
                   </div>
-
 
                   <div class="att-sum-row">
                     <span>Late</span>
                     <b id="sumLate">0</b>
                   </div>
 
-
                   <div class="att-sum-row">
                     <span>Excused</span>
                     <b id="sumExcused">0</b>
                   </div>
-
 
                   <div class="att-sum-row total">
                     <span>Total Students</span>
@@ -622,14 +518,12 @@
                   </div>
                 </div>
 
-
                 <div
                   class="att-side-title reveal-item"
                   style="margin-top: 14px"
                 >
                   Quick Actions
                 </div>
-
 
                 <div class="att-quick reveal-item">
                   <button
@@ -640,7 +534,6 @@
                     ✓ Mark All Present
                   </button>
 
-
                   <button
                     id="quickClearAll"
                     class="att-quick-btn"
@@ -649,26 +542,20 @@
                     🧹 Clear All
                   </button>
 
-
                   <label class="att-check">
                     <input id="autoExcused" type="checkbox" />
-
 
                     <span> Auto-mark unchecked as Excused </span>
                   </label>
                 </div>
 
-
                 <!-- SESSION STATUS -->
-
 
                 <div class="att-session-status reveal-item" id="sessionStatus">
                   Not Saved
                 </div>
 
-
                 <!-- SAVE -->
-
 
                 <button
                   id="saveAttendanceBtn"
@@ -684,21 +571,14 @@
       </main>
     </div>
 
-
     <!-- =========================================================
        SCRIPTS
   ========================================================== -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
 
-
     <script src="../../js/teacher/teacher-sidebar.js"></script>
-
 
     <script src="../../js/teacher/teacher-attendance.js"></script>
   </body>
 </html>
-
-
-

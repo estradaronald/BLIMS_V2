@@ -7,7 +7,6 @@
         const root = document.documentElement;
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         // Restore collapsed sidebar before first paint.
         if (
           isDesktop &&
@@ -16,13 +15,11 @@
           root.classList.add("sb-collapsed");
         }
 
-
         // Restore My Learning dropdown before first paint.
         try {
           const saved = JSON.parse(
             localStorage.getItem("student_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["my-learning"] === true) {
             root.classList.add("sb-preopen-learning");
@@ -33,11 +30,9 @@
       })();
     </script>
 
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student - Subjects</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -47,18 +42,15 @@
       rel="stylesheet"
     />
 
-
     <!-- Same baseline styles -->
     <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
     <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
 
-
     <!-- Student Subjects styles -->
     <link rel="stylesheet" href="../../styles/student/student-subjects.css" />
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <body data-page="subjects">
     <!-- Floating toggle -->
@@ -71,7 +63,6 @@
       ←
     </button>
 
-
     <div class="app">
       <aside class="sidebar" id="sidebar" data-role="student">
         <div class="sb-top">
@@ -83,18 +74,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -107,9 +95,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- MY LEARNING -->
           <div
@@ -128,7 +114,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="studentLearningMenu">
               <a
                 class="sb-item"
@@ -141,7 +126,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-classwork.html"
@@ -152,7 +136,6 @@
                 </span>
                 <span class="sb-text">ASSIGNMENT</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -165,7 +148,6 @@
                 <span class="sb-text">SUBJECTS</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-attendance.html"
@@ -177,7 +159,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a class="sb-item" href="./student-grades.html" data-nav="grades">
                 <span class="sb-ico">
                   <img src="../../assets/icons/grades.svg" alt="" />
@@ -187,13 +168,10 @@
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -203,37 +181,10 @@
             <span class="sb-ico">
               <img src="../../assets/icons/anouncement.svg" alt="" />
             </span>
-            <span class="sb-text">ANNOUCEMENTS</span>
-          </a>
-
-
-          <div class="sb-divider"></div>
-
-
-          <!-- MY ACCOUNT -->
-          <div class="sb-section-title">MY ACCOUNT</div>
-
-
-          <a class="sb-item" href="./student-profile.html" data-nav="profile">
-            <span class="sb-ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            </span>
-            <span class="sb-text">PROFILES</span>
+            <span class="sb-text">ANNOUNCEMENTS</span>
           </a>
         </nav>
       </aside>
-
 
       <main class="content page-animate">
         <!-- TOP BAR -->
@@ -246,19 +197,15 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Student</div>
                 <div class="tb-role">Subjects</div>
               </div>
 
-
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
-
 
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -268,13 +215,11 @@
           </div>
         </header>
 
-
         <!-- PAGE -->
         <section class="teachers-wrap">
           <div class="teachers-page-head reveal-item">
             <h2 class="teachers-title">Subjects</h2>
           </div>
-
 
           <!-- MAIN CARD -->
           <div class="card t-card subj-card reveal-scale">
@@ -283,11 +228,9 @@
               <div class="subj-left">
                 <div class="t-subtitle">My Subjects</div>
 
-
                 <!-- Grade Level only -->
                 <div class="subj-sub"></div>
               </div>
-
 
               <div class="subj-actions">
                 <!-- Current / Archive toggle -->
@@ -306,7 +249,6 @@
                     Current
                   </button>
 
-
                   <button
                     class="subj-tab"
                     id="tabArchive"
@@ -318,11 +260,9 @@
                   </button>
                 </div>
 
-
                 <!-- Search -->
                 <div class="t-search subj-search">
                   <span class="t-search-ico">🔎</span>
-
 
                   <input
                     id="subjSearch"
@@ -333,12 +273,10 @@
               </div>
             </div>
 
-
             <!-- SUBJECT BODY -->
             <div class="subj-body">
               <!-- Subject list -->
               <div class="subj-list" id="subjList"></div>
-
 
               <!-- Empty state -->
               <div id="subjEmpty" class="subj-empty hidden">
@@ -350,13 +288,9 @@
       </main>
     </div>
 
-
     <!-- Student scripts -->
     <script src="../../shared/js/page-animations.js"></script>
     <script src="../../js/student/student-sidebar.js"></script>
     <script src="../../js/student/student-subjects.js"></script>
   </body>
 </html>
-
-
-

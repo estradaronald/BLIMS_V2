@@ -6,7 +6,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Restore collapsed sidebar before first paint */
         if (
           isDesktop &&
@@ -15,13 +14,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Restore My Learning dropdown before first paint */
         try {
           const saved = JSON.parse(
             localStorage.getItem("student_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["my-learning"] === true) {
             document.documentElement.classList.add("sb-preopen-learning");
@@ -32,11 +29,9 @@
       })();
     </script>
 
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student - Dashboard</title>
-
 
     <!-- Plus Jakarta Sans (same as admin/teacher) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,12 +41,10 @@
       rel="stylesheet"
     />
 
-
     <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
     <link rel="stylesheet" href="../../styles/student/student-dashboard.css" />
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <!-- ✅ Must match student-sidebar.html data-nav="dashboard" -->
   <body data-page="dashboard">
@@ -65,7 +58,6 @@
       ←
     </button>
 
-
     <div class="app">
       <aside class="sidebar" id="sidebar" data-role="student">
         <div class="sb-top">
@@ -77,18 +69,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -101,12 +90,9 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
 
-
           <!-- MY LEARNING -->
-
 
           <div
             class="sb-group"
@@ -124,7 +110,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="studentLearningMenu">
               <a
                 class="sb-item"
@@ -137,7 +122,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-classwork.html"
@@ -148,7 +132,6 @@
                 </span>
                 <span class="sb-text">ASSIGNMENT</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -161,7 +144,6 @@
                 <span class="sb-text">SUBJECTS</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-attendance.html"
@@ -173,7 +155,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a class="sb-item" href="./student-grades.html" data-nav="grades">
                 <span class="sb-ico">
                   <img src="../../assets/icons/grades.svg" alt="" />
@@ -183,13 +164,10 @@
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -201,35 +179,8 @@
             </span>
             <span class="sb-text">ANNOUNCEMENTS</span>
           </a>
-
-
-          <div class="sb-divider"></div>
-
-
-          <!-- MY ACCOUNT -->
-          <div class="sb-section-title">MY ACCOUNT</div>
-
-
-          <a class="sb-item" href="./student-profile.html" data-nav="profile">
-            <span class="sb-ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            </span>
-            <span class="sb-text">PROFILE</span>
-          </a>
         </nav>
       </aside>
-
 
       <main class="content page-animate">
         <!-- top bar (same markup/classes as admin/teacher) -->
@@ -248,7 +199,6 @@
               </div>
               <button class="tb-drop" id="userMenuBtn" type="button">▾</button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
                 <button class="tb-item danger" type="button" id="topbarLogout">
@@ -259,7 +209,6 @@
           </div>
         </header>
 
-
         <!-- STUDENT DASH GRID (teacher-style ratios) -->
         <section class="s-dash">
           <!-- HERO (same look as teacher hero card) -->
@@ -267,16 +216,13 @@
             <div class="s-hero-left reveal-item">
               <div class="s-hero-eyebrow">STUDENT DASHBOARD</div>
 
-
               <h2>Welcome back, <span id="heroName">Juan</span>!</h2>
-
 
               <div class="s-hero-meta">
                 <div>
                   <b>Grade &amp; Section:</b>
                   <span id="heroGradeSection">Grade 6 - A</span>
                 </div>
-
 
                 <div>
                   <b>Adviser:</b>
@@ -285,7 +231,6 @@
               </div>
             </div>
 
-
             <div class="s-hero-date reveal-item">
               <span class="s-hero-date-label">TODAY</span>
               <strong id="heroToday">Sunday, October 11, 2026</strong>
@@ -293,11 +238,9 @@
             </div>
           </div>
 
-
           <!-- QUICK ACTIONS (teacher-style inline SVG icons) -->
           <div class="card s-quick reveal-scale">
             <div class="s-quick-title reveal-item">Quick Actions</div>
-
 
             <div class="s-quick-actions">
               <!-- Schedule -->
@@ -324,7 +267,6 @@
                 <span class="s-qa-text">View Schedule</span>
               </button>
 
-
               <!-- Grades -->
               <button
                 class="s-qa s-qa-green reveal-item"
@@ -349,7 +291,6 @@
                 </span>
                 <span class="s-qa-text">View Grades</span>
               </button>
-
 
               <!-- Classwork -->
               <button
@@ -378,7 +319,6 @@
                 <span class="s-qa-text">Open Classwork</span>
               </button>
 
-
               <!-- Announcements -->
               <button
                 class="s-qa s-qa-pink reveal-item"
@@ -404,7 +344,6 @@
               </button>
             </div>
           </div>
-
 
           <!-- STATS (teacher-style cards) -->
           <div class="s-stats reveal-scale">
@@ -434,8 +373,6 @@
               </div>
             </a>
 
-
-           
             <!-- Attendance -->
             <a
               class="s-stat card reveal-scale"
@@ -463,7 +400,6 @@
               </div>
             </a>
 
-
             <!-- Current Average -->
             <a class="s-stat card reveal-scale" href="./student-grades.html">
               <div class="s-stat-ico s-ico-pink reveal-item" aria-hidden="true">
@@ -488,7 +424,6 @@
             </a>
           </div>
 
-
           <!-- TODAY'S SCHEDULE (left, row 3) -->
           <div class="card s-panel s-schedule reveal-scale">
             <div class="s-panel-head reveal-item">
@@ -497,7 +432,6 @@
                 View Schedule
               </a>
             </div>
-
 
             <div class="s-sched" id="todayScheduleList">
               <!-- sample -->
@@ -509,7 +443,6 @@
                 <span class="s-badge s-badge-blue">Current</span>
               </div>
 
-
               <div class="s-sched-row reveal-item">
                 <div class="s-sched-main">
                   <div class="s-sched-title">Science</div>
@@ -520,14 +453,12 @@
             </div>
           </div>
 
-
           <!-- UPCOMING CLASSWORK (right, row 3) -->
           <div class="card s-panel s-classwork reveal-scale">
             <div class="s-panel-head reveal-item">
               <div class="s-panel-title">Upcoming Classwork</div>
               <a class="s-view" href="./student-classwork.html">View All</a>
             </div>
-
 
             <div class="s-list" id="classworkList">
               <!-- sample -->
@@ -540,7 +471,6 @@
                 <button class="s-ghost" type="button">Open</button>
               </div>
 
-
               <div class="s-list-row reveal-item">
                 <div>
                   <div class="s-list-title">Science Reflection</div>
@@ -552,14 +482,12 @@
             </div>
           </div>
 
-
           <!-- ATTENDANCE SUMMARY (left, row 4) -->
           <div class="card s-panel s-attendance reveal-scale">
             <div class="s-panel-head reveal-item">
               <div class="s-panel-title">Attendance Summary</div>
               <a class="s-view" href="./student-attendance.html">View</a>
             </div>
-
 
             <div class="s-att">
               <div class="s-att-row reveal-item">
@@ -581,14 +509,12 @@
             </div>
           </div>
 
-
           <!-- LATEST ANNOUNCEMENTS (right, row 4) -->
           <div class="card s-panel s-announcements reveal-scale">
             <div class="s-panel-head reveal-item">
               <div class="s-panel-title">Latest Announcements</div>
               <a class="s-view" href="./student-announcements.html">View All</a>
             </div>
-
 
             <div class="s-ann" id="announcementsList">
               <!-- sample -->
@@ -600,7 +526,6 @@
                 </div>
                 <div class="s-ann-meta">Venue: AVR Room</div>
               </div>
-
 
               <div class="s-ann-item reveal-item">
                 <div class="s-ann-title">Math Competition</div>
@@ -616,18 +541,12 @@
       </main>
     </div>
 
-
     <script src="../../shared/js/page-animations.js"></script>
-
 
     <!-- Sidebar auto-load (student clone of admin sidebar.js) -->
     <script src="../../js/student/student-sidebar.js"></script>
-
 
     <!-- Student dashboard behaviors -->
     <script src="../../js/student/student-dashboard.js"></script>
   </body>
 </html>
-
-
-

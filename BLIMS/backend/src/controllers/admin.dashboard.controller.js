@@ -84,21 +84,22 @@ exports.getAdminDashboardStats = async (req, res) => {
     // Optional: if you prefer teachers count from Teacher collection instead:
     // const totalTeachers = await Teacher.countDocuments({});
 
-    // ✅ Recently added accounts (latest users)
-    // We show role, username, and createdAt by default.
-    // Name/email/contact are not guaranteed in User model, so we fill nulls unless present.
+    // Recently added accounts — use the actual User model fields.
     const recentUsers = await User.find({})
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .limit(10)
       .lean();
 
     const recentAccounts = recentUsers.map((u) => ({
       role: u.role || "",
       username: u.username || "",
-      name: u.name || null, // only if your User schema has it
-      email: u.email || null, // only if your User schema has it
-      contactNo: u.phone || u.contactNo || null, // only if your User schema has it
-      dateCreated: safeDate(u.createdAt) || safeDate(u.created_at) || null,
+      name:
+        [u.first_name, u.middle_name, u.last_name, u.suffix]
+          .filter(Boolean)
+          .join(" ") || null,
+      email: u.email || null,
+      contactNo: u.phone_number || null,
+      dateCreated: safeDate(u.created_at),
     }));
 
     // ✅ Announcements count (only if you have a model; otherwise keep 0)

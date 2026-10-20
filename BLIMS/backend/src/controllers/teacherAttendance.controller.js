@@ -3,7 +3,6 @@ const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
 const SchoolYear = require("../models/SchoolYear.model");
 
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -12,7 +11,6 @@ function normalize(value) {
   return String(value ?? "").trim();
 }
 
-
 /*
  * Convert a Date into YYYY-MM-DD using UTC.
  *
@@ -20,7 +18,6 @@ function normalize(value) {
  * currently stored.
  */
 function toYmd(value) {
-
   if (!value) {
     return "";
   }
@@ -34,52 +31,45 @@ function toYmd(value) {
   return d.toISOString().slice(0, 10);
 }
 
-
 /*
  * Get today's date.
  */
-function getTodayYmd() {
-  return new Date()
-    .toISOString()
-    .slice(0, 10);
-}
 
+function getTodayYmd() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const dateParts = Object.fromEntries(
+    parts.map(({ type, value }) => [type, value]),
+  );
+
+  return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+}
 
 /* =========================================================
    GET TEACHER FROM SESSION
 ========================================================= */
 
 async function getTeacherBySession(req) {
-
   const userId =
-    req.session?.user?.id ||
-    req.session?.user?._id ||
-    req.session?.userId;
+    req.session?.user?.id || req.session?.user?._id || req.session?.userId;
 
+  console.log("Attendance session user:", req.session?.user);
 
-  console.log(
-    "Attendance session user:",
-    req.session?.user
-  );
-
-
-  console.log(
-    "Attendance resolved userId:",
-    userId
-  );
-
+  console.log("Attendance resolved userId:", userId);
 
   if (!userId) {
     return null;
   }
 
-
-  const teacher =
-    await Teacher.findOne({
-      userId,
-      isActive: true,
-    }).lean();
-
+  const teacher = await Teacher.findOne({
+    userId,
+    isActive: true,
+  }).lean();
 
   console.log(
     "Attendance resolved teacher:",
@@ -92,185 +82,118 @@ async function getTeacherBySession(req) {
           handledClass: teacher.handledClass,
           handledSection: teacher.handledSection,
         }
-      : null
+      : null,
   );
-
 
   return teacher || null;
 }
-
 
 /* =========================================================
    GET ACTIVE SCHOOL YEAR
 ========================================================= */
 
 async function getActiveSchoolYearDoc() {
-
-  return await SchoolYear
-    .findOne({
-      isActive: true,
-    })
-    .lean();
-
+  return await SchoolYear.findOne({
+    isActive: true,
+  }).lean();
 }
-
 
 /* =========================================================
    GET TEACHER CLASS / SECTION
 ========================================================= */
 
-function getTeacherScopeFromDoc(
-  teacher
-) {
-
+function getTeacherScopeFromDoc(teacher) {
   const scope = {
-
-    className:
-      normalize(
-        teacher?.handledClass ||
+    className: normalize(
+      teacher?.handledClass ||
         teacher?.className ||
         teacher?.gradeLevel ||
         teacher?.grade ||
-        teacher?.advisoryClass
-      ),
+        teacher?.advisoryClass,
+    ),
 
-    sectionName:
-      normalize(
-        teacher?.handledSection ||
+    sectionName: normalize(
+      teacher?.handledSection ||
         teacher?.sectionName ||
         teacher?.section ||
-        teacher?.advisorySection
-      ),
-
+        teacher?.advisorySection,
+    ),
   };
 
-
-  console.log(
-    "Attendance teacher scope:",
-    scope
-  );
-
+  console.log("Attendance teacher scope:", scope);
 
   return scope;
 }
-
 
 /* =========================================================
    GET STUDENTS FOR TEACHER
 ========================================================= */
 
-async function getTeacherStudents(
-  scope
-) {
-
+async function getTeacherStudents(scope) {
   return await Student.find({
     isActive: true,
 
-    className:
-      scope.className,
+    className: scope.className,
 
-    sectionName:
-      scope.sectionName,
-
+    sectionName: scope.sectionName,
   })
     .sort({
       lastName: 1,
       firstName: 1,
     })
     .lean();
-
 }
-
 
 /* =========================================================
    GET ATTENDANCE BOOTSTRAP
 ========================================================= */
 
-exports.getAttendanceBootstrap =
-  async (
-    req,
-    res
-  ) => {
-
-    try {
-
-      /* ---------------------------------
+exports.getAttendanceBootstrap = async (req, res) => {
+  try {
+    /* ---------------------------------
          TEACHER
       --------------------------------- */
 
-      const teacher =
-        await getTeacherBySession(
-          req
-        );
+    const teacher = await getTeacherBySession(req);
 
+    if (!teacher) {
+      return res.status(404).json({
+        ok: false,
+        message: "Teacher record not found.",
+      });
+    }
 
-      if (!teacher) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "Teacher record not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          TEACHER SCOPE
       --------------------------------- */
 
-      const scope =
-        getTeacherScopeFromDoc(
-          teacher
-        );
+    const scope = getTeacherScopeFromDoc(teacher);
 
+    if (!scope.className || !scope.sectionName) {
+      return res.status(400).json({
+        ok: false,
+        message: "Teacher class/section assignment not found.",
+      });
+    }
 
-      if (
-        !scope.className ||
-        !scope.sectionName
-      ) {
-
-        return res.status(400).json({
-          ok: false,
-          message:
-            "Teacher class/section assignment not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ACTIVE SCHOOL YEAR
       --------------------------------- */
 
-      const activeSY =
-        await getActiveSchoolYearDoc();
+    const activeSY = await getActiveSchoolYearDoc();
 
+    if (!activeSY) {
+      return res.status(404).json({
+        ok: false,
+        message: "No active school year found.",
+      });
+    }
 
-      if (!activeSY) {
+    const schoolYearStart = toYmd(activeSY.start);
 
-        return res.status(404).json({
-          ok: false,
-          message:
-            "No active school year found.",
-        });
+    const schoolYearEnd = toYmd(activeSY.end);
 
-      }
-
-
-      const schoolYearStart =
-        toYmd(
-          activeSY.start
-        );
-
-
-      const schoolYearEnd =
-        toYmd(
-          activeSY.end
-        );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          TODAY
 
          IMPORTANT:
@@ -279,216 +202,126 @@ exports.getAttendanceBootstrap =
          uses today's date.
       --------------------------------- */
 
-      const date =
-        getTodayYmd();
+    const date = getTodayYmd();
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          STUDENTS
       --------------------------------- */
 
-      const students =
-        await getTeacherStudents(
-          scope
-        );
+    const students = await getTeacherStudents(scope);
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          EXISTING TODAY'S SESSION
       --------------------------------- */
 
-      const session =
-        await Attendance.findOne({
+    const session = await Attendance.findOne({
+      date,
 
-          date,
+      className: scope.className,
 
-          className:
-            scope.className,
+      sectionName: scope.sectionName,
 
-          sectionName:
-            scope.sectionName,
+      schoolYearId: activeSY._id,
+    }).lean();
 
-          schoolYearId:
-            activeSY._id,
-
-        }).lean();
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          RESPONSE
       --------------------------------- */
 
-      return res.json({
+    return res.json({
+      ok: true,
 
-        ok: true,
+      data: {
+        teacherScope: scope,
 
-        data: {
+        schoolYear: {
+          id: String(activeSY._id),
 
-          teacherScope:
-            scope,
+          name: normalize(activeSY.name),
 
-          schoolYear: {
+          start: schoolYearStart,
 
-            id:
-              String(
-                activeSY._id
-              ),
-
-            name:
-              normalize(
-                activeSY.name
-              ),
-
-            start:
-              schoolYearStart,
-
-            end:
-              schoolYearEnd,
-
-          },
-
-          /*
-           * This is always today's
-           * attendance date.
-           */
-          date,
-
-          students,
-
-          session:
-            session || null,
-
+          end: schoolYearEnd,
         },
 
-      });
+        /*
+         * This is always today's
+         * attendance date.
+         */
+        date,
 
-    } catch (err) {
+        students,
 
-      console.error(
-        "getAttendanceBootstrap error:",
-        err
-      );
+        session: session || null,
+      },
+    });
+  } catch (err) {
+    console.error("getAttendanceBootstrap error:", err);
 
+    return res.status(500).json({
+      ok: false,
 
-      return res.status(500).json({
+      message: "Server error",
 
-        ok: false,
-
-        message:
-          "Server error",
-
-        error:
-          process.env.NODE_ENV ===
-          "development"
-            ? err.message
-            : undefined,
-
-      });
-
-    }
-
-  };
-
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
 
 /* =========================================================
    SAVE ATTENDANCE
 ========================================================= */
 
-exports.saveAttendance =
-  async (
-    req,
-    res
-  ) => {
+exports.saveAttendance = async (req, res) => {
+  try {
+    console.log("======================================");
 
-    try {
+    console.log("SAVE ATTENDANCE REQUEST");
 
-      console.log(
-        "======================================"
-      );
+    console.log("BODY:", JSON.stringify(req.body, null, 2));
 
-      console.log(
-        "SAVE ATTENDANCE REQUEST"
-      );
+    console.log("======================================");
 
-      console.log(
-        "BODY:",
-        JSON.stringify(
-          req.body,
-          null,
-          2
-        )
-      );
-
-      console.log(
-        "======================================"
-      );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          TEACHER
       --------------------------------- */
 
-      const teacher =
-        await getTeacherBySession(
-          req
-        );
+    const teacher = await getTeacherBySession(req);
 
+    if (!teacher) {
+      return res.status(404).json({
+        ok: false,
+        message: "Teacher record not found.",
+      });
+    }
 
-      if (!teacher) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "Teacher record not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          TEACHER SCOPE
       --------------------------------- */
 
-      const scope =
-        getTeacherScopeFromDoc(
-          teacher
-        );
+    const scope = getTeacherScopeFromDoc(teacher);
 
+    if (!scope.className || !scope.sectionName) {
+      return res.status(400).json({
+        ok: false,
+        message: "Teacher class/section assignment not found.",
+      });
+    }
 
-      if (
-        !scope.className ||
-        !scope.sectionName
-      ) {
-
-        return res.status(400).json({
-          ok: false,
-          message:
-            "Teacher class/section assignment not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ACTIVE SCHOOL YEAR
       --------------------------------- */
 
-      const activeSY =
-        await getActiveSchoolYearDoc();
+    const activeSY = await getActiveSchoolYearDoc();
 
+    if (!activeSY) {
+      return res.status(404).json({
+        ok: false,
+        message: "No active school year found.",
+      });
+    }
 
-      if (!activeSY) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "No active school year found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          DATE
          
          IMPORTANT:
@@ -496,180 +329,100 @@ exports.saveAttendance =
          Attendance is always for today.
       --------------------------------- */
 
-      const date =
-        getTodayYmd();
+    const date = getTodayYmd();
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          REQUEST RECORDS
       --------------------------------- */
 
-      const rawRecords =
-        Array.isArray(
-          req.body?.records
-        )
-          ? req.body.records
-          : [];
+    const rawRecords = Array.isArray(req.body?.records) ? req.body.records : [];
 
+    console.log("SAVE ATTENDANCE SCOPE:", scope);
 
-      console.log(
-        "SAVE ATTENDANCE SCOPE:",
-        scope
-      );
+    console.log("SAVE ATTENDANCE DATE:", date);
 
+    console.log("SAVE ATTENDANCE RECORD COUNT:", rawRecords.length);
 
-      console.log(
-        "SAVE ATTENDANCE DATE:",
-        date
-      );
-
-
-      console.log(
-        "SAVE ATTENDANCE RECORD COUNT:",
-        rawRecords.length
-      );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          VALIDATE RECORDS
       --------------------------------- */
 
-      if (!rawRecords.length) {
+    if (!rawRecords.length) {
+      return res.status(400).json({
+        ok: false,
+        message: "records are required.",
+      });
+    }
 
-        return res.status(400).json({
-          ok: false,
-          message:
-            "records are required.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          VALID STATUSES
       --------------------------------- */
 
-      const validStatuses =
-        new Set([
-          "present",
-          "absent",
-          "late",
-          "excused",
-        ]);
+    const validStatuses = new Set(["present", "absent", "late", "excused"]);
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          NORMALIZE RECORDS
       --------------------------------- */
 
-      const records =
-        rawRecords
+    const records = rawRecords
 
-          .map(
-            (record) => ({
+      .map((record) => ({
+        studentId: normalize(record?.studentId),
 
-              studentId:
-                normalize(
-                  record?.studentId
-                ),
+        status: normalize(record?.status).toLowerCase(),
+      }))
 
-              status:
-                normalize(
-                  record?.status
-                ).toLowerCase(),
+      .filter((record) => record.studentId && validStatuses.has(record.status));
 
-            })
-          )
+    if (!records.length) {
+      return res.status(400).json({
+        ok: false,
+        message: "No valid attendance records found.",
+      });
+    }
 
-          .filter(
-            (record) =>
-              record.studentId &&
-              validStatuses.has(
-                record.status
-              )
-          );
-
-
-      if (!records.length) {
-
-        return res.status(400).json({
-          ok: false,
-          message:
-            "No valid attendance records found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          GET ALLOWED STUDENTS
       --------------------------------- */
 
-      const allowedStudents =
-        await Student.find({
+    const allowedStudents = await Student.find({
+      isActive: true,
 
-          isActive: true,
+      className: scope.className,
 
-          className:
-            scope.className,
+      sectionName: scope.sectionName,
+    })
 
-          sectionName:
-            scope.sectionName,
+      .select("_id studentId firstName middleName lastName")
 
-        })
+      .lean();
 
-          .select(
-            "_id studentId firstName middleName lastName"
-          )
-
-          .lean();
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          CREATE ALLOWED STUDENT ID SET
       --------------------------------- */
 
-      const allowedIds =
-        new Set(
-          allowedStudents.map(
-            (student) =>
-              normalize(
-                student.studentId
-              )
-          )
-        );
+    const allowedIds = new Set(
+      allowedStudents.map((student) => normalize(student.studentId)),
+    );
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          FILTER RECORDS
       --------------------------------- */
 
-      const filteredRecords =
-        records.filter(
-          (record) =>
-            allowedIds.has(
-              record.studentId
-            )
-        );
+    const filteredRecords = records.filter((record) =>
+      allowedIds.has(record.studentId),
+    );
 
+    if (!filteredRecords.length) {
+      return res.status(400).json({
+        ok: false,
 
-      if (
-        !filteredRecords.length
-      ) {
+        message:
+          "No valid students found for this teacher's class and section.",
+      });
+    }
 
-        return res.status(400).json({
-
-          ok: false,
-
-          message:
-            "No valid students found for this teacher's class and section.",
-
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ATTENDANCE FILTER
       ---------------------------------
 
@@ -682,263 +435,156 @@ exports.saveAttendance =
          active school year.
       */
 
-      const attendanceFilter = {
+    const attendanceFilter = {
+      date,
 
-        date,
+      className: scope.className,
 
-        className:
-          scope.className,
+      sectionName: scope.sectionName,
 
-        sectionName:
-          scope.sectionName,
+      schoolYearId: activeSY._id,
+    };
 
-        schoolYearId:
-          activeSY._id,
+    console.log(
+      "ATTENDANCE MONGODB FILTER:",
+      JSON.stringify(attendanceFilter, null, 2),
+    );
 
-      };
-
-
-      console.log(
-        "ATTENDANCE MONGODB FILTER:",
-        JSON.stringify(
-          attendanceFilter,
-          null,
-          2
-        )
-      );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ATTENDANCE UPDATE
       --------------------------------- */
 
-      const attendanceUpdate = {
+    const attendanceUpdate = {
+      $set: {
+        teacherId: teacher._id,
 
-        $set: {
+        schoolYearId: activeSY._id,
 
-          teacherId:
-            teacher._id,
+        schoolYearName: normalize(activeSY.name),
 
-          schoolYearId:
-            activeSY._id,
+        records: filteredRecords,
+      },
+    };
 
-          schoolYearName:
-            normalize(
-              activeSY.name
-            ),
-
-          records:
-            filteredRecords,
-
-        },
-
-      };
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          SAVE
       --------------------------------- */
 
-      const saved =
-        await Attendance.findOneAndUpdate(
+    const saved = await Attendance.findOneAndUpdate(
+      attendanceFilter,
 
-          attendanceFilter,
+      attendanceUpdate,
 
-          attendanceUpdate,
+      {
+        returnDocument: "after",
 
-          {
+        upsert: true,
 
-            returnDocument:
-              "after",
+        setDefaultsOnInsert: true,
 
-            upsert:
-              true,
+        runValidators: true,
+      },
+    ).lean();
 
-            setDefaultsOnInsert:
-              true,
-
-            runValidators:
-              true,
-
-          }
-
-        ).lean();
-
-
-      if (!saved) {
-
-        return res.status(500).json({
-
-          ok: false,
-
-          message:
-            "Attendance could not be saved.",
-
-        });
-
-      }
-
-
-      console.log(
-        "✅ ATTENDANCE SAVED:",
-        saved._id
-      );
-
-
-      return res.status(200).json({
-
-        ok: true,
-
-        message:
-          "Attendance saved successfully.",
-
-        data:
-          saved,
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        "❌ saveAttendance error:",
-        err
-      );
-
-
+    if (!saved) {
       return res.status(500).json({
-
         ok: false,
 
-        message:
-          "Server error while saving attendance.",
-
-        error:
-          process.env.NODE_ENV ===
-          "development"
-            ? err.message
-            : undefined,
-
+        message: "Attendance could not be saved.",
       });
-
     }
 
-  };
+    console.log("✅ ATTENDANCE SAVED:", saved._id);
 
+    return res.status(200).json({
+      ok: true,
+
+      message: "Attendance saved successfully.",
+
+      data: saved,
+    });
+  } catch (err) {
+    console.error("❌ saveAttendance error:", err);
+
+    return res.status(500).json({
+      ok: false,
+
+      message: "Server error while saving attendance.",
+
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
 
 /* =========================================================
    GET YTD SUMMARY
 ========================================================= */
 
-exports.getYtdSummary =
-  async (
-    req,
-    res
-  ) => {
-
-    try {
-
-      /* ---------------------------------
+exports.getYtdSummary = async (req, res) => {
+  try {
+    /* ---------------------------------
          TEACHER
       --------------------------------- */
 
-      const teacher =
-        await getTeacherBySession(
-          req
-        );
+    const teacher = await getTeacherBySession(req);
 
+    if (!teacher) {
+      return res.status(404).json({
+        ok: false,
+        message: "Teacher record not found.",
+      });
+    }
 
-      if (!teacher) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "Teacher record not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          TEACHER SCOPE
       --------------------------------- */
 
-      const scope =
-        getTeacherScopeFromDoc(
-          teacher
-        );
+    const scope = getTeacherScopeFromDoc(teacher);
 
+    if (!scope.className || !scope.sectionName) {
+      return res.status(400).json({
+        ok: false,
+        message: "Teacher class/section assignment not found.",
+      });
+    }
 
-      if (
-        !scope.className ||
-        !scope.sectionName
-      ) {
-
-        return res.status(400).json({
-          ok: false,
-          message:
-            "Teacher class/section assignment not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ACTIVE SCHOOL YEAR
       --------------------------------- */
 
-      const activeSY =
-        await getActiveSchoolYearDoc();
+    const activeSY = await getActiveSchoolYearDoc();
 
+    if (!activeSY) {
+      return res.status(404).json({
+        ok: false,
+        message: "No active school year found.",
+      });
+    }
 
-      if (!activeSY) {
+    const start = toYmd(activeSY.start);
 
-        return res.status(404).json({
-          ok: false,
-          message:
-            "No active school year found.",
-        });
+    const end = toYmd(activeSY.end);
 
-      }
-
-
-      const start =
-        toYmd(
-          activeSY.start
-        );
-
-
-      const end =
-        toYmd(
-          activeSY.end
-        );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          STUDENTS
       --------------------------------- */
 
-      const students =
-        await Student.find({
+    const students = await Student.find({
+      isActive: true,
 
-          isActive: true,
+      className: scope.className,
 
-          className:
-            scope.className,
+      sectionName: scope.sectionName,
+    })
 
-          sectionName:
-            scope.sectionName,
+      .sort({
+        lastName: 1,
+        firstName: 1,
+      })
 
-        })
+      .lean();
 
-          .sort({
-            lastName: 1,
-            firstName: 1,
-          })
-
-          .lean();
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ATTENDANCE SESSIONS
       ---------------------------------
 
@@ -947,335 +593,166 @@ exports.getYtdSummary =
          Filter by schoolYearId too.
       */
 
-      const sessions =
-        await Attendance.find({
+    const sessions = await Attendance.find({
+      schoolYearId: activeSY._id,
 
-          schoolYearId:
-            activeSY._id,
+      className: scope.className,
 
-          className:
-            scope.className,
+      sectionName: scope.sectionName,
 
-          sectionName:
-            scope.sectionName,
+      date: {
+        $gte: start,
 
-          date: {
+        $lte: end,
+      },
+    })
 
-            $gte:
-              start,
+      .lean();
 
-            $lte:
-              end,
-
-          },
-
-        })
-
-          .lean();
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          CREATE COUNTS
       --------------------------------- */
 
-      const counts =
-        new Map();
+    const counts = new Map();
 
+    students.forEach((student) => {
+      const studentId = normalize(student.studentId);
 
-      students.forEach(
-        (student) => {
+      counts.set(studentId, {
+        studentId,
 
-          const studentId =
-            normalize(
-              student.studentId
-            );
+        fullName: [student.firstName, student.middleName, student.lastName]
 
+          .filter(Boolean)
 
-          counts.set(
-            studentId,
-            {
+          .join(" "),
 
-              studentId,
+        photoDataUrl: student.photoDataUrl || "",
 
-              fullName: [
+        present: 0,
 
-                student.firstName,
+        absent: 0,
 
-                student.middleName,
+        late: 0,
 
-                student.lastName,
+        excused: 0,
 
-              ]
+        total: 0,
+      });
+    });
 
-                .filter(Boolean)
-
-                .join(" "),
-
-              photoDataUrl:
-                student.photoDataUrl ||
-                "",
-
-              present: 0,
-
-              absent: 0,
-
-              late: 0,
-
-              excused: 0,
-
-              total: 0,
-
-            }
-          );
-
-        }
-      );
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          PROCESS SESSIONS
       --------------------------------- */
 
-      sessions.forEach(
-        (session) => {
+    sessions.forEach((session) => {
+      (session.records || []).forEach((record) => {
+        const studentId = normalize(record.studentId);
 
-          (
-            session.records ||
-            []
-          ).forEach(
-            (record) => {
-
-              const studentId =
-                normalize(
-                  record.studentId
-                );
-
-
-              if (
-                !counts.has(
-                  studentId
-                )
-              ) {
-
-                return;
-
-              }
-
-
-              const row =
-                counts.get(
-                  studentId
-                );
-
-
-              const status =
-                normalize(
-                  record.status
-                ).toLowerCase();
-
-
-              if (
-                status ===
-                "present"
-              ) {
-
-                row.present++;
-
-              }
-
-              else if (
-                status ===
-                "absent"
-              ) {
-
-                row.absent++;
-
-              }
-
-              else if (
-                status ===
-                "late"
-              ) {
-
-                row.late++;
-
-              }
-
-              else if (
-                status ===
-                "excused"
-              ) {
-
-                row.excused++;
-
-              }
-
-
-              row.total++;
-
-            }
-          );
-
+        if (!counts.has(studentId)) {
+          return;
         }
-      );
 
+        const row = counts.get(studentId);
 
-      /* ---------------------------------
+        const status = normalize(record.status).toLowerCase();
+
+        if (status === "present") {
+          row.present++;
+        } else if (status === "absent") {
+          row.absent++;
+        } else if (status === "late") {
+          row.late++;
+        } else if (status === "excused") {
+          row.excused++;
+        }
+
+        row.total++;
+      });
+    });
+
+    /* ---------------------------------
          FINAL SUMMARY
       --------------------------------- */
 
-      const summary =
-        Array.from(
-          counts.values()
-        ).map(
-          (row) => ({
+    const summary = Array.from(counts.values()).map((row) => ({
+      ...row,
 
-            ...row,
+      attendancePercent: row.total
+        ? Math.round((row.present / row.total) * 100)
+        : 0,
+    }));
 
-            attendancePercent:
-              row.total
+    return res.json({
+      ok: true,
 
-                ? Math.round(
-                    (
-                      row.present /
-                      row.total
-                    ) *
-                    100
-                  )
+      data: {
+        teacherScope: scope,
 
-                : 0,
+        schoolYear: {
+          id: String(activeSY._id),
 
-          })
-        );
+          name: normalize(activeSY.name),
 
+          start,
 
-      return res.json({
-
-        ok: true,
-
-        data: {
-
-          teacherScope:
-            scope,
-
-          schoolYear: {
-
-            id:
-              String(
-                activeSY._id
-              ),
-
-            name:
-              normalize(
-                activeSY.name
-              ),
-
-            start,
-
-            end,
-
-          },
-
-          sessionCount:
-            sessions.length,
-
-          summary,
-
+          end,
         },
 
-      });
+        sessionCount: sessions.length,
 
-    } catch (err) {
+        summary,
+      },
+    });
+  } catch (err) {
+    console.error("getYtdSummary error:", err);
 
-      console.error(
-        "getYtdSummary error:",
-        err
-      );
+    return res.status(500).json({
+      ok: false,
 
-
-      return res.status(500).json({
-
-        ok: false,
-
-        message:
-          "Server error",
-
-      });
-
-    }
-
-  };
-
+      message: "Server error",
+    });
+  }
+};
 
 /* =========================================================
    GET SESSION BY DATE
 ========================================================= */
 
-exports.getAttendanceSessionByDate =
-  async (
-    req,
-    res
-  ) => {
+exports.getAttendanceSessionByDate = async (req, res) => {
+  try {
+    const teacher = await getTeacherBySession(req);
 
-    try {
+    if (!teacher) {
+      return res.status(404).json({
+        ok: false,
+        message: "Teacher record not found.",
+      });
+    }
 
-      const teacher =
-        await getTeacherBySession(
-          req
-        );
+    const scope = getTeacherScopeFromDoc(teacher);
 
+    if (!scope.className || !scope.sectionName) {
+      return res.status(400).json({
+        ok: false,
+        message: "Teacher class/section assignment not found.",
+      });
+    }
 
-      if (!teacher) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "Teacher record not found.",
-        });
-
-      }
-
-
-      const scope =
-        getTeacherScopeFromDoc(
-          teacher
-        );
-
-
-      if (
-        !scope.className ||
-        !scope.sectionName
-      ) {
-
-        return res.status(400).json({
-          ok: false,
-          message:
-            "Teacher class/section assignment not found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          ACTIVE SCHOOL YEAR
       --------------------------------- */
 
-      const activeSY =
-        await getActiveSchoolYearDoc();
+    const activeSY = await getActiveSchoolYearDoc();
 
+    if (!activeSY) {
+      return res.status(404).json({
+        ok: false,
+        message: "No active school year found.",
+      });
+    }
 
-      if (!activeSY) {
-
-        return res.status(404).json({
-          ok: false,
-          message:
-            "No active school year found.",
-        });
-
-      }
-
-
-      /* ---------------------------------
+    /* ---------------------------------
          DATE
          
          This endpoint is for the
@@ -1283,57 +760,34 @@ exports.getAttendanceSessionByDate =
          don't allow arbitrary dates.
       --------------------------------- */
 
-      const date =
-        getTodayYmd();
+    const date = getTodayYmd();
 
-
-      /* ---------------------------------
+    /* ---------------------------------
          FIND TODAY'S SESSION
       --------------------------------- */
 
-      const session =
-        await Attendance.findOne({
+    const session = await Attendance.findOne({
+      date,
 
-          date,
+      className: scope.className,
 
-          className:
-            scope.className,
+      sectionName: scope.sectionName,
 
-          sectionName:
-            scope.sectionName,
+      schoolYearId: activeSY._id,
+    }).lean();
 
-          schoolYearId:
-            activeSY._id,
+    return res.json({
+      ok: true,
 
-        }).lean();
+      data: session || null,
+    });
+  } catch (err) {
+    console.error("getAttendanceSessionByDate error:", err);
 
+    return res.status(500).json({
+      ok: false,
 
-      return res.json({
-
-        ok: true,
-
-        data:
-          session || null,
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        "getAttendanceSessionByDate error:",
-        err
-      );
-
-
-      return res.status(500).json({
-
-        ok: false,
-
-        message:
-          "Server error",
-
-      });
-
-    }
-
-  };
+      message: "Server error",
+    });
+  }
+};

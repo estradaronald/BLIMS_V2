@@ -7,7 +7,6 @@
         const root = document.documentElement;
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         // Restore collapsed sidebar before first paint.
         if (
           isDesktop &&
@@ -16,13 +15,11 @@
           root.classList.add("sb-collapsed");
         }
 
-
         // Restore My Learning dropdown before first paint.
         try {
           const saved = JSON.parse(
             localStorage.getItem("student_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["my-learning"] === true) {
             root.classList.add("sb-preopen-learning");
@@ -33,40 +30,31 @@
       })();
     </script>
 
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Student - Attendance</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Baseline styles -->
     <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
-
 
     <!-- Student Attendance styles -->
     <link rel="stylesheet" href="../../styles/student/student-attendance.css" />
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <body data-page="attendance">
     <!-- Floating sidebar toggle -->
@@ -78,7 +66,6 @@
     >
       ←
     </button>
-
 
     <div class="app">
       <!-- SIDEBAR -->
@@ -92,18 +79,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -116,9 +100,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- MY LEARNING -->
           <div
@@ -137,7 +119,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="studentLearningMenu">
               <a
                 class="sb-item"
@@ -150,7 +131,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-classwork.html"
@@ -161,7 +141,6 @@
                 </span>
                 <span class="sb-text">ASSIGNMENT</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -174,7 +153,6 @@
                 <span class="sb-text">SUBJECTS</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-attendance.html"
@@ -186,7 +164,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a class="sb-item" href="./student-grades.html" data-nav="grades">
                 <span class="sb-ico">
                   <img src="../../assets/icons/grades.svg" alt="" />
@@ -196,13 +173,10 @@
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -214,41 +188,13 @@
             </span>
             <span class="sb-text">ANNOUNCEMENTS</span>
           </a>
-
-
-          <div class="sb-divider"></div>
-
-
-          <!-- MY ACCOUNT -->
-          <div class="sb-section-title">MY ACCOUNT</div>
-
-
-          <a class="sb-item" href="./student-profile.html" data-nav="profile">
-            <span class="sb-ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            </span>
-            <span class="sb-text">PROFILE</span>
-          </a>
         </nav>
       </aside>
-
 
       <main class="content page-animate">
         <!-- ==========================================
            TOP BAR
       =========================================== -->
-
 
         <header class="topbar reveal-soft">
           <div class="topbar-right">
@@ -259,14 +205,11 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Student</div>
 
-
                 <div class="tb-role">Attendance</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -277,10 +220,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -290,54 +231,43 @@
           </div>
         </header>
 
-
         <!-- ==========================================
            PAGE
       =========================================== -->
 
-
         <section class="teachers-wrap">
           <!-- PAGE HEADER -->
-
 
           <div class="teachers-page-head reveal-item">
             <h2 class="teachers-title">Attendance</h2>
           </div>
 
-
           <!-- ==========================================
              MAIN CARD
         =========================================== -->
-
 
           <div class="card t-card att-card reveal-scale">
             <!-- ========================================
                CARD HEADER
           ========================================= -->
 
-
             <div class="t-card-head att-head">
               <div class="att-left">
                 <div class="t-subtitle">Attendance Record</div>
 
-
                 <!-- Grade Level + Section -->
-
 
                 <div class="att-sub">
                   <span id="attGradeSection"> Grade — </span>
                 </div>
               </div>
 
-
               <!-- ======================================
                  FILTERS / VIEW TOGGLE
             ======================================= -->
 
-
               <div class="att-actions">
                 <!-- Month -->
-
 
                 <select
                   id="attMonthSelect"
@@ -346,46 +276,32 @@
                 >
                   <option value="all">Month: All</option>
 
-
                   <option value="0">January</option>
-
 
                   <option value="1">February</option>
 
-
                   <option value="2">March</option>
-
 
                   <option value="3">April</option>
 
-
                   <option value="4">May</option>
-
 
                   <option value="5">June</option>
 
-
                   <option value="6">July</option>
-
 
                   <option value="7">August</option>
 
-
                   <option value="8">September</option>
-
 
                   <option value="9">October</option>
 
-
                   <option value="10">November</option>
-
 
                   <option value="11">December</option>
                 </select>
 
-
                 <!-- Table / Calendar -->
-
 
                 <div
                   class="att-toggle"
@@ -402,7 +318,6 @@
                     Table
                   </button>
 
-
                   <button
                     class="att-tab"
                     id="attTabCalendar"
@@ -416,68 +331,52 @@
               </div>
             </div>
 
-
             <!-- ==========================================
                SUMMARY
           =========================================== -->
 
-
             <div class="att-summary" id="attSummary">
               <!-- Present -->
-
 
               <div class="att-stat">
                 <div class="att-stat-k">Present</div>
 
-
                 <div class="att-stat-v" id="attPresent">—</div>
               </div>
 
-
               <!-- Absent -->
-
 
               <div class="att-stat">
                 <div class="att-stat-k">Absent</div>
 
-
                 <div class="att-stat-v" id="attAbsent">—</div>
               </div>
 
-
               <!-- Late -->
-
 
               <div class="att-stat">
                 <div class="att-stat-k">Late</div>
 
-
                 <div class="att-stat-v" id="attLate">—</div>
               </div>
 
-
               <!-- Attendance Rate -->
-
 
               <div class="att-stat rate">
                 <div class="att-stat-k">Attendance Rate</div>
-
 
                 <div class="att-stat-v" id="attRate">—</div>
               </div>
             </div>
 
-
             <!-- ==========================================
                ATTENDANCE BODY
           =========================================== -->
-
 
             <div class="att-body">
               <!-- ========================================
                  TABLE VIEW
             ========================================= -->
-
 
               <div id="attViewTable">
                 <div class="att-table-wrap">
@@ -486,11 +385,9 @@
                       <tr>
                         <th style="width: 220px">Date</th>
 
-
                         <th style="width: 180px">Status</th>
                       </tr>
                     </thead>
-
 
                     <tbody id="attTbody">
                       <!-- JS populates attendance records -->
@@ -499,11 +396,9 @@
                 </div>
               </div>
 
-
               <!-- ========================================
                  CALENDAR VIEW
             ========================================= -->
-
 
               <div id="attViewCalendar" class="hidden">
                 <div class="att-cal">
@@ -511,18 +406,15 @@
                     <div class="att-cal-title" id="attCalTitle">Month</div>
                   </div>
 
-
                   <div class="att-cal-grid" id="attCalGrid">
                     <!-- JS populates calendar -->
                   </div>
                 </div>
               </div>
 
-
               <!-- ========================================
                  EMPTY STATE
             ========================================= -->
-
 
               <div id="attEmpty" class="att-empty hidden">
                 No attendance record yet.
@@ -533,19 +425,13 @@
       </main>
     </div>
 
-
     <!-- ==========================================
        STUDENT SCRIPTS
   =========================================== -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
     <script src="../../js/student/student-sidebar.js"></script>
-
 
     <script src="../../js/student/student-attendance.js"></script>
   </body>
 </html>
-
-
-

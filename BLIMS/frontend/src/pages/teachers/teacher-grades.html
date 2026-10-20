@@ -6,7 +6,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Sidebar collapsed state */
         if (
           isDesktop &&
@@ -15,13 +14,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -34,38 +31,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - Grades</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
-
 
     <!-- Teacher Grades -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-grades.css" />
-
 
     <!-- Page Animations -->
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
 
-
   <body data-page="teacher-grades">
     <!-- =========================================================
        FLOATING SIDEBAR TOGGLE
   ========================================================== -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -75,7 +64,6 @@
     >
       ←
     </button>
-
 
     <div class="app">
       <!-- TEACHER SIDEBAR -->
@@ -90,18 +78,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -114,9 +99,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -130,7 +113,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -143,7 +125,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -154,7 +135,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -167,7 +147,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -178,28 +157,13 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- LEARNING ACTIVITIES -->
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
-
 
           <a
             class="sb-item"
@@ -212,13 +176,10 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -233,21 +194,17 @@
         </nav>
       </aside>
 
-
       <!-- =======================================================
          MAIN CONTENT
     ======================================================== -->
-
 
       <main class="content page-animate">
         <!-- =====================================================
            TOPBAR
       ====================================================== -->
 
-
         <header class="topbar reveal-soft">
           <div class="topbar-left"></div>
-
 
           <div class="topbar-right">
             <!-- User -->
@@ -258,14 +215,11 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Bruan, Alvin</div>
 
-
                 <div class="tb-role" id="tbRole">Faculty</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -276,10 +230,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -289,90 +241,74 @@
           </div>
         </header>
 
-
         <!-- =====================================================
            GRADES PAGE
       ====================================================== -->
-
 
         <section class="gr-page ms-page">
           <!-- ===================================================
              PAGE TITLE
         ==================================================== -->
 
-
           <div class="gr-page-title ms-title reveal-soft" id="grTitle">
             Grades
           </div>
 
-
           <!-- ===================================================
              GRADES GRID
         ==================================================== -->
-
 
           <div class="gr-grid">
             <!-- =================================================
                MAIN GRADES CARD
           ================================================== -->
 
-
             <section class="card gr-card reveal-scale">
               <!-- ===============================================
                  CARD HEADER / CONTROLS
             ================================================ -->
 
-
               <div class="gr-card-top reveal-item">
                 <div>
                   <div class="gr-card-title">Class Grades</div>
-
 
                   <div class="gr-card-sub" id="grScopeLabel">
                     Select a subject and quarter
                   </div>
                 </div>
 
-
                 <!-- =============================================
                    CONTROLS
               ============================================== -->
-
 
                 <div class="gr-card-controls">
                   <!-- Quarter -->
                   <div class="gr-pill">
                     <span class="gr-pill-label"> Quarter </span>
 
-
                     <select id="quarterSelect" class="gr-select">
                       <!-- Terms are populated dynamically by teacher-grades.js -->
                     </select>
                   </div>
 
-
                   <!-- Subject -->
                   <div class="gr-pill">
                     <span class="gr-pill-label"> Subject </span>
-
 
                     <select id="subjectSelect" class="gr-select">
                       <!-- Filled by teacher-grades.js -->
                     </select>
                   </div>
 
-
                   <!-- Add Written Work -->
                   <button id="addWWBtn" class="gr-mini" type="button">
                     ＋ Add Written Work
                   </button>
 
-
                   <!-- Add Performance -->
                   <button id="addPTBtn" class="gr-mini" type="button">
                     ＋ Add Performance
                   </button>
-
 
                   <!-- Add Exam -->
                   <button id="addExamBtn" class="gr-mini" type="button">
@@ -381,17 +317,14 @@
                 </div>
               </div>
 
-
               <!-- =================================================
                  ASSESSMENT LIST
             ================================================== -->
-
 
               <div class="gr-assessment-area reveal-item" id="assessmentArea">
                 <div class="gr-assessment-header">
                   <div>
                     <div class="gr-assessment-title">Assessments</div>
-
 
                     <div class="gr-assessment-sub">
                       Assessments you add will appear as columns in the grade
@@ -399,7 +332,6 @@
                     </div>
                   </div>
                 </div>
-
 
                 <!--
                 teacher-grades.js will dynamically populate
@@ -423,7 +355,6 @@
                 └── Quarter 1 Exam — 50 pts
               -->
 
-
                 <div id="assessmentList" class="gr-assessment-list">
                   <div class="gr-assessment-empty">
                     No assessments added yet.
@@ -431,11 +362,9 @@
                 </div>
               </div>
 
-
               <!-- =================================================
                  GRADES TABLE
             ================================================== -->
-
 
               <div class="gr-table-wrap reveal-item">
                 <table class="gr-table" id="gradesTable">
@@ -450,16 +379,13 @@
                   Student | Final Grade
                 -->
 
-
                   <thead id="gradesThead">
                     <tr>
                       <th>Student</th>
 
-
                       <th>Final Grade</th>
                     </tr>
                   </thead>
-
 
                   <tbody id="gradesTbody">
                     <tr>
@@ -469,36 +395,28 @@
                 </table>
               </div>
 
-
               <!-- =================================================
                  WEIGHTS
             ================================================== -->
 
-
               <div class="gr-note reveal-item">
                 <div class="gr-note-title">Grading Weights</div>
-
 
                 <div class="gr-note-grid">
                   <div>
                     <b> Performance / Recitation </b>
 
-
                     <span> 50% </span>
                   </div>
-
 
                   <div>
                     <b> Written Works </b>
 
-
                     <span> 30% </span>
                   </div>
 
-
                   <div>
                     <b> Exam </b>
-
 
                     <span> 20% </span>
                   </div>
@@ -506,63 +424,50 @@
               </div>
             </section>
 
-
             <!-- =================================================
                RIGHT SIDE — GRADES SUMMARY
           ================================================== -->
 
-
             <aside class="card gr-side reveal-scale">
               <div class="gr-side-title reveal-item">Grades Summary</div>
-
 
               <!-- =================================================
                  METRICS
             ================================================== -->
-
 
               <div class="gr-metrics reveal-item">
                 <!-- Total Students -->
                 <div class="gr-metric">
                   <span> Total Students </span>
 
-
                   <b id="mTotal"> 0 </b>
                 </div>
-
 
                 <!-- Class Average -->
                 <div class="gr-metric">
                   <span> Class Average </span>
 
-
                   <b id="mAvg"> — </b>
                 </div>
-
 
                 <!-- Highest -->
                 <div class="gr-metric">
                   <span> Highest Final </span>
 
-
                   <b id="mHigh"> — </b>
                 </div>
-
 
                 <!-- Lowest -->
                 <div class="gr-metric">
                   <span> Lowest Final </span>
 
-
                   <b id="mLow"> — </b>
                 </div>
               </div>
 
-
               <!-- =================================================
                  SAVE
             ================================================== -->
-
 
               <div class="gr-side-actions reveal-item">
                 <button
@@ -574,11 +479,9 @@
                 </button>
               </div>
 
-
               <!-- =================================================
                  SAVE STATUS
             ================================================== -->
-
 
               <div class="gr-status reveal-item" id="saveStatus">Not Saved</div>
             </aside>
@@ -587,24 +490,17 @@
       </main>
     </div>
 
-
     <!-- =========================================================
        JAVASCRIPT
   ========================================================== -->
 
-
     <!-- Page animations -->
     <script src="../../shared/js/page-animations.js"></script>
 
-
     <!-- Teacher sidebar -->
     <script src="../../js/teacher/teacher-sidebar.js"></script>
-
 
     <!-- Teacher grades -->
     <script src="../../js/teacher/teacher-grades.js"></script>
   </body>
 </html>
-
-
-

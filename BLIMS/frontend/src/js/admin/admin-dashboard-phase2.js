@@ -336,6 +336,55 @@ async function loadAttendanceOverview() {
 
     updateAttendanceMockData();
 
+    // Update Today's Attendance KPI using today's real attendance records.
+    const attendanceKpi = document.getElementById("statAttendance");
+    const attendanceKpiHelper = document.getElementById("statAttendanceHelper");
+
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+    const todayRecords = attendanceRecords.filter(
+      (record) => record.date === today,
+    );
+
+    const presentCount = todayRecords.filter(
+      (record) => record.status === "present",
+    ).length;
+
+    const absentCount = todayRecords.filter(
+      (record) => record.status === "absent",
+    ).length;
+
+    const lateCount = todayRecords.filter(
+      (record) => record.status === "late",
+    ).length;
+
+    const excusedCount = todayRecords.filter(
+      (record) => record.status === "excused",
+    ).length;
+
+    const totalCount = presentCount + absentCount + lateCount + excusedCount;
+
+    const attendanceRate = totalCount
+      ? (presentCount / totalCount) * 100
+      : null;
+
+    if (attendanceKpi) {
+      attendanceKpi.textContent =
+        attendanceRate === null ? "—" : `${attendanceRate.toFixed(1)}%`;
+    }
+
+    if (attendanceKpiHelper) {
+      attendanceKpiHelper.textContent =
+        totalCount === 0
+          ? "No attendance recorded today"
+          : `${presentCount} present · ${absentCount} absent`;
+    }
+
     if (note) {
       note.textContent = attendanceRecords.length
         ? "Attendance totals are based on recorded BLIMS attendance."
@@ -1072,7 +1121,6 @@ async function loadDashboardKpis() {
     if (!result.ok) {
       throw new Error("Invalid dashboard KPI response.");
     }
-
 
     // Total Learners
     if (learnersElement) {

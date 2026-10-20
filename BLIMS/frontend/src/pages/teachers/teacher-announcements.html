@@ -5,7 +5,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Sidebar collapsed state */
         if (
           isDesktop &&
@@ -14,13 +13,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -32,45 +29,34 @@
     </script>
     <meta charset="UTF-8" />
 
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - Announcements</title>
-
 
     <!-- =====================================================
        FONTS
   ====================================================== -->
 
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- =====================================================
      TEACHER SHARED STYLES
 ====================================================== -->
 
-
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
-
 
     <!-- =====================================================
        TEACHER ANNOUNCEMENT STYLES
   ====================================================== -->
-
 
     <link
       rel="stylesheet"
@@ -78,12 +64,10 @@
     />
   </head>
 
-
   <body data-page="teacher-announcements">
     <!-- =====================================================
        SIDEBAR TOGGLE
   ====================================================== -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -94,17 +78,14 @@
       ←
     </button>
 
-
     <!-- =====================================================
        APP
   ====================================================== -->
-
 
     <div class="app">
       <!-- ===================================================
          SHARED TEACHER SIDEBAR
     ==================================================== -->
-
 
       <!-- TEACHER SIDEBAR -->
       <aside class="sidebar" id="sidebar">
@@ -118,18 +99,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -142,9 +120,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -158,7 +134,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -171,7 +146,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -182,7 +156,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -195,7 +168,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -206,28 +178,13 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- LEARNING ACTIVITIES -->
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
-
 
           <a
             class="sb-item"
@@ -240,13 +197,10 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -261,22 +215,18 @@
         </nav>
       </aside>
 
-
       <!-- ===================================================
          MAIN CONTENT
     ==================================================== -->
-
 
       <main class="content page-animate">
         <!-- =================================================
            TOPBAR
       ================================================== -->
 
-
         <header class="topbar reveal-soft">
           <div class="topbar-right">
             <!-- USER -->
-
 
             <div class="tb-user" id="userbox">
               <img
@@ -285,14 +235,11 @@
                 alt="avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name" id="tbName">Bruan, Alvin</div>
 
-
                 <div class="tb-role" id="tbRole">Bruan, Alvin</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -303,13 +250,10 @@
                 ▾
               </button>
 
-
               <!-- USER MENU -->
-
 
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -319,26 +263,21 @@
           </div>
         </header>
 
-
         <!-- =================================================
            ANNOUNCEMENTS PAGE
       ================================================== -->
-
 
         <section class="announcement-page">
           <!-- =================================================
              PAGE HEADER
         ================================================== -->
 
-
           <section class="announcement-page-header reveal-soft">
             <div>
               <h1>Announcements</h1>
 
-
               <p id="taSub">Posting to: (unassigned)</p>
             </div>
-
 
             <button
               type="button"
@@ -350,11 +289,9 @@
             </button>
           </section>
 
-
           <!-- =================================================
              TABS
         ================================================== -->
-
 
           <div
             class="announcement-tabs"
@@ -371,7 +308,6 @@
               My Class
             </button>
 
-
             <button
               type="button"
               id="tabAdmin"
@@ -383,41 +319,33 @@
             </button>
           </div>
 
-
           <!-- =================================================
              ANNOUNCEMENT LIST CARD
         ================================================== -->
-
 
           <section class="announcement-card">
             <!-- =================================================
                LIST HEADER
           ================================================== -->
 
-
             <div class="announcement-card-header">
               <div>
                 <h2 id="listTitle">My Class Announcements</h2>
-
 
                 <p id="listSubtext">
                   Create and manage announcements for your handled class.
                 </p>
               </div>
 
-
               <!-- =================================================
                  FILTERS
             ================================================== -->
 
-
               <div class="ann-filters">
                 <!-- SEARCH -->
 
-
                 <div class="t-search ann-search">
                   <span class="t-search-ico" aria-hidden="true"></span>
-
 
                   <input
                     type="search"
@@ -428,9 +356,7 @@
                   />
                 </div>
 
-
                 <!-- STATUS -->
-
 
                 <select
                   id="statusFilter"
@@ -443,9 +369,7 @@
                   <option value="draft">Draft</option>
                 </select>
 
-
                 <!-- CATEGORY -->
-
 
                 <select
                   id="catFilter"
@@ -461,21 +385,17 @@
               </div>
             </div>
 
-
             <!-- =================================================
                ANNOUNCEMENT LIST
           ================================================== -->
-
 
             <div id="annFeed" class="ann-feed">
               <!-- JavaScript inserts announcements here -->
             </div>
 
-
             <!-- =================================================
                EMPTY STATE
           ================================================== -->
-
 
             <div id="annEmpty" class="ann-empty hidden">
               No announcements found.
@@ -485,15 +405,12 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        VIEW ANNOUNCEMENT MODAL
   ====================================================== -->
 
-
     <div id="annViewModal" class="announcement-modal hidden" aria-hidden="true">
       <div id="annViewBackdrop" class="announcement-modal-backdrop"></div>
-
 
       <div
         class="announcement-modal-dialog view-dialog"
@@ -505,15 +422,12 @@
            HEADER
       ================================================== -->
 
-
         <div class="announcement-modal-header">
           <div>
             <h2 id="annViewTitle">Announcement</h2>
 
-
             <p id="annViewMeta">—</p>
           </div>
-
 
           <button
             type="button"
@@ -525,67 +439,52 @@
           </button>
         </div>
 
-
         <!-- =================================================
            BODY
       ================================================== -->
 
-
         <div class="announcement-modal-body">
           <!-- CATEGORY / STATUS -->
-
 
           <div class="announcement-view-meta">
             <span id="annViewPill" class="ta-badge">
               General Announcements
             </span>
 
-
             <span id="annViewStatus" class="ta-status-pill published">
               Published
             </span>
           </div>
 
-
           <!-- SOURCE -->
-
 
           <div class="announcement-view-source">
             <strong> Source </strong>
 
-
             <span id="annViewSource"> Teacher </span>
           </div>
 
-
           <!-- TITLE -->
-
 
           <h3 id="annViewH">Announcement</h3>
 
-
           <!-- MESSAGE -->
-
 
           <div id="annViewMsg" class="announcement-view-message"></div>
         </div>
 
-
         <!-- =================================================
            FOOTER
       ================================================== -->
-
 
         <div id="annViewActions" class="announcement-modal-footer">
           <button type="button" id="annViewCloseBtn" class="btn-secondary">
             Close
           </button>
 
-
           <button type="button" id="annViewEditBtn" class="btn-secondary">
             Edit
           </button>
-
 
           <button type="button" id="annViewDeleteBtn" class="btn-danger">
             Delete
@@ -594,15 +493,12 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        CREATE / EDIT ANNOUNCEMENT MODAL
   ====================================================== -->
 
-
     <div id="annFormModal" class="announcement-modal hidden" aria-hidden="true">
       <div id="annFormBackdrop" class="announcement-modal-backdrop"></div>
-
 
       <div
         class="announcement-modal-dialog form-dialog"
@@ -614,15 +510,12 @@
            FORM HEADER
       ================================================== -->
 
-
         <div class="announcement-modal-header">
           <div>
             <h2 id="annFormTitle">New Announcement</h2>
 
-
             <p id="annFormSub">Compose a message for your handled class.</p>
           </div>
-
 
           <button
             type="button"
@@ -634,11 +527,9 @@
           </button>
         </div>
 
-
         <!-- =================================================
            FORM
       ================================================== -->
-
 
         <form id="announcementForm" class="announcement-form" novalidate>
           <div class="announcement-modal-body">
@@ -646,13 +537,11 @@
                TITLE
           ================================================== -->
 
-
             <div class="form-field">
               <label for="inpTitle">
                 Title
                 <span>*</span>
               </label>
-
 
               <input
                 type="text"
@@ -664,39 +553,30 @@
               />
             </div>
 
-
             <!-- =================================================
                CATEGORY
           ================================================== -->
 
-
             <div class="form-field">
               <label for="inpCategory"> Category </label>
-
 
               <select id="inpCategory" name="category">
                 <option value="general">General Announcements</option>
 
-
                 <option value="events">School Events</option>
 
-
                 <option value="academic">Academic Notices</option>
-
 
                 <option value="priority">Priority Alerts</option>
               </select>
             </div>
 
-
             <!-- =================================================
                PUBLICATION
           ================================================== -->
 
-
             <div class="form-field">
               <label> Publication </label>
-
 
               <div class="publication-options">
                 <label class="publication-option">
@@ -708,10 +588,8 @@
                     checked
                   />
 
-
                   <span> Publish Now </span>
                 </label>
-
 
                 <label class="publication-option">
                   <input
@@ -721,22 +599,18 @@
                     value="schedule"
                   />
 
-
                   <span> Schedule for later </span>
                 </label>
               </div>
             </div>
 
-
             <!-- =================================================
                SCHEDULE
           ================================================== -->
 
-
             <div id="scheduleWrap" class="schedule-field" hidden>
               <div class="form-grid-2">
                 <!-- DATE -->
-
 
                 <div class="form-field">
                   <label for="inpScheduleDate">
@@ -744,13 +618,10 @@
                     <span>*</span>
                   </label>
 
-
                   <input type="date" id="inpScheduleDate" name="scheduleDate" />
                 </div>
 
-
                 <!-- TIME -->
-
 
                 <div class="form-field">
                   <label for="inpScheduleTime">
@@ -758,11 +629,9 @@
                     <span>*</span>
                   </label>
 
-
                   <input type="time" id="inpScheduleTime" name="scheduleTime" />
                 </div>
               </div>
-
 
               <small>
                 The announcement will become visible at the selected date and
@@ -770,15 +639,12 @@
               </small>
             </div>
 
-
             <!-- =================================================
                AUDIENCE
           ================================================== -->
 
-
             <div class="form-field">
               <label for="inpAudienceLabel"> Audience </label>
-
 
               <input
                 type="text"
@@ -788,18 +654,15 @@
               />
             </div>
 
-
             <!-- =================================================
                MESSAGE
           ================================================== -->
-
 
             <div class="form-field">
               <label for="inpMessage">
                 Message
                 <span>*</span>
               </label>
-
 
               <textarea
                 id="inpMessage"
@@ -811,11 +674,9 @@
               ></textarea>
             </div>
 
-
             <!-- =================================================
                FORM HINT
           ================================================== -->
-
 
             <div
               id="formHint"
@@ -825,22 +686,18 @@
             ></div>
           </div>
 
-
           <!-- =================================================
              FORM FOOTER
         ================================================== -->
-
 
           <div class="announcement-modal-footer">
             <button type="button" id="btnCancel" class="btn-secondary">
               Cancel
             </button>
 
-
             <button type="button" id="btnDraft" class="btn-secondary">
               Save as Draft
             </button>
-
 
             <button type="button" id="btnPublish" class="btn-primary">
               Publish
@@ -850,21 +707,14 @@
       </div>
     </div>
 
-
     <!-- =====================================================
        JAVASCRIPT
   ====================================================== -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
 
-
     <script src="../../js/teacher/teacher-sidebar.js"></script>
-
 
     <script src="../../js/teacher/teacher-announcements.js"></script>
   </body>
 </html>
-
-
-

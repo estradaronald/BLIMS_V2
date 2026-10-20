@@ -6,7 +6,6 @@
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         /* Sidebar collapsed state */
         if (
           isDesktop &&
@@ -15,13 +14,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -34,36 +31,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - My Schedule</title>
-
 
     <!-- =========================================================
        FONT
        ========================================================= -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- =========================================================
        SHARED ADMIN / TEACHER STYLES
        ========================================================= -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin-announcements.css" />
-
 
     <!-- =========================================================
        TEACHER SCHEDULE STYLES
@@ -75,13 +64,11 @@
       href="../../styles/teacher/teacher-my-schedule.css"
     />
 
-
     <!-- =========================================================
        PAGE ANIMATIONS
        ========================================================= -->
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <body data-page="teacher-my-schedule">
     <!-- =========================================================
@@ -96,7 +83,6 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- TEACHER SIDEBAR -->
       <aside class="sidebar" id="sidebar">
@@ -110,18 +96,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -134,9 +117,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -150,7 +131,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -163,7 +143,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -174,7 +153,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -187,7 +165,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -198,28 +175,13 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- LEARNING ACTIVITIES -->
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
-
 
           <!-- ASSIGNMENT -->
           <a
@@ -233,13 +195,10 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <!-- ANNOUNCEMENTS -->
           <a
@@ -254,7 +213,6 @@
           </a>
         </nav>
       </aside>
-
 
       <!-- =======================================================
          MAIN CONTENT
@@ -272,14 +230,11 @@
                 alt="Teacher avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Bruan, Alvin</div>
 
-
                 <div class="tb-role">Faculty</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -291,10 +246,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -304,7 +257,6 @@
           </div>
         </header>
 
-
         <!-- =====================================================
            PAGE
            ===================================================== -->
@@ -313,7 +265,6 @@
           <div class="teachers-page-head reveal-soft">
             <h2 class="teachers-title">My Schedule</h2>
           </div>
-
 
           <!-- ===================================================
              SCHEDULE CARD
@@ -327,7 +278,6 @@
               <div class="sched-left">
                 <div class="t-subtitle">Weekly Timetable</div>
 
-
                 <!--
                 Only show the teacher's assigned
                 grade/section here.
@@ -339,7 +289,6 @@
                 <div class="sched-sub">
                   <span id="schedGradeSection"> — </span>
                 </div>
-
 
                 <!--
                 Hidden compatibility elements.
@@ -354,10 +303,8 @@
               -->
                 <span id="schedRoom" hidden> Room — </span>
 
-
                 <span id="schedSY" hidden></span>
               </div>
-
 
               <!-- RIGHT -->
               <div class="sched-actions reveal-item">
@@ -377,7 +324,6 @@
                     Week View
                   </button>
 
-
                   <button
                     class="sched-tab"
                     id="viewDayBtn"
@@ -389,7 +335,6 @@
                   </button>
                 </div>
 
-
                 <!-- DAY SELECT -->
                 <select
                   id="daySelect"
@@ -399,21 +344,16 @@
                 >
                   <option value="mon">Monday</option>
 
-
                   <option value="tue">Tuesday</option>
-
 
                   <option value="wed">Wednesday</option>
 
-
                   <option value="thu">Thursday</option>
-
 
                   <option value="fri">Friday</option>
                 </select>
               </div>
             </div>
-
 
             <!-- =================================================
                SCHEDULE BODY
@@ -426,7 +366,6 @@
                 Loading schedule...
               </div>
 
-
               <!-- =================================================
                  WEEK VIEW
                  ================================================= -->
@@ -436,31 +375,26 @@
                   <div class="sched-col-head">Monday</div>
                 </div>
 
-
                 <!-- TUESDAY -->
                 <div class="sched-col reveal-item">
                   <div class="sched-col-head">Tuesday</div>
                 </div>
-
 
                 <!-- WEDNESDAY -->
                 <div class="sched-col reveal-item">
                   <div class="sched-col-head">Wednesday</div>
                 </div>
 
-
                 <!-- THURSDAY -->
                 <div class="sched-col reveal-item">
                   <div class="sched-col-head">Thursday</div>
                 </div>
-
 
                 <!-- FRIDAY -->
                 <div class="sched-col reveal-item">
                   <div class="sched-col-head">Friday</div>
                 </div>
               </div>
-
 
               <!-- =================================================
                  DAY VIEW
@@ -470,10 +404,8 @@
                   <div class="sched-col-head" id="dayViewTitle">Monday</div>
                 </div>
 
-
                 <div class="sched-day-list" id="dayViewList"></div>
               </div>
-
 
               <!-- =================================================
                  EMPTY / ERROR
@@ -487,23 +419,16 @@
       </main>
     </div>
 
-
     <!-- =========================================================
        SHARED JAVASCRIPT
        ========================================================= -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
-
 
     <!-- Teacher sidebar -->
     <script src="../../js/teacher/teacher-sidebar.js"></script>
-
 
     <!-- Teacher schedule -->
     <script src="../../js/teacher/teacher-my-schedule.js"></script>
   </body>
 </html>
-
-
-

@@ -1,13 +1,11 @@
 <!-- frontend/src/pages/teachers/teacher-dashboard.html -->
 
-
 <!doctype html>
 <html lang="en">
   <head>
     <script>
       (() => {
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
-
 
         /* Sidebar collapsed state */
         if (
@@ -17,13 +15,11 @@
           document.documentElement.classList.add("sb-collapsed");
         }
 
-
         /* Sidebar navigation group state */
         try {
           const saved = JSON.parse(
             localStorage.getItem("teacher_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["classroom"] === true) {
             document.documentElement.classList.add("sb-preopen-classroom");
@@ -34,13 +30,10 @@
       })();
     </script>
 
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Teacher - Dashboard</title>
-
 
     <!-- =====================================================
        FONT
@@ -48,31 +41,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
-
 
     <!-- =====================================================
        TEACHER STYLES
        No Admin CSS dependency
   ====================================================== -->
 
-
     <!-- Teacher Sidebar -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-sidebar.css" />
-
 
     <!-- Teacher Dashboard -->
     <link rel="stylesheet" href="../../styles/teacher/teacher-dashboard.css" />
 
-
     <!-- Shared Page Animations -->
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
-
 
   <body data-page="teacher-dashboard">
     <!-- =====================================================
@@ -86,7 +73,6 @@
     >
       ←
     </button>
-
 
     <!-- =====================================================
        APP
@@ -104,18 +90,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav" aria-label="Teacher navigation">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -128,9 +111,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- CLASSROOM -->
           <div class="sb-group" data-group="classroom">
@@ -144,7 +125,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="sbTeacherClassroom">
               <a
                 class="sb-item"
@@ -157,7 +137,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-students.html"
@@ -168,7 +147,6 @@
                 </span>
                 <span class="sb-text">LEARNERS</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -181,7 +159,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./teacher-grades.html"
@@ -192,30 +169,14 @@
                 </span>
                 <span class="sb-text">GRADES</span>
               </a>
-
-
-              <a
-                class="sb-item"
-                href="./teacher-promotion.html"
-                data-nav="teacher-promotion"
-              >
-                <span class="sb-ico">
-                  <img src="../../assets/icons/promotion.svg" alt="" />
-                </span>
-                <span class="sb-text">PROMOTION</span>
-              </a>
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <div class="sb-section-title">LEARNING ACTIVITIES</div>
 
-
           <!-- ASSIGNMENT -->
-
 
           <a
             class="sb-item"
@@ -228,15 +189,11 @@
             <span class="sb-text">ASSIGNMENT</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <div class="sb-section-title">COMMUNICATIONS</div>
 
-
           <!-- ANNOUNCEMENTS -->
-
 
           <a
             class="sb-item"
@@ -250,7 +207,6 @@
           </a>
         </nav>
       </aside>
-
 
       <!-- ===================================================
          MAIN CONTENT
@@ -269,14 +225,11 @@
                 alt="Teacher avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Bruan, Alvin</div>
 
-
                 <div class="tb-role">Faculty</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -287,11 +240,9 @@
                 ▾
               </button>
 
-
               <!-- User Menu -->
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" type="button" id="topbarLogout">
                   Logout
@@ -301,7 +252,6 @@
           </div>
         </header>
 
-
         <!-- =================================================
            TEACHER DASHBOARD GRID
       ================================================== -->
@@ -310,14 +260,11 @@
              HERO
         ================================================== -->
 
-
           <div class="card t-hero reveal-scale">
             <div class="t-hero-left reveal-item">
               <div class="t-hero-eyebrow">TEACHER DASHBOARD</div>
 
-
               <h2>Welcome back Bruan, Alvin</h2>
-
 
               <div class="t-hero-meta">
                 <div>
@@ -327,7 +274,6 @@
               </div>
             </div>
 
-
             <div class="t-hero-date reveal-item">
               <span class="t-hero-date-label">TODAY</span>
               <strong id="teacherTodayDate">Monday, September 9</strong>
@@ -335,13 +281,11 @@
             </div>
           </div>
 
-
           <!-- =================================================
              QUICK ACTIONS
         ================================================== -->
           <div class="card t-quick reveal-scale">
             <div class="t-quick-title reveal-item">Quick Actions</div>
-
 
             <div class="t-quick-actions">
               <!-- Attendance -->
@@ -366,10 +310,8 @@
                   </svg>
                 </span>
 
-
                 <span class="t-qa-text"> Take Attendance </span>
               </button>
-
 
               <!-- Assignment -->
               <button
@@ -397,10 +339,8 @@
                   </svg>
                 </span>
 
-
                 <span class="t-qa-text"> Add Assignment </span>
               </button>
-
 
               <!-- Announcement -->
               <button
@@ -424,10 +364,8 @@
                   </svg>
                 </span>
 
-
                 <span class="t-qa-text"> Post Announcement </span>
               </button>
-
 
               <!-- Grades -->
               <button
@@ -452,12 +390,10 @@
                   </svg>
                 </span>
 
-
                 <span class="t-qa-text"> Enter Grades </span>
               </button>
             </div>
           </div>
-
 
           <!-- =================================================
              STATS
@@ -485,13 +421,11 @@
                 </svg>
               </div>
 
-
               <div class="t-stat-mid reveal-item">
                 <div class="t-stat-label">Total Learners</div>
                 <div class="t-stat-value">45</div>
               </div>
             </a>
-
 
             <!-- Attendance -->
             <a
@@ -516,13 +450,11 @@
                 </svg>
               </div>
 
-
               <div class="t-stat-mid reveal-item">
                 <div class="t-stat-label">Attendance Rate</div>
                 <div class="t-stat-value">40</div>
               </div>
             </a>
-
 
             <!-- Announcements -->
             <a
@@ -545,14 +477,12 @@
                 </svg>
               </div>
 
-
               <div class="t-stat-mid reveal-item">
                 <div class="t-stat-label">Announcements</div>
                 <div class="t-stat-value">5</div>
               </div>
             </a>
           </div>
-
 
           <!-- =================================================
              TODAY'S SCHEDULE
@@ -565,61 +495,48 @@
               >
             </div>
 
-
             <div class="t-sched">
               <div class="t-sched-row reveal-item">
                 <div class="t-sched-main">
                   <div class="t-sched-title">Mathematics</div>
 
-
                   <div class="t-sched-sub">8:00am - 9:00am</div>
                 </div>
 
-
                 <span class="t-badge t-badge-blue"> Current </span>
               </div>
-
 
               <div class="t-sched-row reveal-item">
                 <div class="t-sched-main">
                   <div class="t-sched-title">Science</div>
 
-
                   <div class="t-sched-sub">9:00am - 10:00am</div>
                 </div>
 
-
                 <span class="t-badge t-badge-gray"> Next </span>
               </div>
-
 
               <div class="t-sched-row reveal-item">
                 <div class="t-sched-main">
                   <div class="t-sched-title">English</div>
 
-
                   <div class="t-sched-sub">10:00am - 11:00am</div>
                 </div>
 
-
                 <span class="t-badge t-badge-gray"> Next </span>
               </div>
-
 
               <div class="t-sched-row reveal-item">
                 <div class="t-sched-main">
                   <div class="t-sched-title">History</div>
 
-
                   <div class="t-sched-sub">11:00am - 12:00pm</div>
                 </div>
-
 
                 <span class="t-badge t-badge-gray"> Next </span>
               </div>
             </div>
           </div>
-
 
           <!-- =================================================
              RECENT ACTIVITY
@@ -630,7 +547,6 @@
               <a class="t-view" href="./teacher-attendance.html">View All</a>
             </div>
 
-
             <div class="t-activity">
               <div class="t-act-row reveal-item">
                 <div class="t-act-body">
@@ -638,49 +554,41 @@
                     Attendance for Science Class 1 - A
                   </div>
 
-
                   <div class="t-act-sub">1 minute ago</div>
                 </div>
               </div>
 
-
               <div class="t-act-row reveal-item">
                 <div class="t-act-body">
                   <div class="t-act-title">
                     Attendance for Mathematics Class 1 - A
                   </div>
-
 
                   <div class="t-act-sub">1 hour ago</div>
                 </div>
               </div>
 
-
               <div class="t-act-row reveal-item">
                 <div class="t-act-body">
                   <div class="t-act-title">
                     Attendance for Mathematics Class 1 - A
                   </div>
-
 
                   <div class="t-act-sub">1 hour ago</div>
                 </div>
               </div>
 
-
               <div class="t-act-row reveal-item">
                 <div class="t-act-body">
                   <div class="t-act-title">
                     Attendance for Mathematics Class 1 - A
                   </div>
-
 
                   <div class="t-act-sub">1 hour ago</div>
                 </div>
               </div>
             </div>
           </div>
-
 
           <!-- =================================================
              SCHEDULED ASSESSMENTS
@@ -691,57 +599,44 @@
               <a class="t-view" href="./teacher-assessment.html">View All</a>
             </div>
 
-
             <div class="t-list">
               <div class="t-list-row reveal-item">
                 <div>
                   <div class="t-list-title">Math Activity</div>
 
-
                   <div class="t-list-sub">Feb 1</div>
                 </div>
 
-
                 <span class="t-badge t-badge-blue"> Scheduled </span>
-
 
                 <button class="t-ghost" type="button">Edit</button>
               </div>
 
-
               <div class="t-list-row reveal-item">
                 <div>
                   <div class="t-list-title">Science Quiz - Biology</div>
 
-
                   <div class="t-list-sub">Jan 30</div>
                 </div>
 
-
                 <span class="t-badge t-badge-green"> Published </span>
-
 
                 <button class="t-ghost" type="button">View</button>
               </div>
 
-
               <div class="t-list-row reveal-item">
                 <div>
                   <div class="t-list-title">Science Quiz - Biology</div>
 
-
                   <div class="t-list-sub">Jan 30</div>
                 </div>
 
-
                 <span class="t-badge t-badge-orange"> Draft </span>
-
 
                 <button class="t-ghost" type="button">Publish</button>
               </div>
             </div>
           </div>
-
 
           <!-- =================================================
              ANNOUNCEMENTS
@@ -750,57 +645,44 @@
             <div class="t-panel-head reveal-item">
               <div class="t-panel-title">Announcements</div>
 
-
               <a class="t-view" href="./teacher-announcements.html">
                 View All
               </a>
             </div>
 
-
             <div class="t-ann">
               <div class="t-ann-item reveal-item">
                 <div class="t-ann-title">Faculty Meeting</div>
 
-
                 <div class="t-ann-meta">
                   <span> Date: Wed, Feb 14 </span>
-
 
                   <span> Time: 12:00pm - 1:00pm </span>
                 </div>
 
-
                 <div class="t-ann-meta">Venue: AVR Room</div>
               </div>
-
 
               <div class="t-ann-item reveal-item">
                 <div class="t-ann-title">Math Competition</div>
 
-
                 <div class="t-ann-meta">
                   <span> Date: Thu, Feb 15 </span>
 
-
                   <span> Time: 8:00am - 12:00pm </span>
                 </div>
-
 
                 <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
               </div>
 
-
               <div class="t-ann-item reveal-item">
                 <div class="t-ann-title">Math Competition</div>
-
 
                 <div class="t-ann-meta">
                   <span> Date: Thu, Feb 15 </span>
 
-
                   <span> Time: 8:00am - 12:00pm </span>
                 </div>
-
 
                 <div class="t-ann-meta">Venue: Bolosan Elementary School</div>
               </div>
@@ -810,7 +692,6 @@
       </main>
     </div>
 
-
     <!-- =====================================================
        TEACHER SCRIPTS
   ====================================================== -->
@@ -819,6 +700,3 @@
     <script src="../../js/teacher/teacher-dashboard.js"></script>
   </body>
 </html>
-
-
-

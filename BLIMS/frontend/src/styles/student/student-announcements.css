@@ -2,27 +2,22 @@
    STUDENT ANNOUNCEMENTS
 ========================================================= */
 
-
 /* =========================================================
 PAGE
 ========================================================= */
-
 
 .student-announcements-page {
   padding: 0;
 }
 
-
 /* =========================================================
 PAGE HEADER
 ========================================================= */
-
 
 .teachers-wrap {
   padding: 0;
   margin: 0;
 }
-
 
 .teachers-page-head {
   display: flex;
@@ -33,7 +28,6 @@ PAGE HEADER
   padding: 0;
 }
 
-
 .teachers-title {
   margin: 0;
   font-size: 34px;
@@ -42,11 +36,9 @@ PAGE HEADER
   line-height: 1.15;
 }
 
-
 /* =========================================================
    MAIN CARD
 ========================================================= */
-
 
 .student-announcement-card {
   overflow: hidden;
@@ -56,11 +48,9 @@ PAGE HEADER
   box-shadow: 0 2px 8px rgba(11, 44, 74, 0.04);
 }
 
-
 /* =========================================================
    CARD HEADER
 ========================================================= */
-
 
 .student-announcement-card-header {
   display: flex;
@@ -73,51 +63,39 @@ PAGE HEADER
   border-bottom: 1px solid #edf1f5;
 }
 
-
 .student-announcement-card-header h2 {
   margin: 0;
 
-
   color: #0b2c4a;
-
 
   font-size: 19px;
   font-weight: 800;
 
-
   letter-spacing: -0.3px;
 }
-
 
 .student-announcement-card-header p {
   margin: 5px 0 0;
 
-
   color: rgba(11, 44, 74, 0.55);
-
 
   font-size: 12px;
   font-weight: 600;
 }
 
-
 /* =========================================================
    FILTERS
 ========================================================= */
-
 
 .student-announcement-filters {
   display: flex;
   align-items: center;
   justify-content: flex-end;
 
-
   gap: 10px;
-
 
   flex-wrap: wrap;
 }
-
 
 /* SEARCH */
 .student-search-box {
@@ -125,36 +103,29 @@ PAGE HEADER
   align-items: center;
   gap: 9px;
 
-
   width: 320px;
   min-width: 0;
   max-width: 100%;
   height: 40px;
   box-sizing: border-box;
 
-
   padding: 0 14px;
-
 
   background: #fff;
   border: 1px solid rgba(11, 44, 74, 0.08);
   border-radius: 999px;
 
-
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-
 
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-
 .student-search-box:focus-within {
   border-color: rgba(11, 77, 122, 0.25);
   box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
 }
-
 
 .student-search-box span {
   position: relative;
@@ -164,7 +135,6 @@ PAGE HEADER
   height: 15px;
   font-size: 0;
 }
-
 
 .student-search-box span::before {
   content: "";
@@ -177,7 +147,6 @@ PAGE HEADER
   border-radius: 50%;
   box-sizing: border-box;
 }
-
 
 .student-search-box span::after {
   content: "";
@@ -192,16 +161,13 @@ PAGE HEADER
   transform-origin: left center;
 }
 
-
 .student-search-box input {
   width: 100%;
   min-width: 0;
 
-
   border: none;
   outline: none;
   background: transparent;
-
 
   font-family: inherit;
   font-size: 12px;
@@ -209,41 +175,32 @@ PAGE HEADER
   color: #0b2c4a;
 }
 
-
 .student-search-box input::placeholder {
   color: rgba(11, 44, 74, 0.48);
 }
-
 
 /* SELECTS */
 .student-announcement-filters select {
   height: 42px;
   box-sizing: border-box;
 
-
   padding: 0 44px 0 14px;
-
 
   border: 1px solid rgba(11, 44, 74, 0.1);
   border-radius: 999px;
 
-
   background-color: #fff;
   color: #0b2c4a;
-
 
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
 
-
   outline: none;
   appearance: none;
   cursor: pointer;
 
-
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
-
 
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20'%3E%3Cpath fill='%230b2c4a' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -251,53 +208,44 @@ PAGE HEADER
   background-size: 14px 14px;
 }
 
-
 .student-announcement-filters select::-ms-expand {
   display: none;
 }
-
 
 .student-announcement-filters select:focus {
   border-color: rgba(11, 77, 122, 0.25);
   box-shadow: 0 0 0 3px rgba(11, 77, 122, 0.07);
 }
 
-
 /* =========================================================
    FEED
 ========================================================= */
-
 
 .student-announcement-feed {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 18px;
+  padding: 12px 12px 18px;
   overflow: visible;
+  box-sizing: border-box;
 }
-
 
 /* =========================================================
    ANNOUNCEMENT ITEM
 ========================================================= */
 
-
 .student-announcement-item {
   position: relative;
   min-width: 0;
-  padding: 18px 20px;
-
+  padding: 22px 24px;
 
   background: #ffffff;
   border: 1px solid #e7edf3;
   border-radius: 14px;
 
-
   box-shadow: 0 2px 8px rgba(11, 44, 74, 0.04);
 
-
   cursor: pointer;
-
 
   transition:
     border-color 0.18s ease,
@@ -305,277 +253,207 @@ PAGE HEADER
     background-color 0.18s ease;
 }
 
-
 .student-announcement-item:hover {
   border-color: #dce5ed;
   box-shadow: 0 3px 10px rgba(11, 44, 74, 0.06);
 }
 
-
 /* =========================================================
    ITEM TOP
 ========================================================= */
-
 
 .student-announcement-item-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
-
   gap: 20px;
 }
-
 
 .student-announcement-item-main {
   min-width: 0;
   flex: 1;
 }
 
-
 .student-announcement-item-title {
   margin: 0;
 
-
   color: #0b2c4a;
-
 
   font-size: 16px;
   font-weight: 800;
 
-
   line-height: 1.4;
-
 
   letter-spacing: -0.2px;
 }
-
 
 .student-announcement-item:hover .student-announcement-item-title {
   text-decoration: underline;
 }
 
-
 /* =========================================================
    MESSAGE
 ========================================================= */
 
-
 .student-announcement-item-message {
   margin: 8px 0 10px;
 
-
   color: rgba(11, 44, 74, 0.68);
-
 
   font-size: 12px;
   font-weight: 600;
 
-
   line-height: 1.6;
-
 
   white-space: pre-wrap;
 }
-
 
 /* =========================================================
    META
 ========================================================= */
 
-
 .student-announcement-item-meta {
   display: flex;
   align-items: center;
 
-
   gap: 8px;
 
-
   color: rgba(11, 44, 74, 0.48);
-
 
   font-size: 10px;
   font-weight: 700;
 }
 
-
 .student-announcement-item-meta strong {
   color: rgba(11, 44, 74, 0.62);
 }
 
-
 /* =========================================================
    RIGHT SIDE
 ========================================================= */
-
 
 .student-announcement-item-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
 
-
   gap: 7px;
 
-
   flex-wrap: wrap;
-
 
   min-width: 210px;
 }
 
-
 /* =========================================================
    SOURCE PILL
 ========================================================= */
-
 
 .student-source-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-
   min-height: 24px;
-
 
   padding: 0 10px;
 
-
   border-radius: 999px;
 
-
   border: 1px solid rgba(11, 44, 74, 0.1);
-
 
   font-size: 10px;
   font-weight: 800;
 }
 
-
 .student-source-pill.admin {
   background: rgba(59, 130, 246, 0.1);
 
-
   border-color: rgba(59, 130, 246, 0.25);
-
 
   color: #2563eb;
 }
 
-
 .student-source-pill.teacher {
   background: rgba(168, 85, 247, 0.1);
 
-
   border-color: rgba(168, 85, 247, 0.25);
-
 
   color: #9333ea;
 }
 
-
 /* =========================================================
    CATEGORY PILL
 ========================================================= */
-
 
 .student-category-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-
   min-height: 24px;
-
 
   padding: 0 10px;
 
-
   border-radius: 999px;
-
 
   background: rgba(11, 44, 74, 0.05);
 
-
   border: 1px solid rgba(11, 44, 74, 0.08);
 
-
   color: #0b2c4a;
-
 
   font-size: 10px;
   font-weight: 800;
 }
 
-
 .student-category-pill.events {
   background: rgba(16, 185, 129, 0.1);
 
-
   border-color: rgba(16, 185, 129, 0.2);
-
 
   color: #047857;
 }
 
-
 .student-category-pill.academic {
   background: rgba(245, 158, 11, 0.1);
 
-
   border-color: rgba(245, 158, 11, 0.2);
-
 
   color: #b45309;
 }
 
-
 .student-category-pill.priority {
   background: rgba(239, 68, 68, 0.1);
 
-
   border-color: rgba(239, 68, 68, 0.2);
-
 
   color: #dc2626;
 }
-
 
 /* =========================================================
    VIEW BUTTON
 ========================================================= */
 
-
 .student-announcement-view-btn {
   height: 27px;
 
-
   padding: 0 12px;
-
 
   border: 1px solid rgba(11, 44, 74, 0.12);
 
-
   border-radius: 999px;
-
 
   background: #ffffff;
 
-
   color: #0b2c4a;
 
-
   font-family: inherit;
-
 
   font-size: 10px;
   font-weight: 800;
 
-
   cursor: pointer;
-
 
   transition:
     background 0.12s ease,
@@ -583,451 +461,340 @@ PAGE HEADER
     transform 0.12s ease;
 }
 
-
 .student-announcement-view-btn:hover {
   background: rgba(59, 130, 246, 0.08);
 
-
   border-color: rgba(59, 130, 246, 0.25);
 }
-
 
 .student-announcement-view-btn:active {
   transform: translateY(1px);
 }
 
-
 /* =========================================================
    EMPTY STATE
 ========================================================= */
 
-
 .student-announcement-empty {
   display: flex;
 
-
   flex-direction: column;
-
 
   align-items: center;
   justify-content: center;
 
-
   min-height: 220px;
 
-
   padding: 30px;
-
 
   text-align: center;
 }
 
-
 /*
    IMPORTANT:
+
+
 
 
    JavaScript adds the "hidden" class
    when announcements exist.
 
 
+
+
    This makes the empty state disappear.
 */
-
 
 .student-announcement-empty.hidden {
   display: none !important;
 }
 
-
 .student-empty-icon {
   margin-bottom: 10px;
-
 
   font-size: 30px;
 }
 
-
 .student-announcement-empty strong {
   color: #0b2c4a;
-
 
   font-size: 14px;
   font-weight: 800;
 }
 
-
 .student-announcement-empty span {
   max-width: 420px;
 
-
   margin-top: 5px;
 
-
   color: rgba(11, 44, 74, 0.5);
-
 
   font-size: 11px;
   font-weight: 600;
 }
 
-
 /* =========================================================
    MODAL
 ========================================================= */
 
-
 .student-announcement-modal {
   position: fixed;
 
-
   inset: 0;
-
 
   z-index: 9999;
 
-
   display: flex;
-
 
   align-items: center;
   justify-content: center;
 
-
   padding: 20px;
 }
-
 
 .student-announcement-modal.hidden {
   display: none;
 }
 
-
 .student-announcement-modal-backdrop {
   position: absolute;
 
-
   inset: 0;
 
-
   background: rgba(8, 28, 45, 0.52);
-
 
   backdrop-filter: blur(3px);
 }
 
-
 .student-announcement-modal-dialog {
   position: relative;
 
-
   z-index: 1;
-
 
   width: min(760px, 100%);
 
-
   max-height: calc(100vh - 40px);
-
 
   overflow: hidden;
 
-
   display: flex;
-
 
   flex-direction: column;
 
-
   border-radius: 16px;
 
-
   background: #ffffff;
-
 
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22);
 }
 
-
 /* =========================================================
    MODAL HEADER
 ========================================================= */
-
 
 .student-announcement-modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
-
   gap: 20px;
 
-
   padding: 20px 24px;
-
 
   border-bottom: 1px solid rgba(11, 44, 74, 0.08);
 }
 
-
 .student-announcement-modal-header h2 {
   margin: 0;
 
-
   color: #0b2c4a;
-
 
   font-size: 18px;
   font-weight: 800;
 }
 
-
 .student-announcement-modal-header p {
   margin: 5px 0 0;
 
-
   color: rgba(11, 44, 74, 0.5);
-
 
   font-size: 11px;
   font-weight: 600;
 }
-
 
 .student-announcement-close {
   width: 32px;
   height: 32px;
 
-
   flex: 0 0 auto;
-
 
   border: 1px solid rgba(11, 44, 74, 0.1);
 
-
   border-radius: 9px;
-
 
   background: #ffffff;
 
-
   color: #0b2c4a;
-
 
   font-size: 20px;
 
-
   line-height: 1;
-
 
   cursor: pointer;
 }
-
 
 .student-announcement-close:hover {
   background: rgba(11, 44, 74, 0.05);
 }
 
-
 /* =========================================================
    MODAL BODY
 ========================================================= */
 
-
 .student-announcement-modal-body {
   overflow-y: auto;
-
 
   padding: 24px;
 }
 
-
 .student-announcement-view-badges {
   display: flex;
 
-
   align-items: center;
-
 
   gap: 8px;
 
-
   margin-bottom: 16px;
-
 
   flex-wrap: wrap;
 }
 
-
 .student-announcement-modal-body h3 {
   margin: 0 0 12px;
 
-
   color: #0b2c4a;
-
 
   font-size: 21px;
   font-weight: 800;
 
-
   line-height: 1.4;
 }
-
 
 .student-announcement-view-message {
   color: rgba(11, 44, 74, 0.72);
 
-
   font-size: 13px;
   font-weight: 600;
 
-
   line-height: 1.75;
-
 
   white-space: pre-wrap;
 }
-
 
 /* =========================================================
    FILES
 ========================================================= */
 
-
 .student-announcement-view-files {
   display: grid;
 
-
   grid-template-columns: repeat(3, minmax(0, 1fr));
-
 
   gap: 10px;
 
-
   margin-top: 18px;
 }
-
 
 .student-announcement-view-files:empty {
   display: none;
 }
 
-
 .student-announcement-view-files img {
   width: 100%;
   height: 160px;
 
-
   object-fit: cover;
-
 
   border: 1px solid rgba(11, 44, 74, 0.1);
 
-
   border-radius: 10px;
-
 
   background: #ffffff;
 }
-
 
 /* =========================================================
    MODAL FOOTER
 ========================================================= */
 
-
 .student-announcement-modal-footer {
   display: flex;
 
-
   justify-content: flex-end;
 
-
   padding: 14px 24px;
-
 
   border-top: 1px solid rgba(11, 44, 74, 0.08);
 }
 
-
 .student-modal-close-btn {
   height: 36px;
 
-
   padding: 0 16px;
-
 
   border: 1px solid rgba(11, 44, 74, 0.12);
 
-
   border-radius: 9px;
-
 
   background: #ffffff;
 
-
   color: #0b2c4a;
 
-
   font-family: inherit;
-
 
   font-size: 11px;
   font-weight: 800;
 
-
   cursor: pointer;
 }
-
 
 .student-modal-close-btn:hover {
   background: rgba(11, 44, 74, 0.05);
 }
 
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
-
 
 @media (max-width: 900px) {
   .student-announcement-card-header {
     flex-direction: column;
   }
 
-
   .student-announcement-filters {
     width: 100%;
 
-
     justify-content: flex-start;
   }
-
 
   .student-search-box {
     width: 100%;
   }
 
-
   .student-announcement-item-top {
     flex-direction: column;
   }
 
-
   .student-announcement-item-right {
     min-width: 0;
-
 
     justify-content: flex-start;
   }
 }
 
-
 @media (max-width: 600px) {
   .teachers-title {
     font-size: 24px;
   }
-
 
   .student-announcement-card-header,
   .student-announcement-item,
@@ -1035,24 +802,17 @@ PAGE HEADER
     padding: 16px;
   }
 
-
   .student-announcement-filters {
     flex-direction: column;
 
-
     align-items: stretch;
   }
-
 
   .student-announcement-filters select {
     width: 100%;
   }
 
-
   .student-announcement-view-files {
     grid-template-columns: 1fr;
   }
 }
-
-
-

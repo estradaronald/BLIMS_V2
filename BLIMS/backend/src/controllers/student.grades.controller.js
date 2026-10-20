@@ -4,7 +4,7 @@ const Grade = require("../models/Grade.model");
 const Student = require("../models/Student.model");
 const User = require("../models/User.model");
 const SchoolYear = require("../models/SchoolYear.model");
-
+const GradeLevel = require("../models/GradeLevel.model");
 
 /* =========================================================
    GET MY GRADES
@@ -17,14 +17,10 @@ exports.getMyGrades = async (req, res) => {
     // GET LOGGED-IN USER
     // ==========================================
 
-    const sessionUser =
-      req.session?.user || null;
+    const sessionUser = req.session?.user || null;
 
     const userId =
-      sessionUser?.id ||
-      sessionUser?._id ||
-      req.session?.userId ||
-      null;
+      sessionUser?.id || sessionUser?._id || req.session?.userId || null;
 
     if (!userId) {
       return res.status(401).json({
@@ -44,9 +40,7 @@ exports.getMyGrades = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId)
-      .select("_id username role")
-      .lean();
+    const user = await User.findById(userId).select("_id username role").lean();
 
     if (!user) {
       return res.status(404).json({
@@ -78,17 +72,11 @@ exports.getMyGrades = async (req, res) => {
       });
     }
 
-    const studentId = String(
-      student.studentId || ""
-    ).trim();
+    const studentId = String(student.studentId || "").trim();
 
-    const gradeLevel = String(
-      student.className || ""
-    ).trim();
+    const gradeLevel = String(student.className || "").trim();
 
-    const sectionName = String(
-      student.sectionName || ""
-    ).trim();
+    const sectionName = String(student.sectionName || "").trim();
 
     if (!studentId) {
       return res.status(400).json({
@@ -101,10 +89,9 @@ exports.getMyGrades = async (req, res) => {
     // ACTIVE SCHOOL YEAR
     // ==========================================
 
-    const activeSchoolYear =
-      await SchoolYear.findOne({
-        isActive: true,
-      }).lean();
+    const activeSchoolYear = await SchoolYear.findOne({
+      isActive: true,
+    }).lean();
 
     if (!activeSchoolYear) {
       return res.status(404).json({
@@ -117,16 +104,10 @@ exports.getMyGrades = async (req, res) => {
     // TERMS
     // ==========================================
 
-    const terms = Array.isArray(
-      activeSchoolYear.terms
-    )
+    const terms = Array.isArray(activeSchoolYear.terms)
       ? activeSchoolYear.terms
           .slice()
-          .sort(
-            (a, b) =>
-              Number(a.order || 0) -
-              Number(b.order || 0)
-          )
+          .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
       : [];
 
     // ==========================================
@@ -135,14 +116,22 @@ exports.getMyGrades = async (req, res) => {
 
     const grades = await Grade.find({
       studentId,
-      gradeLevel,
-      sectionName,
       schoolYearId: activeSchoolYear._id,
     })
-      .sort({
-        subject: 1,
-      })
+      .sort({ subject: 1 })
       .lean();
+    // ==========================================
+    // FETCH ALL SUBJECTS FOR STUDENT GRADE LEVEL
+    // ==========================================
+
+    const gradeLevelDoc = await GradeLevel.findOne({
+      grade: gradeLevel,
+      isActive: true,
+    }).lean();
+
+    const subjects = Array.isArray(gradeLevelDoc?.subjects)
+      ? gradeLevelDoc.subjects
+      : [];
 
     // ==========================================
     // MAP TERM INFORMATION
@@ -151,64 +140,39 @@ exports.getMyGrades = async (req, res) => {
     const termMap = new Map();
 
     terms.forEach((term) => {
-      termMap.set(
-        String(term._id),
-        {
-          id: String(term._id),
-          name: String(
-            term.name || ""
-          ).trim(),
-          order: Number(
-            term.order || 0
-          ),
-          locked: !!term.locked,
-        }
-      );
+      termMap.set(String(term._id), {
+        id: String(term._id),
+        name: String(term.name || "").trim(),
+        order: Number(term.order || 0),
+        locked: !!term.locked,
+      });
     });
 
     // ==========================================
     // FORMAT GRADES
     // ==========================================
 
-    const formattedGrades = grades.map(
-      (grade) => {
-        const term =
-          termMap.get(
-            String(grade.termId)
-          );
+    const formattedGrades = grades.map((grade) => {
+      const term = termMap.get(String(grade.termId));
 
-        return {
-          id: String(
-            grade._id
-          ),
+      return {
+        id: String(grade._id),
 
-          subject: String(
-            grade.subject || ""
-          ).trim(),
+        subject: String(grade.subject || "").trim(),
 
-          termId: String(
-            grade.termId
-          ),
+        termId: String(grade.termId),
 
-          termName:
-            term?.name || "Unknown Term",
+        termName: term?.name || "Unknown Term",
 
-          termOrder:
-            term?.order || 0,
+        termOrder: term?.order || 0,
 
-          locked:
-            term?.locked ?? true,
+        locked: term?.locked ?? true,
 
-          initialGrade:
-            grade.initialGrade ??
-            null,
+        initialGrade: grade.initialGrade ?? null,
 
-          termGrade:
-            grade.termGrade ??
-            null,
-        };
-      }
-    );
+        termGrade: grade.termGrade ?? null,
+      };
+    });
 
     // ==========================================
     // RESPONSE
@@ -225,25 +189,19 @@ exports.getMyGrades = async (req, res) => {
         },
 
         schoolYear: {
-          id: String(
-            activeSchoolYear._id
-          ),
-          name: String(
-            activeSchoolYear.name || ""
-          ).trim(),
+          id: String(activeSchoolYear._id),
+          name: String(activeSchoolYear.name || "").trim(),
         },
 
         terms,
 
+        subjects,
+
         grades: formattedGrades,
       },
     });
-
   } catch (error) {
-    console.error(
-      "❌ Failed to fetch student grades:",
-      error
-    );
+    console.error("❌ Failed to fetch student grades:", error);
 
     return res.status(500).json({
       ok: false,

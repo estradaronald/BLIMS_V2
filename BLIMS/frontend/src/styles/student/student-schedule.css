@@ -10,226 +10,342 @@
 
 .teachers-wrap {
   padding: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* ===============================
+   PAGE TITLE
+   Match Teacher My Schedule
+   =============================== */
+
+.teachers-page-head {
+  margin-bottom: 14px;
+}
+
+.teachers-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 1000;
+  color: #0b2c4a;
+  line-height: 1.15;
+}
+
+/* ===============================
+   SCHEDULE CARD
+   =============================== */
+
+.sched-card {
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
 
 /* ===============================
    UTILITY
    =============================== */
 
-/* Required for Week View / Day View switching */
 .hidden {
   display: none !important;
 }
-
 
 /* ===============================
    CARD HEADER
    =============================== */
 
 .sched-head {
+  padding: 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 18px;
+  box-sizing: border-box;
 }
 
 .sched-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  min-width: 0;
+}
+
+.t-subtitle {
+  font-size: 16px;
+  font-weight: 1000;
+  color: rgba(11, 44, 74, 0.88);
 }
 
 .sched-sub {
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(11, 44, 74, 0.55);
-
+  margin-top: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
-
+  gap: 7px;
   flex-wrap: wrap;
+
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(11, 44, 74, 0.55);
 }
 
 .sched-dot {
-  opacity: 0.4;
+  color: rgba(11, 44, 74, 0.35);
 }
 
-
 /* ===============================
-   VIEW TOGGLE
+   HEADER ACTIONS
    =============================== */
 
 .sched-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .sched-toggle {
   display: flex;
-  background: rgba(11, 44, 74, 0.06);
-  padding: 4px;
-  border-radius: 999px;
+  align-items: center;
+  padding: 3px;
+
+  background: rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
 }
 
 .sched-tab {
-  border: none;
-  background: transparent;
+  height: 34px;
+  padding: 0 13px;
 
-  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: rgba(11, 44, 74, 0.58);
+
+  font-size: 11px;
+  font-weight: 1000;
+
+  cursor: pointer;
+}
+
+.sched-tab:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.sched-tab.active {
+  background: #ffffff;
+  color: #0b4d7a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ===============================
+   DAY SELECT
+   =============================== */
+
+.sched-day {
+  height: 38px;
+  min-width: 130px;
+
+  border: 1px solid rgba(11, 44, 74, 0.15);
+  border-radius: 10px;
+
+  padding: 0 34px 0 12px;
+
+  background: #ffffff;
+  color: rgba(11, 44, 74, 0.8);
 
   font-size: 12px;
   font-weight: 900;
 
-  border-radius: 999px;
-
+  outline: none;
   cursor: pointer;
 
-  transition:
-    background 0.15s ease,
-    transform 0.12s ease;
-
-  color: rgba(11, 44, 74, 0.65);
+  box-sizing: border-box;
 }
 
-.sched-tab.active {
-  background: #fff;
-  color: #0b2c4a;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+.sched-day:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
-
-.sched-tab:hover {
-  transform: translateY(-1px);
-}
-
-.sched-day {
-  min-width: 130px;
-}
-
 
 /* ===============================
    SCHEDULE BODY
    =============================== */
 
 .sched-body {
-  margin-top: 18px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
-
 
 /* ===============================
-   WEEK GRID
+   LOADING / EMPTY
    =============================== */
 
-.sched-week {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+.sched-empty {
+  width: 100%;
+  padding: 28px 16px;
 
-  margin-bottom: 6px;
+  text-align: center;
+  color: rgba(11, 44, 74, 0.48);
+
+  font-size: 13px;
+  font-weight: 900;
+
+  box-sizing: border-box;
 }
 
+/* ===============================
+   WEEK VIEW
+   =============================== */
+
+#weekView,
+.sched-week {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+
+  padding: 0 16px 16px;
+  margin-bottom: 0;
+
+  box-sizing: border-box;
+}
 
 /* ===============================
    DAY COLUMN
    =============================== */
 
 .sched-col {
-  background: #fff;
+  min-width: 0;
+  min-height: 250px;
 
-  border: 1px solid rgba(11, 44, 74, 0.12);
+  border: 1px solid rgba(11, 44, 74, 0.11);
   border-radius: 14px;
 
-  padding: 12px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  min-height: 220px;
-
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    border-color 0.15s ease;
-
+  background: #ffffff;
   overflow: hidden;
+
+  box-sizing: border-box;
 }
 
 .sched-col:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.08);
-
-  border-color: rgba(59, 130, 246, 0.25);
+  transform: none;
+  box-shadow: none;
+  border-color: rgba(11, 44, 74, 0.11);
 }
+
+/* ===============================
+   DAY HEADER
+   =============================== */
 
 .sched-col-head {
-  font-size: 13px;
-  font-weight: 1000;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 12px;
+
+  background: rgba(148, 163, 184, 0.09);
+  border-bottom: 1px solid rgba(11, 44, 74, 0.08);
 
   color: #0b2c4a;
+  font-size: 12px;
+  font-weight: 1000;
+  text-align: center;
 
-  margin-bottom: 4px;
+  box-sizing: border-box;
 }
 
+/* ===============================
+   EMPTY DAY
+   =============================== */
+
+.sched-slot-empty {
+  min-height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px 12px;
+
+  color: rgba(11, 44, 74, 0.38);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+
+  box-sizing: border-box;
+}
 
 /* ===============================
    SCHEDULE ITEM
    =============================== */
 
 .sched-item {
-  border: 1px solid rgba(11, 44, 74, 0.10);
-  border-radius: 12px;
+  position: relative;
 
-  padding: 10px;
+  width: calc(100% - 20px);
+  margin: 10px;
+  padding: 12px 12px 12px 16px;
 
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 11px;
 
-  /* IMPORTANT:
-     Stack schedule information vertically
-     so narrow columns don't crush the text. */
-  display: flex;
-  flex-direction: column;
+  background: rgba(34, 197, 94, 0.1);
 
-  gap: 5px;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
 
   transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    border-color 0.12s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
 
-  min-width: 0;
+.sched-item::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 5px;
+  background: #22c55e;
+
+  pointer-events: none;
 }
 
 .sched-item:hover {
+  filter: brightness(0.99);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.07);
   transform: translateY(-1px);
-
-  box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.06);
-
-  border-color: rgba(59, 130, 246, 0.25);
 }
-
 
 /* ===============================
    SCHEDULE TIME
+   Supports existing student
+   and teacher-style class names
    =============================== */
 
-.sched-time {
-  font-size: 11px;
+.sched-time,
+.sched-item-time {
+  margin-bottom: 5px;
+
+  color: rgba(11, 44, 74, 0.58);
+  font-size: 10px;
   font-weight: 900;
+  line-height: 1.25;
 
-  color: rgba(11, 44, 74, 0.55);
-
-  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   min-width: 0;
 }
-
 
 /* ===============================
    SCHEDULE MAIN
@@ -238,58 +354,68 @@
 .sched-main {
   display: flex;
   flex-direction: column;
-
   gap: 4px;
-
   min-width: 0;
 }
-
 
 /* ===============================
    SUBJECT
    =============================== */
 
-.sched-subject {
-  font-size: 12px;
-  font-weight: 1000;
+.sched-subject,
+.sched-item-title {
+  margin-bottom: 4px;
 
   color: #0b2c4a;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1.25;
 
-  line-height: 1.35;
-
+  white-space: normal;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
-
 
 /* ===============================
-   TEACHER
+   CLASS / SECTION METADATA
    =============================== */
 
-.sched-meta {
-  font-size: 11px;
-  font-weight: 800;
+.sched-meta,
+.sched-item-meta {
+  margin-bottom: 4px;
 
-  color: rgba(11, 44, 74, 0.55);
+  color: rgba(11, 44, 74, 0.72);
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.25;
 
-  line-height: 1.35;
-
+  white-space: normal;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
-
 
 /* ===============================
-   NO CLASS MESSAGE
+   ROOM
    =============================== */
 
-.sched-slot-empty {
-  font-size: 12px;
-  font-weight: 700;
+.sched-item-room {
+  color: rgba(11, 44, 74, 0.52);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
 
-  color: rgba(11, 44, 74, 0.55);
-
-  padding: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Keep schedule content within its cards. */
+
+.sched-item,
+.sched-item * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
 /* ===============================
    DAY VIEW
@@ -298,123 +424,136 @@
 .sched-dayview {
   display: flex;
   flex-direction: column;
-
   gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .sched-day-head {
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 
-.sched-day-list {
+#dayViewTitle {
+  min-height: 42px;
+  justify-content: flex-start;
+  padding: 0 14px;
+
+  border: 1px solid rgba(11, 44, 74, 0.1);
+  border-radius: 10px;
+
+  background: rgba(148, 163, 184, 0.08);
+  box-sizing: border-box;
+}
+
+.sched-day-list,
+#dayViewList {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
 
+/* ===============================
+   DAY VIEW SCHEDULE ITEMS
+   =============================== */
+
+.sched-day-list .sched-item,
+#dayViewList .sched-item {
+  width: 100%;
+  margin: 0;
+
+  padding: 13px 16px 13px 18px;
+
+  display: grid;
+  grid-template-columns:
+    150px
+    minmax(140px, 1fr)
+    minmax(160px, 1fr)
+    120px;
+
+  align-items: center;
   gap: 12px;
 }
 
+/* Remove vertical margins inside the Day View grid. */
 
-/* ===============================
-   DAY VIEW ITEMS
-   =============================== */
-
-/*
-   In Day View the card has more horizontal space,
-   so allow the information to breathe.
-*/
-
-.sched-day-list .sched-item {
-  display: flex;
-  flex-direction: column;
-
-  padding: 14px 16px;
+.sched-day-list .sched-time,
+.sched-day-list .sched-item-time,
+#dayViewList .sched-item-time,
+.sched-day-list .sched-subject,
+.sched-day-list .sched-item-title,
+#dayViewList .sched-item-title,
+.sched-day-list .sched-meta,
+.sched-day-list .sched-item-meta,
+#dayViewList .sched-item-meta,
+.sched-day-list .sched-item-room,
+#dayViewList .sched-item-room {
+  margin-bottom: 0;
 }
 
-.sched-day-list .sched-time {
-  font-size: 12px;
+.sched-day-list .sched-time,
+.sched-day-list .sched-item-time,
+#dayViewList .sched-item-time {
+  font-size: 10px;
 }
 
-.sched-day-list .sched-subject {
+.sched-day-list .sched-subject,
+.sched-day-list .sched-item-title,
+#dayViewList .sched-item-title {
   font-size: 13px;
 }
 
-.sched-day-list .sched-meta {
-  font-size: 11px;
+.sched-day-list .sched-meta,
+.sched-day-list .sched-item-meta,
+#dayViewList .sched-item-meta {
+  font-size: 10.5px;
 }
 
-
-/* ===============================
-   EMPTY STATE
-   =============================== */
-
-.sched-empty {
-  text-align: center;
-
-  padding: 40px 0;
-
-  font-weight: 900;
-  font-size: 13px;
-
-  color: rgba(11, 44, 74, 0.45);
+.sched-day-list .sched-item-room,
+#dayViewList .sched-item-room {
+  font-size: 10px;
 }
-
-
-/* ===============================
-   SCHEDULE CARD BODY
-   =============================== */
-
-.sched-card .sched-body {
-  padding: 0 18px 18px;
-}
-
 
 /* ===============================
    RESPONSIVE
+   Match Teacher My Schedule
    =============================== */
 
 @media (max-width: 1100px) {
+  .sched-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
+  .sched-actions {
+    justify-content: flex-start;
+  }
+
+  #weekView,
+  .sched-week {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  #weekView,
   .sched-week {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .sched-day-list .sched-item,
+  #dayViewList .sched-item {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-
-@media (max-width: 700px) {
-
-  .sched-week {
-    grid-template-columns: 1fr;
+@media (max-width: 560px) {
+  .teachers-title {
+    font-size: 28px;
   }
-
-  .sched-actions {
-    width: 100%;
-
-    justify-content: space-between;
-
-    flex-wrap: wrap;
-  }
-
-  .sched-toggle {
-    flex-shrink: 0;
-  }
-
-  .sched-day {
-    flex: 1;
-    min-width: 120px;
-  }
-
-}
-
-
-/* ===============================
-   SMALL MOBILE
-   =============================== */
-
-@media (max-width: 480px) {
 
   .sched-head {
-    align-items: flex-start;
+    padding: 14px;
   }
 
   .sched-actions {
@@ -434,4 +573,27 @@
     width: 100%;
   }
 
+  #weekView,
+  .sched-week {
+    grid-template-columns: 1fr;
+    padding: 0 10px 10px;
+  }
+
+  .sched-col {
+    min-height: auto;
+  }
+
+  .sched-dayview {
+    padding: 0 10px 10px;
+  }
+
+  .sched-day-list .sched-item,
+  #dayViewList .sched-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .sched-empty {
+    padding: 28px 16px;
+  }
 }

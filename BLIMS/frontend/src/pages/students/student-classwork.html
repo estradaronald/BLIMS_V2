@@ -7,7 +7,6 @@
         const root = document.documentElement;
         const isDesktop = window.matchMedia("(min-width: 701px)").matches;
 
-
         // Restore collapsed sidebar before first paint.
         if (
           isDesktop &&
@@ -16,13 +15,11 @@
           root.classList.add("sb-collapsed");
         }
 
-
         // Restore My Learning dropdown before first paint.
         try {
           const saved = JSON.parse(
             localStorage.getItem("student_sidebar_groups_v1") || "{}",
           );
-
 
           if (saved["my-learning"] === true) {
             root.classList.add("sb-preopen-learning");
@@ -33,47 +30,37 @@
       })();
     </script>
 
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
     <title>Student - Classwork</title>
-
 
     <!-- Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
       rel="stylesheet"
     />
 
-
     <!-- Baseline styles -->
     <link rel="stylesheet" href="../../styles/student/student-sidebar.css" />
 
-
     <link rel="stylesheet" href="../../styles/admin/admin-dashboard.css" />
-
 
     <!-- Header / Card / Modal styles -->
     <link rel="stylesheet" href="../../styles/admin/admin-teachers.css" />
-
 
     <!-- Student Classwork styles -->
     <link rel="stylesheet" href="../../styles/student/student-classwork.css" />
     <link rel="stylesheet" href="../../shared/css/page-animations.css" />
   </head>
 
-
   <body data-page="classwork">
     <!-- =========================================
        FLOATING SIDEBAR TOGGLE
   ========================================== -->
-
 
     <button
       class="sidebar-float-toggle"
@@ -84,12 +71,10 @@
       ←
     </button>
 
-
     <div class="app">
       <!-- =========================================
          SIDEBAR
     ========================================== -->
-
 
       <aside class="sidebar" id="sidebar" data-role="student">
         <div class="sb-top">
@@ -101,18 +86,15 @@
             />
           </div>
 
-
           <div class="sb-school">
             <div class="sb-school-name">Bolosan Elementary School</div>
             <div class="sb-school-sub">Bolosan District, Dagupan City</div>
           </div>
         </div>
 
-
         <nav class="sb-nav">
           <!-- OVERVIEW -->
           <div class="sb-section-title">OVERVIEW</div>
-
 
           <a
             class="sb-item"
@@ -125,9 +107,7 @@
             <span class="sb-text">DASHBOARD</span>
           </a>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- MY LEARNING -->
           <div
@@ -146,7 +126,6 @@
               <span class="sb-chevron" aria-hidden="true">˅</span>
             </button>
 
-
             <div class="sb-submenu" id="studentLearningMenu">
               <a
                 class="sb-item"
@@ -159,7 +138,6 @@
                 <span class="sb-text">MY SCHEDULE</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-classwork.html"
@@ -170,7 +148,6 @@
                 </span>
                 <span class="sb-text">ASSIGNMENT</span>
               </a>
-
 
               <a
                 class="sb-item"
@@ -183,7 +160,6 @@
                 <span class="sb-text">SUBJECTS</span>
               </a>
 
-
               <a
                 class="sb-item"
                 href="./student-attendance.html"
@@ -195,7 +171,6 @@
                 <span class="sb-text">ATTENDANCE</span>
               </a>
 
-
               <a class="sb-item" href="./student-grades.html" data-nav="grades">
                 <span class="sb-ico">
                   <img src="../../assets/icons/grades.svg" alt="" />
@@ -205,13 +180,10 @@
             </div>
           </div>
 
-
           <div class="sb-divider"></div>
-
 
           <!-- COMMUNICATIONS -->
           <div class="sb-section-title">COMMUNICATIONS</div>
-
 
           <a
             class="sb-item"
@@ -223,41 +195,13 @@
             </span>
             <span class="sb-text">ANNOUNCEMENTS</span>
           </a>
-
-
-          <div class="sb-divider"></div>
-
-
-          <!-- MY ACCOUNT -->
-          <div class="sb-section-title">MY ACCOUNT</div>
-
-
-          <a class="sb-item" href="./student-profile.html" data-nav="profile">
-            <span class="sb-ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
-              </svg>
-            </span>
-            <span class="sb-text">PROFILE</span>
-          </a>
         </nav>
       </aside>
-
 
       <main class="content page-animate">
         <!-- =========================================
            TOP BAR
       ========================================== -->
-
 
         <header class="topbar reveal-soft">
           <div class="topbar-right">
@@ -268,14 +212,11 @@
                 alt="Student avatar"
               />
 
-
               <div class="tb-meta">
                 <div class="tb-name">Student</div>
 
-
                 <div class="tb-role">Classwork</div>
               </div>
-
 
               <button
                 class="tb-drop"
@@ -286,10 +227,8 @@
                 ▾
               </button>
 
-
               <div class="tb-menu" id="userMenu">
                 <button class="tb-item" type="button">Settings</button>
-
 
                 <button class="tb-item danger" id="topbarLogout" type="button">
                   Logout
@@ -299,58 +238,46 @@
           </div>
         </header>
 
-
         <!-- =========================================
            PAGE
       ========================================== -->
 
-
         <section class="teachers-wrap">
           <!-- PAGE HEADER -->
-
 
           <div class="teachers-page-head reveal-item">
             <h2 class="teachers-title">Assignment</h2>
           </div>
 
-
           <!-- =========================================
              MAIN CARD
         ========================================== -->
 
-
           <div class="card t-card cw-card reveal-scale">
             <!-- CARD HEADER -->
-
 
             <div class="t-card-head cw-head">
               <!-- LEFT -->
 
-
               <div class="cw-left">
                 <div class="t-subtitle">Assignments & Tasks</div>
-
 
                 <!--
                 School year intentionally removed.
                 Student only sees their class and section.
               -->
 
-
                 <div class="cw-sub">
                   <span id="cwGradeSection"> Grade 6 - Section A </span>
                 </div>
               </div>
 
-
               <!-- =====================================
                  FILTERS / SEARCH
             ====================================== -->
 
-
               <div class="cw-actions">
                 <!-- Subject filter -->
-
 
                 <div class="cw-filter-wrap">
                   <select
@@ -362,13 +289,10 @@
                   </select>
                 </div>
 
-
                 <!-- Search -->
-
 
                 <div class="t-search cw-search">
                   <span class="t-search-ico" aria-hidden="true"> 🔎 </span>
-
 
                   <input
                     id="cwSearch"
@@ -381,21 +305,16 @@
               </div>
             </div>
 
-
             <!-- =========================================
                CLASSWORK BODY
           ========================================== -->
 
-
             <div class="cw-body">
               <!-- Assignment list -->
 
-
               <div class="cw-list" id="cwList"></div>
 
-
               <!-- Empty state -->
-
 
               <div id="cwEmpty" class="cw-empty hidden">
                 No classwork to display.
@@ -406,11 +325,9 @@
       </main>
     </div>
 
-
     <!-- =============================================
        VIEW ASSIGNMENT DETAILS MODAL
   ============================================== -->
-
 
     <div
       class="tmodal hidden"
@@ -422,27 +339,21 @@
     >
       <!-- Backdrop -->
 
-
       <div class="tmodal-backdrop" id="cwViewBackdrop"></div>
 
-
       <!-- Dialog -->
-
 
       <div class="tmodal-dialog cw-view-dialog" role="document">
         <!-- =========================================
            MODAL HEADER
       ========================================== -->
 
-
         <div class="tmodal-head">
           <div>
             <div class="tmodal-title" id="cwViewTitle">Assignment Details</div>
 
-
             <div class="tmodal-sub" id="cwViewSub">—</div>
           </div>
-
 
           <button
             class="tmodal-x"
@@ -454,36 +365,27 @@
           </button>
         </div>
 
-
         <!-- =========================================
            MODAL BODY
       ========================================== -->
 
-
         <div class="tmodal-body">
           <!-- Assignment information -->
 
-
           <div class="cw-view-chips" id="cwViewChips"></div>
 
-
           <!-- Instructions -->
-
 
           <div class="cw-view-block">
             <div class="cw-view-label">Description</div>
 
-
             <div class="cw-view-text" id="cwViewDesc">—</div>
           </div>
 
-
           <!-- Attachment -->
-
 
           <div class="cw-view-block">
             <div class="cw-view-label">Attachment</div>
-
 
             <div class="cw-view-file" id="cwViewFile">
               <span class="cw-file-muted"> No file attached. </span>
@@ -491,17 +393,14 @@
           </div>
         </div>
 
-
         <!-- =========================================
            MODAL FOOTER
       ========================================== -->
-
 
         <div class="tmodal-foot">
           <button class="t-ghost" id="cwViewCloseBtn" type="button">
             Close
           </button>
-
 
           <div class="tmodal-foot-right">
             <button class="t-ghost" id="cwDownloadBtn" type="button" disabled>
@@ -512,19 +411,13 @@
       </div>
     </div>
 
-
     <!-- =============================================
        SCRIPTS
   ============================================== -->
 
-
     <script src="../../shared/js/page-animations.js"></script>
     <script src="../../js/student/student-sidebar.js"></script>
-
 
     <script src="../../js/student/student-classwork.js"></script>
   </body>
 </html>
-
-
-
