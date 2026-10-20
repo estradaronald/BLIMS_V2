@@ -14,7 +14,7 @@
       const user = data.user;
 
       const name =
-        `${user.last_name || ""}, ${user.first_name || ""}`
+        ${user.last_name || ""}, ${user.first_name || ""}
           .replace(/^,\s*|\s*,$/g, "")
           .trim();
 

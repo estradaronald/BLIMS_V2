@@ -4,6 +4,8 @@
    FRONTEND-ONLY MOCK DATA
 
 
+
+
    IMPORTANT:
    - This file is an ADD-ON.
    - DO NOT modify admin-dashboard.js.
@@ -11,9 +13,11 @@
    - Backend/API integration will replace the mock data later.
 ========================================================= */
 
+
 /* =========================================================
    NEW CODE — MOCK DATA
 ========================================================= */
+
 
 const DASHBOARD_PHASE2_MOCK = {
   enrollment: {
@@ -21,11 +25,13 @@ const DASHBOARD_PHASE2_MOCK = {
     10: [],
   },
 
+
   attendance: {
     today: {
       present: 1168,
       absent: 77,
     },
+
 
     week: [
       { day: "Mon", present: 1184, absent: 61 },
@@ -35,6 +41,7 @@ const DASHBOARD_PHASE2_MOCK = {
       { day: "Fri", present: 1168, absent: 77 },
     ],
 
+
     month: [
       { day: "Week 1", rate: 95.2 },
       { day: "Week 2", rate: 96.1 },
@@ -42,6 +49,7 @@ const DASHBOARD_PHASE2_MOCK = {
       { day: "Week 4", rate: 96.4 },
     ],
   },
+
 
   grades: [
     { grade: "Grade 1", count: 188 },
@@ -53,9 +61,11 @@ const DASHBOARD_PHASE2_MOCK = {
   ],
 };
 
+
 /* =========================================================
    NEW CODE — ENROLLMENT TREND
 ========================================================= */
+
 
 async function loadEnrollmentTrend() {
   try {
@@ -67,15 +77,19 @@ async function loadEnrollmentTrend() {
       },
     });
 
+
     if (!response.ok) {
       throw new Error("Failed to load enrollment data.");
     }
 
+
     const result = await response.json();
+
 
     if (!result.ok || !Array.isArray(result.enrollmentTrend)) {
       throw new Error("Invalid enrollment trend response.");
     }
+
 
     const enrollmentData = result.enrollmentTrend
       .filter(
@@ -89,9 +103,12 @@ async function loadEnrollmentTrend() {
         count: Number(item.totalStudents),
       }));
 
+
     DASHBOARD_PHASE2_MOCK.enrollment[5] = enrollmentData.slice(-5);
 
+
     DASHBOARD_PHASE2_MOCK.enrollment[10] = enrollmentData.slice(-10);
+
 
     renderEnrollmentTrend(
       String(document.getElementById("enrollmentRange")?.value || "")
@@ -101,7 +118,9 @@ async function loadEnrollmentTrend() {
         : 5,
     );
 
+
     const note = document.getElementById("enrollmentNote");
+
 
     if (note) {
       note.textContent = enrollmentData.length
@@ -111,7 +130,9 @@ async function loadEnrollmentTrend() {
   } catch (error) {
     console.error("Enrollment trend loading error:", error);
 
+
     const note = document.getElementById("enrollmentNote");
+
 
     if (note) {
       note.textContent =
@@ -120,40 +141,55 @@ async function loadEnrollmentTrend() {
   }
 }
 
+
 function setupEnrollmentTrend() {
   const select = document.getElementById("enrollmentRange");
 
+
   if (!select) return;
+
 
   function getRange() {
     return String(select.value).toLowerCase().includes("10") ? 10 : 5;
   }
 
+
   select.addEventListener("change", () => {
     renderEnrollmentTrend(getRange());
   });
 
+
   renderEnrollmentTrend(getRange());
 }
+
 
 function renderEnrollmentTrend(range = 5) {
   const chart = document.getElementById("enrollmentChart");
 
+
   const line = document.getElementById("enrollmentLine");
+
 
   const area = document.getElementById("enrollmentArea");
 
+
   const pointsGroup = document.getElementById("enrollmentPoints");
+
 
   const xAxis = document.getElementById("enrollmentXAxis");
 
+
   const yAxis = document.getElementById("enrollmentYAxis");
+
 
   const summary = document.getElementById("enrollmentSummary");
 
+
   if (!chart || !line || !pointsGroup) return;
 
+
   const data = DASHBOARD_PHASE2_MOCK.enrollment[range] || [];
+
 
   if (!data.length) {
     if (line) line.setAttribute("points", "");
@@ -162,39 +198,52 @@ function renderEnrollmentTrend(range = 5) {
     if (xAxis) xAxis.innerHTML = "";
     if (yAxis) yAxis.innerHTML = "";
 
+
     if (summary) {
       summary.innerHTML = "<span>No enrollment data available</span>";
       summary.removeAttribute("title");
     }
 
+
     return;
   }
 
+
   const width = 560;
   const height = 190;
+
 
   const left = 8;
   const right = 8;
   const top = 16;
   const bottom = 20;
 
+
   const chartWidth = width - left - right;
+
 
   const chartHeight = height - top - bottom;
 
+
   const values = data.map((item) => item.count);
+
 
   const minValue = Math.min(...values);
 
+
   const maxValue = Math.max(...values);
 
+
   const valueRange = maxValue - minValue || 1;
+
 
   const points = data.map((item, index) => {
     const x = left + (index / Math.max(data.length - 1, 1)) * chartWidth;
 
+
     const y =
       top + chartHeight - ((item.count - minValue) / valueRange) * chartHeight;
+
 
     return {
       x,
@@ -203,23 +252,31 @@ function renderEnrollmentTrend(range = 5) {
     };
   });
 
+
   const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
 
+
   line.setAttribute("points", linePoints);
+
 
   if (area) {
     const areaPath = [
       `M ${points[0].x} ${top + chartHeight}`,
 
+
       ...points.map((point) => `L ${point.x} ${point.y}`),
 
+
       `L ${points[points.length - 1].x} ${top + chartHeight}`,
+
 
       "Z",
     ].join(" ");
 
+
     area.setAttribute("d", areaPath);
   }
+
 
   pointsGroup.innerHTML = points
     .map((point) => {
@@ -237,6 +294,7 @@ function renderEnrollmentTrend(range = 5) {
     })
     .join("");
 
+
   if (xAxis) {
     xAxis.innerHTML = points
       .map((point) => {
@@ -249,6 +307,7 @@ function renderEnrollmentTrend(range = 5) {
       .join("");
   }
 
+
   if (yAxis) {
     const labels = [
       maxValue,
@@ -257,6 +316,7 @@ function renderEnrollmentTrend(range = 5) {
       Math.round(minValue + valueRange * 0.25),
       minValue,
     ];
+
 
     yAxis.innerHTML = labels
       .map(
@@ -269,12 +329,17 @@ function renderEnrollmentTrend(range = 5) {
       .join("");
   }
 
+
   if (summary) {
     const current = data[data.length - 1];
 
+
     const previous = data[data.length - 2];
 
+
     summary.innerHTML = `
+
+
 
 
       <span>
@@ -282,31 +347,42 @@ function renderEnrollmentTrend(range = 5) {
       </span>
 
 
+
+
       <strong>
         ${current.count.toLocaleString()} learners
       </strong>
 
 
+
+
     `;
+
 
     if (previous) {
       const change = current.count - previous.count;
 
+
       const percentage = previous.count ? (change / previous.count) * 100 : 0;
+
 
       summary.title = `${change >= 0 ? "+" : ""}${change.toLocaleString()} learners (${percentage.toFixed(1)}%) from the previous school year.`;
     }
   }
 }
 
+
 /* =========================================================
    NEW CODE — ATTENDANCE OVERVIEW
 ========================================================= */
 
+
 let attendanceRecords = [];
+
 
 async function loadAttendanceOverview() {
   const note = document.getElementById("attendanceNote");
+
 
   try {
     const response = await fetch("/api/admin/attendance", {
@@ -317,15 +393,19 @@ async function loadAttendanceOverview() {
       },
     });
 
+
     if (!response.ok) {
       throw new Error("Failed to load attendance records.");
     }
 
+
     const result = await response.json();
+
 
     if (!result.ok || !Array.isArray(result.data)) {
       throw new Error("Invalid attendance response.");
     }
+
 
     attendanceRecords = result.data.filter(
       (record) =>
@@ -334,11 +414,14 @@ async function loadAttendanceOverview() {
         ["present", "absent", "late", "excused"].includes(record.status),
     );
 
+
     updateAttendanceMockData();
+
 
     // Update Today's Attendance KPI using today's real attendance records.
     const attendanceKpi = document.getElementById("statAttendance");
     const attendanceKpiHelper = document.getElementById("statAttendanceHelper");
+
 
     const today = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Manila",
@@ -347,36 +430,45 @@ async function loadAttendanceOverview() {
       day: "2-digit",
     }).format(new Date());
 
+
     const todayRecords = attendanceRecords.filter(
       (record) => record.date === today,
     );
+
 
     const presentCount = todayRecords.filter(
       (record) => record.status === "present",
     ).length;
 
+
     const absentCount = todayRecords.filter(
       (record) => record.status === "absent",
     ).length;
+
 
     const lateCount = todayRecords.filter(
       (record) => record.status === "late",
     ).length;
 
+
     const excusedCount = todayRecords.filter(
       (record) => record.status === "excused",
     ).length;
 
+
     const totalCount = presentCount + absentCount + lateCount + excusedCount;
+
 
     const attendanceRate = totalCount
       ? (presentCount / totalCount) * 100
       : null;
 
+
     if (attendanceKpi) {
       attendanceKpi.textContent =
         attendanceRate === null ? "—" : `${attendanceRate.toFixed(1)}%`;
     }
+
 
     if (attendanceKpiHelper) {
       attendanceKpiHelper.textContent =
@@ -385,11 +477,13 @@ async function loadAttendanceOverview() {
           : `${presentCount} present · ${absentCount} absent`;
     }
 
+
     if (note) {
       note.textContent = attendanceRecords.length
         ? "Attendance totals are based on recorded BLIMS attendance."
         : "No attendance records are available for the selected periods.";
     }
+
 
     renderAttendanceOverview(
       String(
@@ -399,6 +493,7 @@ async function loadAttendanceOverview() {
   } catch (error) {
     console.error("Attendance overview loading error:", error);
 
+
     if (note) {
       note.textContent =
         "Unable to load attendance records. Please refresh the dashboard.";
@@ -406,17 +501,37 @@ async function loadAttendanceOverview() {
   }
 }
 
+
 function updateAttendanceMockData() {
   const formatDate = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
 
+
     return `${year}-${month}-${day}`;
   };
 
-  const today = new Date();
-  const todayKey = formatDate(today);
+
+  const manilaDateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+
+  const manilaDate = Object.fromEntries(
+    manilaDateParts.map(({ type, value }) => [type, value]),
+  );
+
+
+  const todayKey = `${manilaDate.year}-${manilaDate.month}-${manilaDate.day}`;
+
+
+  const [year, monthNumber, day] = todayKey.split("-").map(Number);
+  const today = new Date(year, monthNumber - 1, day);
+
 
   const getCounts = (records) => {
     const counts = {
@@ -426,25 +541,31 @@ function updateAttendanceMockData() {
       excused: 0,
     };
 
+
     records.forEach((record) => {
       counts[record.status] += 1;
     });
 
+
     return counts;
   };
+
 
   const startOfWeek = new Date(today);
   const mondayOffset = (today.getDay() + 6) % 7;
   startOfWeek.setDate(today.getDate() - mondayOffset);
 
+
   const week = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + index);
+
 
     const key = formatDate(date);
     const counts = getCounts(
       attendanceRecords.filter((record) => record.date === key),
     );
+
 
     return {
       day: date.toLocaleDateString("en-US", { weekday: "short" }),
@@ -452,25 +573,34 @@ function updateAttendanceMockData() {
     };
   });
 
+
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const month = [];
 
-  for (let weekIndex = 0; weekIndex < 5; weekIndex += 1) {
-    const firstDay = new Date(monthStart);
-    firstDay.setDate(1 + weekIndex * 7);
 
-    if (firstDay > monthEnd) break;
+  const firstMonday = new Date(monthStart);
+  firstMonday.setDate(monthStart.getDate() - ((monthStart.getDay() + 6) % 7));
 
-    const lastDay = new Date(firstDay);
-    lastDay.setDate(firstDay.getDate() + 6);
 
-    if (lastDay > monthEnd) {
-      lastDay.setTime(monthEnd.getTime());
-    }
+  for (
+    let weekIndex = 0, weekStart = new Date(firstMonday);
+    weekStart <= monthEnd;
+    weekIndex++, weekStart.setDate(weekStart.getDate() + 7)
+  ) {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
 
-    const startKey = formatDate(firstDay);
-    const endKey = formatDate(lastDay);
+
+    const rangeStart = new Date(
+      Math.max(weekStart.getTime(), monthStart.getTime()),
+    );
+    const rangeEnd = new Date(Math.min(weekEnd.getTime(), monthEnd.getTime()));
+
+
+    const startKey = formatDate(rangeStart);
+    const endKey = formatDate(rangeEnd);
+
 
     const counts = getCounts(
       attendanceRecords.filter(
@@ -478,109 +608,159 @@ function updateAttendanceMockData() {
       ),
     );
 
+
     const total = counts.present + counts.absent + counts.late + counts.excused;
 
-    month.push({
-      day: `Week ${weekIndex + 1}`,
-      rate: total ? (counts.present / total) * 100 : null,
-    });
+
+    if (total > 0) {
+      month.push({
+        day: `Week ${weekIndex + 1}`,
+        rate: (counts.present / total) * 100,
+      });
+    } else {
+      month.push({
+        day: `Week ${weekIndex + 1}`,
+        rate: null,
+      });
+    }
   }
+
 
   DASHBOARD_PHASE2_MOCK.attendance.today = getCounts(
     attendanceRecords.filter((record) => record.date === todayKey),
   );
 
+
   DASHBOARD_PHASE2_MOCK.attendance.week = week;
   DASHBOARD_PHASE2_MOCK.attendance.month = month;
+  console.table(DASHBOARD_PHASE2_MOCK.attendance.month);
 }
+
 
 function setupAttendanceOverview() {
   const select = document.getElementById("attendancePeriod");
 
+
   if (!select) return;
+
 
   select.addEventListener("change", () => {
     renderAttendanceOverview(String(select.value).toLowerCase());
   });
 
+
   renderAttendanceOverview(String(select.value).toLowerCase());
   loadAttendanceOverview();
 }
 
+
 function renderAttendanceOverview(period) {
   const preview = document.getElementById("attendancePreview");
 
+
   if (!preview) return;
 
-  if (period.includes("week")) {
+
+  const selectedPeriod = String(period || "today").toLowerCase();
+
+
+  if (selectedPeriod.includes("week")) {
     renderWeeklyAttendance(preview);
-
-    return;
-  }
-
-  if (period.includes("month")) {
+  } else if (selectedPeriod.includes("month")) {
     renderMonthlyAttendance(preview);
-
-    return;
+  } else {
+    renderTodayAttendance(preview);
   }
-
-  renderTodayAttendance(preview);
 }
+
 
 /* ---------------------------------------------------------
    TODAY
 --------------------------------------------------------- */
 
+
 function renderTodayAttendance(preview) {
   const data = DASHBOARD_PHASE2_MOCK.attendance.today;
+
 
   const total =
     data.present + data.absent + (data.late || 0) + (data.excused || 0);
 
+
   const rate = total ? (data.present / total) * 100 : 0;
 
+
+  // Restore the original Today layout after switching from Week or Month.
+  preview.innerHTML = `
+    <div
+      class="donut-placeholder"
+      id="attendanceDonut"
+      aria-hidden="true"
+    >
+      <div class="donut-center">
+        <strong id="attendanceCenterRate">—</strong>
+        <span>Attendance Rate</span>
+      </div>
+    </div>
+
+
+    <div class="attendance-legend">
+      <div class="attendance-row">
+        <span class="legend-dot present"></span>
+        <span>Present</span>
+        <strong id="attendancePresent">—</strong>
+      </div>
+
+
+      <div class="attendance-row">
+        <span class="legend-dot absent"></span>
+        <span>Absent</span>
+        <strong id="attendanceAbsent">—</strong>
+      </div>
+
+
+      <div class="attendance-row total">
+        <span class="legend-dot total-dot"></span>
+        <span>Total</span>
+        <strong id="attendanceTotal">—</strong>
+      </div>
+    </div>
+  `;
+
+
   const donut = document.getElementById("attendanceDonut");
-
   const center = document.getElementById("attendanceCenterRate");
-
   const present = document.getElementById("attendancePresent");
-
   const absent = document.getElementById("attendanceAbsent");
-
   const totalEl = document.getElementById("attendanceTotal");
+
 
   if (donut) {
     donut.style.background = `conic-gradient(
-        #10b981 0deg ${rate * 3.6}deg,
-        #f06b72 ${rate * 3.6}deg 360deg
-      )`;
+      #10b981 0deg ${rate * 3.6}deg,
+      #f06b72 ${rate * 3.6}deg 360deg
+    )`;
   }
 
-  if (center) {
-    center.textContent = `${rate.toFixed(1)}%`;
-  }
 
-  if (present) {
-    present.textContent = data.present.toLocaleString();
-  }
+  if (center) center.textContent = `${rate.toFixed(1)}%`;
+  if (present) present.textContent = data.present.toLocaleString();
+  if (absent) absent.textContent = data.absent.toLocaleString();
+  if (totalEl) totalEl.textContent = total.toLocaleString();
 
-  if (absent) {
-    absent.textContent = data.absent.toLocaleString();
-  }
-
-  if (totalEl) {
-    totalEl.textContent = total.toLocaleString();
-  }
 
   renderAttendanceLegendLayout(preview);
 }
+
 
 /* ---------------------------------------------------------
    WEEK
 --------------------------------------------------------- */
 
+
 function renderWeeklyAttendance(preview) {
   const data = DASHBOARD_PHASE2_MOCK.attendance.week;
+
 
   const maxTotal = Math.max(
     1,
@@ -590,7 +770,10 @@ function renderWeeklyAttendance(preview) {
     ),
   );
 
+
   preview.innerHTML = `
+
+
 
 
     <div class="attendance-week-chart"
@@ -605,16 +788,22 @@ function renderWeeklyAttendance(preview) {
          ">
 
 
+
+
       ${data
         .map((item) => {
           const total =
             item.present + item.absent + (item.late || 0) + (item.excused || 0);
 
+
           const presentHeight = (item.present / maxTotal) * 100;
           const absentHeight = (item.absent / maxTotal) * 100;
           const rate = total ? (item.present / total) * 100 : 0;
 
+
           return `
+
+
 
 
           <div
@@ -630,6 +819,8 @@ function renderWeeklyAttendance(preview) {
           >
 
 
+
+
             <span
               style="
                 font-size:8px;
@@ -639,6 +830,10 @@ function renderWeeklyAttendance(preview) {
             >
               ${rate.toFixed(1)}%
             </span>
+
+
+
+
 
 
 
@@ -660,12 +855,16 @@ function renderWeeklyAttendance(preview) {
             >
 
 
+
+
               <div
                 style="
                   height:${presentHeight}%;
                   background:#10b981;
                 "
               ></div>
+
+
 
 
               <div
@@ -676,7 +875,13 @@ function renderWeeklyAttendance(preview) {
               ></div>
 
 
+
+
             </div>
+
+
+
+
 
 
 
@@ -692,7 +897,11 @@ function renderWeeklyAttendance(preview) {
             </span>
 
 
+
+
           </div>
+
+
 
 
         `;
@@ -700,41 +909,55 @@ function renderWeeklyAttendance(preview) {
         .join("")}
 
 
+
+
     </div>
+
+
 
 
   `;
 }
 
+
 /* ---------------------------------------------------------
    MONTH
 --------------------------------------------------------- */
+
 
 function renderMonthlyAttendance(preview) {
   const data = DASHBOARD_PHASE2_MOCK.attendance.month;
   const hasAttendanceData = data.some((item) => Number.isFinite(item.rate));
 
+
   const width = 560;
   const height = 170;
+
 
   const left = 38;
   const right = 12;
   const top = 15;
   const bottom = 30;
 
+
   const chartWidth = width - left - right;
+
 
   const chartHeight = height - top - bottom;
 
-  const min = 90;
+
+  const min = 0;
   const max = 100;
+
 
   const points = data.map((item, index) => {
     const x = left + (index / Math.max(data.length - 1, 1)) * chartWidth;
 
+
     const y = Number.isFinite(item.rate)
       ? top + chartHeight - ((item.rate - min) / (max - min)) * chartHeight
       : null;
+
 
     return {
       x,
@@ -743,12 +966,16 @@ function renderMonthlyAttendance(preview) {
     };
   });
 
+
   const validPoints = points.filter((point) => point.y !== null);
   const polyline = validPoints
     .map((point) => `${point.x},${point.y}`)
     .join(" ");
 
+
   preview.innerHTML = `
+
+
 
 
     <div
@@ -760,6 +987,8 @@ function renderMonthlyAttendance(preview) {
     >
 
 
+
+
       <svg
         viewBox="0 0 ${width} ${height}"
         width="100%"
@@ -769,12 +998,17 @@ function renderMonthlyAttendance(preview) {
       >
 
 
-        ${[90, 95, 100]
+
+
+        ${[0, 25, 50, 75, 100]
           .map((value) => {
             const y =
               top + chartHeight - ((value - min) / (max - min)) * chartHeight;
 
+
             return `
+
+
 
 
             <line
@@ -785,6 +1019,8 @@ function renderMonthlyAttendance(preview) {
               stroke="rgba(11,44,74,.08)"
               stroke-dasharray="3 4"
             />
+
+
 
 
             <text
@@ -798,9 +1034,15 @@ function renderMonthlyAttendance(preview) {
             </text>
 
 
+
+
           `;
           })
           .join("")}
+
+
+
+
 
 
 
@@ -813,6 +1055,10 @@ function renderMonthlyAttendance(preview) {
           stroke-linecap="round"
           stroke-linejoin="round"
         />
+
+
+
+
 
 
 
@@ -835,6 +1081,7 @@ function renderMonthlyAttendance(preview) {
           )
           .join("")}
 
+
 ${points
   .map(
     (point) => `
@@ -853,18 +1100,26 @@ ${points
   .join("")}
 
 
+
+
       </svg>
+
+
 
 
     </div>
 
 
+
+
   `;
 }
+
 
 /* ---------------------------------------------------------
    RESTORE EXISTING ATTENDANCE LEGEND
 --------------------------------------------------------- */
+
 
 function renderAttendanceLegendLayout(preview) {
   /*
@@ -872,7 +1127,9 @@ function renderAttendanceLegendLayout(preview) {
      Do not rebuild it here.
   */
 
+
   const note = document.getElementById("attendanceNote");
+
 
   if (note) {
     note.textContent = attendanceRecords.length
@@ -881,32 +1138,41 @@ function renderAttendanceLegendLayout(preview) {
   }
 }
 
+
 /* =========================================================
    NEW CODE — LEARNERS BY GRADE LEVEL
 ========================================================= */
 
+
 let gradeDistributionData = [];
 let gradeSchoolYears = [];
+
 
 function setupGradeDistribution() {
   const container = document.getElementById("gradeBars");
   const select = document.getElementById("gradeSchoolYear");
 
+
   if (!container) return;
+
 
   if (select) {
     select.addEventListener("change", renderGradeDistribution);
   }
 
+
   loadGradeDistribution();
 }
+
 
 async function loadGradeDistribution() {
   const container = document.getElementById("gradeBars");
   const note = document.getElementById("gradeNote");
   const select = document.getElementById("gradeSchoolYear");
 
+
   if (!container) return;
+
 
   try {
     const response = await fetch("/api/admin/dashboard", {
@@ -917,11 +1183,14 @@ async function loadGradeDistribution() {
       },
     });
 
+
     if (!response.ok) {
       throw new Error("Failed to load grade distribution.");
     }
 
+
     const result = await response.json();
+
 
     if (
       !result.ok ||
@@ -931,6 +1200,7 @@ async function loadGradeDistribution() {
       throw new Error("Invalid grade distribution response.");
     }
 
+
     gradeDistributionData = result.gradeDistribution.filter(
       (item) =>
         item &&
@@ -939,6 +1209,7 @@ async function loadGradeDistribution() {
         Number.isFinite(Number(item.count)),
     );
 
+
     gradeSchoolYears = result.enrollmentTrend.filter(
       (item) =>
         item &&
@@ -946,8 +1217,10 @@ async function loadGradeDistribution() {
         typeof item.schoolYearName === "string",
     );
 
+
     if (select) {
       const previousValue = select.value;
+
 
       select.innerHTML = gradeSchoolYears
         .map(
@@ -955,6 +1228,7 @@ async function loadGradeDistribution() {
             `<option value="${year.schoolYearId}">${year.schoolYearName}</option>`,
         )
         .join("");
+
 
       if (
         gradeSchoolYears.some((year) => year.schoolYearId === previousValue)
@@ -966,7 +1240,9 @@ async function loadGradeDistribution() {
       }
     }
 
+
     renderGradeDistribution();
+
 
     if (note) {
       note.textContent = gradeDistributionData.length
@@ -976,7 +1252,9 @@ async function loadGradeDistribution() {
   } catch (error) {
     console.error("Grade distribution loading error:", error);
 
+
     container.innerHTML = "";
+
 
     if (note) {
       note.textContent =
@@ -985,17 +1263,22 @@ async function loadGradeDistribution() {
   }
 }
 
+
 function renderGradeDistribution() {
   const container = document.getElementById("gradeBars");
   const select = document.getElementById("gradeSchoolYear");
 
+
   if (!container) return;
 
+
   const selectedSchoolYearId = select?.value || "";
+
 
   const selectedRecords = gradeDistributionData.filter(
     (item) => item.schoolYearId === selectedSchoolYearId,
   );
+
 
   const gradeOrder = [
     "Kindergarten",
@@ -1007,8 +1290,10 @@ function renderGradeDistribution() {
     "Grade 6",
   ];
 
+
   const data = gradeOrder.map((grade) => {
     const record = selectedRecords.find((item) => item.grade === grade);
+
 
     return {
       grade,
@@ -1016,16 +1301,20 @@ function renderGradeDistribution() {
     };
   });
 
+
   const maxValue = Math.max(1, ...data.map((item) => item.count));
+
 
   container.innerHTML = data
     .map((item) => {
       const height = (item.count / maxValue) * 100;
 
+
       const label =
         item.grade === "Kindergarten"
           ? "Kinder"
           : item.grade.replace("Grade ", "G");
+
 
       return `
         <div
@@ -1048,6 +1337,7 @@ function renderGradeDistribution() {
             "
           >${item.count.toLocaleString()}</strong>
 
+
           <div
             title="${item.grade}: ${item.count.toLocaleString()} learners"
             style="
@@ -1058,6 +1348,7 @@ function renderGradeDistribution() {
               background:#1976d2;
             "
           ></div>
+
 
           <span
             style="
@@ -1074,34 +1365,44 @@ function renderGradeDistribution() {
     .join("");
 }
 
+
 /* =========================================================
    NEW CODE — INITIALIZATION
 ========================================================= */
+
 
 document.addEventListener("DOMContentLoaded", () => {
   /*
         This file uses elements that already exist
         in dashboard.html.
 
+
         No new dashboard cards are created.
         No existing HTML is replaced.
     */
 
+
   setupEnrollmentTrend();
   loadEnrollmentTrend();
 
+
   setupAttendanceOverview();
+
 
   setupGradeDistribution();
 
+
   loadDashboardKpis();
 });
+
 
 async function loadDashboardKpis() {
   const learnersElement = document.getElementById("statStudents");
   const facultyElement = document.getElementById("statTeachers");
 
+
   if (!learnersElement && !facultyElement) return;
+
 
   try {
     const response = await fetch("/api/admin/dashboard", {
@@ -1112,28 +1413,35 @@ async function loadDashboardKpis() {
       },
     });
 
+
     if (!response.ok) {
       throw new Error("Failed to load dashboard KPI data.");
     }
 
+
     const result = await response.json();
+
 
     if (!result.ok) {
       throw new Error("Invalid dashboard KPI response.");
     }
 
+
     // Total Learners
     if (learnersElement) {
       const totalLearners = Number(result.stats?.totalStudents);
+
 
       learnersElement.textContent = Number.isFinite(totalLearners)
         ? totalLearners.toLocaleString()
         : "—";
     }
 
+
     // Total Faculty
     if (facultyElement) {
       const totalFaculty = Number(result.stats?.totalTeachers);
+
 
       facultyElement.textContent = Number.isFinite(totalFaculty)
         ? totalFaculty.toLocaleString()
@@ -1142,14 +1450,18 @@ async function loadDashboardKpis() {
   } catch (error) {
     console.error("Dashboard KPI loading error:", error);
 
+
     if (learnersElement) learnersElement.textContent = "—";
     if (facultyElement) facultyElement.textContent = "—";
   }
 }
 
+
 /* =========================================================
    NEW CODE — API INTEGRATION (LATER)
 =========================================================
+
+
 
 
    When backend integration begins, replace
@@ -1157,7 +1469,14 @@ async function loadDashboardKpis() {
    the appropriate BLIMS API endpoint.
 
 
+
+
    Do not connect the API yet.
 
 
+
+
 ========================================================= */
+
+
+

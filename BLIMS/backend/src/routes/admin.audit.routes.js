@@ -55,8 +55,7 @@ router.use(requireRole("Admin"));
 // ?q=login
 // ?action=AUTH_LOGIN_SUCCESS
 // ?outcome=SUCCESS
-// ?startDate=2026-10-01
-// ?endDate=2026-10-02
+// ?date=2026-10-21
 // =====================================================
 
 router.get("/audit-logs", async (req, res, next) => {
@@ -82,9 +81,7 @@ router.get("/audit-logs", async (req, res, next) => {
 
     const outcome = String(req.query.outcome || "").trim();
 
-    const startDate = String(req.query.startDate || "").trim();
-
-    const endDate = String(req.query.endDate || "").trim();
+    const date = String(req.query.date || "").trim();
 
     // =================================================
     // MONGODB FILTER
@@ -181,48 +178,70 @@ router.get("/audit-logs", async (req, res, next) => {
     // DATE FILTER
     // =================================================
     //
-    // startDate:
-    // beginning of selected day
+    // date:
+    // entire selected calendar day in Philippine time
     //
-    // endDate:
-    // end of selected day
+    // Example:
+    //
+    // ?date=2026-10-21
     //
     // =================================================
 
-    if (startDate || endDate) {
-      filter.createdAt = {};
-
+    if (date) {
       // -----------------------------------------------
-      // START DATE
+      // VALIDATE DATE FORMAT
       // -----------------------------------------------
 
-      if (startDate) {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-
-        if (!Number.isNaN(start.getTime())) {
-          filter.createdAt.$gte = start;
-        }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({
+          ok: false,
+          message: "Invalid date format. Use YYYY-MM-DD.",
+        });
       }
 
       // -----------------------------------------------
-      // END DATE
+      // START OF SELECTED DAY
+      //
+      // Philippine time (UTC+8)
       // -----------------------------------------------
 
-      if (endDate) {
-        const end = new Date(`${endDate}T23:59:59.999Z`);
+      const start = new Date(
+        `${date}T00:00:00+08:00`
+      );
 
-        if (!Number.isNaN(end.getTime())) {
-          filter.createdAt.$lte = end;
-        }
+      // -----------------------------------------------
+      // START OF NEXT DAY
+      //
+      // Use an exclusive upper boundary so timestamps
+      // with milliseconds are handled correctly.
+      // -----------------------------------------------
+
+      const nextDay = new Date(
+        start.getTime() + 24 * 60 * 60 * 1000
+      );
+
+      // -----------------------------------------------
+      // VALIDATE DATE
+      // -----------------------------------------------
+
+      if (
+        Number.isNaN(start.getTime()) ||
+        Number.isNaN(nextDay.getTime())
+      ) {
+        return res.status(400).json({
+          ok: false,
+          message: "Invalid date.",
+        });
       }
 
       // -----------------------------------------------
-      // REMOVE EMPTY DATE FILTER
+      // APPLY DATE FILTER
       // -----------------------------------------------
 
-      if (Object.keys(filter.createdAt).length === 0) {
-        delete filter.createdAt;
-      }
+      filter.createdAt = {
+        $gte: start,
+        $lt: nextDay,
+      };
     }
 
     // =================================================

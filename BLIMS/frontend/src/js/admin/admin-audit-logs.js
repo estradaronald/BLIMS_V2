@@ -34,9 +34,7 @@
 
     outcome: "",
 
-    startDate: "",
-
-    endDate: "",
+    date: "",
 
   };
 
@@ -509,26 +507,12 @@
 
     }
 
-
-    if (state.startDate) {
-
-      qs.set(
-        "startDate",
-        state.startDate
-      );
-
-    }
-
-
-    if (state.endDate) {
-
-      qs.set(
-        "endDate",
-        state.endDate
-      );
-
-    }
-
+if (state.date) {
+  qs.set(
+    "date",
+    state.date
+  );
+}
 
     const url =
       `/api/admin/audit-logs?${qs.toString()}`;
@@ -685,13 +669,8 @@
       $("outcomeSelect")?.value || "";
 
 
-    state.startDate =
-      $("startDate")?.value || "";
-
-
-    state.endDate =
-      $("endDate")?.value || "";
-
+    state.date =
+  $("auditDate")?.value || "";
 
     fetchLogs()
       .catch(() => {});
@@ -699,80 +678,57 @@
   }
 
 
-  // =====================================================
-  // CLEAR FILTERS
-  // =====================================================
+ // =====================================================
+// CLEAR FILTERS
+// =====================================================
 
-  function clearFilters() {
+function clearFilters() {
 
-    state.page = 1;
+  state.page = 1;
 
-    state.q = "";
+  state.q = "";
 
-    state.action = "";
+  state.action = "";
 
-    state.outcome = "";
+  state.outcome = "";
 
-    state.startDate = "";
-
-    state.endDate = "";
+  state.date = "";
 
 
-    const q =
-      $("qInput");
+  const q =
+    $("qInput");
 
-    const a =
-      $("actionSelect");
+  const a =
+    $("actionSelect");
 
-    const o =
-      $("outcomeSelect");
+  const o =
+    $("outcomeSelect");
 
-    const start =
-      $("startDate");
-
-    const end =
-      $("endDate");
+  const date =
+    $("auditDate");
 
 
-    if (q) {
-
-      q.value = "";
-
-    }
-
-
-    if (a) {
-
-      a.value = "";
-
-    }
-
-
-    if (o) {
-
-      o.value = "";
-
-    }
-
-
-    if (start) {
-
-      start.value = "";
-
-    }
-
-
-    if (end) {
-
-      end.value = "";
-
-    }
-
-
-    fetchLogs()
-      .catch(() => {});
-
+  if (q) {
+    q.value = "";
   }
+
+  if (a) {
+    a.value = "";
+  }
+
+  if (o) {
+    o.value = "";
+  }
+
+  if (date) {
+    date.value = "";
+  }
+
+
+  fetchLogs()
+    .catch(() => {});
+
+}
 
 
   // =====================================================

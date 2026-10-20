@@ -1612,7 +1612,6 @@ router.post("/reset-password", async (req, res) => {
     });
   }
 });
-
 // =======================================================
 // GET /api/auth/me
 // =======================================================
@@ -1639,11 +1638,45 @@ router.get("/me", async (req, res) => {
       });
     }
 
+    let first_name = user.first_name;
+    let last_name = user.last_name;
+
+    // ===================================================
+    // TEACHER
+    // ===================================================
+
+    if (user.role === "teacher") {
+      const teacher = await Teacher.findOne({
+        userId: user._id,
+      }).select("firstName lastName");
+
+      if (teacher) {
+        first_name = teacher.firstName;
+        last_name = teacher.lastName;
+      }
+    }
+
+    // ===================================================
+    // STUDENT
+    // ===================================================
+
+    if (user.role === "student") {
+      const student = await Student.findOne({
+        userId: user._id,
+        isActive: true,
+      }).select("firstName lastName");
+
+      if (student) {
+        first_name = student.firstName;
+        last_name = student.lastName;
+      }
+    }
+
     return res.json({
       ok: true,
       user: {
-        first_name: user.first_name,
-        last_name: user.last_name,
+        first_name,
+        last_name,
         role: user.role,
       },
     });
@@ -1656,7 +1689,6 @@ router.get("/me", async (req, res) => {
     });
   }
 });
-
 // =======================================================
 // GET /api/auth/csrf
 // =======================================================
