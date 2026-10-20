@@ -389,6 +389,76 @@ function initGrades() {
     });
   }
 
+  const selectedTerm = state.terms.find(
+    (term) =>
+      String(term.id).trim() ===
+      String(state.selectedTermId).trim()
+  );
+
+  if (!selectedTerm) {
+    return [];
+  }
+
+  const selectedTermId =
+    String(selectedTerm.id || "").trim();
+
+  const selectedTermName =
+    normalize(selectedTerm.name);
+
+  const selectedTermOrder =
+    Number(selectedTerm.order || 0);
+
+  return state.grades.filter((grade) => {
+    const gradeTermId =
+      String(grade.termId || "").trim();
+
+    const gradeTermName =
+      normalize(grade.termName);
+
+    const gradeTermOrder =
+      Number(grade.termOrder || 0);
+
+    /*
+     * 1. Best match: actual term ID
+     */
+    if (
+      gradeTermId &&
+      selectedTermId &&
+      gradeTermId === selectedTermId
+    ) {
+      return true;
+    }
+
+    /*
+     * 2. Fallback: term order
+     *
+     * This handles grades whose termId does not
+     * match the SchoolYear term ID but whose
+     * term order is correct.
+     */
+    if (
+      gradeTermOrder > 0 &&
+      selectedTermOrder > 0 &&
+      gradeTermOrder === selectedTermOrder
+    ) {
+      return true;
+    }
+
+    /*
+     * 3. Final fallback: term name
+     */
+    if (
+      gradeTermName &&
+      selectedTermName &&
+      gradeTermName === selectedTermName
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+}
+ 
   /* =======================================================
      FINAL AVERAGE
   ======================================================= */
@@ -481,31 +551,51 @@ function initGrades() {
     if (!state.subjects.length) {
       empty.textContent = "No subjects available.";
 
-      empty.classList.remove("hidden");
-    } else {
-      empty.classList.add("hidden");
+currentTermGrades.forEach((grade) => {
+  const key = normalize(grade.subject);
 
-      state.subjects.forEach((subject) => {
-        const tr = document.createElement("tr");
+  if (key) {
+    gradeBySubject.set(key, grade);
+  }
+});
 
-        const grade = gradeBySubject.get(normalize(subject));
+if (!state.subjects.length) {
+  empty.textContent =
+    "No subjects available.";
 
-        const termGrade = grade ? getNumericGrade(grade.termGrade) : null;
+  empty.classList.remove("hidden");
+} else {
+  empty.classList.add("hidden");
 
-        const displayGrade = termGrade === null ? "—" : termGrade;
+  state.subjects.forEach((subject) => {
+    const tr =
+      document.createElement("tr");
 
-        const remark = getRemark(termGrade);
+    const grade =
+      gradeBySubject.get(
+        normalize(subject)
+      );
 
-        tr.innerHTML = `
+    const termGrade = grade
+      ? getNumericGrade(grade.termGrade)
+      : null;
+
+    const displayGrade =
+      termGrade === null
+        ? "—"
+        : termGrade;
+
+    const remark =
+      getRemark(termGrade);
+
+    tr.innerHTML = `
       <td>
         ${escapeHtml(subject)}
       </td>
 
-
       <td style="text-align:right;">
         ${escapeHtml(displayGrade)}
       </td>
-
 
       <td>
         ${escapeHtml(remark)}

@@ -193,7 +193,7 @@ exports.getMyGrades = async (req, res) => {
           name: String(activeSchoolYear.name || "").trim(),
         },
 
-        terms,
+       terms,
 
         subjects,
 
