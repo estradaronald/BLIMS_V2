@@ -72,12 +72,12 @@ function initGrades() {
   }
 
   const state = {
-    selectedTermId: "",
-    terms: [],
-    grades: [],
-    student: null,
-  };
-
+  selectedTermId: "",
+  terms: [],
+  subjects: [],
+  grades: [],
+  student: null,
+};
   /* =======================================================
      HELPERS
   ======================================================= */
@@ -156,6 +156,11 @@ function initGrades() {
       const data = result.data || {};
 
       state.student = data.student || null;
+      state.subjects = Array.isArray(data.subjects)
+  ? data.subjects
+      .map((subject) => String(subject || "").trim())
+      .filter(Boolean)
+  : [];
 
       state.terms = Array.isArray(data.terms)
         ? data.terms
@@ -225,6 +230,7 @@ function initGrades() {
 
       state.student = null;
       state.terms = [];
+      state.subjects = [];
       state.grades = [];
       state.selectedTermId = "";
 
@@ -373,21 +379,84 @@ function initGrades() {
   }
 
   /* =======================================================
-     GET CURRENT TERM GRADES
-  ======================================================= */
+   GET CURRENT TERM GRADES
+======================================================= */
 
-  function getCurrentTermGrades() {
-    if (!state.selectedTermId) {
-      return [];
-    }
-
-    return state.grades.filter(
-      (grade) =>
-        String(grade.termId) ===
-        String(state.selectedTermId)
-    );
+function getCurrentTermGrades() {
+  if (!state.selectedTermId) {
+    return [];
   }
 
+  const selectedTerm = state.terms.find(
+    (term) =>
+      String(term.id).trim() ===
+      String(state.selectedTermId).trim()
+  );
+
+  if (!selectedTerm) {
+    return [];
+  }
+
+  const selectedTermId =
+    String(selectedTerm.id || "").trim();
+
+  const selectedTermName =
+    normalize(selectedTerm.name);
+
+  const selectedTermOrder =
+    Number(selectedTerm.order || 0);
+
+  return state.grades.filter((grade) => {
+    const gradeTermId =
+      String(grade.termId || "").trim();
+
+    const gradeTermName =
+      normalize(grade.termName);
+
+    const gradeTermOrder =
+      Number(grade.termOrder || 0);
+
+    /*
+     * 1. Best match: actual term ID
+     */
+    if (
+      gradeTermId &&
+      selectedTermId &&
+      gradeTermId === selectedTermId
+    ) {
+      return true;
+    }
+
+    /*
+     * 2. Fallback: term order
+     *
+     * This handles grades whose termId does not
+     * match the SchoolYear term ID but whose
+     * term order is correct.
+     */
+    if (
+      gradeTermOrder > 0 &&
+      selectedTermOrder > 0 &&
+      gradeTermOrder === selectedTermOrder
+    ) {
+      return true;
+    }
+
+    /*
+     * 3. Final fallback: term name
+     */
+    if (
+      gradeTermName &&
+      selectedTermName &&
+      gradeTermName === selectedTermName
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+}
+ 
   /* =======================================================
      FINAL AVERAGE
   ======================================================= */
@@ -487,62 +556,65 @@ function initGrades() {
       return;
     }
 
-    const currentTermGrades =
-      getCurrentTermGrades();
+   const currentTermGrades =
+  getCurrentTermGrades();
 
-    /*
-     * No grades for selected term.
-     */
-    if (!currentTermGrades.length) {
-      empty.textContent =
-        "No grades available for this term.";
+const gradeBySubject = new Map();
 
-      empty.classList.remove("hidden");
-    } else {
-      empty.classList.add("hidden");
+currentTermGrades.forEach((grade) => {
+  const key = normalize(grade.subject);
 
-      currentTermGrades.forEach(
-        (grade) => {
-          const tr =
-            document.createElement("tr");
+  if (key) {
+    gradeBySubject.set(key, grade);
+  }
+});
 
-          const termGrade =
-            getNumericGrade(
-              grade.termGrade
-            );
+if (!state.subjects.length) {
+  empty.textContent =
+    "No subjects available.";
 
-          const displayGrade =
-            termGrade === null
-              ? "—"
-              : termGrade;
+  empty.classList.remove("hidden");
+} else {
+  empty.classList.add("hidden");
 
-          const remark =
-            getRemark(termGrade);
+  state.subjects.forEach((subject) => {
+    const tr =
+      document.createElement("tr");
 
-          tr.innerHTML = `
-            <td>
-              ${escapeHtml(
-                grade.subject
-              )}
-            </td>
-
-            <td style="text-align:right;">
-              ${escapeHtml(
-                displayGrade
-              )}
-            </td>
-
-            <td>
-              ${escapeHtml(
-                remark
-              )}
-            </td>
-          `;
-
-          tbody.appendChild(tr);
-        }
+    const grade =
+      gradeBySubject.get(
+        normalize(subject)
       );
-    }
+
+    const termGrade = grade
+      ? getNumericGrade(grade.termGrade)
+      : null;
+
+    const displayGrade =
+      termGrade === null
+        ? "—"
+        : termGrade;
+
+    const remark =
+      getRemark(termGrade);
+
+    tr.innerHTML = `
+      <td>
+        ${escapeHtml(subject)}
+      </td>
+
+      <td style="text-align:right;">
+        ${escapeHtml(displayGrade)}
+      </td>
+
+      <td>
+        ${escapeHtml(remark)}
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
 
     /*
      * Final average is based on all available

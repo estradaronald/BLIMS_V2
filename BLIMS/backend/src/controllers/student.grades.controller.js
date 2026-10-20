@@ -4,7 +4,7 @@ const Grade = require("../models/Grade.model");
 const Student = require("../models/Student.model");
 const User = require("../models/User.model");
 const SchoolYear = require("../models/SchoolYear.model");
-
+const GradeLevel = require("../models/GradeLevel.model");
 
 /* =========================================================
    GET MY GRADES
@@ -133,16 +133,24 @@ exports.getMyGrades = async (req, res) => {
     // FETCH STUDENT GRADES
     // ==========================================
 
-    const grades = await Grade.find({
-      studentId,
-      gradeLevel,
-      sectionName,
-      schoolYearId: activeSchoolYear._id,
-    })
-      .sort({
-        subject: 1,
-      })
-      .lean();
+   const grades = await Grade.find({
+  studentId,
+  schoolYearId: activeSchoolYear._id,
+})
+  .sort({ subject: 1 })
+  .lean();
+  // ==========================================
+// FETCH ALL SUBJECTS FOR STUDENT GRADE LEVEL
+// ==========================================
+
+const gradeLevelDoc = await GradeLevel.findOne({
+  grade: gradeLevel,
+  isActive: true,
+}).lean();
+
+const subjects = Array.isArray(gradeLevelDoc?.subjects)
+  ? gradeLevelDoc.subjects
+  : [];
 
     // ==========================================
     // MAP TERM INFORMATION
@@ -233,9 +241,11 @@ exports.getMyGrades = async (req, res) => {
           ).trim(),
         },
 
-        terms,
+       terms,
 
-        grades: formattedGrades,
+subjects,
+
+grades: formattedGrades,
       },
     });
 
