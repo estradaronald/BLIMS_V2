@@ -368,10 +368,10 @@ async function loadSavedGrades() {
 
   for (const grade of grades) {
     const termId = normalize(grade.termId);
-
     const subjectName = normalize(grade.subject);
+    const sid = normalize(grade.studentId);
 
-    if (!termId || !subjectName) {
+    if (!termId || !subjectName || !sid) {
       continue;
     }
 
@@ -383,18 +383,23 @@ async function loadSavedGrades() {
 
     const bucket = gradesStore[key];
 
-    const sid = normalize(grade.studentId);
-
-    if (!sid) {
-      continue;
-    }
-
     if (!bucket.scores[sid]) {
       bucket.scores[sid] = {
         ww: {},
         pt: {},
         exam: {},
       };
+    }
+
+    const savedFinal = grade.termGrade ?? grade.initialGrade ?? null;
+    if (
+      savedFinal !== null &&
+      savedFinal !== undefined &&
+      savedFinal !== "" &&
+      Number.isFinite(Number(savedFinal))
+    ) {
+      bucket.savedFinals = bucket.savedFinals || {};
+      bucket.savedFinals[sid] = Number(savedFinal);
     }
 
     // --------------------------------------------------------
@@ -560,6 +565,8 @@ function createEmptyBucket() {
 
     scores: {},
 
+    savedFinals: {},
+
     updatedAt: Date.now(),
   };
 }
@@ -583,6 +590,7 @@ function ensureBucketStructure(bucket) {
   }
 
   bucket.scores = bucket.scores || {};
+  bucket.savedFinals = bucket.savedFinals || {};
 
   students.forEach((student) => {
     const sid = normalize(student.studentId);
@@ -841,36 +849,49 @@ function getExamPercentage(bucket, sid) {
 // ============================================================
 
 function computeFinalForStudent(bucket, sid) {
-  const wwAverage = getGroupAverage(bucket, sid, "ww");
-
-  const ptAverage = getGroupAverage(bucket, sid, "pt");
-
-  const examAverage = getExamPercentage(bucket, sid);
+  const savedFinal = bucket.savedFinals?.[sid];
 
   /*
-   * If absolutely nothing has been
-   * entered, don't display a grade.
+   * LOCKED TERM
+   *
+   * Never recalculate from assessments.
+   * Show exactly what was saved in MongoDB.
    */
-  if (wwAverage == null && ptAverage == null && examAverage == null) {
-    return null;
+  if (isCurrentTermLocked()) {
+    return savedFinal ?? null;
   }
 
   /*
-   * Keep the existing BLIMS behavior:
+   * UNLOCKED TERM
    *
-   * WW = 30%
-   * PT = 50%
-   * Exam = 20%
-   *
-   * Missing components contribute 0.
+   * Calculate normally from the current
+   * assessment scores.
    */
+  const wwAverage = getGroupAverage(bucket, sid, "ww");
+  const ptAverage = getGroupAverage(bucket, sid, "pt");
+  const examAverage = getExamPercentage(bucket, sid);
+
+  /*
+   * If there are no assessment scores,
+   * keep showing the previously saved final grade.
+   */
+  if (
+    wwAverage == null &&
+    ptAverage == null &&
+    examAverage == null
+  ) {
+    return savedFinal ?? null;
+  }
+
   const ww = wwAverage ?? 0;
-
   const pt = ptAverage ?? 0;
-
   const exam = examAverage ?? 0;
 
-  return roundOne(pt * 0.5 + ww * 0.3 + exam * 0.2);
+  return roundOne(
+    pt * 0.5 +
+    ww * 0.3 +
+    exam * 0.2,
+  );
 }
 
 function remark(final) {

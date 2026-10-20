@@ -595,8 +595,62 @@ label {
   opacity: 1;
   text-decoration: underline;
 }
+.forgot-password-description {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
 
+.forgot-password-help {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0 0 26px;
+}
+/* ================= PASSWORD REQUIREMENTS ================= */
 
+.password-hint {
+  margin: 8px 0 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #6c757d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.password-hint strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.password-hint ul {
+  margin: 5px 0 0 18px;
+  padding: 0;
+}
+
+.password-hint li {
+  color: #6c757d;
+  transition: color 0.2s ease;
+}
+
+.password-hint li.met {
+  color: #198754 !important;
+  font-weight: 600;
+}
+
+.password-hint li .hint-icon {
+  display: inline-block;
+  width: 18px;
+  font-weight: 600;
+}
+
+.password-hint li.met .hint-icon {
+  color: #198754 !important;
+  font-weight: 700;
+}
 /* =========================================================
    CAPTCHA / HUMAN VERIFICATION
 ========================================================= */
