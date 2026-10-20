@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   setupTopbarMenu();
+  loadCurrentUser();
+  setDashboardDate();
 
   setupLogout();
 
@@ -206,6 +208,57 @@ function announcementCategoryLabel(
 /* =========================================================
    TOPBAR
 ========================================================= */
+async function loadCurrentUser() {
+  try {
+    const data = await apiFetch("/api/auth/me");
+    const user = data?.user;
+
+    const name =
+      `${user?.last_name || ""}, ${user?.first_name || ""}`
+        .replace(/^,\s*|\s*,$/g, "")
+        .trim();
+
+    const nameEl = document.getElementById("tbName");
+    const roleEl = document.getElementById("tbRole");
+
+    if (nameEl) {
+      nameEl.textContent = name || "User";
+    }
+
+    if (roleEl) {
+      roleEl.textContent = user?.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+        : "User";
+    }
+
+    const welcomeNameEl =
+      document.getElementById("welcomeName");
+
+    if (welcomeNameEl) {
+      welcomeNameEl.textContent = name || "User";
+    }
+
+  } catch (err) {
+    console.error("Failed to load current user:", err);
+  }
+}
+
+function setDashboardDate() {
+  const today = new Date();
+
+  const dateText = today.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const todayEl =
+    document.getElementById("dashboardToday");
+
+  if (todayEl) {
+    todayEl.textContent = dateText;
+  }
+} 
 
 function setupTopbarMenu() {
 

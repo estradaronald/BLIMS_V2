@@ -1582,22 +1582,28 @@
 
     // Forgot Password
 
-    if (forgotLink) {
+   if (forgotLink) {
 
-      forgotLink.addEventListener(
-        "click",
-        function () {
+  forgotLink.addEventListener(
+    "click",
+    function () {
 
-          clearMessage(loginMsg);
+      clearMessage(loginMsg);
 
-          clearMessage(mfaMsg);
+      clearMessage(mfaMsg);
 
-          showView("forgot");
+      resetForgotPasswordUI();
 
-        }
-      );
+      showView("forgot");
+
+      if (forgotEmail) {
+        forgotEmail.focus();
+      }
 
     }
+  );
+
+}
 
 
 
@@ -1751,6 +1757,792 @@
   }
 
 
+// =========================
+// FORGOT PASSWORD
+// =========================
+
+const FORGOT_PASSWORD_ENDPOINT =
+  "/api/auth/forgot-password";
+
+const VERIFY_RESET_OTP_ENDPOINT =
+  "/api/auth/verify-reset-otp";
+
+const RESET_PASSWORD_ENDPOINT =
+  "/api/auth/reset-password";
+
+const forgotEmail = $("forgotEmail");
+const forgotContinueBtn = $("forgotContinueBtn");
+const forgotMsg = $("forgotMsg");
+
+const forgotStepEmail = $("forgotStepEmail");
+const forgotStepOtp = $("forgotStepOtp");
+const forgotStepPassword = $("forgotStepPassword");
+
+const forgotOtp = $("forgotOtp");
+const verifyOtpBtn = $("verifyOtpBtn");
+const otpMsg = $("otpMsg");
+
+const resetNewPassword = $("resetNewPassword");
+const resetConfirmPassword = $("resetConfirmPassword");
+const resetPasswordBtn = $("resetPasswordBtn");
+const resetPasswordMsg = $("resetPasswordMsg");
+
+const backToForgotEmail = $("backToForgotEmail");
+
+
+// =========================
+// PASSWORD REQUIREMENTS
+// =========================
+
+function updatePasswordHints() {
+  if (!resetNewPassword || !resetConfirmPassword) {
+    return;
+  }
+
+  const password = resetNewPassword.value;
+  const confirmPassword = resetConfirmPassword.value;
+
+  const requirements = {
+    hintLength: password.length >= 12,
+    hintUppercase: /[A-Z]/.test(password),
+    hintLowercase: /[a-z]/.test(password),
+    hintNumber: /[0-9]/.test(password),
+    hintSpecial: /[^A-Za-z0-9]/.test(password),
+    hintMatch:
+      password.length > 0 &&
+      confirmPassword.length > 0 &&
+      password === confirmPassword
+  };
+
+  Object.entries(requirements).forEach(
+    ([id, met]) => {
+      const element =
+        document.getElementById(id);
+
+      if (!element) {
+        return;
+      }
+
+      const icon =
+        element.querySelector(".hint-icon");
+
+      element.classList.toggle(
+        "met",
+        met
+      );
+
+      if (icon) {
+        icon.textContent =
+          met ? "✓" : "○";
+      }
+    }
+  );
+}
+
+
+// =========================
+// RESET FORGOT PASSWORD UI
+// =========================
+
+function resetForgotPasswordUI() {
+
+  if (forgotStepEmail) {
+    forgotStepEmail.style.display = "";
+  }
+
+  if (forgotStepOtp) {
+    forgotStepOtp.style.display = "none";
+  }
+
+  if (forgotStepPassword) {
+    forgotStepPassword.style.display = "none";
+  }
+
+  if (forgotEmail) {
+    forgotEmail.value = "";
+  }
+
+  if (forgotOtp) {
+    forgotOtp.value = "";
+  }
+
+  if (resetNewPassword) {
+    resetNewPassword.value = "";
+  }
+
+  if (resetConfirmPassword) {
+    resetConfirmPassword.value = "";
+  }
+
+  clearMessage(forgotMsg);
+  clearMessage(otpMsg);
+  clearMessage(resetPasswordMsg);
+
+  updatePasswordHints();
+}
+
+
+// =========================
+// SHOW FORGOT PASSWORD STEP
+// =========================
+
+function showForgotStep(step) {
+
+  if (forgotStepEmail) {
+    forgotStepEmail.style.display =
+      step === "email"
+        ? ""
+        : "none";
+  }
+
+  if (forgotStepOtp) {
+    forgotStepOtp.style.display =
+      step === "otp"
+        ? ""
+        : "none";
+  }
+
+  if (forgotStepPassword) {
+    forgotStepPassword.style.display =
+      step === "password"
+        ? ""
+        : "none";
+  }
+
+}
+
+
+// =========================
+// HANDLE FORGOT PASSWORD
+// =========================
+
+async function handleForgotPassword() {
+
+  clearMessage(forgotMsg);
+
+  if (!forgotEmail) {
+    return;
+  }
+
+  const email =
+    forgotEmail.value
+      .trim()
+      .toLowerCase();
+
+  if (!email) {
+
+    showError(
+      forgotMsg,
+      "Please enter your registered email address."
+    );
+
+    forgotEmail.focus();
+
+    return;
+  }
+
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
+
+    showError(
+      forgotMsg,
+      "Please enter a valid email address."
+    );
+
+    forgotEmail.focus();
+
+    return;
+  }
+
+  const originalText =
+    forgotContinueBtn
+      ? forgotContinueBtn.textContent
+      : "Continue";
+
+  if (forgotContinueBtn) {
+
+    forgotContinueBtn.disabled = true;
+
+    forgotContinueBtn.textContent =
+      "Sending OTP...";
+  }
+
+  try {
+
+    const token =
+      await ensureCsrfToken();
+
+    const headers = {
+      "Content-Type":
+        "application/json"
+    };
+
+    if (token) {
+      headers["X-CSRF-Token"] =
+        token;
+    }
+
+    const response =
+      await fetch(
+        FORGOT_PASSWORD_ENDPOINT,
+        {
+          method: "POST",
+          credentials: "include",
+          headers,
+          body: JSON.stringify({
+            email
+          })
+        }
+      );
+
+    const result =
+      await parseResponse(response);
+
+    const payload =
+      result.data || {};
+
+    if (
+      !result.ok ||
+      payload.ok === false
+    ) {
+
+      showError(
+        forgotMsg,
+        payload.message ||
+          "Unable to process your password reset request."
+      );
+
+      return;
+    }
+
+    showForgotStep("otp");
+
+    clearMessage(forgotMsg);
+
+    if (forgotOtp) {
+      forgotOtp.focus();
+    }
+
+    showSuccess(
+      otpMsg,
+      "A 6-digit OTP has been sent to your registered email address."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Forgot password error:",
+      error
+    );
+
+    showError(
+      forgotMsg,
+      "Unable to connect to the server. Please try again."
+    );
+
+  } finally {
+
+    if (forgotContinueBtn) {
+
+      forgotContinueBtn.disabled =
+        false;
+
+      forgotContinueBtn.textContent =
+        originalText;
+    }
+
+  }
+}
+
+
+// =========================
+// VERIFY RESET OTP
+// =========================
+
+async function handleVerifyResetOtp() {
+
+  clearMessage(otpMsg);
+
+  if (!forgotOtp) {
+    return;
+  }
+
+  const otp =
+    forgotOtp.value.trim();
+
+  if (!/^\d{6}$/.test(otp)) {
+
+    showError(
+      otpMsg,
+      "Please enter the 6-digit OTP sent to your email."
+    );
+
+    forgotOtp.focus();
+
+    return;
+  }
+
+  const originalText =
+    verifyOtpBtn
+      ? verifyOtpBtn.textContent
+      : "Verify OTP";
+
+  if (verifyOtpBtn) {
+
+    verifyOtpBtn.disabled = true;
+
+    verifyOtpBtn.textContent =
+      "Verifying...";
+  }
+
+  try {
+
+    const token =
+      await ensureCsrfToken();
+
+    const headers = {
+      "Content-Type":
+        "application/json"
+    };
+
+    if (token) {
+      headers["X-CSRF-Token"] =
+        token;
+    }
+
+    const response =
+      await fetch(
+        VERIFY_RESET_OTP_ENDPOINT,
+        {
+          method: "POST",
+          credentials: "include",
+          headers,
+          body: JSON.stringify({
+            otp
+          })
+        }
+      );
+
+    const result =
+      await parseResponse(response);
+
+    const payload =
+      result.data || {};
+
+    if (
+      !result.ok ||
+      payload.ok === false
+    ) {
+
+      showError(
+        otpMsg,
+        payload.message ||
+          "Invalid or expired OTP."
+      );
+
+      return;
+    }
+
+    showForgotStep("password");
+
+    clearMessage(otpMsg);
+
+    updatePasswordHints();
+
+    if (resetNewPassword) {
+      resetNewPassword.focus();
+    }
+
+    showSuccess(
+      resetPasswordMsg,
+      "OTP verified. Please create your new password."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "OTP verification error:",
+      error
+    );
+
+    showError(
+      otpMsg,
+      "Unable to connect to the server. Please try again."
+    );
+
+  } finally {
+
+    if (verifyOtpBtn) {
+
+      verifyOtpBtn.disabled =
+        false;
+
+      verifyOtpBtn.textContent =
+        originalText;
+    }
+
+  }
+}
+
+
+// =========================
+// RESET PASSWORD
+// =========================
+
+async function handleResetPassword() {
+
+  clearMessage(resetPasswordMsg);
+
+  if (
+    !resetNewPassword ||
+    !resetConfirmPassword
+  ) {
+    return;
+  }
+
+  const newPassword =
+    resetNewPassword.value;
+
+  const confirmPassword =
+    resetConfirmPassword.value;
+
+
+  if (!newPassword) {
+
+    showError(
+      resetPasswordMsg,
+      "Please enter your new password."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  if (!confirmPassword) {
+
+    showError(
+      resetPasswordMsg,
+      "Please confirm your new password."
+    );
+
+    resetConfirmPassword.focus();
+
+    return;
+  }
+
+
+  if (newPassword !== confirmPassword) {
+
+    showError(
+      resetPasswordMsg,
+      "Passwords do not match."
+    );
+
+    resetConfirmPassword.focus();
+
+    return;
+  }
+
+
+  if (newPassword.length < 12) {
+
+    showError(
+      resetPasswordMsg,
+      "Password must be at least 12 characters."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  if (!/[A-Z]/.test(newPassword)) {
+
+    showError(
+      resetPasswordMsg,
+      "Password must include at least 1 uppercase letter."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  if (!/[a-z]/.test(newPassword)) {
+
+    showError(
+      resetPasswordMsg,
+      "Password must include at least 1 lowercase letter."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  if (!/[0-9]/.test(newPassword)) {
+
+    showError(
+      resetPasswordMsg,
+      "Password must include at least 1 number."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  if (!/[^A-Za-z0-9]/.test(newPassword)) {
+
+    showError(
+      resetPasswordMsg,
+      "Password must include at least 1 special character."
+    );
+
+    resetNewPassword.focus();
+
+    return;
+  }
+
+
+  const originalText =
+    resetPasswordBtn
+      ? resetPasswordBtn.textContent
+      : "Reset Password";
+
+
+  if (resetPasswordBtn) {
+
+    resetPasswordBtn.disabled =
+      true;
+
+    resetPasswordBtn.textContent =
+      "Resetting...";
+  }
+
+
+  try {
+
+    const token =
+      await ensureCsrfToken();
+
+    const headers = {
+      "Content-Type":
+        "application/json"
+    };
+
+    if (token) {
+      headers["X-CSRF-Token"] =
+        token;
+    }
+
+
+    const response =
+      await fetch(
+        RESET_PASSWORD_ENDPOINT,
+        {
+          method: "POST",
+          credentials: "include",
+          headers,
+          body: JSON.stringify({
+            newPassword,
+            confirmPassword
+          })
+        }
+      );
+
+
+    const result =
+      await parseResponse(response);
+
+    const payload =
+      result.data || {};
+
+
+    if (
+      !result.ok ||
+      payload.ok === false
+    ) {
+
+      showError(
+        resetPasswordMsg,
+        payload.message ||
+          "Unable to reset your password."
+      );
+
+      return;
+    }
+
+
+    showSuccess(
+      resetPasswordMsg,
+      "Password reset successful. You can now sign in."
+    );
+
+
+    if (resetNewPassword) {
+      resetNewPassword.value = "";
+    }
+
+    if (resetConfirmPassword) {
+      resetConfirmPassword.value = "";
+    }
+
+    updatePasswordHints();
+
+
+    setTimeout(() => {
+
+      resetForgotPasswordUI();
+
+      showView("login");
+
+
+      if (loginMsg) {
+
+        showSuccess(
+          loginMsg,
+          "Your password has been reset. Please sign in with your new password."
+        );
+
+      }
+
+
+      if (usernameEl) {
+        usernameEl.focus();
+      }
+
+    }, 1200);
+
+
+  } catch (error) {
+
+    console.error(
+      "Password reset error:",
+      error
+    );
+
+    showError(
+      resetPasswordMsg,
+      "Unable to connect to the server. Please try again."
+    );
+
+  } finally {
+
+    if (resetPasswordBtn) {
+
+      resetPasswordBtn.disabled =
+        false;
+
+      resetPasswordBtn.textContent =
+        originalText;
+    }
+
+  }
+}
+
+
+// =========================
+// SETUP FORGOT PASSWORD
+// =========================
+
+function setupForgotPassword() {
+
+  if (forgotContinueBtn) {
+
+    forgotContinueBtn.addEventListener(
+      "click",
+      handleForgotPassword
+    );
+
+  }
+
+
+  if (verifyOtpBtn) {
+
+    verifyOtpBtn.addEventListener(
+      "click",
+      handleVerifyResetOtp
+    );
+
+  }
+
+
+  if (resetPasswordBtn) {
+
+    resetPasswordBtn.addEventListener(
+      "click",
+      handleResetPassword
+    );
+
+  }
+
+
+  if (resetNewPassword) {
+
+    resetNewPassword.addEventListener(
+      "input",
+      updatePasswordHints
+    );
+
+  }
+
+
+  if (resetConfirmPassword) {
+
+    resetConfirmPassword.addEventListener(
+      "input",
+      updatePasswordHints
+    );
+
+  }
+
+
+  if (backToForgotEmail) {
+
+    backToForgotEmail.addEventListener(
+      "click",
+      function () {
+
+        clearMessage(otpMsg);
+
+        showForgotStep("email");
+
+        if (forgotEmail) {
+          forgotEmail.focus();
+        }
+
+      }
+    );
+
+  }
+
+
+  if (forgotOtp) {
+
+    forgotOtp.addEventListener(
+      "input",
+      function () {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
+
+      }
+    );
+
+  }
+
+}
+
 
   // =========================
   // EVENTS
@@ -1836,6 +2628,8 @@
 
     setupEventListeners();
 
+  
+    setupForgotPassword();
 
 
     await loadCsrfToken();
